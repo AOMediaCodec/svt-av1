@@ -56,6 +56,8 @@ else
     CMAKE_COMPILER=$ICC_COMPILER
 fi
 
+cd $(dirname $(realpath $0))
+
 if [ $# -eq 0 ]; then
     debug
     release
