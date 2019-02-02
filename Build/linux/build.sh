@@ -22,7 +22,7 @@ function debug {
         -DCMAKE_ASM_NASM_COMPILER=$CMAKE_ASSEMBLER  \
 
     # Compile the Library
-    make SvtAv1EncApp
+    make -j $(nproc) SvtAv1EncApp
     cd ..
 }
 
@@ -37,7 +37,7 @@ function release {
         -DCMAKE_ASM_NASM_COMPILER=$CMAKE_ASSEMBLER  \
 
     # Compile the Library
-    make SvtAv1EncApp
+    make -j $(nproc) SvtAv1EncApp
     cd ..
 }
 
