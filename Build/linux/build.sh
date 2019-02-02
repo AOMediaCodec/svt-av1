@@ -1,9 +1,8 @@
+#!/bin/bash
 #
 # Copyright(c) 2019 Intel Corporation
 # SPDX - License - Identifier: BSD - 2 - Clause - Patent
 #
-
-#!/bin/bash
 
 function clean {
     rm -R -f debug
