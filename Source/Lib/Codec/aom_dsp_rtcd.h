@@ -407,7 +407,7 @@ extern "C" {
 
 
 
-    //void av1_inv_txfm_add_c(const tran_low_t *dqcoeff, uint8_t *dst, int32_t stride, const TxfmParam *txfm_param);
+    void av1_inv_txfm_add_c(const tran_low_t *dqcoeff, uint8_t *dst, int32_t stride, const TxfmParam *txfm_param);
     void av1_inv_txfm_add_ssse3(const tran_low_t *dqcoeff, uint8_t *dst, int32_t stride, const TxfmParam *txfm_param);
     RTCD_EXTERN void(*av1_inv_txfm_add)(const tran_low_t *dqcoeff, uint8_t *dst, int32_t stride, const TxfmParam *txfm_param);
 
@@ -2135,8 +2135,8 @@ extern "C" {
         av1_inv_txfm2d_add_16x4 = av1_inv_txfm2d_add_16x4_c;
         if (flags & HAS_SSE4_1) av1_inv_txfm2d_add_16x4 = av1_inv_txfm2d_add_16x4_sse4_1;
 
-        //toDO add C
-        if (flags & HAS_AVX2) av1_inv_txfm_add = av1_inv_txfm_add_ssse3;
+        av1_inv_txfm_add = av1_inv_txfm_add_c;
+        if (flags & HAS_SSSE3) av1_inv_txfm_add = av1_inv_txfm_add_ssse3;
 
         highbd_variance64 = highbd_variance64_c;
         if (flags & HAS_AVX2) highbd_variance64 = highbd_variance64_avx2;
