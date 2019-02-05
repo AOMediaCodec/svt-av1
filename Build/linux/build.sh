@@ -11,28 +11,15 @@ function clean {
     rm -R -f ../../Bin/Release
 }
 
-function debug {
-    mkdir -p debug
-    mkdir -p ../../Bin/Debug
-    cd debug
+function build {
+    build_type=$1
+    lowercase_build_type=${build_type,}
+    mkdir -p $lowercase_build_type
+    mkdir -p ../../Bin/$build_type
+    cd $lowercase_build_type
     PATH=$PATH:/usr/local/bin/
     cmake ../../..                                  \
-        -DCMAKE_BUILD_TYPE=Debug                    \
-        -DCMAKE_C_COMPILER=$CMAKE_COMPILER          \
-        -DCMAKE_ASM_NASM_COMPILER=$CMAKE_ASSEMBLER  \
-
-    # Compile the Library
-    make -j $(nproc) SvtAv1EncApp
-    cd ..
-}
-
-function release {
-    mkdir -p release
-    mkdir -p ../../Bin/Release
-    cd release
-    PATH=$PATH:/usr/local/bin/
-    cmake ../../..                                  \
-        -DCMAKE_BUILD_TYPE=Release                  \
+        -DCMAKE_BUILD_TYPE=$build_type              \
         -DCMAKE_C_COMPILER=$CMAKE_COMPILER          \
         -DCMAKE_ASM_NASM_COMPILER=$CMAKE_ASSEMBLER  \
 
@@ -59,23 +46,23 @@ fi
 cd $(dirname $(realpath $0))
 
 if [ $# -eq 0 ]; then
-    debug
-    release
+    build Debug
+    build Release
 elif [ "$1" = "clean" ]; then
     clean
 elif [ "$1" = "debug" ]; then
-    debug
+    build Debug
 elif [ "$1" = "release" ]; then
-    release
+    build Release
 elif [ "$1" = "cpp" ]; then
-    debug
-    release
+    build Debug
+    build Release
 elif [ "$1" = "all" ]; then
-    debug
-    release
+    build Debug
+    build Release
 elif [ "$1" = "gcc" ]; then
-    debug
-    release
+    build Debug
+    build Release
 else
     echo "build.sh <clean|all|debug|release|help>"
 fi
