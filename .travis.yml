@@ -10,6 +10,10 @@ addons:
     packages:
       - yasm
 
+matrix:
+  allow_failures:
+  - name: "FFmpeg patch"  # See issue #15
+
 jobs:
   include:
    # General Linux build job
@@ -35,7 +39,6 @@ jobs:
      
    # FFmpeg interation build
    - name: FFmpeg patch
-     allow_failures: true
      script:
      # Build and install SVT-AV1
      - cd $TRAVIS_BUILD_DIR
