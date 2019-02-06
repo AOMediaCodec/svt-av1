@@ -1,0 +1,15 @@
+language: c
+dist: xenial
+
+addons:
+  apt:
+    packages:
+     - cmake
+     - yasm
+
+jobs:
+  include:
+   - name: SVT-AV1
+     script:
+     - cd Build/linux
+     - ./build.sh release

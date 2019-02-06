@@ -2084,13 +2084,13 @@ extern "C" {
         if (flags & HAS_AVX2) av1_jnt_convolve_2d = av1_jnt_convolve_2d_avx2;
 
         aom_quantize_b = aom_quantize_b_c_II;
-        if (flags & HAS_AVX) aom_quantize_b = aom_highbd_quantize_b_avx2;
+        if (flags & HAS_AVX2) aom_quantize_b = aom_highbd_quantize_b_avx2;
 
         aom_quantize_b_32x32 = aom_quantize_b_32x32_c_II;
-        if (flags & HAS_AVX) aom_quantize_b_32x32 = aom_highbd_quantize_b_32x32_avx2;
+        if (flags & HAS_AVX2) aom_quantize_b_32x32 = aom_highbd_quantize_b_32x32_avx2;
 
         aom_highbd_quantize_b_32x32 = aom_highbd_quantize_b_32x32_c;
-        if (flags & HAS_AVX) aom_highbd_quantize_b_32x32 = aom_highbd_quantize_b_32x32_avx2;
+        if (flags & HAS_AVX2) aom_highbd_quantize_b_32x32 = aom_highbd_quantize_b_32x32_avx2;
 
         aom_highbd_quantize_b = aom_highbd_quantize_b_c;
         if (flags & HAS_AVX2) aom_highbd_quantize_b = aom_highbd_quantize_b_avx2;
