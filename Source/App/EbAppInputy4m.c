@@ -14,6 +14,7 @@ int32_t readY4mHeader(EbConfig_t *cfg){
     FILE *ptr_in;
     unsigned char buffer[YFM_HEADER_MAX];
     unsigned char *tokstart, *tokend;
+    char *fresult;
     uint32_t bitdepth = 8, width = 0, height = 0, fr_n = 0,
         fr_d = 0, aspect_n, aspect_d;
     char chroma[4] = "420", scan_type = 'p';
@@ -22,7 +23,8 @@ int32_t readY4mHeader(EbConfig_t *cfg){
     ptr_in = cfg->inputFile;
 
     /* get first line after YUV4MPEG2 */
-    fgets((char*)buffer, sizeof(buffer), ptr_in);
+    fresult = fgets((char*)buffer, sizeof(buffer), ptr_in);
+    assert(fresult != NULL);
 
     /* print header */
     if(PRINT_HEADER) {
@@ -36,13 +38,13 @@ int32_t readY4mHeader(EbConfig_t *cfg){
             continue;
         switch (*tokstart++) {
         case 'W': /* width, required. */
-            width = strtol(tokstart, &tokend, 10);
+            width = strtol((const char*)tokstart, (char**)&tokend, 10);
             if(PRINT_HEADER)
                 printf("width = %d\n", width);
             tokstart = tokend;
             break;
         case 'H': /* height, required. */
-            height = strtol(tokstart, &tokend, 10);
+            height = strtol((const char*)tokstart, (char**)&tokend, 10);
             if(PRINT_HEADER)
                 printf("height = %d\n", height);
             tokstart = tokend;
@@ -185,7 +187,8 @@ int32_t readY4mHeader(EbConfig_t *cfg){
     }
 
     /* read next line with contains "FRAME" */
-    fgets((char*)buffer, sizeof(buffer), ptr_in);
+    fresult = fgets((char*)buffer, sizeof(buffer), ptr_in);
+    assert(fresult != NULL);
 
     /* Assign parameters to cfg */
     cfg->sourceWidth = width;
@@ -205,8 +208,10 @@ int32_t readY4mHeader(EbConfig_t *cfg){
 int32_t readY4mFrameDelimiter(EbConfig_t *cfg){
 
     unsigned char bufferY4Mheader[10];
+    char *fresult;
 
-    fgets((char *)bufferY4Mheader, sizeof(bufferY4Mheader), cfg->inputFile);
+    fresult = fgets((char *)bufferY4Mheader, sizeof(bufferY4Mheader), cfg->inputFile);
+    assert(fresult != NULL);
 
     if (strcmp((const char*)bufferY4Mheader, "FRAME\n") != 0) {
         fprintf(cfg->errorLogFile, "Failed to read proper y4m frame delimeter. Read broken.\n");
@@ -221,9 +226,11 @@ int32_t readY4mFrameDelimiter(EbConfig_t *cfg){
 EbBool checkIfY4m(EbConfig_t *cfg){
 
     unsigned char buffer[YUV4MPEG2_IND_SIZE+1];
+    size_t headerReadLength;
 
     /* Parse the header for the "YUV4MPEG2" string */
-    fread(buffer, YUV4MPEG2_IND_SIZE, 1, cfg->inputFile);
+    headerReadLength = fread(buffer, YUV4MPEG2_IND_SIZE, 1, cfg->inputFile);
+    assert(headerReadLength == 1);
     buffer[YUV4MPEG2_IND_SIZE] = 0;
 
     if (strcmp((const char*)buffer, "YUV4MPEG2") == 0) {
