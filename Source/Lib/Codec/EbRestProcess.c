@@ -33,7 +33,34 @@
 void ReconOutput(
     PictureControlSet_t    *picture_control_set_ptr,
     SequenceControlSet_t   *sequence_control_set_ptr);
-
+void av1_loop_restoration_filter_frame(Yv12BufferConfig *frame,
+    Av1Common *cm, int32_t optimized_lr);
+void CopyStatisticsToRefObject(
+    PictureControlSet_t    *picture_control_set_ptr,
+    SequenceControlSet_t   *sequence_control_set_ptr);
+void PsnrCalculations(
+    PictureControlSet_t    *picture_control_set_ptr,
+    SequenceControlSet_t   *sequence_control_set_ptr);
+void PadRefAndSetFlags(
+    PictureControlSet_t    *picture_control_set_ptr,
+    SequenceControlSet_t   *sequence_control_set_ptr);
+void generate_padding(
+    EbByte              src_pic,
+    uint32_t            src_stride,
+    uint32_t            original_src_width,
+    uint32_t            original_src_height,
+    uint32_t            padding_width,
+    uint32_t            padding_height);
+#if REST_M
+void restoration_seg_search(
+    RestContext_t          *context_ptr,
+    Yv12BufferConfig       *org_fts,
+    const Yv12BufferConfig *src,
+    Yv12BufferConfig       *trial_frame_rst,
+    PictureControlSet_t    *pcs_ptr,
+    uint32_t                segment_index);
+void rest_finish_search(Macroblock *x, Av1Common *const cm);
+#endif
 /******************************************************
  * Rest Context Constructor
  ******************************************************/

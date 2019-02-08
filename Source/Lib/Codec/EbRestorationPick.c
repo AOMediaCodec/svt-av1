@@ -1673,7 +1673,7 @@ static void search_sgrproj_seg(const RestorationTileLimits *limits,
     RestSearchCtxt *rsc = (RestSearchCtxt *)priv;
     RestUnitSearchInfo *rusi = &rsc->rusi[rest_unit_idx];
 
-    const Macroblock *const x = rsc->x;
+   
     const Av1Common *const cm = rsc->cm;
     const int32_t highbd = cm->use_highbitdepth;
     const int32_t bit_depth = cm->bit_depth;
@@ -1708,6 +1708,9 @@ static void search_sgrproj_seg(const RestorationTileLimits *limits,
 static void search_sgrproj_finish(const RestorationTileLimits *limits,
     const AV1PixelRect *tile, int32_t rest_unit_idx,
     void *priv) {
+
+    (void)limits;
+    (void)tile;
     RestSearchCtxt *rsc = (RestSearchCtxt *)priv;
     RestUnitSearchInfo *rusi = &rsc->rusi[rest_unit_idx];
 
@@ -1822,13 +1825,15 @@ static void search_wiener_seg(const RestorationTileLimits *limits,
 static void search_wiener_finish(const RestorationTileLimits *limits,
     const AV1PixelRect *tile_rect, int32_t rest_unit_idx,
     void *priv) {
+    (void)limits;
+    (void)tile_rect;
     RestSearchCtxt *rsc = (RestSearchCtxt *)priv;
     RestUnitSearchInfo *rusi = &rsc->rusi[rest_unit_idx];
 
     const int32_t wiener_win =
         (rsc->plane == AOM_PLANE_Y) ? WIENER_WIN : WIENER_WIN_CHROMA;
   
-    const Av1Common *const cm = rsc->cm;
+    
    
     const Macroblock *const x = rsc->x;
     const int64_t bits_none = x->wiener_restore_cost[0];
@@ -1893,6 +1898,7 @@ static void search_norestore_finish(const RestorationTileLimits *limits,
     const AV1PixelRect *tile_rect, int32_t rest_unit_idx,
     void *priv) {
     (void)tile_rect;
+    (void)limits;
 
     RestSearchCtxt *rsc = (RestSearchCtxt *)priv;
     RestUnitSearchInfo *rusi = &rsc->rusi[rest_unit_idx];
@@ -1927,12 +1933,7 @@ void restoration_seg_search(
     Macroblock *x = pcs_ptr->parent_pcs_ptr->av1x;   
     const int32_t num_planes = 3;
 
-    int32_t ntiles[2];
-    for (int32_t is_uv = 0; is_uv < 2; ++is_uv)
-        ntiles[is_uv] = rest_tiles_in_plane(cm, is_uv);
-
-    assert(ntiles[1] <= ntiles[0]);   
-
+    
     // If the restoration unit dimensions are not multiples of
     // rsi->restoration_unit_size then some elements of the rusi array may be
     // left uninitialised when we reach copy_unit_info(...). This is not a
@@ -1953,10 +1954,7 @@ void restoration_seg_search(
        
         rsc_p->tmpbuf = context_ptr->rst_tmpbuf;
 
-        const int32_t plane_ntiles = ntiles[plane > 0];  //no switchable for resolutions with 1 FB
-        const RestorationType num_rtypes =
-            (plane_ntiles > 1) ? RESTORE_TYPES : RESTORE_SWITCHABLE_TYPES;
-
+    
         const int32_t highbd = rsc.cm->use_highbitdepth;
         extend_frame(rsc.dgd_buffer, rsc.plane_width, rsc.plane_height,
             rsc.dgd_stride, RESTORATION_BORDER, RESTORATION_BORDER,
@@ -2008,7 +2006,7 @@ void rest_finish_search(Macroblock *x, Av1Common *const cm)
 
         double best_cost = 0;
         RestorationType best_rtype = RESTORE_NONE;
-        const int32_t highbd = rsc.cm->use_highbitdepth;
+       
        
         for (int32_t restType = 0; restType < num_rtypes; ++restType) {
 

@@ -1506,7 +1506,7 @@ static void foreach_rest_unit_in_tile_seg(const AV1PixelRect *tile_rect,
     while (y0 < tile_h) {
 #else
     int32_t y0 = y_unit_start_idx * unit_size;
-    int32_t yend = (y_unit_end_idx == picture_height_in_units) ? tile_h : y_unit_end_idx * unit_size; //MIN(y_unit_end_idx * unit_size , tile_h);
+    int32_t yend = ((int32_t)y_unit_end_idx == (int32_t)picture_height_in_units) ? tile_h : (int32_t)y_unit_end_idx * (int32_t)unit_size; //MIN(y_unit_end_idx * unit_size , tile_h);
     int32_t i = y_unit_start_idx;
 
     while (y0 < yend) {
@@ -1529,7 +1529,7 @@ static void foreach_rest_unit_in_tile_seg(const AV1PixelRect *tile_rect,
         while (x0 < tile_w) {
 #else
         int32_t x0 = x_unit_start_idx * unit_size;
-        int32_t xend = (x_unit_end_idx == picture_width_in_units) ? tile_w : x_unit_end_idx * unit_size; //MIN(x_unit_end_idx * unit_size,tile_w);
+        int32_t xend = ((int32_t)x_unit_end_idx == (int32_t)picture_width_in_units) ? tile_w : (int32_t)x_unit_end_idx * (int32_t)unit_size; //MIN(x_unit_end_idx * unit_size,tile_w);
         int32_t j = x_unit_start_idx;
 
         while (x0 < xend) {

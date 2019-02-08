@@ -473,6 +473,9 @@ void av1_cdef_frame(
     PictureControlSet_t            *pCs
 )
 {
+#if FILT_PROC
+    (void)context_ptr;
+#endif
     struct PictureParentControlSet_s     *pPcs = pCs->parent_pcs_ptr;
     Av1Common*   cm = pPcs->av1_cm;
 
@@ -1148,9 +1151,9 @@ void av1_cdef_frame16bit(
 #define REDUCED_PRI_STRENGTHS 8
 #define REDUCED_TOTAL_STRENGTHS (REDUCED_PRI_STRENGTHS * CDEF_SEC_STRENGTHS)
 #define TOTAL_STRENGTHS (CDEF_PRI_STRENGTHS * CDEF_SEC_STRENGTHS)
-
-static int32_t priconv[REDUCED_PRI_STRENGTHS] = { 0, 1, 2, 3, 5, 7, 10, 13 };
 #endif
+static int32_t priconv[REDUCED_PRI_STRENGTHS] = { 0, 1, 2, 3, 5, 7, 10, 13 };
+
 /* Search for the best strength to add as an option, knowing we
 already selected nb_strengths options. */
 static uint64_t search_one(int32_t *lev, int32_t nb_strengths,
@@ -1431,17 +1434,12 @@ void finish_cdef_search(
     struct PictureParentControlSet_s     *pPcs = picture_control_set_ptr->parent_pcs_ptr;
     Av1Common*   cm = pPcs->av1_cm;
     int32_t mi_rows = pPcs->av1_cm->mi_rows;
-    int32_t mi_cols = pPcs->av1_cm->mi_cols;   
-    int32_t r, c;
+    int32_t mi_cols = pPcs->av1_cm->mi_cols;  
+    
     int32_t fbr, fbc;   
-    int32_t stride[3];
-    int32_t bsize[3];
-    int32_t mi_wide_l2[3];
-    int32_t mi_high_l2[3];
-    int32_t xdec[3];
-    int32_t ydec[3];
+   
     int32_t pli;  
-    int32_t coeff_shift = AOMMAX(sequence_control_set_ptr->static_config.encoder_bit_depth - 8, 0);
+   
     uint64_t best_tot_mse = (uint64_t)1 << 63;
     uint64_t tot_mse;
     int32_t sb_count;
@@ -1458,7 +1456,7 @@ void finish_cdef_search(
     int32_t quantizer;
     double lambda;
     const int32_t num_planes = 3;
-    const int32_t total_strengths = fast ? REDUCED_TOTAL_STRENGTHS : TOTAL_STRENGTHS;  
+    
     quantizer =        
         av1_ac_quant_Q3(pPcs->base_qindex, 0, (aom_bit_depth_t)sequence_control_set_ptr->static_config.encoder_bit_depth) >> (sequence_control_set_ptr->static_config.encoder_bit_depth - 8);
     lambda = .12 * quantizer * quantizer / 256.;  
@@ -1467,29 +1465,13 @@ void finish_cdef_search(
     mse[1] = (uint64_t(*)[64])aom_malloc(sizeof(**mse) * nvfb * nhfb);
 
 
-    for (pli = 0; pli < num_planes; pli++) {       
-
-        int32_t subsampling_x = (pli == 0) ? 0 : 1;
-        int32_t subsampling_y = (pli == 0) ? 0 : 1;
-        xdec[pli] = subsampling_x; 
-        ydec[pli] = subsampling_y; 
-        bsize[pli] = ydec[pli] ? (xdec[pli] ? BLOCK_4X4 : BLOCK_8X4)
-            : (xdec[pli] ? BLOCK_4X8 : BLOCK_8X8);
-        stride[pli] = cm->mi_cols << MI_SIZE_LOG2;
-        mi_wide_l2[pli] = MI_SIZE_LOG2 - subsampling_x;  
-        mi_high_l2[pli] = MI_SIZE_LOG2 - subsampling_y;  
-    }
+ 
     
   
     sb_count = 0;
     for (fbr = 0; fbr < nvfb; ++fbr) {
         for (fbc = 0; fbc < nhfb; ++fbc) {
-            int32_t nvb, nhb;          
-            nhb = AOMMIN(MI_SIZE_64X64, cm->mi_cols - MI_SIZE_64X64 * fbc);
-            nvb = AOMMIN(MI_SIZE_64X64, cm->mi_rows - MI_SIZE_64X64 * fbr);
-            int32_t hb_step = 1; // these should be all time with 64x64 LCUs
-            int32_t vb_step = 1;
-            BlockSize bs = BLOCK_64X64;
+           
             ModeInfo **mi = picture_control_set_ptr->mi_grid_base + MI_SIZE_64X64 * fbr * cm->mi_stride + MI_SIZE_64X64 * fbc;
             const MbModeInfo *mbmi = &mi[0]->mbmi;
 
@@ -1498,17 +1480,7 @@ void finish_cdef_search(
                 ((fbr & 1) &&
                 (mbmi->sb_type == BLOCK_128X128 || mbmi->sb_type == BLOCK_64X128)))
                 continue;
-            if (mbmi->sb_type == BLOCK_128X128 || mbmi->sb_type == BLOCK_128X64 ||
-                mbmi->sb_type == BLOCK_64X128)
-                bs = mbmi->sb_type;
-            if (bs == BLOCK_128X128 || bs == BLOCK_128X64) {
-                nhb = AOMMIN(MI_SIZE_128X128, cm->mi_cols - MI_SIZE_64X64 * fbc);
-                hb_step = 2;
-            }
-            if (bs == BLOCK_128X128 || bs == BLOCK_64X128) {
-                nvb = AOMMIN(MI_SIZE_128X128, cm->mi_rows - MI_SIZE_64X64 * fbr);
-                vb_step = 2;
-            }
+          
           
             // No filtering if the entire filter block is skipped
             if (sb_all_skip(picture_control_set_ptr, cm, fbr * MI_SIZE_64X64, fbc * MI_SIZE_64X64))

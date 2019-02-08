@@ -30,6 +30,7 @@
 
 #include "EbDeblockingFilter.h"
 
+void av1_loop_restoration_save_boundary_lines(const Yv12BufferConfig *frame, Av1Common *cm, int32_t after_cdef);
 
 /******************************************************
  * Dlf Context Constructor
@@ -82,7 +83,7 @@ EbErrorType dlf_context_ctor(
     }
 
   
-    return EB_ErrorNone;
+    return return_error;
 }
 
 /******************************************************
@@ -102,8 +103,7 @@ void* DlfKernel(void *input_ptr)
     //// Output
     EbObjectWrapper_t                       *dlfResultsWrapperPtr;
     struct DlfResults_s*                     dlfResultsPtr; 
-    EbObjectWrapper_t                       *pictureDemuxResultsWrapperPtr;
-    PictureDemuxResults_t                   *pictureDemuxResultsPtr;
+    
     // SB Loop variables
     
     
@@ -117,7 +117,7 @@ void* DlfKernel(void *input_ptr)
         encDecResultsPtr = (EncDecResults_t*)encDecResultsWrapperPtr->objectPtr;
         picture_control_set_ptr = (PictureControlSet_t*)encDecResultsPtr->pictureControlSetWrapperPtr->objectPtr;
         sequence_control_set_ptr = (SequenceControlSet_t*)picture_control_set_ptr->sequence_control_set_wrapper_ptr->objectPtr;
-        uint8_t lcuSizeLog2 = (uint8_t)Log2f(sequence_control_set_ptr->sb_size_pix);
+      
         EbBool  is16bit = (EbBool)(sequence_control_set_ptr->static_config.encoder_bit_depth > EB_8BIT);
 
 #if 1
