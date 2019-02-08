@@ -855,8 +855,11 @@ EbErrorType PictureControlSetCtor(
 #if CDEF_M
     EB_CREATEMUTEX(EbHandle, objectPtr->cdef_search_mutex, sizeof(EbHandle), EB_MUTEX);
 
-    objectPtr->mse_seg[0] = (uint64_t(*)[64])aom_malloc(sizeof(**objectPtr->mse_seg) *  pictureLcuWidth * pictureLcuHeight);
-    objectPtr->mse_seg[1] = (uint64_t(*)[64])aom_malloc(sizeof(**objectPtr->mse_seg) *  pictureLcuWidth * pictureLcuHeight);
+    //objectPtr->mse_seg[0] = (uint64_t(*)[64])aom_malloc(sizeof(**objectPtr->mse_seg) *  pictureLcuWidth * pictureLcuHeight);
+   // objectPtr->mse_seg[1] = (uint64_t(*)[64])aom_malloc(sizeof(**objectPtr->mse_seg) *  pictureLcuWidth * pictureLcuHeight);
+   
+    EB_MALLOC(uint64_t(*)[64], objectPtr->mse_seg[0], sizeof(**objectPtr->mse_seg) *  pictureLcuWidth * pictureLcuHeight, EB_N_PTR);
+    EB_MALLOC(uint64_t(*)[64], objectPtr->mse_seg[1], sizeof(**objectPtr->mse_seg) *  pictureLcuWidth * pictureLcuHeight, EB_N_PTR);
 
     if (is16bit == 0)
     {
