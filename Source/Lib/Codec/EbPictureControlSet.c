@@ -860,12 +860,12 @@ EbErrorType PictureControlSetCtor(
 
     if (is16bit == 0)
     {
-        objectPtr->src[0] = (uint16_t*)malloc(sizeof(*objectPtr->src)       * initDataPtr->picture_width * initDataPtr->picture_height);
-        objectPtr->ref_coeff[0] = (uint16_t*)malloc(sizeof(*objectPtr->ref_coeff) * initDataPtr->picture_width * initDataPtr->picture_height);
-        objectPtr->src[1] = (uint16_t*)malloc(sizeof(*objectPtr->src)       * initDataPtr->picture_width * initDataPtr->picture_height * 3 / 2);
-        objectPtr->ref_coeff[1] = (uint16_t*)malloc(sizeof(*objectPtr->ref_coeff) * initDataPtr->picture_width * initDataPtr->picture_height * 3 / 2);
-        objectPtr->src[2] = (uint16_t*)malloc(sizeof(*objectPtr->src)       * initDataPtr->picture_width * initDataPtr->picture_height * 3 / 2);
-        objectPtr->ref_coeff[2] = (uint16_t*)malloc(sizeof(*objectPtr->ref_coeff) * initDataPtr->picture_width * initDataPtr->picture_height * 3 / 2);
+        EB_MALLOC(uint16_t*, objectPtr->src[0],sizeof(*objectPtr->src)       * initDataPtr->picture_width * initDataPtr->picture_height,EB_N_PTR);
+        EB_MALLOC(uint16_t*, objectPtr->ref_coeff[0],sizeof(*objectPtr->ref_coeff) * initDataPtr->picture_width * initDataPtr->picture_height, EB_N_PTR);
+        EB_MALLOC(uint16_t*, objectPtr->src[1],sizeof(*objectPtr->src)       * initDataPtr->picture_width * initDataPtr->picture_height * 3 / 2, EB_N_PTR);
+        EB_MALLOC(uint16_t*, objectPtr->ref_coeff[1],sizeof(*objectPtr->ref_coeff) * initDataPtr->picture_width * initDataPtr->picture_height * 3 / 2, EB_N_PTR);
+        EB_MALLOC(uint16_t*, objectPtr->src[2],sizeof(*objectPtr->src)       * initDataPtr->picture_width * initDataPtr->picture_height * 3 / 2, EB_N_PTR);
+        EB_MALLOC(uint16_t*,objectPtr->ref_coeff[2],sizeof(*objectPtr->ref_coeff) * initDataPtr->picture_width * initDataPtr->picture_height * 3 / 2, EB_N_PTR);
     }
 #endif
 
@@ -1112,9 +1112,15 @@ EbErrorType PictureParentControlSetCtor(
         ntiles[is_uv] = objectPtr->av1_cm->rst_info[is_uv].units_per_tile; //CHKN res_tiles_in_plane
 
     assert(ntiles[1] <= ntiles[0]);
-    objectPtr->rusi_picture[0] = (RestUnitSearchInfo *)malloc(sizeof(RestUnitSearchInfo) * ntiles[0]);
-    objectPtr->rusi_picture[1] = (RestUnitSearchInfo *)malloc(sizeof(RestUnitSearchInfo) * ntiles[1]);
-    objectPtr->rusi_picture[2] = (RestUnitSearchInfo *)malloc(sizeof(RestUnitSearchInfo) * ntiles[1]);
+
+    EB_MALLOC(RestUnitSearchInfo*, objectPtr->rusi_picture[0], sizeof(RestUnitSearchInfo) * ntiles[0], EB_N_PTR);
+    EB_MALLOC(RestUnitSearchInfo*, objectPtr->rusi_picture[1], sizeof(RestUnitSearchInfo) * ntiles[1], EB_N_PTR);
+    EB_MALLOC(RestUnitSearchInfo*, objectPtr->rusi_picture[2], sizeof(RestUnitSearchInfo) * ntiles[1], EB_N_PTR);
+
+    //objectPtr->rusi_picture[0] = (RestUnitSearchInfo *)malloc(sizeof(RestUnitSearchInfo) * ntiles[0]);
+    //objectPtr->rusi_picture[1] = (RestUnitSearchInfo *)malloc(sizeof(RestUnitSearchInfo) * ntiles[1]);
+    //objectPtr->rusi_picture[2] = (RestUnitSearchInfo *)malloc(sizeof(RestUnitSearchInfo) * ntiles[1]);
+
     memset(objectPtr->rusi_picture[0], 0, sizeof(RestUnitSearchInfo) * ntiles[0]);
     memset(objectPtr->rusi_picture[1], 0, sizeof(RestUnitSearchInfo) * ntiles[1]);
     memset(objectPtr->rusi_picture[2], 0, sizeof(RestUnitSearchInfo) * ntiles[1]);
