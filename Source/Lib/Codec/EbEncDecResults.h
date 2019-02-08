@@ -22,6 +22,35 @@ extern "C" {
 
     } EncDecResults_t;
 
+#if FILT_PROC
+    typedef struct DlfResults_s
+    {
+        EbObjectWrapper_t      *pictureControlSetWrapperPtr;
+        uint32_t                  completedLcuRowIndexStart;
+        uint32_t                  completedLcuRowCount;
+#if CDEF_M
+        uint32_t          segment_index;
+#endif
+
+    } DlfResults_t;
+    typedef struct CdefResults_s
+    {
+        EbObjectWrapper_t      *pictureControlSetWrapperPtr;
+        uint32_t                  completedLcuRowIndexStart;
+        uint32_t                  completedLcuRowCount;
+#if REST_M
+        uint32_t          segment_index;
+#endif
+
+    } CdefResults_t;
+    typedef struct RestResults_s
+    {
+        EbObjectWrapper_t      *pictureControlSetWrapperPtr;
+        uint32_t                  completedLcuRowIndexStart;
+        uint32_t                  completedLcuRowCount;
+
+    } RestResults_t;
+#endif
     typedef struct EncDecResultsInitData_s
     {
         uint32_t         junk;

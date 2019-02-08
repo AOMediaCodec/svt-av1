@@ -42,7 +42,11 @@ void av1_cdef_search16bit(
     PictureControlSet_t            *picture_control_set_ptr
 );
 void av1_cdef_frame16bit(
+#if FILT_PROC
+    uint8_t is16bit,
+#else
     EncDecContext_t                *context_ptr,
+#endif
     SequenceControlSet_t           *sequence_control_set_ptr,
     PictureControlSet_t            *pCs
 );
@@ -216,7 +220,7 @@ EbErrorType enc_dec_context_ctor(
 
 
     context_ptr->md_context->enc_dec_context_ptr = context_ptr;
-
+#if ! FILT_PROC
     context_ptr->temp_lf_recon_picture16bit_ptr = (EbPictureBufferDesc_t *)EB_NULL;
     context_ptr->temp_lf_recon_picture_ptr = (EbPictureBufferDesc_t *)EB_NULL;
     EbPictureBufferDescInitData_t tempLfReconDescInitData;
@@ -243,8 +247,8 @@ EbErrorType enc_dec_context_ctor(
             (EbPtr*)&(context_ptr->temp_lf_recon_picture_ptr),
             (EbPtr)&tempLfReconDescInitData);
     }
-
-
+#endif
+#if  ! FILT_PROC
     {
         EbPictureBufferDescInitData_t initData;
 
@@ -271,6 +275,7 @@ EbErrorType enc_dec_context_ctor(
         //memset(context_ptr->trial_frame_rst->bufferCr, context_ptr->trial_frame_rst->chromaSize * 2, 0);
 
     }
+#endif
 
 
     return EB_ErrorNone;
@@ -617,7 +622,11 @@ EbBool AssignEncDecSegments(
 
     return continueProcessingFlag;
 }
+#if FILT_PROC
+void ReconOutput(
+#else
 static void ReconOutput(
+#endif
     PictureControlSet_t    *picture_control_set_ptr,
     SequenceControlSet_t   *sequence_control_set_ptr) {
 
@@ -1635,7 +1644,7 @@ void* EncDecKernel(void *input_ptr)
                         = picture_control_set_ptr->parent_pcs_ptr->film_grain_params;
                 }
             }
-
+#if !FILT_PROC
 #if AV1_LF 
             EbBool dlfEnableFlag = (EbBool)(picture_control_set_ptr->parent_pcs_ptr->loop_filter_mode &&
                 (picture_control_set_ptr->parent_pcs_ptr->is_used_as_reference_flag ||
@@ -1682,6 +1691,9 @@ void* EncDecKernel(void *input_ptr)
             }
 #endif
 
+#endif
+
+#if !FILT_PROC
             Av1Common* cm = picture_control_set_ptr->parent_pcs_ptr->av1_cm;
 
             EbPictureBufferDesc_t  * recon_picture_ptr;
@@ -1756,6 +1768,17 @@ void* EncDecKernel(void *input_ptr)
 
             }
 
+#endif
+
+
+
+#if FILT_PROC     
+            memcpy(picture_control_set_ptr->parent_pcs_ptr->av1x->sgrproj_restore_cost, context_ptr->md_rate_estimation_ptr->sgrprojRestoreFacBits, 2 * sizeof(int32_t));
+            memcpy(picture_control_set_ptr->parent_pcs_ptr->av1x->switchable_restore_cost, context_ptr->md_rate_estimation_ptr->switchableRestoreFacBits, 3 * sizeof(int32_t));
+            memcpy(picture_control_set_ptr->parent_pcs_ptr->av1x->wiener_restore_cost, context_ptr->md_rate_estimation_ptr->wienerRestoreFacBits, 2 * sizeof(int32_t));
+            picture_control_set_ptr->parent_pcs_ptr->av1x->rdmult = context_ptr->full_lambda;
+
+#else
 
 #if REST_REF_ONLY
             if (sequence_control_set_ptr->enable_restoration && picture_control_set_ptr->parent_pcs_ptr->is_used_as_reference_flag) {
@@ -1803,7 +1826,8 @@ void* EncDecKernel(void *input_ptr)
                 cm->rst_info[1].frame_restoration_type = RESTORE_NONE;
                 cm->rst_info[2].frame_restoration_type = RESTORE_NONE;
             }
-
+#endif
+#if !FILT_PROC
             if (picture_control_set_ptr->parent_pcs_ptr->reference_picture_wrapper_ptr != NULL) {
                 // copy stat to ref object (intra_coded_area, Luminance, Scene change detection flags)
                 CopyStatisticsToRefObject(
@@ -1887,7 +1911,8 @@ void* EncDecKernel(void *input_ptr)
                     picture_control_set_ptr,
                     sequence_control_set_ptr);
             }
-
+#endif
+#if !FILT_PROC
             if (picture_control_set_ptr->parent_pcs_ptr->is_used_as_reference_flag) {
 
                 // Get Empty EntropyCoding Results
@@ -1904,9 +1929,30 @@ void* EncDecKernel(void *input_ptr)
                 // Post Reference Picture
                 EbPostFullObject(pictureDemuxResultsWrapperPtr);
             }
+#endif
 
         }
 
+
+
+#if FILT_PROC
+        if (lastLcuFlag)
+        {
+
+            // Get Empty EncDec Results
+            EbGetEmptyObject(
+                context_ptr->enc_dec_output_fifo_ptr,
+                &encDecResultsWrapperPtr);
+            encDecResultsPtr = (EncDecResults_t*)encDecResultsWrapperPtr->objectPtr;
+            encDecResultsPtr->pictureControlSetWrapperPtr = encDecTasksPtr->pictureControlSetWrapperPtr;
+            //CHKN these are not needed for DLF 
+            encDecResultsPtr->completedLcuRowIndexStart = 0; 
+            encDecResultsPtr->completedLcuRowCount = ((sequence_control_set_ptr->luma_height + sequence_control_set_ptr->sb_size_pix - 1) >> lcuSizeLog2);
+            // Post EncDec Results
+            EbPostFullObject(encDecResultsWrapperPtr);
+
+        }
+#else
         // Send the Entropy Coder incremental updates as each SB row becomes available
         if (enableEcRows)
         {
@@ -1940,7 +1986,7 @@ void* EncDecKernel(void *input_ptr)
             EbPostFullObject(encDecResultsWrapperPtr);
 
         }
-
+#endif
         // Release Mode Decision Results
         EbReleaseObject(encDecTasksWrapperPtr);
 
