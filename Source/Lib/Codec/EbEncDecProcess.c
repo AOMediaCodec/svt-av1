@@ -1340,15 +1340,15 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
     // 2                    6
     // 3                    4
     // 4                    4/3/2
-    if (picture_control_set_ptr->enc_mode == ENC_M0) 
+    if (picture_control_set_ptr->enc_mode == ENC_M0)
         context_ptr->nfl_level = 0;
-    else if (picture_control_set_ptr->enc_mode == ENC_M1) 
+    else if (picture_control_set_ptr->enc_mode == ENC_M1)
         context_ptr->nfl_level = 1;
-    else if (picture_control_set_ptr->enc_mode == ENC_M2) 
+    else if (picture_control_set_ptr->enc_mode == ENC_M2)
         context_ptr->nfl_level = 2;
-    else 
+    else
         context_ptr->nfl_level = 3;
-    
+
 
     return return_error;
 }
@@ -1429,11 +1429,11 @@ void* EncDecKernel(void *input_ptr)
         (void)endOfRowFlag;
 #endif
         // EncDec Kernel Signal(s) derivation
-        
+
         signal_derivation_enc_dec_kernel_oq(
             picture_control_set_ptr,
             context_ptr->md_context);
-      
+
         // SB Constants
         sb_sz = (uint8_t)sequence_control_set_ptr->sb_size_pix;
         lcuSizeLog2 = (uint8_t)Log2f(sb_sz);
@@ -1504,7 +1504,7 @@ void* EncDecKernel(void *input_ptr)
                         EbPictureBufferDesc_t       *inputPicturePtr;
 
                         inputPicturePtr = picture_control_set_ptr->parent_pcs_ptr->enhanced_picture_ptr;
-                        
+
                         // Load the SB from the input to the intermediate SB buffer
                         uint32_t bufferIndex = (inputPicturePtr->origin_y + sb_origin_y) * inputPicturePtr->strideY + inputPicturePtr->origin_x + sb_origin_x;
 
@@ -1649,7 +1649,7 @@ void* EncDecKernel(void *input_ptr)
                 }
             }
 #if !FILT_PROC
-#if AV1_LF 
+#if AV1_LF
             EbBool dlfEnableFlag = (EbBool)(picture_control_set_ptr->parent_pcs_ptr->loop_filter_mode &&
                 (picture_control_set_ptr->parent_pcs_ptr->is_used_as_reference_flag ||
                     sequence_control_set_ptr->static_config.recon_enabled ||
@@ -1767,8 +1767,8 @@ void* EncDecKernel(void *input_ptr)
                 picture_control_set_ptr->parent_pcs_ptr->cdef_bits = 0;
 
                 picture_control_set_ptr->parent_pcs_ptr->nb_cdef_strengths = 0;
-#endif         
-           
+#endif
+
 
             }
 
@@ -1776,7 +1776,7 @@ void* EncDecKernel(void *input_ptr)
 
 
 
-#if FILT_PROC     
+#if FILT_PROC
             memcpy(picture_control_set_ptr->parent_pcs_ptr->av1x->sgrproj_restore_cost, context_ptr->md_rate_estimation_ptr->sgrprojRestoreFacBits, 2 * sizeof(int32_t));
             memcpy(picture_control_set_ptr->parent_pcs_ptr->av1x->switchable_restore_cost, context_ptr->md_rate_estimation_ptr->switchableRestoreFacBits, 3 * sizeof(int32_t));
             memcpy(picture_control_set_ptr->parent_pcs_ptr->av1x->wiener_restore_cost, context_ptr->md_rate_estimation_ptr->wienerRestoreFacBits, 2 * sizeof(int32_t));
@@ -1949,8 +1949,8 @@ void* EncDecKernel(void *input_ptr)
                 &encDecResultsWrapperPtr);
             encDecResultsPtr = (EncDecResults_t*)encDecResultsWrapperPtr->objectPtr;
             encDecResultsPtr->pictureControlSetWrapperPtr = encDecTasksPtr->pictureControlSetWrapperPtr;
-            //CHKN these are not needed for DLF 
-            encDecResultsPtr->completedLcuRowIndexStart = 0; 
+            //CHKN these are not needed for DLF
+            encDecResultsPtr->completedLcuRowIndexStart = 0;
             encDecResultsPtr->completedLcuRowCount = ((sequence_control_set_ptr->luma_height + sequence_control_set_ptr->sb_size_pix - 1) >> lcuSizeLog2);
             // Post EncDec Results
             EbPostFullObject(encDecResultsWrapperPtr);

@@ -78,7 +78,7 @@ EbErrorType rest_context_ctor(
     RestContext_t *context_ptr;
     EB_MALLOC(RestContext_t*, context_ptr, sizeof(RestContext_t), EB_N_PTR);
     *context_dbl_ptr = context_ptr;
-    
+
     // Input/Output System Resource Manager FIFOs
     context_ptr->rest_input_fifo_ptr = rest_input_fifo_ptr;
     context_ptr->rest_output_fifo_ptr = rest_output_fifo_ptr;
@@ -104,9 +104,9 @@ EbErrorType rest_context_ctor(
 
         if (return_error == EB_ErrorInsufficientResources) {
             return EB_ErrorInsufficientResources;
-        }  
+        }
 
-#if REST_M 
+#if REST_M
          return_error = EbPictureBufferDescCtor(
             (EbPtr*)&context_ptr->org_rec_frame,
                 (EbPtr)&initData);
@@ -143,7 +143,7 @@ EbErrorType rest_context_ctor(
             (EbPtr)&tempLfReconDescInitData);
     }
 
-  
+
     return EB_ErrorNone;
 }
 #if REST_M
@@ -221,12 +221,12 @@ void* RestKernel(void *input_ptr)
 
     //// Output
     EbObjectWrapper_t                       *restResultsWrapperPtr;
-    RestResults_t*                          restResultsPtr; 
+    RestResults_t*                          restResultsPtr;
     EbObjectWrapper_t                       *pictureDemuxResultsWrapperPtr;
     PictureDemuxResults_t                   *pictureDemuxResultsPtr;
     // SB Loop variables
-    
-    
+
+
     for (;;) {
 
         // Get Cdef Results
@@ -242,7 +242,7 @@ void* RestKernel(void *input_ptr)
         Av1Common* cm = picture_control_set_ptr->parent_pcs_ptr->av1_cm;
 
 #if  REST_M
-     
+
         if (sequence_control_set_ptr->enable_restoration)
         {
             get_own_recon(sequence_control_set_ptr, picture_control_set_ptr, context_ptr, is16bit);
@@ -303,13 +303,13 @@ void* RestKernel(void *input_ptr)
                 LinkEbToAomBufferDesc(
                     context_ptr->trial_frame_rst,
                     &trial_frame_rst);
-        
+
 
 #endif
 
 
 #if REST_M
-                rest_finish_search(                   
+                rest_finish_search(
                     picture_control_set_ptr->parent_pcs_ptr->av1x,
                     picture_control_set_ptr->parent_pcs_ptr->av1_cm);
 #else
@@ -343,7 +343,7 @@ void* RestKernel(void *input_ptr)
                     picture_control_set_ptr,
                     sequence_control_set_ptr);
             }
-      
+
             // PSNR Calculation
             if (sequence_control_set_ptr->static_config.stat_report) {
                 PsnrCalculations(
@@ -457,7 +457,7 @@ void* RestKernel(void *input_ptr)
         EbReleaseMutex(picture_control_set_ptr->rest_search_mutex);
 #endif
 
-       
+
         // Release input Results
         EbReleaseObject(cdefResultsWrapperPtr);
 

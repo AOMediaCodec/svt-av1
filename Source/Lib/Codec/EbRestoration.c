@@ -283,7 +283,7 @@ EbErrorType av1_alloc_restoration_struct(struct Av1Common *cm, RestorationInfo *
     // max with 1 is to deal with tiles that are smaller than half of a
     // restoration unit.
     const int32_t unit_size = rsi->restoration_unit_size;
-    const int32_t hpertile = count_units_in_tile(unit_size, max_tile_w);   //FB of size < 1/2 UnitSize are included in neigh FB making them bigger!! 
+    const int32_t hpertile = count_units_in_tile(unit_size, max_tile_w);   //FB of size < 1/2 UnitSize are included in neigh FB making them bigger!!
     const int32_t vpertile = count_units_in_tile(unit_size, max_tile_h);
 
     rsi->units_per_tile = hpertile * vpertile;//pic_tot_FB
@@ -1557,7 +1557,7 @@ void av1_foreach_rest_unit_in_frame_seg(Av1Common *cm, int32_t plane,
     rest_unit_visitor_t on_rest_unit,
     void *priv,
     PictureControlSet_t   *picture_control_set_ptr,
-    uint32_t segment_index) 
+    uint32_t segment_index)
 {
     const int32_t is_uv = plane > 0;
     const int32_t ss_y = is_uv && cm->subsampling_y;

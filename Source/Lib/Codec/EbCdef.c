@@ -1434,18 +1434,18 @@ void finish_cdef_search(
     struct PictureParentControlSet_s     *pPcs = picture_control_set_ptr->parent_pcs_ptr;
     Av1Common*   cm = pPcs->av1_cm;
     int32_t mi_rows = pPcs->av1_cm->mi_rows;
-    int32_t mi_cols = pPcs->av1_cm->mi_cols;  
-    
-    int32_t fbr, fbc;   
-   
-    int32_t pli;  
-   
+    int32_t mi_cols = pPcs->av1_cm->mi_cols;
+
+    int32_t fbr, fbc;
+
+    int32_t pli;
+
     uint64_t best_tot_mse = (uint64_t)1 << 63;
     uint64_t tot_mse;
     int32_t sb_count;
     int32_t nvfb = (mi_rows + MI_SIZE_64X64 - 1) / MI_SIZE_64X64;
     int32_t nhfb = (mi_cols + MI_SIZE_64X64 - 1) / MI_SIZE_64X64;
-    int32_t *sb_index = (int32_t *)aom_malloc(nvfb * nhfb * sizeof(*sb_index));       
+    int32_t *sb_index = (int32_t *)aom_malloc(nvfb * nhfb * sizeof(*sb_index));
     int32_t *selected_strength = (int32_t *)aom_malloc(nvfb * nhfb * sizeof(*sb_index));
     uint64_t(*mse[2])[TOTAL_STRENGTHS];
     int32_t pri_damping = 3 + (picture_control_set_ptr->parent_pcs_ptr->base_qindex  >> 6);
@@ -1456,22 +1456,22 @@ void finish_cdef_search(
     int32_t quantizer;
     double lambda;
     const int32_t num_planes = 3;
-    
-    quantizer =        
+
+    quantizer =
         av1_ac_quant_Q3(pPcs->base_qindex, 0, (aom_bit_depth_t)sequence_control_set_ptr->static_config.encoder_bit_depth) >> (sequence_control_set_ptr->static_config.encoder_bit_depth - 8);
-    lambda = .12 * quantizer * quantizer / 256.;  
+    lambda = .12 * quantizer * quantizer / 256.;
 
     mse[0] = (uint64_t(*)[64])aom_malloc(sizeof(**mse) * nvfb * nhfb);
     mse[1] = (uint64_t(*)[64])aom_malloc(sizeof(**mse) * nvfb * nhfb);
 
 
- 
-    
-  
+
+
+
     sb_count = 0;
     for (fbr = 0; fbr < nvfb; ++fbr) {
         for (fbc = 0; fbc < nhfb; ++fbc) {
-           
+
             ModeInfo **mi = picture_control_set_ptr->mi_grid_base + MI_SIZE_64X64 * fbr * cm->mi_stride + MI_SIZE_64X64 * fbc;
             const MbModeInfo *mbmi = &mi[0]->mbmi;
 
@@ -1480,11 +1480,11 @@ void finish_cdef_search(
                 ((fbr & 1) &&
                 (mbmi->sb_type == BLOCK_128X128 || mbmi->sb_type == BLOCK_64X128)))
                 continue;
-          
-          
+
+
             // No filtering if the entire filter block is skipped
             if (sb_all_skip(picture_control_set_ptr, cm, fbr * MI_SIZE_64X64, fbc * MI_SIZE_64X64))
-                continue;                    
+                continue;
 
             for (pli = 0; pli < num_planes; pli++) {
                 if (pli == 0)
@@ -1542,7 +1542,7 @@ void finish_cdef_search(
                 best_mse = curr;
             }
         }
-        selected_strength[i] = best_gi;       
+        selected_strength[i] = best_gi;
         picture_control_set_ptr->mi_grid_base[sb_index[i]]->mbmi.cdef_strength = (int8_t)best_gi;
         //in case the fb is within a block=128x128 or 128x64, or 64x128, then we genrate param only for the first 64x64.
         //since our mi map deos not have the multi pointer single data assignment, we need to duplicate data.

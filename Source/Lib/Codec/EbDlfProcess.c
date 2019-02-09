@@ -38,7 +38,7 @@ void av1_loop_restoration_save_boundary_lines(const Yv12BufferConfig *frame, Av1
 EbErrorType dlf_context_ctor(
     DlfContext_t **context_dbl_ptr,
     EbFifo_t                *dlf_input_fifo_ptr,
-    EbFifo_t                *dlf_output_fifo_ptr ,  
+    EbFifo_t                *dlf_output_fifo_ptr ,
     EbBool                  is16bit,
     uint32_t                max_input_luma_width,
     uint32_t                max_input_luma_height
@@ -48,13 +48,13 @@ EbErrorType dlf_context_ctor(
     DlfContext_t *context_ptr;
     EB_MALLOC(DlfContext_t*, context_ptr, sizeof(DlfContext_t), EB_N_PTR);
     *context_dbl_ptr = context_ptr;
-    
+
     // Input/Output System Resource Manager FIFOs
     context_ptr->dlf_input_fifo_ptr = dlf_input_fifo_ptr;
     context_ptr->dlf_output_fifo_ptr = dlf_output_fifo_ptr;
-   
-    
-   
+
+
+
     context_ptr->temp_lf_recon_picture16bit_ptr = (EbPictureBufferDesc_t *)EB_NULL;
     context_ptr->temp_lf_recon_picture_ptr = (EbPictureBufferDesc_t *)EB_NULL;
     EbPictureBufferDescInitData_t tempLfReconDescInitData;
@@ -82,7 +82,7 @@ EbErrorType dlf_context_ctor(
             (EbPtr)&tempLfReconDescInitData);
     }
 
-  
+
     return return_error;
 }
 
@@ -102,11 +102,11 @@ void* DlfKernel(void *input_ptr)
 
     //// Output
     EbObjectWrapper_t                       *dlfResultsWrapperPtr;
-    struct DlfResults_s*                     dlfResultsPtr; 
-    
+    struct DlfResults_s*                     dlfResultsPtr;
+
     // SB Loop variables
-    
-    
+
+
     for (;;) {
 
         // Get EncDec Results
@@ -117,7 +117,7 @@ void* DlfKernel(void *input_ptr)
         encDecResultsPtr = (EncDecResults_t*)encDecResultsWrapperPtr->objectPtr;
         picture_control_set_ptr = (PictureControlSet_t*)encDecResultsPtr->pictureControlSetWrapperPtr->objectPtr;
         sequence_control_set_ptr = (SequenceControlSet_t*)picture_control_set_ptr->sequence_control_set_wrapper_ptr->objectPtr;
-      
+
         EbBool  is16bit = (EbBool)(sequence_control_set_ptr->static_config.encoder_bit_depth > EB_8BIT);
 
 #if 1
@@ -198,9 +198,9 @@ void* DlfKernel(void *input_ptr)
 
             if (sequence_control_set_ptr->enable_restoration) {
                 av1_loop_restoration_save_boundary_lines(cm->frame_to_show, cm, 0);
-            } 
-    
-#if CDEF_M 
+            }
+
+#if CDEF_M
             if (sequence_control_set_ptr->enable_cdef)
             {
 #endif
@@ -219,7 +219,7 @@ void* DlfKernel(void *input_ptr)
                 else
                 {
                     //these copies should go!
-                EbByte  rec_ptr = &((recon_picture_ptr->bufferY)[recon_picture_ptr->origin_x + recon_picture_ptr->origin_y * recon_picture_ptr->strideY]);               
+                EbByte  rec_ptr = &((recon_picture_ptr->bufferY)[recon_picture_ptr->origin_x + recon_picture_ptr->origin_y * recon_picture_ptr->strideY]);
                     EbByte  rec_ptr_cb = &((recon_picture_ptr->bufferCb)[recon_picture_ptr->origin_x / 2 + recon_picture_ptr->origin_y / 2 * recon_picture_ptr->strideCb]);
                     EbByte  rec_ptr_cr = &((recon_picture_ptr->bufferCr)[recon_picture_ptr->origin_x / 2 + recon_picture_ptr->origin_y / 2 * recon_picture_ptr->strideCr]);
 
@@ -231,7 +231,7 @@ void* DlfKernel(void *input_ptr)
                     for (int r = 0; r < sequence_control_set_ptr->luma_height; ++r) {
                         for (int c = 0; c < sequence_control_set_ptr->luma_width; ++c) {
                         picture_control_set_ptr->src[0]      [r * sequence_control_set_ptr->luma_width + c] = rec_ptr[r * recon_picture_ptr->strideY + c];
-                        picture_control_set_ptr->ref_coeff[0][r * sequence_control_set_ptr->luma_width + c] = enh_ptr[r * inputPicturePtr->strideY + c];                    
+                        picture_control_set_ptr->ref_coeff[0][r * sequence_control_set_ptr->luma_width + c] = enh_ptr[r * inputPicturePtr->strideY + c];
                         }
                     }
 
@@ -243,20 +243,20 @@ void* DlfKernel(void *input_ptr)
                             picture_control_set_ptr->ref_coeff[2][r * sequence_control_set_ptr->luma_width / 2 + c] = enh_ptr_cr[r * inputPicturePtr->strideCr + c];
                         }
                     }
-                
+
                 }
-#if CDEF_M 
+#if CDEF_M
             }
 #endif
 
-        }             
-          
+        }
+
         picture_control_set_ptr->cdef_segments_column_count =  sequence_control_set_ptr->cdef_segment_column_count;
         picture_control_set_ptr->cdef_segments_row_count = sequence_control_set_ptr->cdef_segment_row_count;
         picture_control_set_ptr->cdef_segments_total_count  = (uint16_t)(picture_control_set_ptr->cdef_segments_column_count  * picture_control_set_ptr->cdef_segments_row_count);
         picture_control_set_ptr->tot_seg_searched_cdef = 0;
-        uint32_t segment_index;          
-          
+        uint32_t segment_index;
+
         for (segment_index = 0; segment_index < picture_control_set_ptr->cdef_segments_total_count; ++segment_index)
         {
             // Get Empty DLF Results to Cdef
@@ -269,7 +269,7 @@ void* DlfKernel(void *input_ptr)
             dlfResultsPtr->segment_index = segment_index;
             // Post DLF Results
             EbPostFullObject(dlfResultsWrapperPtr);
-        }          
+        }
 #else
 
             // Get Empty DLF Results to Cdef
@@ -283,7 +283,7 @@ void* DlfKernel(void *input_ptr)
             // Post DLF Results
             EbPostFullObject(dlfResultsWrapperPtr);
 #endif
-       
+
             // Release EncDec Results
             EbReleaseObject(encDecResultsWrapperPtr);
 
