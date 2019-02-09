@@ -1373,9 +1373,10 @@ void* EncDecKernel(void *input_ptr)
     // Output
     EbObjectWrapper_t                       *encDecResultsWrapperPtr;
     EncDecResults_t                         *encDecResultsPtr;
+#if ! FILT_PROC
     EbObjectWrapper_t                       *pictureDemuxResultsWrapperPtr;
     PictureDemuxResults_t                   *pictureDemuxResultsPtr;
-
+#endif
     // SB Loop variables
     LargestCodingUnit_t                     *sb_ptr;
     uint16_t                                 sb_index;
@@ -1407,9 +1408,9 @@ void* EncDecKernel(void *input_ptr)
     uint32_t                                 segmentBandIndex;
     uint32_t                                 segmentBandSize;
     EncDecSegments_t                        *segmentsPtr;
-
+#if ! FILT_PROC
     EbBool                                   enableEcRows = EB_FALSE;//for CDEF.
-
+#endif
     for (;;) {
 
         // Get Mode Decision Results
@@ -1423,7 +1424,10 @@ void* EncDecKernel(void *input_ptr)
         segmentsPtr = picture_control_set_ptr->enc_dec_segment_ctrl;
         lastLcuFlag = EB_FALSE;
         is16bit = (EbBool)(sequence_control_set_ptr->static_config.encoder_bit_depth > EB_8BIT);
-
+#if FILT_PROC
+        (void)is16bit;
+        (void)endOfRowFlag;
+#endif
         // EncDec Kernel Signal(s) derivation
         
         signal_derivation_enc_dec_kernel_oq(
