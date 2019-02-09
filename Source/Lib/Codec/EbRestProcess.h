@@ -1,12 +1,7 @@
-// INTEL CONFIDENTIAL
-// Copyright © 2018 Intel Corporation.
-//
-// This software and the related documents are Intel copyrighted materials,
-// and your use of them is governed by the express license under which they were provided to you.
-// Unless the License provides otherwise, you may not use, modify, copy, publish, distribute, disclose or transmit
-// this software or the related documents without Intel's prior written permission.
-// This software and the related documents are provided as is, with no express or implied warranties,
-// other than those that are expressly stated in the License.
+/*
+* Copyright(c) 2019 Intel Corporation
+* SPDX - License - Identifier: BSD - 2 - Clause - Patent
+*/
 
 #ifndef EbRestProcess_h
 #define EbRestProcess_h
@@ -57,6 +52,6 @@ extern EbErrorType rest_context_ctor(
     uint32_t                max_input_luma_height
    );
 
-extern void* RestKernel(void *input_ptr);
+extern void* rest_kernel(void *input_ptr);
 
 #endif

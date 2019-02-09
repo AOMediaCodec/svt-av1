@@ -25,9 +25,8 @@ extern "C" {
 #if FILT_PROC
     typedef struct DlfResults_s
     {
-        EbObjectWrapper_t      *pictureControlSetWrapperPtr;
-        uint32_t                  completedLcuRowIndexStart;
-        uint32_t                  completedLcuRowCount;
+        EbObjectWrapper_t      *picture_control_set_wrapper_ptr;
+      
 #if CDEF_M
         uint32_t          segment_index;
 #endif
@@ -35,9 +34,8 @@ extern "C" {
     } DlfResults_t;
     typedef struct CdefResults_s
     {
-        EbObjectWrapper_t      *pictureControlSetWrapperPtr;
-        uint32_t                  completedLcuRowIndexStart;
-        uint32_t                  completedLcuRowCount;
+        EbObjectWrapper_t      *picture_control_set_wrapper_ptr;
+       
 #if REST_M
         uint32_t          segment_index;
 #endif
@@ -45,9 +43,9 @@ extern "C" {
     } CdefResults_t;
     typedef struct RestResults_s
     {
-        EbObjectWrapper_t      *pictureControlSetWrapperPtr;
-        uint32_t                  completedLcuRowIndexStart;
-        uint32_t                  completedLcuRowCount;
+        EbObjectWrapper_t      *picture_control_set_wrapper_ptr;
+        uint32_t                  completed_lcu_row_index_start;
+        uint32_t                  completed_lcu_row_count;
 
     } RestResults_t;
 #endif

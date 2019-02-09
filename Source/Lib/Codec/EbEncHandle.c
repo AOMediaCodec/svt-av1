@@ -1736,7 +1736,7 @@ EB_API EbErrorType eb_init_encoder(EbComponentType *svt_enc_component)
     EB_MALLOC(EbHandle*, encHandlePtr->dlfThreadHandleArray, sizeof(EbHandle) * encHandlePtr->sequenceControlSetInstanceArray[0]->sequence_control_set_ptr->dlf_process_init_count, EB_N_PTR);
 
     for (processIndex = 0; processIndex < encHandlePtr->sequenceControlSetInstanceArray[0]->sequence_control_set_ptr->dlf_process_init_count; ++processIndex) {
-        EB_CREATETHREAD(EbHandle, encHandlePtr->dlfThreadHandleArray[processIndex], sizeof(EbHandle), EB_THREAD, DlfKernel, encHandlePtr->dlfContextPtrArray[processIndex]);
+        EB_CREATETHREAD(EbHandle, encHandlePtr->dlfThreadHandleArray[processIndex], sizeof(EbHandle), EB_THREAD, dlf_kernel, encHandlePtr->dlfContextPtrArray[processIndex]);
     }
 
 
@@ -1744,14 +1744,14 @@ EB_API EbErrorType eb_init_encoder(EbComponentType *svt_enc_component)
     EB_MALLOC(EbHandle*, encHandlePtr->cdefThreadHandleArray, sizeof(EbHandle) * encHandlePtr->sequenceControlSetInstanceArray[0]->sequence_control_set_ptr->cdef_process_init_count, EB_N_PTR);
 
     for (processIndex = 0; processIndex < encHandlePtr->sequenceControlSetInstanceArray[0]->sequence_control_set_ptr->cdef_process_init_count; ++processIndex) {
-        EB_CREATETHREAD(EbHandle, encHandlePtr->cdefThreadHandleArray[processIndex], sizeof(EbHandle), EB_THREAD, CdefKernel, encHandlePtr->cdefContextPtrArray[processIndex]);
+        EB_CREATETHREAD(EbHandle, encHandlePtr->cdefThreadHandleArray[processIndex], sizeof(EbHandle), EB_THREAD, cdef_kernel, encHandlePtr->cdefContextPtrArray[processIndex]);
     }
 
     // Rest Process
     EB_MALLOC(EbHandle*, encHandlePtr->restThreadHandleArray, sizeof(EbHandle) * encHandlePtr->sequenceControlSetInstanceArray[0]->sequence_control_set_ptr->rest_process_init_count, EB_N_PTR);
 
     for (processIndex = 0; processIndex < encHandlePtr->sequenceControlSetInstanceArray[0]->sequence_control_set_ptr->rest_process_init_count; ++processIndex) {
-        EB_CREATETHREAD(EbHandle, encHandlePtr->restThreadHandleArray[processIndex], sizeof(EbHandle), EB_THREAD, RestKernel, encHandlePtr->restContextPtrArray[processIndex]);
+        EB_CREATETHREAD(EbHandle, encHandlePtr->restThreadHandleArray[processIndex], sizeof(EbHandle), EB_THREAD, rest_kernel, encHandlePtr->restContextPtrArray[processIndex]);
     }
 #endif
     // Entropy Coding Process

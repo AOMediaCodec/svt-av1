@@ -1,12 +1,7 @@
-// INTEL CONFIDENTIAL
-// Copyright © 2018 Intel Corporation.
-//
-// This software and the related documents are Intel copyrighted materials,
-// and your use of them is governed by the express license under which they were provided to you.
-// Unless the License provides otherwise, you may not use, modify, copy, publish, distribute, disclose or transmit
-// this software or the related documents without Intel's prior written permission.
-// This software and the related documents are provided as is, with no express or implied warranties,
-// other than those that are expressly stated in the License.
+/*
+* Copyright(c) 2019 Intel Corporation
+* SPDX - License - Identifier: BSD - 2 - Clause - Patent
+*/
 
 /*
 * Copyright (c) 2016, Alliance for Open Media. All rights reserved
@@ -208,7 +203,7 @@ void   get_own_recon(
 /******************************************************
  * Rest Kernel
  ******************************************************/
-void* RestKernel(void *input_ptr)
+void* rest_kernel(void *input_ptr)
 {
     // Context & SCS & PCS
     RestContext_t                            *context_ptr = (RestContext_t*)input_ptr;
@@ -216,14 +211,14 @@ void* RestKernel(void *input_ptr)
     SequenceControlSet_t                    *sequence_control_set_ptr;
 
     //// Input
-    EbObjectWrapper_t                       *cdefResultsWrapperPtr;
-    CdefResults_t                         *cdefResultsPtr;
+    EbObjectWrapper_t                       *cdef_results_wrapper_ptr;
+    CdefResults_t                         *cdef_results_ptr;
 
     //// Output
-    EbObjectWrapper_t                       *restResultsWrapperPtr;
-    RestResults_t*                          restResultsPtr;
-    EbObjectWrapper_t                       *pictureDemuxResultsWrapperPtr;
-    PictureDemuxResults_t                   *pictureDemuxResultsPtr;
+    EbObjectWrapper_t                       *rest_results_wrapper_ptr;
+    RestResults_t*                          rest_results_ptr;
+    EbObjectWrapper_t                       *picture_demux_results_wrapper_ptr;
+    PictureDemuxResults_t                   *picture_demux_results_rtr;
     // SB Loop variables
 
 
@@ -232,10 +227,10 @@ void* RestKernel(void *input_ptr)
         // Get Cdef Results
         EbGetFullObject(
             context_ptr->rest_input_fifo_ptr,
-            &cdefResultsWrapperPtr);
+            &cdef_results_wrapper_ptr);
 
-        cdefResultsPtr = (CdefResults_t*)cdefResultsWrapperPtr->objectPtr;
-        picture_control_set_ptr = (PictureControlSet_t*)cdefResultsPtr->pictureControlSetWrapperPtr->objectPtr;
+        cdef_results_ptr = (CdefResults_t*)cdef_results_wrapper_ptr->objectPtr;
+        picture_control_set_ptr = (PictureControlSet_t*)cdef_results_ptr->picture_control_set_wrapper_ptr->objectPtr;
         sequence_control_set_ptr = (SequenceControlSet_t*)picture_control_set_ptr->sequence_control_set_wrapper_ptr->objectPtr;
         uint8_t lcuSizeLog2 = (uint8_t)Log2f(sequence_control_set_ptr->sb_size_pix);
         EbBool  is16bit = (EbBool)(sequence_control_set_ptr->static_config.encoder_bit_depth > EB_8BIT);
@@ -268,7 +263,7 @@ void* RestKernel(void *input_ptr)
                 &cpi_source,
                 &trial_frame_rst,
                 picture_control_set_ptr,
-                cdefResultsPtr->segment_index);
+                cdef_results_ptr->segment_index);
         }
 
         //all seg based search is done. update total processed segments. if all done, finish the search and perfrom application.
@@ -427,16 +422,16 @@ void* RestKernel(void *input_ptr)
                 // Get Empty PicMgr Results
                 EbGetEmptyObject(
                     context_ptr->picture_demux_fifo_ptr,
-                    &pictureDemuxResultsWrapperPtr);
+                    &picture_demux_results_wrapper_ptr);
 
-                pictureDemuxResultsPtr = (PictureDemuxResults_t*)pictureDemuxResultsWrapperPtr->objectPtr;
-                pictureDemuxResultsPtr->reference_picture_wrapper_ptr = picture_control_set_ptr->parent_pcs_ptr->reference_picture_wrapper_ptr;
-                pictureDemuxResultsPtr->sequence_control_set_wrapper_ptr = picture_control_set_ptr->sequence_control_set_wrapper_ptr;
-                pictureDemuxResultsPtr->picture_number = picture_control_set_ptr->picture_number;
-                pictureDemuxResultsPtr->pictureType = EB_PIC_REFERENCE;
+                picture_demux_results_rtr = (PictureDemuxResults_t*)picture_demux_results_wrapper_ptr->objectPtr;
+                picture_demux_results_rtr->reference_picture_wrapper_ptr = picture_control_set_ptr->parent_pcs_ptr->reference_picture_wrapper_ptr;
+                picture_demux_results_rtr->sequence_control_set_wrapper_ptr = picture_control_set_ptr->sequence_control_set_wrapper_ptr;
+                picture_demux_results_rtr->picture_number = picture_control_set_ptr->picture_number;
+                picture_demux_results_rtr->pictureType = EB_PIC_REFERENCE;
 
                 // Post Reference Picture
-                EbPostFullObject(pictureDemuxResultsWrapperPtr);
+                EbPostFullObject(picture_demux_results_wrapper_ptr);
             }
 
 
@@ -444,13 +439,13 @@ void* RestKernel(void *input_ptr)
             // Get Empty rest Results to EC
             EbGetEmptyObject(
                 context_ptr->rest_output_fifo_ptr,
-                &restResultsWrapperPtr);
-            restResultsPtr = (struct RestResults_s*)restResultsWrapperPtr->objectPtr;
-            restResultsPtr->pictureControlSetWrapperPtr = cdefResultsPtr->pictureControlSetWrapperPtr;
-            restResultsPtr->completedLcuRowIndexStart = 0;
-            restResultsPtr->completedLcuRowCount = ((sequence_control_set_ptr->luma_height + sequence_control_set_ptr->sb_size_pix - 1) >> lcuSizeLog2);
+                &rest_results_wrapper_ptr);
+            rest_results_ptr = (struct RestResults_s*)rest_results_wrapper_ptr->objectPtr;
+            rest_results_ptr->picture_control_set_wrapper_ptr = cdef_results_ptr->picture_control_set_wrapper_ptr;
+            rest_results_ptr->completed_lcu_row_index_start = 0;
+            rest_results_ptr->completed_lcu_row_count = ((sequence_control_set_ptr->luma_height + sequence_control_set_ptr->sb_size_pix - 1) >> lcuSizeLog2);
             // Post Rest Results
-            EbPostFullObject(restResultsWrapperPtr);
+            EbPostFullObject(rest_results_wrapper_ptr);
 
 #if REST_M
         }
@@ -459,7 +454,7 @@ void* RestKernel(void *input_ptr)
 
 
         // Release input Results
-        EbReleaseObject(cdefResultsWrapperPtr);
+        EbReleaseObject(cdef_results_wrapper_ptr);
 
     }
 

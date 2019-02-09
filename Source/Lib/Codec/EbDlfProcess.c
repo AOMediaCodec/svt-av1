@@ -1,12 +1,7 @@
-// INTEL CONFIDENTIAL
-// Copyright © 2018 Intel Corporation.
-//
-// This software and the related documents are Intel copyrighted materials,
-// and your use of them is governed by the express license under which they were provided to you.
-// Unless the License provides otherwise, you may not use, modify, copy, publish, distribute, disclose or transmit
-// this software or the related documents without Intel's prior written permission.
-// This software and the related documents are provided as is, with no express or implied warranties,
-// other than those that are expressly stated in the License.
+/*
+* Copyright(c) 2019 Intel Corporation
+* SPDX - License - Identifier: BSD - 2 - Clause - Patent
+*/
 
 /*
 * Copyright (c) 2016, Alliance for Open Media. All rights reserved
@@ -57,29 +52,29 @@ EbErrorType dlf_context_ctor(
 
     context_ptr->temp_lf_recon_picture16bit_ptr = (EbPictureBufferDesc_t *)EB_NULL;
     context_ptr->temp_lf_recon_picture_ptr = (EbPictureBufferDesc_t *)EB_NULL;
-    EbPictureBufferDescInitData_t tempLfReconDescInitData;
-    tempLfReconDescInitData.maxWidth = (uint16_t)max_input_luma_width;
-    tempLfReconDescInitData.maxHeight = (uint16_t)max_input_luma_height;
-    tempLfReconDescInitData.bufferEnableMask = PICTURE_BUFFER_DESC_FULL_MASK;
+    EbPictureBufferDescInitData_t temp_lf_recon_desc_init_data;
+    temp_lf_recon_desc_init_data.maxWidth = (uint16_t)max_input_luma_width;
+    temp_lf_recon_desc_init_data.maxHeight = (uint16_t)max_input_luma_height;
+    temp_lf_recon_desc_init_data.bufferEnableMask = PICTURE_BUFFER_DESC_FULL_MASK;
 
-    tempLfReconDescInitData.left_padding = PAD_VALUE;
-    tempLfReconDescInitData.right_padding = PAD_VALUE;
-    tempLfReconDescInitData.top_padding = PAD_VALUE;
-    tempLfReconDescInitData.bot_padding = PAD_VALUE;
+    temp_lf_recon_desc_init_data.left_padding = PAD_VALUE;
+    temp_lf_recon_desc_init_data.right_padding = PAD_VALUE;
+    temp_lf_recon_desc_init_data.top_padding = PAD_VALUE;
+    temp_lf_recon_desc_init_data.bot_padding = PAD_VALUE;
 
-    tempLfReconDescInitData.splitMode = EB_FALSE;
+    temp_lf_recon_desc_init_data.splitMode = EB_FALSE;
 
     if (is16bit) {
-        tempLfReconDescInitData.bit_depth = EB_16BIT;
+        temp_lf_recon_desc_init_data.bit_depth = EB_16BIT;
         return_error = EbReconPictureBufferDescCtor(
             (EbPtr*)&(context_ptr->temp_lf_recon_picture16bit_ptr),
-            (EbPtr)&tempLfReconDescInitData);
+            (EbPtr)&temp_lf_recon_desc_init_data);
     }
     else {
-        tempLfReconDescInitData.bit_depth = EB_8BIT;
+        temp_lf_recon_desc_init_data.bit_depth = EB_8BIT;
         return_error = EbReconPictureBufferDescCtor(
             (EbPtr*)&(context_ptr->temp_lf_recon_picture_ptr),
-            (EbPtr)&tempLfReconDescInitData);
+            (EbPtr)&temp_lf_recon_desc_init_data);
     }
 
 
@@ -89,7 +84,7 @@ EbErrorType dlf_context_ctor(
 /******************************************************
  * Dlf Kernel
  ******************************************************/
-void* DlfKernel(void *input_ptr)
+void* dlf_kernel(void *input_ptr)
 {
     // Context & SCS & PCS
     DlfContext_t                            *context_ptr = (DlfContext_t*)input_ptr;
@@ -97,12 +92,12 @@ void* DlfKernel(void *input_ptr)
     SequenceControlSet_t                    *sequence_control_set_ptr;
 
     //// Input
-    EbObjectWrapper_t                       *encDecResultsWrapperPtr;
-    EncDecResults_t                         *encDecResultsPtr;
+    EbObjectWrapper_t                       *enc_dec_results_wrapper_ptr;
+    EncDecResults_t                         *enc_dec_results_ptr;
 
     //// Output
-    EbObjectWrapper_t                       *dlfResultsWrapperPtr;
-    struct DlfResults_s*                     dlfResultsPtr;
+    EbObjectWrapper_t                       *dlf_results_wrapper_ptr;
+    struct DlfResults_s*                     dlf_results_ptr;
 
     // SB Loop variables
 
@@ -112,10 +107,10 @@ void* DlfKernel(void *input_ptr)
         // Get EncDec Results
         EbGetFullObject(
             context_ptr->dlf_input_fifo_ptr,
-            &encDecResultsWrapperPtr);
+            &enc_dec_results_wrapper_ptr);
 
-        encDecResultsPtr = (EncDecResults_t*)encDecResultsWrapperPtr->objectPtr;
-        picture_control_set_ptr = (PictureControlSet_t*)encDecResultsPtr->pictureControlSetWrapperPtr->objectPtr;
+        enc_dec_results_ptr = (EncDecResults_t*)enc_dec_results_wrapper_ptr->objectPtr;
+        picture_control_set_ptr = (PictureControlSet_t*)enc_dec_results_ptr->pictureControlSetWrapperPtr->objectPtr;
         sequence_control_set_ptr = (SequenceControlSet_t*)picture_control_set_ptr->sequence_control_set_wrapper_ptr->objectPtr;
 
         EbBool  is16bit = (EbBool)(sequence_control_set_ptr->static_config.encoder_bit_depth > EB_8BIT);
@@ -135,19 +130,19 @@ void* DlfKernel(void *input_ptr)
 
         if (dlfEnableFlag) {
 #endif
-            EbPictureBufferDesc_t  *reconBuffer = is16bit ? picture_control_set_ptr->recon_picture16bit_ptr : picture_control_set_ptr->recon_picture_ptr;
+            EbPictureBufferDesc_t  *recon_buffer = is16bit ? picture_control_set_ptr->recon_picture16bit_ptr : picture_control_set_ptr->recon_picture_ptr;
             if (picture_control_set_ptr->parent_pcs_ptr->is_used_as_reference_flag == EB_TRUE) {
 
                 //get the 16bit form of the input LCU
                 if (is16bit) {
-                    reconBuffer = ((EbReferenceObject_t*)picture_control_set_ptr->parent_pcs_ptr->reference_picture_wrapper_ptr->objectPtr)->referencePicture16bit;
+                    recon_buffer = ((EbReferenceObject_t*)picture_control_set_ptr->parent_pcs_ptr->reference_picture_wrapper_ptr->objectPtr)->referencePicture16bit;
                 }
                 else {
-                    reconBuffer = ((EbReferenceObject_t*)picture_control_set_ptr->parent_pcs_ptr->reference_picture_wrapper_ptr->objectPtr)->referencePicture;
+                    recon_buffer = ((EbReferenceObject_t*)picture_control_set_ptr->parent_pcs_ptr->reference_picture_wrapper_ptr->objectPtr)->referencePicture;
                 }
             }
             else { // non ref pictures
-                reconBuffer = is16bit ? picture_control_set_ptr->recon_picture16bit_ptr : picture_control_set_ptr->recon_picture_ptr;
+                recon_buffer = is16bit ? picture_control_set_ptr->recon_picture16bit_ptr : picture_control_set_ptr->recon_picture_ptr;
             }
 
             av1_loop_filter_init(picture_control_set_ptr);
@@ -166,7 +161,7 @@ void* DlfKernel(void *input_ptr)
             picture_control_set_ptr->parent_pcs_ptr->lf.filter_level_v = 0;
 #endif
                 av1_loop_filter_frame(
-                    reconBuffer,
+                    recon_buffer,
                     picture_control_set_ptr,
                     0,
                     3);
@@ -262,30 +257,30 @@ void* DlfKernel(void *input_ptr)
             // Get Empty DLF Results to Cdef
             EbGetEmptyObject(
                 context_ptr->dlf_output_fifo_ptr,
-                &dlfResultsWrapperPtr);
-            dlfResultsPtr = (struct DlfResults_s*)dlfResultsWrapperPtr->objectPtr;
-            dlfResultsPtr->pictureControlSetWrapperPtr = encDecResultsPtr->pictureControlSetWrapperPtr;
+                &dlf_results_wrapper_ptr);
+            dlf_results_ptr = (struct DlfResults_s*)dlf_results_wrapper_ptr->objectPtr;
+            dlf_results_ptr->picture_control_set_wrapper_ptr = enc_dec_results_ptr->pictureControlSetWrapperPtr;
 
-            dlfResultsPtr->segment_index = segment_index;
+            dlf_results_ptr->segment_index = segment_index;
             // Post DLF Results
-            EbPostFullObject(dlfResultsWrapperPtr);
+            EbPostFullObject(dlf_results_wrapper_ptr);
         }
 #else
 
             // Get Empty DLF Results to Cdef
             EbGetEmptyObject(
                 context_ptr->dlf_output_fifo_ptr,
-                &dlfResultsWrapperPtr);
-            dlfResultsPtr = (struct DlfResults_s*)dlfResultsWrapperPtr->objectPtr;
-            dlfResultsPtr->pictureControlSetWrapperPtr = encDecResultsPtr->pictureControlSetWrapperPtr;
-            dlfResultsPtr->completedLcuRowIndexStart = 0;
-            dlfResultsPtr->completedLcuRowCount = ((sequence_control_set_ptr->luma_height + sequence_control_set_ptr->sb_size_pix - 1) >> lcuSizeLog2);
+                &dlf_results_wrapper_ptr);
+            dlf_results_ptr = (struct DlfResults_s*)dlf_results_wrapper_ptr->objectPtr;
+            dlf_results_ptr->pictureControlSetWrapperPtr = enc_dec_results_ptr->pictureControlSetWrapperPtr;
+            dlf_results_ptr->completedLcuRowIndexStart = 0;
+            dlf_results_ptr->completedLcuRowCount = ((sequence_control_set_ptr->luma_height + sequence_control_set_ptr->sb_size_pix - 1) >> lcuSizeLog2);
             // Post DLF Results
-            EbPostFullObject(dlfResultsWrapperPtr);
+            EbPostFullObject(dlf_results_wrapper_ptr);
 #endif
 
             // Release EncDec Results
-            EbReleaseObject(encDecResultsWrapperPtr);
+            EbReleaseObject(enc_dec_results_wrapper_ptr);
 
         }
 

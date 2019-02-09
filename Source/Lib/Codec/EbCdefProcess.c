@@ -1,12 +1,7 @@
-// INTEL CONFIDENTIAL
-// Copyright © 2018 Intel Corporation.
-//
-// This software and the related documents are Intel copyrighted materials,
-// and your use of them is governed by the express license under which they were provided to you.
-// Unless the License provides otherwise, you may not use, modify, copy, publish, distribute, disclose or transmit
-// this software or the related documents without Intel's prior written permission.
-// This software and the related documents are provided as is, with no express or implied warranties,
-// other than those that are expressly stated in the License.
+/*
+* Copyright(c) 2019 Intel Corporation
+* SPDX - License - Identifier: BSD - 2 - Clause - Patent
+*/
 
 /*
 * Copyright (c) 2016, Alliance for Open Media. All rights reserved
@@ -418,7 +413,7 @@ void cdef_seg_search16bit(
 /******************************************************
  * CDEF Kernel
  ******************************************************/
-void* CdefKernel(void *input_ptr)
+void* cdef_kernel(void *input_ptr)
 {
     // Context & SCS & PCS
     CdefContext_t                            *context_ptr = (CdefContext_t*)input_ptr;
@@ -426,12 +421,12 @@ void* CdefKernel(void *input_ptr)
     SequenceControlSet_t                    *sequence_control_set_ptr;
 
     //// Input
-    EbObjectWrapper_t                       *dlfResultsWrapperPtr;
-    DlfResults_t                            *dlfResultsPtr;
+    EbObjectWrapper_t                       *dlf_results_wrapper_ptr;
+    DlfResults_t                            *dlf_results_ptr;
 
     //// Output
-    EbObjectWrapper_t                       *cdefResultsWrapperPtr;
-    CdefResults_t                           *cdefResultsPtr;
+    EbObjectWrapper_t                       *cdef_results_wrapper_ptr;
+    CdefResults_t                           *cdef_results_ptr;
 
     // SB Loop variables
 
@@ -441,10 +436,10 @@ void* CdefKernel(void *input_ptr)
         // Get DLF Results
         EbGetFullObject(
             context_ptr->cdef_input_fifo_ptr,
-            &dlfResultsWrapperPtr);
+            &dlf_results_wrapper_ptr);
 
-        dlfResultsPtr = (DlfResults_t*)dlfResultsWrapperPtr->objectPtr;
-        picture_control_set_ptr = (PictureControlSet_t*)dlfResultsPtr->pictureControlSetWrapperPtr->objectPtr;
+        dlf_results_ptr = (DlfResults_t*)dlf_results_wrapper_ptr->objectPtr;
+        picture_control_set_ptr = (PictureControlSet_t*)dlf_results_ptr->picture_control_set_wrapper_ptr->objectPtr;
         sequence_control_set_ptr = (SequenceControlSet_t*)picture_control_set_ptr->sequence_control_set_wrapper_ptr->objectPtr;
 
         EbBool  is16bit = (EbBool)(sequence_control_set_ptr->static_config.encoder_bit_depth > EB_8BIT);
@@ -460,12 +455,12 @@ void* CdefKernel(void *input_ptr)
                 cdef_seg_search16bit(
                     picture_control_set_ptr,
                     sequence_control_set_ptr,
-                    dlfResultsPtr->segment_index);
+                    dlf_results_ptr->segment_index);
             else
                 cdef_seg_search(
                     picture_control_set_ptr,
                     sequence_control_set_ptr,
-                    dlfResultsPtr->segment_index);
+                    dlf_results_ptr->segment_index);
 #if CDEF_M
         }
 #endif
@@ -605,12 +600,12 @@ void* CdefKernel(void *input_ptr)
             // Get Empty Cdef Results to Rest
             EbGetEmptyObject(
                 context_ptr->cdef_output_fifo_ptr,
-                &cdefResultsWrapperPtr);
-            cdefResultsPtr = (struct CdefResults_s*)cdefResultsWrapperPtr->objectPtr;
-            cdefResultsPtr->pictureControlSetWrapperPtr = dlfResultsPtr->pictureControlSetWrapperPtr;
-            cdefResultsPtr->segment_index = segment_index;
+                &cdef_results_wrapper_ptr);
+            cdef_results_ptr = (struct CdefResults_s*)cdef_results_wrapper_ptr->objectPtr;
+            cdef_results_ptr->picture_control_set_wrapper_ptr = dlf_results_ptr->picture_control_set_wrapper_ptr;
+            cdef_results_ptr->segment_index = segment_index;
             // Post Cdef Results
-            EbPostFullObject(cdefResultsWrapperPtr);
+            EbPostFullObject(cdef_results_wrapper_ptr);
 
         }
 #else
@@ -620,10 +615,10 @@ void* CdefKernel(void *input_ptr)
         EbGetEmptyObject(
             context_ptr->cdef_output_fifo_ptr,
             &cdefResultsWrapperPtr);
-        cdefResultsPtr = (struct CdefResults_s*)cdefResultsWrapperPtr->objectPtr;
-        cdefResultsPtr->pictureControlSetWrapperPtr = dlfResultsPtr->pictureControlSetWrapperPtr;
-        cdefResultsPtr->completedLcuRowIndexStart = 0;
-        cdefResultsPtr->completedLcuRowCount =  ((sequence_control_set_ptr->luma_height + sequence_control_set_ptr->sb_size_pix - 1) >> lcuSizeLog2);
+        cdef_results_ptr = (struct CdefResults_s*)cdefResultsWrapperPtr->objectPtr;
+        cdef_results_ptr->pictureControlSetWrapperPtr = dlf_results_ptr->pictureControlSetWrapperPtr;
+        cdef_results_ptr->completedLcuRowIndexStart = 0;
+        cdef_results_ptr->completedLcuRowCount =  ((sequence_control_set_ptr->luma_height + sequence_control_set_ptr->sb_size_pix - 1) >> lcuSizeLog2);
         // Post Cdef Results
         EbPostFullObject(cdefResultsWrapperPtr);
 #endif
@@ -634,7 +629,7 @@ void* CdefKernel(void *input_ptr)
 #endif
 
         // Release Dlf Results
-        EbReleaseObject(dlfResultsWrapperPtr);
+        EbReleaseObject(dlf_results_wrapper_ptr);
 
     }
 
