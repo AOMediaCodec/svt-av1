@@ -1564,7 +1564,8 @@ void finish_cdef_search(
         case BLOCK_64X128:
             picture_control_set_ptr->mi_grid_base[sb_index[i] + MI_SIZE_64X64 * picture_control_set_ptr->mi_stride]->mbmi.cdef_strength = (int8_t)best_gi;
             break;
-            
+        default:          
+            break;            
         }
 
 
