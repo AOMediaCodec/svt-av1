@@ -22,9 +22,6 @@ typedef struct CdefContext_s
 {
     EbFifo_t                       *cdef_input_fifo_ptr;
     EbFifo_t                       *cdef_output_fifo_ptr;
-
-
-
 } CdefContext_t;
 
 /**************************************

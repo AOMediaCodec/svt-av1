@@ -1445,8 +1445,8 @@ void finish_cdef_search(
     int32_t sb_count;
     int32_t nvfb = (mi_rows + MI_SIZE_64X64 - 1) / MI_SIZE_64X64;
     int32_t nhfb = (mi_cols + MI_SIZE_64X64 - 1) / MI_SIZE_64X64;
-    int32_t *sb_index = (int32_t *)aom_malloc(nvfb * nhfb * sizeof(*sb_index));
-    int32_t *selected_strength = (int32_t *)aom_malloc(nvfb * nhfb * sizeof(*sb_index));
+    int32_t *sb_index = (int32_t *)malloc(nvfb * nhfb * sizeof(*sb_index));
+    int32_t *selected_strength = (int32_t *)malloc(nvfb * nhfb * sizeof(*sb_index));
     uint64_t(*mse[2])[TOTAL_STRENGTHS];
     int32_t pri_damping = 3 + (picture_control_set_ptr->parent_pcs_ptr->base_qindex  >> 6);
     int32_t sec_damping = 3 + (picture_control_set_ptr->parent_pcs_ptr->base_qindex  >> 6);
@@ -1461,8 +1461,8 @@ void finish_cdef_search(
         av1_ac_quant_Q3(pPcs->base_qindex, 0, (aom_bit_depth_t)sequence_control_set_ptr->static_config.encoder_bit_depth) >> (sequence_control_set_ptr->static_config.encoder_bit_depth - 8);
     lambda = .12 * quantizer * quantizer / 256.;
 
-    mse[0] = (uint64_t(*)[64])aom_malloc(sizeof(**mse) * nvfb * nhfb);
-    mse[1] = (uint64_t(*)[64])aom_malloc(sizeof(**mse) * nvfb * nhfb);
+    mse[0] = (uint64_t(*)[64])malloc(sizeof(**mse) * nvfb * nhfb);
+    mse[1] = (uint64_t(*)[64])malloc(sizeof(**mse) * nvfb * nhfb);
 
 
 
@@ -1479,7 +1479,10 @@ void finish_cdef_search(
                 (mbmi->sb_type == BLOCK_128X128 || mbmi->sb_type == BLOCK_128X64)) ||
                 ((fbr & 1) &&
                 (mbmi->sb_type == BLOCK_128X128 || mbmi->sb_type == BLOCK_64X128)))
+            {
                 continue;
+            }
+
 
 
             // No filtering if the entire filter block is skipped
@@ -1548,20 +1551,23 @@ void finish_cdef_search(
         //since our mi map deos not have the multi pointer single data assignment, we need to duplicate data.
         BlockSize sb_type = picture_control_set_ptr->mi_grid_base[sb_index[i]]->mbmi.sb_type;
 
-        if (sb_type == BLOCK_128X128)
+        switch (sb_type)
         {
+        case BLOCK_128X128: 
             picture_control_set_ptr->mi_grid_base[sb_index[i] + MI_SIZE_64X64]->mbmi.cdef_strength = (int8_t)best_gi;
             picture_control_set_ptr->mi_grid_base[sb_index[i] + MI_SIZE_64X64 * picture_control_set_ptr->mi_stride]->mbmi.cdef_strength = (int8_t)best_gi;
             picture_control_set_ptr->mi_grid_base[sb_index[i] + MI_SIZE_64X64 * picture_control_set_ptr->mi_stride + MI_SIZE_64X64]->mbmi.cdef_strength = (int8_t)best_gi;
-        }
-        else if (sb_type == BLOCK_128X64)
-        {
+            break;
+        case BLOCK_128X64:
             picture_control_set_ptr->mi_grid_base[sb_index[i] + MI_SIZE_64X64]->mbmi.cdef_strength = (int8_t)best_gi;
-        }
-        else if (sb_type == BLOCK_64X128)
-        {
+            break;
+        case BLOCK_64X128:
             picture_control_set_ptr->mi_grid_base[sb_index[i] + MI_SIZE_64X64 * picture_control_set_ptr->mi_stride]->mbmi.cdef_strength = (int8_t)best_gi;
+            break;
+            
         }
+
+
 
     }
 
@@ -1575,10 +1581,10 @@ void finish_cdef_search(
     pPcs->cdef_sec_damping = sec_damping;
 
 
-    aom_free(mse[0]);
-    aom_free(mse[1]);
-    aom_free(sb_index);
-    aom_free(selected_strength);
+    free(mse[0]);
+    free(mse[1]);
+    free(sb_index);
+    free(selected_strength);
 }
 #endif
 

@@ -114,22 +114,13 @@ void* dlf_kernel(void *input_ptr)
         sequence_control_set_ptr = (SequenceControlSet_t*)picture_control_set_ptr->sequence_control_set_wrapper_ptr->objectPtr;
 
         EbBool  is16bit = (EbBool)(sequence_control_set_ptr->static_config.encoder_bit_depth > EB_8BIT);
-
-#if 1
         EbBool dlfEnableFlag = (EbBool)(picture_control_set_ptr->parent_pcs_ptr->loop_filter_mode &&
             (picture_control_set_ptr->parent_pcs_ptr->is_used_as_reference_flag ||
                 sequence_control_set_ptr->static_config.recon_enabled ||
                 sequence_control_set_ptr->static_config.stat_report));
 
         if (dlfEnableFlag && picture_control_set_ptr->parent_pcs_ptr->loop_filter_mode == 2) {
-#else
-        EbBool dlfEnableFlag = (EbBool)(!sequence_control_set_ptr->static_config.disable_dlf_flag &&
-            (picture_control_set_ptr->parent_pcs_ptr->is_used_as_reference_flag ||
-                sequence_control_set_ptr->static_config.recon_enabled ||
-                sequence_control_set_ptr->static_config.stat_report));
 
-        if (dlfEnableFlag) {
-#endif
             EbPictureBufferDesc_t  *recon_buffer = is16bit ? picture_control_set_ptr->recon_picture16bit_ptr : picture_control_set_ptr->recon_picture_ptr;
             if (picture_control_set_ptr->parent_pcs_ptr->is_used_as_reference_flag == EB_TRUE) {
 
