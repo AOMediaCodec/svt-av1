@@ -90,7 +90,8 @@ The SVT-AV1 Encoder adapts to the system that is being ran on. The memory requir
      -    YASM Assembler version 1.2.0 or later
 
 * __Build Instructions__
-     -    ./Build/linux/build.sh <release | debug> (if none specified, both release and debug will be built)
+	 -	./Build/linux/build.sh <release | debug> (if none specified, both release and debug will be built)
+
 
 * __Sample Binaries location__
      -    Binaries can be found under Bin/Release and / or Bin/Debug
