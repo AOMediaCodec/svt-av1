@@ -1237,6 +1237,9 @@ void  inject_inter_candidates(
     IntMv  bestPredmv[2] = { 0 };
 
     generate_av1_mvp_table(
+#if TILES
+        &sb_ptr->tile_info,
+#endif
         context_ptr,
         context_ptr->cu_ptr,
         context_ptr->blk_geom,

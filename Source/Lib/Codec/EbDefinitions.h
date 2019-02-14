@@ -40,6 +40,14 @@ extern "C" {
     ////
 #define MEM_RED4                                        0 //  Reduce mem allocation when DISABLE_128X128_SB is ON
 
+
+
+#define  TILES     1
+
+
+
+
+
 #define    DLF_TEST2                                       1
 #define    DLF_TEST3                                       0
 #define    DLF_TEST4                                       0

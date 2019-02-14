@@ -32,6 +32,9 @@
 
 static const uint32_t me2Nx2NOffset[4] = { 0, 1, 5, 21 };
 extern void av1_predict_intra_block(
+#if TILES   
+    TileInfo                    *tile,
+#endif
 #if INTRA_CORE_OPT
     ModeDecisionContext_t                  *md_context_ptr,
 #endif
@@ -65,6 +68,9 @@ extern void av1_predict_intra_block(
 
 #if INTRA_10BIT_SUPPORT
 void av1_predict_intra_block_16bit(
+#if TILES   
+    TileInfo               *tile,
+#endif
     EncDecContext_t         *context_ptr,
     CodingUnit_t *cu_ptr,
     const Av1Common *cm,
@@ -3209,6 +3215,9 @@ EB_EXTERN void AV1EncodePass(
                                         mode = cu_ptr->pred_mode; //PredictionMode mode,
 
                                     av1_predict_intra_block_16bit(
+#if TILES   
+                                        &sb_ptr->tile_info,
+#endif
                                         context_ptr,
                                         cu_ptr,
                                         picture_control_set_ptr->parent_pcs_ptr->av1_cm,                  //const Av1Common *cm,
@@ -3282,6 +3291,9 @@ EB_EXTERN void AV1EncodePass(
                                         mode = cu_ptr->pred_mode; //PredictionMode mode,
 
                                     av1_predict_intra_block(
+#if TILES
+                                        &sb_ptr->tile_info,
+#endif
 #if INTRA_CORE_OPT
                                         NULL,
 #endif
@@ -3567,7 +3579,10 @@ EB_EXTERN void AV1EncodePass(
 
                     //IntMv  predmv[2];
                     enc_pass_av1_mv_pred(
-                        context_ptr->md_context,
+#if TILES
+                        &sb_ptr->tile_info,
+#endif
+                         context_ptr->md_context,
                         cu_ptr,
                         blk_geom,
                         context_ptr->cu_origin_x,
