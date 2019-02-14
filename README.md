@@ -47,12 +47,12 @@ In order to achieve the performance targeted by the SVT-AV1 Encoder, the specifi
 The SVT-AV1 Encoder adapts to the system that is being ran on. The memory requirements depend on the number of cores the system contains, the input frame rate of the input sequence (-fps) and the look ahead distance passed to the encoder (-lad). The SVT-AV1 Encoder application will display an error if the system does not have enough RAM to support the encode prior to the start of the encode. The following table shows the minimum amount of RAM required for some standard resolutions of 10bit video per stream:
 
 
-        Resolution      | 8-vCPU Commit Size (GB)| 40-vCPU Commit Size (GB)|
+|       Resolution      | 8-vCPU Commit Size (GB)| 40-vCPU Commit Size (GB)|
 |-----------------------|------------------------|-------------------------|
 |       4k              |           14           |           24            |
-        1080p           |            6           |           10            |
-        720p            |            4           |            7            |
-        480p            |            3           |            5            |
+|       1080p           |            6           |           10            |
+|       720p            |            4           |            7            |
+|       480p            |            3           |            5            |
 
 
 # Build and Install
