@@ -23,6 +23,7 @@
 
 #if TILES
 #define  AV1_MIN_TILE_SIZE_BYTES 1
+void av1_reset_loop_restoration(PictureControlSet_t     *piCSetPtr);
 void av1_tile_set_col(TileInfo *tile, PictureParentControlSet_t * pcsPtr, int col);
 void av1_tile_set_row(TileInfo *tile, PictureParentControlSet_t * pcsPtr, int row);
 #endif
@@ -716,9 +717,9 @@ void* EntropyCodingKernel(void *input_ptr)
    
                      av1_reset_loop_restoration(picture_control_set_ptr);
                    
-                     for (yLcuIndex = cm->tile_row_start_sb[tile_row]; yLcuIndex < cm->tile_row_start_sb[tile_row + 1]; ++yLcuIndex)
+                     for (yLcuIndex = cm->tile_row_start_sb[tile_row]; yLcuIndex < (uint32_t)cm->tile_row_start_sb[tile_row + 1]; ++yLcuIndex)
                      {
-                         for (xLcuIndex = cm->tile_col_start_sb[tile_col]; xLcuIndex < cm->tile_col_start_sb[tile_col + 1]; ++xLcuIndex)
+                         for (xLcuIndex = cm->tile_col_start_sb[tile_col]; xLcuIndex < (uint32_t)cm->tile_col_start_sb[tile_col + 1]; ++xLcuIndex)
                          {
                              
                              int sb_index = (uint16_t)(xLcuIndex + yLcuIndex * picture_width_in_sb);

@@ -22,6 +22,8 @@
 #include "EbErrorCodes.h"
 
 #if TILES
+void av1_tile_set_col(TileInfo *tile, PictureParentControlSet_t * pcsPtr, int col);
+void av1_tile_set_row(TileInfo *tile, PictureParentControlSet_t * pcsPtr, int row);
 void set_tile_info(PictureParentControlSet_t * pcsPtr);
 #endif
 
@@ -571,9 +573,9 @@ void* PictureManagerKernel(void *input_ptr)
                             {
                                 av1_tile_set_col(&tile_info, ppcs_ptr, tile_col);
 
-                                for (y_lcu_index = cm->tile_row_start_sb[tile_row]; y_lcu_index < cm->tile_row_start_sb[tile_row + 1]; ++y_lcu_index)
+                                for (y_lcu_index = cm->tile_row_start_sb[tile_row]; y_lcu_index < (uint32_t)cm->tile_row_start_sb[tile_row + 1]; ++y_lcu_index)
                                 {
-                                    for (x_lcu_index = cm->tile_col_start_sb[tile_col]; x_lcu_index < cm->tile_col_start_sb[tile_col + 1]; ++x_lcu_index)
+                                    for (x_lcu_index = cm->tile_col_start_sb[tile_col]; x_lcu_index < (uint32_t)cm->tile_col_start_sb[tile_col + 1]; ++x_lcu_index)
                                     {
                                         int sb_index = (uint16_t)(x_lcu_index + y_lcu_index * picture_width_in_sb);
                                         ChildPictureControlSetPtr->sb_ptr_array[sb_index]->tile_info = tile_info;                                       
