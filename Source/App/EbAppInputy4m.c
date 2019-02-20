@@ -17,6 +17,7 @@ int32_t readY4mHeader(EbConfig_t *cfg){
     uint32_t bitdepth = 8, width = 0, height = 0, fr_n = 0,
         fr_d = 0, aspect_n, aspect_d;
     char chroma[4] = "420", scan_type = 'p';
+    EbBool interlaced = EB_TRUE;
 
     /* pointer to the input file */
     ptr_in = cfg->inputFile;
@@ -50,27 +51,40 @@ int32_t readY4mHeader(EbConfig_t *cfg){
             break;
         case 'I': /* scan type, not required, default: 'p' */
             switch (*tokstart++) {
-            case '?':
-                scan_type = '?';
-                break;
             case 'p':
+                interlaced = EB_FALSE;
                 scan_type = 'p';
                 break;
             case 't':
+                interlaced = EB_TRUE;
                 scan_type = 't';
                 break;
             case 'b':
+                interlaced = EB_TRUE;
                 scan_type = 'b';
                 break;
+            case '?':
             default:
-                fprintf(cfg->errorLogFile, "Interlace type not supported\n");
+                fprintf(cfg->errorLogFile, "interlace type not supported\n");
                 return EB_ErrorBadParameter;
             }
             if(PRINT_HEADER)
                 printf("scan_type = %c\n", scan_type);
             break;
         case 'C': /* color space, not required: default "420" */
-            if (strncmp("420p16", tokstart, 6) == 0) {
+            if (strncmp("420jpeg", tokstart, 7) == 0) {
+                strcpy(chroma, "420");
+                // chroma center
+                bitdepth = 8;
+            } else if (strncmp("420mpeg2", tokstart, 8) == 0) {
+                strcpy(chroma, "420");
+                // chroma left
+                bitdepth = 8;
+            } else if (strncmp("420paldv", tokstart, 8) == 0) {
+                strcpy(chroma, "420");
+                // chroma top-left
+                bitdepth = 8;
+            } else if (strncmp("420p16", tokstart, 6) == 0) {
                 strcpy(chroma, "420");
                 bitdepth = 16;
             } else if (strncmp("422p16", tokstart, 6) == 0) {
@@ -123,6 +137,9 @@ int32_t readY4mHeader(EbConfig_t *cfg){
                 bitdepth = 8;
             } else if (strncmp("422", tokstart, 3) == 0) {
                 strcpy(chroma, "422");
+                bitdepth = 8;
+            } else if (strncmp("444", tokstart, 3) == 0) {
+                strcpy(chroma, "444");
                 bitdepth = 8;
             } else if (strncmp("mono16", tokstart, 6) == 0) {
                 strcpy(chroma, "400");
@@ -185,10 +202,6 @@ int32_t readY4mHeader(EbConfig_t *cfg){
         return EB_ErrorBadParameter;
     }
 
-    /* read next line with contains "FRAME" */
-    fresult = fgets((char*)buffer, sizeof(buffer), ptr_in);
-    assert(fresult != NULL);
-
     /* Assign parameters to cfg */
     cfg->sourceWidth = width;
     cfg->sourceHeight = height;
@@ -196,6 +209,7 @@ int32_t readY4mHeader(EbConfig_t *cfg){
     cfg->frameRateDenominator = fr_d;
     cfg->frameRate = fr_n/fr_d;
     cfg->encoderBitDepth = bitdepth;
+    cfg->interlacedVideo = interlaced;
     /* TODO: when implemented, need to set input bit depth
         (instead of the encoder bit depth) and chroma format */
 
@@ -210,7 +224,11 @@ int32_t readY4mFrameDelimiter(EbConfig_t *cfg){
     char *fresult;
 
     fresult = fgets((char *)bufferY4Mheader, sizeof(bufferY4Mheader), cfg->inputFile);
-    assert(fresult != NULL);
+
+    if(fresult == NULL){
+        assert(feof(cfg->inputFile));
+        return EB_ErrorNone;
+    }
 
     if (strcmp((const char*)bufferY4Mheader, "FRAME\n") != 0) {
         fprintf(cfg->errorLogFile, "Failed to read proper y4m frame delimeter. Read broken.\n");
