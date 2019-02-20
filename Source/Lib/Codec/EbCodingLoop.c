@@ -29,6 +29,9 @@
 #include "EbModeDecisionConfiguration.h"
 #include "EbIntraPrediction.h"
 #include "aom_dsp_rtcd.h"
+#if TX_SEARCH_LEVELS
+#include "EbCodingLoop.h"
+#endif
 
 static const uint32_t me2Nx2NOffset[4] = { 0, 1, 5, 21 };
 extern void av1_predict_intra_block(
@@ -636,12 +639,23 @@ static void Av1EncodeLoop(
             residual16bit->strideY,
             context_ptr->blk_geom->tx_width[context_ptr->txb_itr],
             context_ptr->blk_geom->tx_height[context_ptr->txb_itr]);
+#if TX_SEARCH_LEVELS
+        uint8_t  tx_search_skip_fag = picture_control_set_ptr->parent_pcs_ptr->tx_search_level == TX_SEARCH_ENC_DEC ? get_skip_tx_search_flag(
+            context_ptr->blk_geom->sq_size,
+            MAX_MODE_COST,
+            0,
+            1) : 1;
+
+        if (!tx_search_skip_fag) {
+#else
 
 #if ENCDEC_TX_SEARCH
 #if ENCODER_MODE_CLEANUP
         if (picture_control_set_ptr->enc_mode > ENC_M1) {
 #endif
             if (context_ptr->blk_geom->sq_size < 128) //no tx search for 128x128 for now
+#endif
+#endif
                 encode_pass_tx_search(
                     picture_control_set_ptr,
                     context_ptr,
@@ -663,7 +677,7 @@ static void Av1EncodeLoop(
 #if ENCODER_MODE_CLEANUP
         }
 #endif
-#endif
+
         Av1EstimateTransform(
             ((int16_t*)residual16bit->bufferY) + scratchLumaOffset,
             residual16bit->strideY,
@@ -1039,11 +1053,22 @@ static void Av1EncodeLoop16bit(
                 context_ptr->blk_geom->tx_width[context_ptr->txb_itr],
                 context_ptr->blk_geom->tx_height[context_ptr->txb_itr]);
 
+#if TX_SEARCH_LEVELS
+            uint8_t  tx_search_skip_fag = picture_control_set_ptr->parent_pcs_ptr->tx_search_level == TX_SEARCH_ENC_DEC ? get_skip_tx_search_flag(
+                context_ptr->blk_geom->sq_size,
+                MAX_MODE_COST,
+                0,
+                1) : 1;
+
+            if (!tx_search_skip_fag) {
+#else
 #if ENCDEC_TX_SEARCH
 #if ENCODER_MODE_CLEANUP
             if (picture_control_set_ptr->enc_mode > ENC_M1) {
 #endif
                 if (context_ptr->blk_geom->sq_size < 128) //no tx search for 128x128 for now
+#endif
+#endif
                     encode_pass_tx_search_hbd(
                         picture_control_set_ptr,
                         context_ptr,
@@ -1064,7 +1089,7 @@ static void Av1EncodeLoop16bit(
 #if ENCODER_MODE_CLEANUP
             }
 #endif
-#endif
+
 
             Av1EstimateTransform(
                 ((int16_t*)residual16bit->bufferY) + scratchLumaOffset,
@@ -3018,7 +3043,11 @@ EB_EXTERN void AV1EncodePass(
             av1_loop_filter_init(picture_control_set_ptr);
 
             av1_pick_filter_level(
+#if FILT_PROC
+                0,
+#else
                 context_ptr,
+#endif
                 (EbPictureBufferDesc_t*)picture_control_set_ptr->parent_pcs_ptr->enhanced_picture_ptr,
                 picture_control_set_ptr,
                 LPF_PICK_FROM_Q);
