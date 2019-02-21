@@ -90,8 +90,8 @@
 #define LOOK_AHEAD_DIST_TOKEN           "-lad"
 #define SUPER_BLOCK_SIZE_TOKEN          "-sb-size"
 #if TILES
-#define TILE_ROW_TOKEN                   "-tile-row"
-#define TILE_COL_TOKEN                   "-tile-col"
+#define TILE_ROW_TOKEN                   "-tile-rows"
+#define TILE_COL_TOKEN                   "-tile-columns"
 #endif
 #define SCENE_CHANGE_DETECTION_TOKEN    "-scd"
 #define INJECTOR_TOKEN                  "-inj"  // no Eval
