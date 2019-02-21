@@ -3756,41 +3756,22 @@ EB_EXTERN void AV1EncodePass(
                         if (doMC &&
                             pu_ptr->motion_mode == WARPED_CAUSAL)
                         {
-                            if (is16bit) {
-                                warped_motion_prediction(
-                                    &context_ptr->mv_unit,
-                                    context_ptr->cu_origin_x,
-                                    context_ptr->cu_origin_y,
-                                    cu_ptr,
-                                    blk_geom,
-                                    refObj0->referencePicture16bit,
-                                    reconBuffer,
-                                    context_ptr->cu_origin_x,
-                                    context_ptr->cu_origin_y,
-                                    &cu_ptr->prediction_unit_array[0].wm_params,
-                                    (uint8_t) sequence_control_set_ptr->static_config.encoder_bit_depth,
+                            warped_motion_prediction(
+                                &context_ptr->mv_unit,
+                                context_ptr->cu_origin_x,
+                                context_ptr->cu_origin_y,
+                                cu_ptr,
+                                blk_geom,
+                                is16bit ? refObj0->referencePicture16bit : refObj0->referencePicture,
+                                reconBuffer,
+                                context_ptr->cu_origin_x,
+                                context_ptr->cu_origin_y,
+                                &cu_ptr->prediction_unit_array[0].wm_params,
+                                (uint8_t) sequence_control_set_ptr->static_config.encoder_bit_depth,
 #if CHROMA_BLIND
-                                    EB_TRUE,
+                                EB_TRUE,
 #endif
-                                    asm_type);
-                            } else {
-                                warped_motion_prediction(
-                                    &context_ptr->mv_unit,
-                                    context_ptr->cu_origin_x,
-                                    context_ptr->cu_origin_y,
-                                    cu_ptr,
-                                    blk_geom,
-                                    refObj0->referencePicture,
-                                    reconBuffer,
-                                    context_ptr->cu_origin_x,
-                                    context_ptr->cu_origin_y,
-                                    &cu_ptr->prediction_unit_array[0].wm_params,
-                                    (uint8_t) sequence_control_set_ptr->static_config.encoder_bit_depth,
-#if CHROMA_BLIND
-                                    EB_TRUE,
-#endif
-                                    asm_type);
-                            }
+                                asm_type);
                         }
 
                         if (doMC &&
