@@ -3032,14 +3032,14 @@ void av1_get_tile_limits(PictureParentControlSet_t * pcsPtr) {
 }
 
 #if TILES
-void av1_calculate_tile_cols(PictureParentControlSet_t * pcsPtr) {
+void av1_calculate_tile_cols(PictureParentControlSet_t * pcs_ptr) {
 
-    Av1Common *const cm =  pcsPtr->av1_cm;
+    Av1Common *const cm = pcs_ptr->av1_cm;
 
-    int mi_cols = ALIGN_POWER_OF_TWO(cm->mi_cols, pcsPtr->sequence_control_set_ptr->mib_size_log2);
-    int mi_rows = ALIGN_POWER_OF_TWO(cm->mi_rows, pcsPtr->sequence_control_set_ptr->mib_size_log2);
-    int sb_cols = mi_cols >> pcsPtr->sequence_control_set_ptr->mib_size_log2;
-    int sb_rows = mi_rows >> pcsPtr->sequence_control_set_ptr->mib_size_log2;
+    int mi_cols = ALIGN_POWER_OF_TWO(cm->mi_cols, pcs_ptr->sequence_control_set_ptr->mib_size_log2);
+    int mi_rows = ALIGN_POWER_OF_TWO(cm->mi_rows, pcs_ptr->sequence_control_set_ptr->mib_size_log2);
+    int sb_cols = mi_cols >> pcs_ptr->sequence_control_set_ptr->mib_size_log2;
+    int sb_rows = mi_rows >> pcs_ptr->sequence_control_set_ptr->mib_size_log2;
     int i;
 
     if (cm->uniform_tile_spacing_flag) {
@@ -3056,7 +3056,7 @@ void av1_calculate_tile_cols(PictureParentControlSet_t * pcsPtr) {
         cm->min_log2_tile_rows = AOMMAX(cm->min_log2_tiles - cm->log2_tile_cols, 0);
         cm->max_tile_height_sb = sb_rows >> cm->min_log2_tile_rows;
 
-        cm->tile_width = size_sb << pcsPtr->sequence_control_set_ptr->mib_size_log2;
+        cm->tile_width = size_sb << pcs_ptr->sequence_control_set_ptr->mib_size_log2;
         cm->tile_width = AOMMIN(cm->tile_width, cm->mi_cols);
     }
     else {
@@ -3067,9 +3067,9 @@ void av1_calculate_tile_cols(PictureParentControlSet_t * pcsPtr) {
             int size_sb = cm->tile_col_start_sb[i + 1] - cm->tile_col_start_sb[i];
             widest_tile_sb = AOMMAX(widest_tile_sb, size_sb);
         }
-        if (cm->min_log2_tiles) {
+        if (cm->min_log2_tiles)
             max_tile_area_sb >>= (cm->min_log2_tiles + 1);
-        }
+        
         cm->max_tile_height_sb = AOMMAX(max_tile_area_sb / widest_tile_sb, 1);
     }
 }
@@ -3102,7 +3102,7 @@ void av1_calculate_tile_rows(PictureParentControlSet_t * pcsPtr)
     }
 }
 
- void set_tile_info(PictureParentControlSet_t * pcsPtr)
+ void set_tile_info(PictureParentControlSet_t * pcs_ptr)
 {
 
      /*  Tiling algorithm:
@@ -3117,7 +3117,7 @@ void av1_calculate_tile_rows(PictureParentControlSet_t * pcsPtr)
         of tiles could be less than tile_count
      */
    
-    Av1Common * cm = pcsPtr->av1_cm;
+    Av1Common * cm = pcs_ptr->av1_cm;
     int i, start_sb;
     //to connect later if non uniform tile spacing is needed.
     int tile_width_count = 0;
@@ -3125,19 +3125,19 @@ void av1_calculate_tile_rows(PictureParentControlSet_t * pcsPtr)
     int tile_widths[MAX_TILE_COLS] = {0};
     int tile_heights[MAX_TILE_ROWS] = { 0 };
 
-    av1_get_tile_limits(pcsPtr);
+    av1_get_tile_limits(pcs_ptr);
 
 
     // configure tile columns
     if (tile_width_count == 0 || tile_height_count == 0) 
     {
         cm->uniform_tile_spacing_flag = 1;
-        cm->log2_tile_cols = AOMMAX(pcsPtr->sequence_control_set_ptr->static_config.tile_columns, cm->min_log2_tile_cols);
+        cm->log2_tile_cols = AOMMAX(pcs_ptr->sequence_control_set_ptr->static_config.tile_columns, cm->min_log2_tile_cols);
         cm->log2_tile_cols = AOMMIN(cm->log2_tile_cols, cm->max_log2_tile_cols);
     }
     else {
-        int mi_cols = ALIGN_POWER_OF_TWO(cm->mi_cols, pcsPtr->sequence_control_set_ptr->mib_size_log2);
-        int sb_cols = mi_cols >> pcsPtr->sequence_control_set_ptr->mib_size_log2;
+        int mi_cols = ALIGN_POWER_OF_TWO(cm->mi_cols, pcs_ptr->sequence_control_set_ptr->mib_size_log2);
+        int sb_cols = mi_cols >> pcs_ptr->sequence_control_set_ptr->mib_size_log2;
         int size_sb, j = 0;
         cm->uniform_tile_spacing_flag = 0;
         for (i = 0, start_sb = 0; start_sb < sb_cols && i < MAX_TILE_COLS; i++) {
@@ -3149,16 +3149,16 @@ void av1_calculate_tile_rows(PictureParentControlSet_t * pcsPtr)
         cm->tile_cols = i;
         cm->tile_col_start_sb[i] = sb_cols;
     }
-    av1_calculate_tile_cols(pcsPtr);
+    av1_calculate_tile_cols(pcs_ptr);
 
     // configure tile rows
     if (cm->uniform_tile_spacing_flag) {
-        cm->log2_tile_rows = AOMMAX(pcsPtr->sequence_control_set_ptr->static_config.tile_rows, cm->min_log2_tile_rows);
+        cm->log2_tile_rows = AOMMAX(pcs_ptr->sequence_control_set_ptr->static_config.tile_rows, cm->min_log2_tile_rows);
         cm->log2_tile_rows = AOMMIN(cm->log2_tile_rows, cm->max_log2_tile_rows);
     }
     else {
-        int mi_rows = ALIGN_POWER_OF_TWO(cm->mi_rows, pcsPtr->sequence_control_set_ptr->mib_size_log2);
-        int sb_rows = mi_rows >> pcsPtr->sequence_control_set_ptr->mib_size_log2;
+        int mi_rows = ALIGN_POWER_OF_TWO(cm->mi_rows, pcs_ptr->sequence_control_set_ptr->mib_size_log2);
+        int sb_rows = mi_rows >> pcs_ptr->sequence_control_set_ptr->mib_size_log2;
         int size_sb, j = 0;
         for (i = 0, start_sb = 0; start_sb < sb_rows && i < MAX_TILE_ROWS; i++) {
             cm->tile_row_start_sb[i] = start_sb;
@@ -3169,31 +3169,31 @@ void av1_calculate_tile_rows(PictureParentControlSet_t * pcsPtr)
         cm->tile_rows = i;
         cm->tile_row_start_sb[i] = sb_rows;
     }
-    av1_calculate_tile_rows(pcsPtr);
+    av1_calculate_tile_rows(pcs_ptr);
 }
 
- void av1_tile_set_row(TileInfo *tile, PictureParentControlSet_t * pcsPtr, int row)
+ void av1_tile_set_row(TileInfo *tile, PictureParentControlSet_t * pcs_ptr, int row)
  {
 
-     Av1Common *const cm = pcsPtr->av1_cm;
+     Av1Common *const cm = pcs_ptr->av1_cm;
 
      assert(row < cm->tile_rows);
-     int mi_row_start = cm->tile_row_start_sb[row]    << pcsPtr->sequence_control_set_ptr->mib_size_log2;
-     int mi_row_end  = cm->tile_row_start_sb[row + 1] << pcsPtr->sequence_control_set_ptr->mib_size_log2;
+     int mi_row_start = cm->tile_row_start_sb[row]    << pcs_ptr->sequence_control_set_ptr->mib_size_log2;
+     int mi_row_end  = cm->tile_row_start_sb[row + 1] << pcs_ptr->sequence_control_set_ptr->mib_size_log2;
      tile->tile_row = row;
      tile->mi_row_start = mi_row_start;
      tile->mi_row_end = AOMMIN(mi_row_end, cm->mi_rows);
      assert(tile->mi_row_end > tile->mi_row_start);
  }
 
- void av1_tile_set_col(TileInfo *tile, PictureParentControlSet_t * pcsPtr, int col) {
+ void av1_tile_set_col(TileInfo *tile, PictureParentControlSet_t * pcs_ptr, int col) {
 
-     Av1Common *const cm = pcsPtr->av1_cm;
+     Av1Common *const cm = pcs_ptr->av1_cm;
 
      assert(col < cm->tile_cols);
-     int mi_col_start = cm->tile_col_start_sb[col] << pcsPtr->sequence_control_set_ptr->mib_size_log2;
+     int mi_col_start = cm->tile_col_start_sb[col] << pcs_ptr->sequence_control_set_ptr->mib_size_log2;
      int mi_col_end = cm->tile_col_start_sb[col + 1]
-         << pcsPtr->sequence_control_set_ptr->mib_size_log2;
+         << pcs_ptr->sequence_control_set_ptr->mib_size_log2;
      tile->tile_col = col;
      tile->mi_col_start = mi_col_start;
      tile->mi_col_end = AOMMIN(mi_col_end, cm->mi_cols);
@@ -3202,26 +3202,26 @@ void av1_calculate_tile_rows(PictureParentControlSet_t * pcsPtr)
 #endif
 
 
-static void write_tile_info(const PictureParentControlSet_t *const pcsPtr,
+static void write_tile_info(const PictureParentControlSet_t *const pcs_ptr,
     //struct aom_write_bit_buffer *saved_wb,
     struct aom_write_bit_buffer *wb) {
 
-    av1_get_tile_limits((PictureParentControlSet_t *)pcsPtr);
+    av1_get_tile_limits((PictureParentControlSet_t *)pcs_ptr);
 #if AV1_UPGRADE
-    write_tile_info_max_tile(pcsPtr, wb);
+    write_tile_info_max_tile(pcs_ptr, wb);
 
 #if TILES
-    if (pcsPtr->av1_cm->tile_rows * pcsPtr->av1_cm->tile_cols > 1) {
+    if (pcs_ptr->av1_cm->tile_rows * pcs_ptr->av1_cm->tile_cols > 1) {
 
         // tile id used for cdf update
-        aom_wb_write_literal(wb, 0, pcsPtr->av1_cm->log2_tile_cols + pcsPtr->av1_cm->log2_tile_rows);
+        aom_wb_write_literal(wb, 0, pcs_ptr->av1_cm->log2_tile_cols + pcs_ptr->av1_cm->log2_tile_rows);
         // Number of bytes in tile size - 1
         aom_wb_write_literal(wb, 3, 2);
     }
 #endif
 
 #else
-    if (pcsPtr->large_scale_tile) {
+    if (pcs_ptr->large_scale_tile) {
         printf("ERROR[AN]: large_scale_tile not supported yet\n");
         //const int32_t tile_width =
         //    ALIGN_POWER_OF_TWO(cm->tile_width, cm->seq_params.mib_size_log2) >>
@@ -3247,12 +3247,12 @@ static void write_tile_info(const PictureParentControlSet_t *const pcsPtr,
         //}
     }
     else {
-        write_tile_info_max_tile(pcsPtr, wb);
+        write_tile_info_max_tile(pcs_ptr, wb);
     }
 #endif
     /**saved_wb = *wb;*/
 #if !AV1_UPGRADE
-    if (pcsPtr->large_scale_tile) {
+    if (pcs_ptr->large_scale_tile) {
 
         printf("ERROR[AN]: large_scale_tile not supported yet\n");
 #endif

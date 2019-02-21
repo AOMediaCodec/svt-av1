@@ -2490,7 +2490,7 @@ static EbErrorType VerifySettings(
         return_error = EB_ErrorBadParameter;
     }
 #if TILES
-    if (config->tile_rows > 6 || config->tile_columns > 6) {
+    if (config->tile_rows < 0 || config->tile_columns < 0 || config->tile_rows > 6 || config->tile_columns > 6) {
         SVT_LOG("Error Instance %u: Log2Tile rows/cols must be [0 - 6] \n", channelNumber + 1);
         return_error = EB_ErrorBadParameter;
     }
