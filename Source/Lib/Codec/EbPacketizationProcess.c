@@ -51,6 +51,7 @@ EbErrorType PacketizationContextCtor(
 #define TD_SIZE                     2
 #define OBU_FRAME_HEADER_SIZE       3
 #define TILES_GROUP_SIZE            1
+
 // insert TD sutrcture at an offset
 static void write_td (
     EbBufferHeaderType  *out_str_ptr,
@@ -58,21 +59,17 @@ static void write_td (
     EbBool               has_tiles){
 
     uint8_t  td_buff[TD_SIZE] = { 0,0 };
-    uint8_t  obu_frame_header_size = has_tiles ? OBU_FRAME_HEADER_SIZE + 1 : OBU_FRAME_HEADER_SIZE;
+    uint8_t  obu_frame_header_size = has_tiles ? OBU_FRAME_HEADER_SIZE + TILES_GROUP_SIZE : OBU_FRAME_HEADER_SIZE;
     if (out_str_ptr &&
         (out_str_ptr->n_alloc_len > (out_str_ptr->n_filled_len + 2))) {
 
         uint8_t *src_address = (show_ex == EB_FALSE) ?  out_str_ptr->p_buffer :
-                has_tiles ?
-                out_str_ptr->p_buffer + out_str_ptr->n_filled_len - (obu_frame_header_size + TILES_GROUP_SIZE) :
                 out_str_ptr->p_buffer + out_str_ptr->n_filled_len - (obu_frame_header_size);
 
         uint8_t *dst_address = src_address + TD_SIZE;
 
         uint32_t move_size   = (show_ex == EB_FALSE) ? out_str_ptr->n_filled_len :
-                has_tiles ? 
-                (obu_frame_header_size + TILES_GROUP_SIZE):
-                (obu_frame_header_size);
+                               (obu_frame_header_size);
 
         memmove(dst_address,
                 src_address,
