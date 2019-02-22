@@ -1590,7 +1590,6 @@ EB_API EbErrorType eb_init_encoder(EbComponentType *svt_enc_component)
             return EB_ErrorInsufficientResources;
         }
     }
-#endif
 
 #if FILT_PROC
     // Dlf Contexts
