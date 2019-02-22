@@ -105,10 +105,8 @@ EbBool is a 32 bit quantity and is aligned on a 32 bit word boundary.
 
 #define EB_BUFFERFLAG_EOS           0x00000001  // signals the last packet of the stream
 #define EB_BUFFERFLAG_SHOW_EXT      0x00000002  // signals that the packet contains a show existing frame at the end
+#define EB_BUFFERFLAG_HAS_TD        0x00000004  // signals that the packet contains a show existing frame at the end
 
-#if TILES
-#define EB_BUFFERFLAG_TG            0x00000004  // signals that the packet contains Tile Group header
-#endif
     // For 8-bit and 10-bit packed inputs, the luma, cb, and cr fields should be used
     //   for the three input picture planes.  However, for 10-bit unpacked planes the
     //   lumaExt, cbExt, and crExt fields should be used hold the extra 2-bits of

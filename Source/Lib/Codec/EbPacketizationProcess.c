@@ -48,6 +48,44 @@ EbErrorType PacketizationContextCtor(
     return EB_ErrorNone;
 }
 
+#define TD_SIZE                     2
+#define OBU_FRAME_HEADER_SIZE       3
+#define TILES_GROUP_SIZE            1
+// insert TD sutrcture at an offset
+static void write_td (
+    EbBufferHeaderType  *out_str_ptr,
+    EbBool               show_ex,
+    EbBool               has_tiles){
+
+    uint8_t  td_buff[TD_SIZE] = { 0,0 };
+    uint8_t  obu_frame_header_size = has_tiles ? OBU_FRAME_HEADER_SIZE + 1 : OBU_FRAME_HEADER_SIZE;
+    if (out_str_ptr &&
+        (out_str_ptr->n_alloc_len > (out_str_ptr->n_filled_len + 2))) {
+
+        uint8_t *src_address = (show_ex == EB_FALSE) ?  out_str_ptr->p_buffer :
+                has_tiles ?
+                out_str_ptr->p_buffer + out_str_ptr->n_filled_len - (obu_frame_header_size + TILES_GROUP_SIZE) :
+                out_str_ptr->p_buffer + out_str_ptr->n_filled_len - (obu_frame_header_size);
+
+        uint8_t *dst_address = src_address + TD_SIZE;
+
+        uint32_t move_size   = (show_ex == EB_FALSE) ? out_str_ptr->n_filled_len :
+                has_tiles ? 
+                (obu_frame_header_size + TILES_GROUP_SIZE):
+                (obu_frame_header_size);
+
+        memmove(dst_address,
+                src_address,
+                move_size);
+
+        encode_td_av1((uint8_t*)(&td_buff));
+
+        EB_MEMCPY(src_address,
+                  &td_buff, 
+                  TD_SIZE);
+    }
+}
+
 void* PacketizationKernel(void *input_ptr)
 {
     // Context
@@ -131,11 +169,6 @@ void* PacketizationKernel(void *input_ptr)
         ResetBitstream(
             picture_control_set_ptr->bitstreamPtr->outputBitstreamPtr);
 
-
-        if (picture_control_set_ptr->parent_pcs_ptr->showFrame && picture_control_set_ptr->parent_pcs_ptr->temporal_layer_index == 0) {
-            EncodeTDAv1(
-                picture_control_set_ptr->bitstreamPtr);
-        }
         // Code the SPS
         if (picture_control_set_ptr->parent_pcs_ptr->av1FrameType == KEY_FRAME) {
             EncodeSPSAv1(
@@ -175,11 +208,6 @@ void* PacketizationKernel(void *input_ptr)
                 encode_context_ptr);
 
             output_stream_ptr->flags |= EB_BUFFERFLAG_SHOW_EXT;
-
-#if TILES
-            if (picture_control_set_ptr->parent_pcs_ptr->av1_cm->tile_cols * picture_control_set_ptr->parent_pcs_ptr->av1_cm->tile_rows > 1)
-                output_stream_ptr->flags |= EB_BUFFERFLAG_TG;
-#endif
         }
 
         // Send the number of bytes per frame to RC
@@ -241,8 +269,24 @@ void* PacketizationKernel(void *input_ptr)
 
         while (queueEntryPtr->output_stream_wrapper_ptr != EB_NULL) {
 
+            EbBool has_tiles = (EbBool)(sequence_control_set_ptr->static_config.tile_columns || sequence_control_set_ptr->static_config.tile_rows);
             output_stream_wrapper_ptr = queueEntryPtr->output_stream_wrapper_ptr;
             output_stream_ptr = (EbBufferHeaderType*)output_stream_wrapper_ptr->objectPtr;
+
+            if (queueEntryPtr->hasShowExisting) {
+                write_td(output_stream_ptr, EB_TRUE, has_tiles);
+                output_stream_ptr->n_filled_len += TD_SIZE;
+            }
+
+            if (encode_context_ptr->td_needed == EB_TRUE){
+                output_stream_ptr->flags |= (uint32_t)EB_BUFFERFLAG_HAS_TD;
+                write_td(output_stream_ptr, EB_FALSE, has_tiles);
+                encode_context_ptr->td_needed = EB_FALSE;
+                output_stream_ptr->n_filled_len += TD_SIZE;
+            }
+
+            if (queueEntryPtr->hasShowExisting || queueEntryPtr->showFrame)
+                encode_context_ptr->td_needed = EB_TRUE;
 
 #if DETAILED_FRAME_OUTPUT
             {
