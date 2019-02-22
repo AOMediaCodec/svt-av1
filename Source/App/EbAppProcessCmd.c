@@ -16,6 +16,10 @@
 #include "EbAppInputy4m.h"
 
 #include "EbTime.h"
+
+
+#define IVF_FRAME_HEADER_IN_LIB                     0
+
 /***************************************
  * Macros
  ***************************************/
@@ -1416,6 +1420,7 @@ APPEXITCONDITIONTYPE ProcessOutputStreamBuffer(
                     // An EB_BUFFERFLAG_SHOW_EXT means that another TD has been added to the packet to show another frame, a new IVF is needed
                     write_ivf_frame_header(config, (obu_frame_header_size + TD_SIZE));
                     fwrite(headerPtr->p_buffer + headerPtr->n_filled_len - (obu_frame_header_size + TD_SIZE), 1, (obu_frame_header_size + TD_SIZE), streamFile);
+
 
                     break;
 

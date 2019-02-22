@@ -524,7 +524,6 @@ void EbConfigCtor(EbConfig_t *config_ptr)
     config_ptr->tile_rows                            = 0;
     config_ptr->tile_columns                         = 0;
 #endif
-
     config_ptr->byte_count_since_ivf                 = 0;
     config_ptr->ivf_count                            = 0;
     return;

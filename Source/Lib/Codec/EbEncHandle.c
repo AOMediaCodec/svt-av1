@@ -1590,6 +1590,7 @@ EB_API EbErrorType eb_init_encoder(EbComponentType *svt_enc_component)
             return EB_ErrorInsufficientResources;
         }
     }
+#endif
 
 #if FILT_PROC
     // Dlf Contexts
@@ -2487,6 +2488,7 @@ static EbErrorType VerifySettings(
 
     if (config->look_ahead_distance > MAX_LAD && config->look_ahead_distance != (uint32_t)~0) {
         SVT_LOG("Error Instance %u: The lookahead distance must be [0 - %d] \n", channelNumber + 1, MAX_LAD);
+
         return_error = EB_ErrorBadParameter;
     }
 #if TILES

@@ -2961,7 +2961,6 @@ void av1_calculate_tile_cols(PictureParentControlSet_t * pcs_ptr) {
 
 void av1_calculate_tile_rows(PictureParentControlSet_t * pcsPtr)
 {
-
     Av1Common *const cm = pcsPtr->av1_cm;
 
     int mi_rows = ALIGN_POWER_OF_TWO(cm->mi_rows, pcsPtr->sequence_control_set_ptr->mib_size_log2);
@@ -3074,7 +3073,6 @@ void av1_calculate_tile_rows(PictureParentControlSet_t * pcsPtr)
  void av1_tile_set_col(TileInfo *tile, PictureParentControlSet_t * pcs_ptr, int col) {
 
      Av1Common *const cm = pcs_ptr->av1_cm;
-
      assert(col < cm->tile_cols);
      int mi_col_start = cm->tile_col_start_sb[col] << pcs_ptr->sequence_control_set_ptr->mib_size_log2;
      int mi_col_end = cm->tile_col_start_sb[col + 1]
@@ -4457,7 +4455,6 @@ static uint32_t write_tile_group_header(uint8_t *const dst, int startTile,
     uint32_t size = 0;
 
     if (!tiles_log2) return size;
-
     aom_wb_write_bit(&wb, tile_start_and_end_present_flag);
 
     if (tile_start_and_end_present_flag) {
