@@ -47,12 +47,11 @@ EbErrorType PacketizationContextCtor(
 
     return EB_ErrorNone;
 }
-
 #define TD_SIZE                     2
 #define OBU_FRAME_HEADER_SIZE       3
 #define TILES_GROUP_SIZE            1
 
-// insert TD sutrcture at an offset
+// Write TD after offsetting the stream buffer 
 static void write_td (
     EbBufferHeaderType  *out_str_ptr,
     EbBool               show_ex,
@@ -265,8 +264,11 @@ void* PacketizationKernel(void *input_ptr)
         queueEntryPtr = encode_context_ptr->packetization_reorder_queue[encode_context_ptr->packetization_reorder_queue_head_index];
 
         while (queueEntryPtr->output_stream_wrapper_ptr != EB_NULL) {
-
+#if TILES
             EbBool has_tiles = (EbBool)(sequence_control_set_ptr->static_config.tile_columns || sequence_control_set_ptr->static_config.tile_rows);
+#else
+            EbBool has_tiles = EB_FALSE;
+#endif
             output_stream_wrapper_ptr = queueEntryPtr->output_stream_wrapper_ptr;
             output_stream_ptr = (EbBufferHeaderType*)output_stream_wrapper_ptr->objectPtr;
 

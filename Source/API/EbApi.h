@@ -12,10 +12,7 @@ extern "C" {
 
 #include "stdint.h"
 
-
-#define  TILES    1
-
-
+#define TILES                   1
     // API Version
 #define SVT_VERSION_MAJOR       0
 #define SVT_VERSION_MINOR       4
