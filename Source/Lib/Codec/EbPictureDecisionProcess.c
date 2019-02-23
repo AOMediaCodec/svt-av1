@@ -37,7 +37,7 @@
 #if TUNED_SETTINGS_FOR_M0
 #define FC_SKIP_TX_SR_TH                       125 // Fast cost skip tx search threshold.
 #endif
-#if TUNED_SETTINGS_FOR_M0
+#if TUNED_SETTINGS_FOR_M1
 #define FC_SKIP_TX_SR_TH_M1                    110 // Fast cost skip tx search threshold.
 #endif
  /************************************************
