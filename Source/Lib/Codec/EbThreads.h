@@ -8,7 +8,7 @@
 
 #include "EbDefinitions.h"
 
-#ifdef _MSC_VER
+#ifdef _WIN32
 #include <Windows.h>
 #endif
 
@@ -63,10 +63,10 @@ extern "C" {
     extern    uint32_t                  *memoryMapIndex;          // library memory index
     extern    uint64_t                  *totalLibMemory;          // library Memory malloc'd
 
-#ifdef _MSC_VER
+#ifdef _WIN32
     extern    GROUP_AFFINITY           groupAffinity;
-    extern    uint8_t                    numGroups;
-    extern    EbBool                  alternateGroups;
+    extern    uint8_t                  numGroups;
+    extern    EbBool                   alternateGroups;
 #define EB_CREATETHREAD(type, pointer, nElements, pointerClass, threadFunction, threadContext) \
     pointer = EbCreateThread(threadFunction, threadContext); \
     if (pointer == (type)EB_NULL) { \
@@ -81,7 +81,10 @@ extern "C" {
         else { \
             *totalLibMemory += ((nElements) + (8 - ((nElements) % 8))); \
         } \
-        if (numGroups == 2 && alternateGroups){ \
+        if(numGroups == 1) {\
+            SetThreadAffinityMask(pointer, groupAffinity.Mask);\
+        }\
+        else if (numGroups == 2 && alternateGroups){ \
             groupAffinity.Group = 1 - groupAffinity.Group; \
             SetThreadGroupAffinity(pointer,&groupAffinity,NULL); \
         } \
@@ -94,12 +97,18 @@ extern "C" {
     } \
     libThreadCount++;
 #else
+#define __USE_GNU
+#define _GNU_SOURCE
+#include <sched.h>
+#include <pthread.h>
+extern    cpu_set_t                   groupAffinity;
 #define EB_CREATETHREAD(type, pointer, nElements, pointerClass, threadFunction, threadContext) \
     pointer = EbCreateThread(threadFunction, threadContext); \
     if (pointer == (type)EB_NULL) { \
         return EB_ErrorInsufficientResources; \
     } \
     else { \
+        pthread_setaffinity_np(*((pthread_t*)pointer),sizeof(cpu_set_t),&groupAffinity); \
         memoryMap[*(memoryMapIndex)].ptrType = pointerClass; \
         memoryMap[(*(memoryMapIndex))++].ptr = pointer; \
         if (nElements % 8 == 0) { \
