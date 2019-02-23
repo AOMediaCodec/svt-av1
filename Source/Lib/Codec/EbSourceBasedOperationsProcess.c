@@ -155,20 +155,21 @@ void DerivePictureActivityStatistics(
 #endif
             nonMovingIndexSum += picture_control_set_ptr->non_moving_index_array[sb_index];
 
+
             if (picture_control_set_ptr->non_moving_index_array[sb_index] < NON_MOVING_SCORE_1)
                 totNmvIdx++;
         }
+
     }
 #if CONTENT_BASED_QPS
     picture_control_set_ptr->non_moving_index_average = (uint16_t)(nonMovingIndexSum / complete_sb_count);
-
 #else
     picture_control_set_ptr->non_moving_index_average = (uint16_t)(nonMovingIndexSum / sb_total_count);
 #endif
+  
 #if NEW_PRED_STRUCT
     picture_control_set_ptr->kf_zeromotion_pct = (non_moving_sb_count * 100) / complete_sb_count;
 #endif
-
     InitBeaQpmInfo(
         picture_control_set_ptr,
         sequence_control_set_ptr);
