@@ -11,18 +11,11 @@ extern "C" {
 #endif // __cplusplus
 
 #include "stdint.h"
+#include "EbCodec.h"
 
-#define TILES                   1
-
-    // API Version
-#define SVT_VERSION_MAJOR       0
-#define SVT_VERSION_MINOR       4
-#define SVT_VERSION_PATCHLEVEL  0
-#define EB_MAX_TEMPORAL_LAYERS              MAX_TEMPORAL_LAYERS
     //***HME***
 #define EB_HME_SEARCH_AREA_COLUMN_MAX_COUNT         2
 #define EB_HME_SEARCH_AREA_ROW_MAX_COUNT            2
-
 #define MAX_ENC_PRESET                              4
 
 #ifdef _WIN32
@@ -153,7 +146,7 @@ typedef struct EbSvtAv1EncConfiguration
      * -1 = no intra update.
      * -2 = auto.
      *
-     * Deault is -2. */
+     * Default is -2. */
     int32_t                  intra_period_length;
     /* Random access.
      *
@@ -175,7 +168,7 @@ typedef struct EbSvtAv1EncConfiguration
      * encoded pictures in display order. In other words, pictures with display
      * order N can only be referenced by pictures with display order greater than
      * N, and it can only refer pictures with picture order lower than N. The Low
-     * Delay structure can be flat structured (e.g. IPPPPPPP…) or hierarchically
+     * Delay structure can be flat structured (e.g. IPPPPPPP...) or hierarchically
      * structured. B/b pictures can be used instead of P/p pictures. However, the
      * reference picture list 0 and the reference picture list 1 will contain the
      * same reference picture.
@@ -210,12 +203,14 @@ typedef struct EbSvtAv1EncConfiguration
      *
      * Default is 25. */
     uint32_t                 frame_rate;
-    /* Frame rate numerator. When zero, the encoder will use –fps if
+
+    /* Frame rate numerator. When zero, the encoder will use -fps if
      * FrameRateDenominator is also zero, otherwise an error is returned.
      *
      * Default is 0. */
     uint32_t                 frame_rate_numerator;
-    /* Frame rate denominator. When zero, the encoder will use –fps if
+
+    /* Frame rate denominator. When zero, the encoder will use -fps if
      * FrameRateNumerator is also zero, otherwise an error is returned.
      *
      * Default is 0. */
@@ -394,12 +389,12 @@ typedef struct EbSvtAv1EncConfiguration
      *
      * Default is 7000000. */
     uint32_t                 target_bit_rate;
-    /* Maxium QP value allowed for rate control use, only apllicable when rate
+    /* Maxium QP value allowed for rate control use, only applicable when rate
      * control mode is set to 1. It has to be greater or equal to minQpAllowed.
      *
      * Default is 63. */
     uint32_t                 max_qp_allowed;
-    /* Minimum QP value allowed for rate control use, only apllicable when rate
+    /* Minimum QP value allowed for rate control use, only applicable when rate
      * control mode is set to 1. It has to be smaller or equal to maxQpAllowed.
      *
      * Default is 0. */
@@ -418,7 +413,7 @@ typedef struct EbSvtAv1EncConfiguration
      *
      * Default is 0. */
     uint32_t                 buffering_period_sei;
-    /* Flag to enable picture timeing supplemental enhancement information.
+    /* Flag to enable picture timing supplemental enhancement information.
      *
      * Default is 0. */
     uint32_t                 picture_timing_sei;
@@ -462,7 +457,7 @@ typedef struct EbSvtAv1EncConfiguration
     /* Assembly instruction set used by encoder.
     *
     * 0 = non-AVX2, C only.
-    * 1 = up to AVX512, auto-select highest assembly insturction set supported.
+    * 1 = up to AVX512, auto-select highest assembly instruction set supported.
     *
     * Default is 1. */
     uint32_t                 asm_type;
@@ -478,7 +473,7 @@ typedef struct EbSvtAv1EncConfiguration
     /* Flag to enable the Speed Control functionality to achieve the real-time
     * encoding speed defined by dynamically changing the encoding preset to meet
     * the average speed defined in injectorFrameRate. When this parameter is set
-    * to 1 it forces –inj to be 1 -inj-frm-rt to be set to the –fps.
+    * to 1 it forces -inj to be 1 -inj-frm-rt to be set to the -fps.
     *
     * Default is 0. */
     uint32_t                 speed_control_flag;

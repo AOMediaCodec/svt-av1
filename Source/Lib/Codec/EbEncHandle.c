@@ -62,7 +62,7 @@
 #include <immintrin.h>
 
 #include "EbDefinitions.h"
-#include "EbApi.h"
+#include "EbEncApi.h"
 #include "EbThreads.h"
 #include "EbUtility.h"
 #include "EbEncHandle.h"
@@ -3017,8 +3017,8 @@ static EbErrorType CopyFrameBuffer(
     EbSvtAv1EncConfiguration          *config = &sequence_control_set_ptr->static_config;
     EbErrorType                      return_error = EB_ErrorNone;
 
-    EbPictureBufferDesc_t           *input_picture_ptr = (EbPictureBufferDesc_t*)dst;
-    EbSvtEncInput               *inputPtr = (EbSvtEncInput*)src;
+    EbPictureBufferDesc_t           *inputPicturePtr = (EbPictureBufferDesc_t*)dst;
+    EbSvtIOFormat                   *inputPtr = (EbSvtIOFormat*)src;
     uint16_t                         inputRowIndex;
     EbBool                           is16BitInput = (EbBool)(config->encoder_bit_depth > EB_8BIT);
 
