@@ -280,7 +280,7 @@ uint64_t GetAffinityMask(uint32_t lpnum) {
 }
 #endif
 
-void EbSetThreadManagementParameters(EbSvtAv1EncConfiguration   *config_ptr) {
+EbErrorType EbSetThreadManagementParameters(EbSvtAv1EncConfiguration   *config_ptr) {
     uint32_t numLogicProcessors = GetNumProcessors();
 #ifdef _WIN32
     // For system with a single processor group(no more than 64 logic processors all together)
@@ -323,7 +323,6 @@ void EbSetThreadManagementParameters(EbSvtAv1EncConfiguration   *config_ptr) {
     if (processor_id_len < 0 || processor_id_len >= 128) return EB_ErrorInsufficientResources;
     if (physical_id_len < 0 || physical_id_len >= 128) return EB_ErrorInsufficientResources;
     CPU_ZERO(&groupAffinity);
-    numGroups = 1;
     typedef struct logicalProcessorGroup {
         uint32_t num;
         uint32_t group[1024];
@@ -403,6 +402,7 @@ void EbSetThreadManagementParameters(EbSvtAv1EncConfiguration   *config_ptr) {
         }
     }
 #endif
+    return EB_ErrorNone;
 }
 void asmSetConvolveAsmTable(void);
 void asmSetConvolveHbdAsmTable(void);
@@ -496,7 +496,7 @@ void LoadDefaultBufferConfigurationSettings(
 #endif
     //#====================== Data Structures and Picture Buffers ======================
     sequence_control_set_ptr->picture_control_set_pool_init_count       = inputPic;
-    sequence_control_set_ptr->picture_control_set_pool_init_count_child = MAX(MIN(2, coreCount/2), coreCount / 6);
+    sequence_control_set_ptr->picture_control_set_pool_init_count_child = MAX(MAX(MIN(2, coreCount/2), coreCount / 6), 1);
     sequence_control_set_ptr->reference_picture_buffer_init_count       = MAX((uint32_t)(inputPic >> 1),
                                                                           (uint32_t)((1 << sequence_control_set_ptr->static_config.hierarchical_levels) + 2)) +
                                                                           sequence_control_set_ptr->static_config.look_ahead_distance + SCD_LAD;
@@ -1779,7 +1779,11 @@ EB_API EbErrorType eb_init_encoder(EbComponentType *svt_enc_component)
     * Thread Handles
     ************************************/
     EbSvtAv1EncConfiguration   *config_ptr = &encHandlePtr->sequenceControlSetInstanceArray[0]->sequence_control_set_ptr->static_config;
-    EbSetThreadManagementParameters(config_ptr);
+
+    return_error = EbSetThreadManagementParameters(config_ptr);
+    if (return_error == EB_ErrorInsufficientResources) {
+        return EB_ErrorInsufficientResources;
+    }
 
     // Resource Coordination
     EB_CREATETHREAD(EbHandle, encHandlePtr->resourceCoordinationThreadHandle, sizeof(EbHandle), EB_THREAD, ResourceCoordinationKernel, encHandlePtr->resourceCoordinationContextPtr);
