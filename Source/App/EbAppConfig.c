@@ -956,7 +956,7 @@ int32_t ComputeFramesToBeEncoded(
     uint32_t frameSize;
     long currLoc;
 
-    currLoc = ftell(config->inputFile); // get current fp location
+    currLoc = ftello64(config->inputFile); // get current fp location
 
     if (config->inputFile) {
         fseeko64(config->inputFile, 0L, SEEK_END);
