@@ -168,6 +168,12 @@ GROUP_AFFINITY                   groupAffinity;
 EbBool                           alternateGroups = 0;
 #else
 cpu_set_t                        groupAffinity;
+typedef struct logicalProcessorGroup {
+    uint32_t num;
+    uint32_t group[1024];
+}processorGroup;
+#define MAX_PROCESSOR_GROUP 16
+processorGroup                   lpgroup[MAX_PROCESSOR_GROUP];
 #endif
 
 /**************************************
@@ -254,7 +260,7 @@ EbAsm GetCpuAsmType()
 
 //Get Number of logical processors
 uint32_t GetNumProcessors() {
-#ifdef WIN32
+#ifdef _WIN32
     SYSTEM_INFO sysinfo;
     GetSystemInfo(&sysinfo);
     return numGroups == 1 ? sysinfo.dwNumberOfProcessors : sysinfo.dwNumberOfProcessors << 1;
@@ -268,6 +274,49 @@ void InitThreadManagmentParams() {
     // Initialize groupAffinity structure with Current thread info
     GetThreadGroupAffinity(GetCurrentThread(), &groupAffinity);
     numGroups = (uint8_t)GetActiveProcessorGroupCount();
+#else
+    const char* PROCESSORID = "processor";
+    const char* PHYSICALID = "physical id";
+    int processor_id_len = strnlen_ss(PROCESSORID, 128);
+    int physical_id_len = strnlen_ss(PHYSICALID, 128);
+    if (processor_id_len < 0 || processor_id_len >= 128) return EB_ErrorInsufficientResources;
+    if (physical_id_len < 0 || physical_id_len >= 128) return EB_ErrorInsufficientResources;
+    memset(lpgroup, 0, sizeof(lpgroup));
+
+    int fd = open("/proc/cpuinfo", O_RDONLY | O_NOFOLLOW, "rt");
+    struct stat file_stat;
+    if (fd >= 0) {
+        if (fstat(fd, &file_stat) != -1 && S_ISREG(file_stat.st_mode) != 0) {
+            int processor_id = 0, socket_id = 0;
+            char line[128];
+            int bytes = 1;
+            while (bytes > 0) {
+                bytes = read(fd, line, 128);
+                if (bytes > 0) {
+                    if (strncmp(line, PROCESSORID, processor_id_len) == 0) {
+                        char* p = line + processor_id_len;
+                        while (*p < '0' || *p > '9') p++;
+                        processor_id = strtol(p, NULL, 0);
+                    }
+                    if (strncmp(line, PHYSICALID, physical_id_len) == 0) {
+                        char* p = line + physical_id_len;
+                        while (*p < '0' || *p > '9') p++;
+                        socket_id = strtol(p, NULL, 0);
+                        if (socket_id < 0 || socket_id > 15) {
+                            close(fd);
+                            return EB_ErrorInsufficientResources;
+                        }
+                        if (socket_id + 1 > numGroups)
+                            numGroups = socket_id + 1;
+                        lpgroup[socket_id].group[lpgroup[socket_id].num++] = processor_id;
+                    }
+                    lseek(fd, -bytes + 1, SEEK_CUR);
+                    while (line[0] != '\n' && bytes > 0) bytes = read(fd, line, 1);
+                }
+            }
+        }
+        close(fd);
+    }
 #endif
 }
 
@@ -312,58 +361,12 @@ EbErrorType EbSetThreadManagementParameters(EbSvtAv1EncConfiguration   *config_p
                     config_ptr->logical_processors < numLpPerGroup ? config_ptr->logical_processors : numLpPerGroup;
                 groupAffinity.Mask = GetAffinityMask(lps);
                 groupAffinity.Group = config_ptr->target_socket;
-                }
             }
         }
-#else
-    const char* PROCESSORID = "processor";
-    const char* PHYSICALID = "physical id";
-    int processor_id_len = strnlen_ss(PROCESSORID, 128);
-    int physical_id_len = strnlen_ss(PHYSICALID, 128);
-    if (processor_id_len < 0 || processor_id_len >= 128) return EB_ErrorInsufficientResources;
-    if (physical_id_len < 0 || physical_id_len >= 128) return EB_ErrorInsufficientResources;
-    CPU_ZERO(&groupAffinity);
-    typedef struct logicalProcessorGroup {
-        uint32_t num;
-        uint32_t group[1024];
-    }processorGroup;
-    processorGroup lpgroup[16];
-    memset(lpgroup, 0, 16 * sizeof(processorGroup));
-
-    int fd = open("/proc/cpuinfo", O_RDONLY | O_NOFOLLOW, "rt");
-    struct stat file_stat;
-    if (fd >= 0) {
-        if (fstat(fd, &file_stat) != -1 && S_ISREG(file_stat.st_mode) != 0) {
-            int processor_id = 0, socket_id = 0;
-            char line[128];
-            int bytes = 1;
-            while (bytes > 0) {
-                bytes = read(fd, line, 128);
-                if (bytes > 0) {
-                    if (strncmp(line, PROCESSORID, processor_id_len) == 0) {
-                        char* p = line + processor_id_len;
-                        while (*p < '0' || *p > '9') p++;
-                        processor_id = strtol(p, NULL, 0);
-                    }
-                    if (strncmp(line, PHYSICALID, physical_id_len) == 0) {
-                        char* p = line + physical_id_len;
-                        while (*p < '0' || *p > '9') p++;
-                        socket_id = strtol(p, NULL, 0);
-                        if (socket_id < 0 || socket_id > 15) {
-                            close(fd);
-                            return EB_ErrorInsufficientResources;
-                        }
-                        if (socket_id + 1 > numGroups)
-                            numGroups = socket_id + 1;
-                        lpgroup[socket_id].group[lpgroup[socket_id].num++] = processor_id;
-                    }
-                    lseek(fd, -bytes + 1, SEEK_CUR);
-                    while (line[0] != '\n' && bytes > 0) bytes = read(fd, line, 1);
-                }
-            }
-        }
-        close(fd);
     }
+#else
+    CPU_ZERO(&groupAffinity);
+
     if (numGroups == 1) {
         uint32_t lps = config_ptr->logical_processors == 0 ? numLogicProcessors :
             config_ptr->logical_processors < numLogicProcessors ? config_ptr->logical_processors : numLogicProcessors;
@@ -442,12 +445,27 @@ void LoadDefaultBufferConfigurationSettings(
     uint32_t meSegW     = (((sequence_control_set_ptr->max_input_luma_width + 32) / BLOCK_SIZE_64) < 10) ? 1 : 10;
     uint32_t inputPic   = SetParentPcs(&sequence_control_set_ptr->static_config);
 
-    unsigned int coreCount = GetNumProcessors();
+    unsigned int lpCount = GetNumProcessors();
+    unsigned int coreCount = lpCount;
     if (sequence_control_set_ptr->static_config.target_socket != -1)
-        coreCount /=2;
+        coreCount /= numGroups;
     if (sequence_control_set_ptr->static_config.logical_processors != 0)
         coreCount = sequence_control_set_ptr->static_config.logical_processors < coreCount ?
             sequence_control_set_ptr->static_config.logical_processors: coreCount;
+
+#ifdef _WIN32
+    //Handle special case on Windows
+    //By default, on Windows an application is constrained to a single group
+    if (sequence_control_set_ptr->static_config.target_socket == -1 &&
+        sequence_control_set_ptr->static_config.logical_processors == 0)
+        coreCount /= numGroups;
+
+    //Affininty can only be set by group on Windows.
+    //Run on both sockets if -lp is larger than logical processor per group.
+    if (sequence_control_set_ptr->static_config.target_socket == -1 &&
+        sequence_control_set_ptr->static_config.logical_processors > lpCount / numGroups)
+        coreCount = lpCount;
+#endif
 
     sequence_control_set_ptr->input_buffer_fifo_init_count = inputPic + SCD_LAD + sequence_control_set_ptr->static_config.look_ahead_distance ;
     sequence_control_set_ptr->output_stream_buffer_fifo_init_count = sequence_control_set_ptr->input_buffer_fifo_init_count + 4;
