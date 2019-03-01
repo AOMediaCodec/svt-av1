@@ -269,7 +269,7 @@ uint32_t GetNumProcessors() {
 #endif
 }
 
-void InitThreadManagmentParams() {
+EbErrorType InitThreadManagmentParams() {
 #ifdef _WIN32
     // Initialize group_affinity structure with Current thread info
     GetThreadGroupAffinity(GetCurrentThread(), &group_affinity);
@@ -280,9 +280,9 @@ void InitThreadManagmentParams() {
     int processor_id_len = strnlen_ss(PROCESSORID, 128);
     int physical_id_len = strnlen_ss(PHYSICALID, 128);
     if (processor_id_len < 0 || processor_id_len >= 128)
-        return;
+        return EB_ErrorInsufficientResources;
     if (physical_id_len < 0 || physical_id_len >= 128)
-        return;
+        return EB_ErrorInsufficientResources;
     memset(lp_group, 0, sizeof(lp_group));
 
     int fd = open("/proc/cpuinfo", O_RDONLY | O_NOFOLLOW, "rt");
@@ -306,7 +306,7 @@ void InitThreadManagmentParams() {
                         socket_id = strtol(p, NULL, 0);
                         if (socket_id < 0 || socket_id > 15) {
                             close(fd);
-                            return;
+                            return EB_ErrorInsufficientResources;
                         }
                         if (socket_id + 1 > num_groups)
                             num_groups = socket_id + 1;
@@ -320,6 +320,7 @@ void InitThreadManagmentParams() {
         close(fd);
     }
 #endif
+    return EB_ErrorNone;
 }
 
 #ifdef _WIN32
@@ -331,7 +332,7 @@ uint64_t GetAffinityMask(uint32_t lpnum) {
 }
 #endif
 
-EbErrorType EbSetThreadManagementParameters(EbSvtAv1EncConfiguration   *config_ptr) {
+void EbSetThreadManagementParameters(EbSvtAv1EncConfiguration   *config_ptr) {
     uint32_t num_logical_processors = GetNumProcessors();
 #ifdef _WIN32
     // For system with a single processor group(no more than 64 logic processors all together)
@@ -407,7 +408,6 @@ EbErrorType EbSetThreadManagementParameters(EbSvtAv1EncConfiguration   *config_p
         }
     }
 #endif
-    return EB_ErrorNone;
 }
 void asmSetConvolveAsmTable(void);
 void asmSetConvolveHbdAsmTable(void);
@@ -690,7 +690,10 @@ static EbErrorType eb_enc_handle_ctor(
         return EB_ErrorInsufficientResources;
     }
 
-    InitThreadManagmentParams();
+    return_error = InitThreadManagmentParams();
+    if (return_error == EB_ErrorInsufficientResources) {
+        return EB_ErrorInsufficientResources;
+    }
 
     encHandlePtr->encodeInstanceTotalCount = EB_EncodeInstancesTotalCount;
 
@@ -1801,10 +1804,7 @@ EB_API EbErrorType eb_init_encoder(EbComponentType *svt_enc_component)
     ************************************/
     EbSvtAv1EncConfiguration   *config_ptr = &encHandlePtr->sequence_control_set_instance_array[0]->sequence_control_set_ptr->static_config;
 
-    return_error = EbSetThreadManagementParameters(config_ptr);
-    if (return_error == EB_ErrorInsufficientResources) {
-        return EB_ErrorInsufficientResources;
-    }
+    EbSetThreadManagementParameters(config_ptr);
 
     // Resource Coordination
     EB_CREATETHREAD(EbHandle, encHandlePtr->resourceCoordinationThreadHandle, sizeof(EbHandle), EB_THREAD, resource_coordination_kernel, encHandlePtr->resourceCoordinationContextPtr);
