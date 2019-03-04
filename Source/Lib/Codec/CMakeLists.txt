@@ -58,7 +58,7 @@ if(NOT DEFINED CMAKE_INSTALL_LIBDIR)
 endif()
 
 if(NOT DEFINED CMAKE_INSTALL_INCLUDEDIR)
-    set(CMAKE_INSTALL_INCLUDEDIR "include/svt-av1")
+    set(CMAKE_INSTALL_INCLUDEDIR "include")
 endif()
     
 configure_file(../pkg-config.pc.in ${CMAKE_BINARY_DIR}/SvtAv1Enc.pc @ONLY)
