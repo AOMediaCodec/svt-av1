@@ -36,15 +36,19 @@ void *aom_memalign(size_t align, size_t size);
 void aom_free(void *memblk);
 void *aom_malloc(size_t size);
 uint64_t compute_cdef_dist(uint16_t *dst, int32_t dstride, uint16_t *src,
-    cdef_list *dlist, int32_t cdef_count, BlockSize bsize,
+    cdef_list *dlist, int32_t cdef_count, block_size bsize,
     int32_t coeff_shift, int32_t pli);
 int32_t sb_all_skip(PictureControlSet_t   *picture_control_set_ptr, const Av1Common *const cm, int32_t mi_row, int32_t mi_col);
 int32_t sb_compute_cdef_list(PictureControlSet_t   *picture_control_set_ptr, const Av1Common *const cm, int32_t mi_row, int32_t mi_col,
-    cdef_list *dlist, BlockSize bs);
+    cdef_list *dlist, block_size bs);
 void finish_cdef_search(
     EncDecContext_t                *context_ptr,
     SequenceControlSet_t           *sequence_control_set_ptr,
-    PictureControlSet_t            *picture_control_set_ptr);
+    PictureControlSet_t            *picture_control_set_ptr
+#if FAST_CDEF
+    ,int32_t                         selected_strength_cnt[64]
+#endif
+   );
 void av1_cdef_frame16bit(
     EncDecContext_t                *context_ptr,
     SequenceControlSet_t           *sequence_control_set_ptr,
@@ -134,6 +138,13 @@ void cdef_seg_search(
     uint16_t *in;
     DECLARE_ALIGNED(32, uint16_t, tmp_dst[1 << (MAX_SB_SIZE_LOG2 * 2)]);
 
+#if FAST_CDEF
+    int32_t gi_step;
+    int32_t mid_gi;
+    int32_t start_gi;
+    int32_t end_gi;
+#endif
+
     for (pli = 0; pli < num_planes; pli++) {
 
         int32_t subsampling_x = (pli == 0) ? 0 : 1;
@@ -164,7 +175,7 @@ void cdef_seg_search(
             nvb = AOMMIN(MI_SIZE_64X64, cm->mi_rows - MI_SIZE_64X64 * fbr);
             int32_t hb_step = 1; //these should be all time with 64x64 LCUs
             int32_t vb_step = 1;
-            BlockSize bs = BLOCK_64X64;
+            block_size bs = BLOCK_64X64;
             ModeInfo **mi = picture_control_set_ptr->mi_grid_base + MI_SIZE_64X64 * fbr * cm->mi_stride + MI_SIZE_64X64 * fbc;
             const MbModeInfo *mbmi = &mi[0]->mbmi;
 
@@ -208,8 +219,16 @@ void cdef_seg_search(
                     (fbr * MI_SIZE_64X64 << mi_high_l2[pli]) - yoff,
                     (fbc * MI_SIZE_64X64 << mi_wide_l2[pli]) - xoff,
                     stride[pli], ysize, xsize);
+#if FAST_CDEF
+                gi_step = get_cdef_gi_step(pPcs->cdef_filter_mode);
+                mid_gi = pPcs->cdf_ref_frame_strenght;
+                start_gi = 0;
+                end_gi = pPcs->use_ref_frame_cdef_strength ? AOMMIN(total_strengths, mid_gi + gi_step) : total_strengths;
 
+                for (gi = start_gi; gi < end_gi; gi++) {
+#else
                 for (gi = 0; gi < total_strengths; gi++) {
+#endif
                     int32_t threshold;
                     uint64_t curr_mse;
                     int32_t sec_strength;
@@ -228,7 +247,7 @@ void cdef_seg_search(
                         ref_coeff[pli] +
                         (fbr * MI_SIZE_64X64 << mi_high_l2[pli]) * stride[pli] +
                         (fbc * MI_SIZE_64X64 << mi_wide_l2[pli]),
-                        stride[pli], tmp_dst, dlist, cdef_count, (BlockSize)bsize[pli], coeff_shift,
+                        stride[pli], tmp_dst, dlist, cdef_count, (block_size)bsize[pli], coeff_shift,
                         pli);
 
                     if (pli < 2)
@@ -254,7 +273,7 @@ void cdef_seg_search16bit(
     EbPictureBufferDesc_t *input_pic_ptr = picture_control_set_ptr->input_frame16bit;
     EbPictureBufferDesc_t *recon_pic_ptr =
         (picture_control_set_ptr->parent_pcs_ptr->is_used_as_reference_flag == EB_TRUE) ?
-        ((EbReferenceObject_t*)picture_control_set_ptr->parent_pcs_ptr->reference_picture_wrapper_ptr->objectPtr)->referencePicture16bit :
+        ((EbReferenceObject_t*)picture_control_set_ptr->parent_pcs_ptr->reference_picture_wrapper_ptr->object_ptr)->referencePicture16bit :
          picture_control_set_ptr->recon_picture16bit_ptr;
 
     struct PictureParentControlSet_s     *pPcs = picture_control_set_ptr->parent_pcs_ptr;
@@ -299,6 +318,12 @@ void cdef_seg_search16bit(
     DECLARE_ALIGNED(32, uint16_t, inbuf[CDEF_INBUF_SIZE]);
     uint16_t *in;
     DECLARE_ALIGNED(32, uint16_t, tmp_dst[1 << (MAX_SB_SIZE_LOG2 * 2)]);
+#if FAST_CDEF
+    int32_t gi_step;
+    int32_t mid_gi;
+    int32_t start_gi;
+    int32_t end_gi;
+#endif
 
     for (pli = 0; pli < num_planes; pli++) {
 
@@ -314,8 +339,8 @@ void cdef_seg_search16bit(
 
         src[pli] = picture_control_set_ptr->src[pli];
         ref_coeff[pli] = picture_control_set_ptr->ref_coeff[pli];
-        stride_src[pli] = pli == 0 ? recon_pic_ptr->strideY : (pli == 1 ? recon_pic_ptr->strideCb : recon_pic_ptr->strideCr);
-        stride_ref[pli] = pli == 0 ? input_pic_ptr->strideY : (pli == 1 ? input_pic_ptr->strideCb : input_pic_ptr->strideCr);
+        stride_src[pli] = pli == 0 ? recon_pic_ptr->stride_y : (pli == 1 ? recon_pic_ptr->strideCb : recon_pic_ptr->strideCr);
+        stride_ref[pli] = pli == 0 ? input_pic_ptr->stride_y : (pli == 1 ? input_pic_ptr->strideCb : input_pic_ptr->strideCr);
 
     }
 
@@ -331,7 +356,7 @@ void cdef_seg_search16bit(
             nvb = AOMMIN(MI_SIZE_64X64, cm->mi_rows - MI_SIZE_64X64 * fbr);
             int32_t hb_step = 1; //these should be all time with 64x64 LCUs
             int32_t vb_step = 1;
-            BlockSize bs = BLOCK_64X64;
+            block_size bs = BLOCK_64X64;
             ModeInfo **mi = picture_control_set_ptr->mi_grid_base + MI_SIZE_64X64 * fbr * cm->mi_stride + MI_SIZE_64X64 * fbc;
             const MbModeInfo *mbmi = &mi[0]->mbmi;
 
@@ -374,8 +399,16 @@ void cdef_seg_search16bit(
                     (fbr * MI_SIZE_64X64 << mi_high_l2[pli]) - yoff,
                     (fbc * MI_SIZE_64X64 << mi_wide_l2[pli]) - xoff,
                     stride_src[pli], ysize, xsize);
+#if FAST_CDEF
+                gi_step = get_cdef_gi_step(pPcs->cdef_filter_mode);
+                mid_gi = pPcs->cdf_ref_frame_strenght;
+                start_gi = 0;
+                end_gi = pPcs->use_ref_frame_cdef_strength ? AOMMIN(total_strengths, mid_gi + gi_step) : total_strengths;
 
+                for (gi = start_gi; gi < end_gi; gi++) {
+#else
                 for (gi = 0; gi < total_strengths; gi++) {
+#endif
                     int32_t threshold;
                     uint64_t curr_mse;
                     int32_t sec_strength;
@@ -394,7 +427,7 @@ void cdef_seg_search16bit(
                         ref_coeff[pli] +
                         (fbr * MI_SIZE_64X64 << mi_high_l2[pli]) * stride_ref[pli] +
                         (fbc * MI_SIZE_64X64 << mi_wide_l2[pli]),
-                        stride_ref[pli], tmp_dst, dlist, cdef_count, (BlockSize)bsize[pli], coeff_shift,
+                        stride_ref[pli], tmp_dst, dlist, cdef_count, (block_size)bsize[pli], coeff_shift,
                         pli);
 
                     if (pli < 2)
@@ -434,21 +467,24 @@ void* cdef_kernel(void *input_ptr)
     for (;;) {
 
         // Get DLF Results
-        EbGetFullObject(
+        eb_get_full_object(
             context_ptr->cdef_input_fifo_ptr,
             &dlf_results_wrapper_ptr);
 
-        dlf_results_ptr = (DlfResults_t*)dlf_results_wrapper_ptr->objectPtr;
-        picture_control_set_ptr = (PictureControlSet_t*)dlf_results_ptr->picture_control_set_wrapper_ptr->objectPtr;
-        sequence_control_set_ptr = (SequenceControlSet_t*)picture_control_set_ptr->sequence_control_set_wrapper_ptr->objectPtr;
+        dlf_results_ptr = (DlfResults_t*)dlf_results_wrapper_ptr->object_ptr;
+        picture_control_set_ptr = (PictureControlSet_t*)dlf_results_ptr->picture_control_set_wrapper_ptr->object_ptr;
+        sequence_control_set_ptr = (SequenceControlSet_t*)picture_control_set_ptr->sequence_control_set_wrapper_ptr->object_ptr;
 
         EbBool  is16bit = (EbBool)(sequence_control_set_ptr->static_config.encoder_bit_depth > EB_8BIT);
         Av1Common* cm = picture_control_set_ptr->parent_pcs_ptr->av1_cm;
 
+#if FAST_CDEF
+        int32_t selected_strength_cnt[64] = { 0 };
+#endif
 
 #if CDEF_M
 #if CDEF_M
-        if (sequence_control_set_ptr->enable_cdef)
+        if (sequence_control_set_ptr->enable_cdef && picture_control_set_ptr->parent_pcs_ptr->cdef_filter_mode)
         {
 #endif
             if (is16bit)
@@ -466,7 +502,7 @@ void* cdef_kernel(void *input_ptr)
 #endif
 
         //all seg based search is done. update total processed segments. if all done, finish the search and perfrom application.
-        EbBlockOnMutex(picture_control_set_ptr->cdef_search_mutex);
+        eb_block_on_mutex(picture_control_set_ptr->cdef_search_mutex);
 
         picture_control_set_ptr->tot_seg_searched_cdef++;
         if (picture_control_set_ptr->tot_seg_searched_cdef == picture_control_set_ptr->cdef_segments_total_count)
@@ -479,13 +515,13 @@ void* cdef_kernel(void *input_ptr)
         EbPictureBufferDesc_t  * recon_picture_ptr;
         if (is16bit) {
             if (picture_control_set_ptr->parent_pcs_ptr->is_used_as_reference_flag == EB_TRUE)
-                recon_picture_ptr = ((EbReferenceObject_t*)picture_control_set_ptr->parent_pcs_ptr->reference_picture_wrapper_ptr->objectPtr)->referencePicture16bit;
+                recon_picture_ptr = ((EbReferenceObject_t*)picture_control_set_ptr->parent_pcs_ptr->reference_picture_wrapper_ptr->object_ptr)->referencePicture16bit;
             else
                 recon_picture_ptr = picture_control_set_ptr->recon_picture16bit_ptr;
         }
         else {
             if (picture_control_set_ptr->parent_pcs_ptr->is_used_as_reference_flag == EB_TRUE)
-                recon_picture_ptr = ((EbReferenceObject_t*)picture_control_set_ptr->parent_pcs_ptr->reference_picture_wrapper_ptr->objectPtr)->referencePicture;
+                recon_picture_ptr = ((EbReferenceObject_t*)picture_control_set_ptr->parent_pcs_ptr->reference_picture_wrapper_ptr->object_ptr)->referencePicture;
             else
                 recon_picture_ptr = picture_control_set_ptr->recon_picture_ptr;
         }
@@ -503,13 +539,17 @@ void* cdef_kernel(void *input_ptr)
 #if CDEF_REF_ONLY
         if (sequence_control_set_ptr->enable_cdef && picture_control_set_ptr->parent_pcs_ptr->is_used_as_reference_flag) {
 #else
-        if (sequence_control_set_ptr->enable_cdef) {
+        if (sequence_control_set_ptr->enable_cdef && picture_control_set_ptr->parent_pcs_ptr->cdef_filter_mode) {
 #endif
 #if CDEF_M
                 finish_cdef_search(
                     0,
                     sequence_control_set_ptr,
-                    picture_control_set_ptr);
+                    picture_control_set_ptr
+#if FAST_CDEF
+                    ,selected_strength_cnt
+#endif
+                );
 
                 if (is16bit)
                     av1_cdef_frame16bit(
@@ -598,38 +638,38 @@ void* cdef_kernel(void *input_ptr)
         for (segment_index = 0; segment_index < picture_control_set_ptr->rest_segments_total_count; ++segment_index)
         {
             // Get Empty Cdef Results to Rest
-            EbGetEmptyObject(
+            eb_get_empty_object(
                 context_ptr->cdef_output_fifo_ptr,
                 &cdef_results_wrapper_ptr);
-            cdef_results_ptr = (struct CdefResults_s*)cdef_results_wrapper_ptr->objectPtr;
+            cdef_results_ptr = (struct CdefResults_s*)cdef_results_wrapper_ptr->object_ptr;
             cdef_results_ptr->picture_control_set_wrapper_ptr = dlf_results_ptr->picture_control_set_wrapper_ptr;
             cdef_results_ptr->segment_index = segment_index;
             // Post Cdef Results
-            EbPostFullObject(cdef_results_wrapper_ptr);
+            eb_post_full_object(cdef_results_wrapper_ptr);
 
         }
 #else
 
 
         // Get Empty Cdef Results to Rest
-        EbGetEmptyObject(
+        eb_get_empty_object(
             context_ptr->cdef_output_fifo_ptr,
             &cdefResultsWrapperPtr);
-        cdef_results_ptr = (struct CdefResults_s*)cdefResultsWrapperPtr->objectPtr;
+        cdef_results_ptr = (struct CdefResults_s*)cdefResultsWrapperPtr->object_ptr;
         cdef_results_ptr->pictureControlSetWrapperPtr = dlf_results_ptr->pictureControlSetWrapperPtr;
         cdef_results_ptr->completedLcuRowIndexStart = 0;
         cdef_results_ptr->completedLcuRowCount =  ((sequence_control_set_ptr->luma_height + sequence_control_set_ptr->sb_size_pix - 1) >> lcuSizeLog2);
         // Post Cdef Results
-        EbPostFullObject(cdefResultsWrapperPtr);
+        eb_post_full_object(cdefResultsWrapperPtr);
 #endif
 
 #if CDEF_M
         }
-        EbReleaseMutex(picture_control_set_ptr->cdef_search_mutex);
+        eb_release_mutex(picture_control_set_ptr->cdef_search_mutex);
 #endif
 
         // Release Dlf Results
-        EbReleaseObject(dlf_results_wrapper_ptr);
+        eb_release_object(dlf_results_wrapper_ptr);
 
     }
 
