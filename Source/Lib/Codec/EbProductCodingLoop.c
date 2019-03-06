@@ -2987,6 +2987,7 @@ void inter_depth_tx_search(
         } while (txb_itr < tuTotalCount);
     }
 }
+
 #if NSQ_OPTIMASATION
 #if NSQ_ADD_NEIGH_INFO
 uint8_t get_part_side(
