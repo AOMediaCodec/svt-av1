@@ -165,7 +165,7 @@ uint8_t                          num_groups = 0;
 #ifdef _WIN32
 GROUP_AFFINITY                   group_affinity;
 EbBool                           alternate_groups = 0;
-#else
+#elif defined(__linux__)
 cpu_set_t                        group_affinity;
 typedef struct logicalProcessorGroup {
     uint32_t num;
@@ -273,7 +273,7 @@ EbErrorType InitThreadManagmentParams() {
     // Initialize group_affinity structure with Current thread info
     GetThreadGroupAffinity(GetCurrentThread(), &group_affinity);
     num_groups = (uint8_t)GetActiveProcessorGroupCount();
-#else
+#elif defined(__linux__)
     const char* PROCESSORID = "processor";
     const char* PHYSICALID = "physical id";
     int processor_id_len = strnlen_ss(PROCESSORID, 128);
@@ -366,7 +366,7 @@ void EbSetThreadManagementParameters(EbSvtAv1EncConfiguration   *config_ptr) {
             }
         }
     }
-#else
+#elif defined(__linux__)
     CPU_ZERO(&group_affinity);
 
     if (num_groups == 1) {
@@ -464,11 +464,13 @@ EbErrorType LoadDefaultBufferConfigurationSettings(
 
     unsigned int lpCount = GetNumProcessors();
     unsigned int coreCount = lpCount;
+#if !defined(__APPLE__)
     if (sequence_control_set_ptr->static_config.target_socket != -1)
         coreCount /= num_groups;
     if (sequence_control_set_ptr->static_config.logical_processors != 0)
         coreCount = sequence_control_set_ptr->static_config.logical_processors < coreCount ?
             sequence_control_set_ptr->static_config.logical_processors: coreCount;
+#endif
 
 #ifdef _WIN32
     //Handle special case on Windows
