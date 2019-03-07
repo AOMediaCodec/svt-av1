@@ -305,7 +305,7 @@ EbErrorType InitThreadManagmentParams() {
                         socket_id = strtol(p, NULL, 0);
                         if (socket_id < 0 || socket_id > 15) {
                             close(fd);
-                            return;
+                            return EB_ErrorInsufficientResources;
                         }
                         if (socket_id + 1 > num_groups)
                             num_groups = socket_id + 1;
@@ -464,7 +464,7 @@ EbErrorType LoadDefaultBufferConfigurationSettings(
 
     unsigned int lpCount = GetNumProcessors();
     unsigned int coreCount = lpCount;
-#if !defined(__APPLE__)
+#if defined(_WIN32) || defined(__linux__)
     if (sequence_control_set_ptr->static_config.target_socket != -1)
         coreCount /= num_groups;
     if (sequence_control_set_ptr->static_config.logical_processors != 0)

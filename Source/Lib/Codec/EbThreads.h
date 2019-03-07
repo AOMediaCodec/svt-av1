@@ -134,7 +134,7 @@ extern    cpu_set_t                   group_affinity;
         return EB_ErrorInsufficientResources; \
     } \
     lib_thread_count++;
-#elif defined(__APPLE__)
+#else
 #define EB_CREATETHREAD(type, pointer, n_elements, pointer_class, thread_function, thread_context) \
     pointer = eb_create_thread(thread_function, thread_context); \
     if (pointer == (type)EB_NULL) { \
