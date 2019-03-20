@@ -1,7 +1,7 @@
-# 
+#
 # Copyright(c) 2018 Intel Corporation
 # SPDX - License - Identifier: BSD - 2 - Clause - Patent
-# 
+#
 
 cmake_minimum_required(VERSION 3.5)
 set(project_name "svt-av1")
@@ -46,14 +46,21 @@ endif(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 
 include(CTest)
 
-set(USE_CODE_COVERAGE 0)
+set(COVERAGE false CACHE BOOL "For use with coveralls and GTest")
 
 # Prepare for Coveralls
-set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/CMakeModules)
-if(USE_CODE_COVERAGE AND CMAKE_COMPILER_IS_GNUCXX)
-    include(CodeCoverage)
-    setup_target_for_coverage(${PROJECT_NAME}_coverage ${PROJECT_TEST_NAME} coverage)
+if(COVERAGE)
+    if(CMAKE_C_COMPILER_ID MATCHES "GNU|Clang")
+        set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} --coverage")
+        set(CMAKE_EXE_LINKER_FLAGS_DEBUG "${CMAKE_EXE_LINKER_FLAGS_DEBUG} --coverage")
+    endif()
 endif()
+
+#set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/CMakeModules)
+#if(USE_CODE_COVERAGE AND CMAKE_COMPILER_IS_GNUCXX)
+#    include(CodeCoverage)
+#    setup_target_for_coverage(${PROJECT_NAME}_coverage ${PROJECT_TEST_NAME} coverage)
+#endif()
 
 # Add Subdirectories
 add_subdirectory (Source/Lib/Common)
