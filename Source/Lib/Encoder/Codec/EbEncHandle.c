@@ -3384,7 +3384,8 @@ EbErrorType init_svt_av1_encoder_handle(
 #else
 #define clangtype "Generic"
 #endif
-    printf("SVT [build]  :\t%s Clang %d.%d.%d\t", clangtype, __clang_major__, __clang_minor__, __clang_patchlevel__);
+    printf("SVT [build]  :\t%s Clang %d.%d.%d\t", clangtype, __clang_major__,
+           __clang_minor__, __clang_patchlevel__);
 #elif defined(__GNUC__)
     printf("SVT [build]  :\tGCC %d.%d.%d\t", __GNUC__, __GNUC_MINOR__, __GNUC_PATCHLEVEL__);
 #else
