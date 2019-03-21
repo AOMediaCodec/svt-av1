@@ -15,7 +15,7 @@ jobs:
    # General Linux build job
    - name: Build
      before_install:
-     - sudo apt-get update && apt-get install -y libaom
+     - sudo apt-get install -y libaom valgrind
      - wget -nc https://mf4.xiph.org/~ltrudeau/videos/nyan.y4m
      script:
      - cd Build/linux
