@@ -3374,15 +3374,15 @@ EbErrorType init_svt_av1_encoder_handle(
     printf("SVT [build]  :\tVisual Studio 2017");
 #elif defined(__clang__)
 #ifdef __APPLE__
-    char clangtype[] = "Apple";
+#define clangtype "Apple"
 #elif defined(__MINGW32__)
-    char clangtype[] = "MINGW";
+#define clangtype "MINGW"
 #elif defined(_MSC_VER)
-    char clangtype[] = "MSVC";
+#define clangtype "MSVC"
 #elif defined(__LINUX__)
-    char clangtype[] = "Linux";
+#define clangtype "Linux"
 #else
-    char clangtype[] = "Generic";
+#define clangtype "Generic"
 #endif
     printf("SVT [build]  :\t%s Clang %d.%d.%d\t", clangtype, __clang_major__, __clang_minor__, __clang_patchlevel__);
 #elif defined(__GNUC__)
