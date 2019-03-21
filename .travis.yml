@@ -17,7 +17,6 @@ jobs:
      script:
      - cd Build/linux
      - ./build.sh release
-
    # General Linux debug build job
    - name: Debug build
      script:
