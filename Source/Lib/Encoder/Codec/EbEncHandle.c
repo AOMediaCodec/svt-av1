@@ -3382,7 +3382,12 @@ EbErrorType init_svt_av1_encoder_handle(
 #elif defined(__LINUX__)
 #define clangtype "Linux"
 #else
+#include <sys/param.h>
+#ifdef BSD
+#define clangtype "BSD"
+#else
 #define clangtype "Generic"
+#endif
 #endif
     printf("SVT [build]  :\t%s Clang %d.%d.%d\t", clangtype, __clang_major__,
            __clang_minor__, __clang_patchlevel__);
