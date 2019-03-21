@@ -14,9 +14,15 @@ jobs:
   include:
    # General Linux build job
    - name: Build
+     before_install:
+     - apt-get update && apt-get install -y libaom
+     - wget -nc https://mf4.xiph.org/~ltrudeau/videos/nyan.y4m
      script:
      - cd Build/linux
      - ./build.sh release
+     - valgrind --leak-check=full ../../Bin/Release/SvtAv1EncApp -i nyan.y4m -enc-mode 0 -lp 1 -q 24 -o out.yuv -b out.ivf
+     - aomdec out.ivf -o /dev/null
+
    # General Linux debug build job
    - name: Debug build
      script:
