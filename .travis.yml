@@ -15,7 +15,7 @@ jobs:
    # General Linux build job
    - name: Build
      before_install:
-     - sudo apt-get install -y libaom valgrind
+     - sudo apt-get install -y libaom-dev valgrind
      script:
      - cd Build/linux
      - ./build.sh release
