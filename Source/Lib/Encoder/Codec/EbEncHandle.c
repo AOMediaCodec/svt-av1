@@ -3372,27 +3372,8 @@ EbErrorType init_svt_av1_encoder_handle(
     printf("SVT [build]  : Visual Studio 2013");
 #elif ( defined( _MSC_VER ) && (_MSC_VER >= 1910) )
     printf("SVT [build]  :\tVisual Studio 2017");
-#elif defined(__clang__)
-#ifdef __APPLE__
-#define clangtype "Apple"
-#elif defined(__MINGW32__)
-#define clangtype "MINGW"
-#elif defined(_MSC_VER)
-#define clangtype "MSVC"
-#elif defined(__LINUX__)
-#define clangtype "Linux"
-#else
-#include <sys/param.h>
-#ifdef BSD
-#define clangtype "BSD"
-#else
-#define clangtype "Generic"
-#endif
-#endif
-    printf("SVT [build]  :\t%s Clang %d.%d.%d\t", clangtype, __clang_major__,
-           __clang_minor__, __clang_patchlevel__);
 #elif defined(__GNUC__)
-    printf("SVT [build]  :\tGCC %d.%d.%d\t", __GNUC__, __GNUC_MINOR__, __GNUC_PATCHLEVEL__);
+    printf("SVT [build]  :\tGCC %s\t", __VERSION__);
 #else
     printf("SVT [build]  :\tunknown compiler");
 #endif
