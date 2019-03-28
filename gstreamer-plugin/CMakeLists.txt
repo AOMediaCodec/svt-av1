@@ -33,7 +33,7 @@ if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
     message("Install to: " ${GSTREAMER_LIBDIR})
 endif()
 
-install (TARGETS gstsvtav1enc
+install(TARGETS gstsvtav1enc
     LIBRARY DESTINATION gstreamer-1.0)
 
 message("Build: " ${CMAKE_BUILD_TYPE})
