@@ -70,5 +70,5 @@ jobs:
      - sudo make install
      # Build GST-SVT-AV1 plugin
      - cd $TRAVIS_BUILD_DIR/gstreamer-plugin
-     - cmake
+     - cmake .
      - make --quiet -j$(nproc)
