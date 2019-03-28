@@ -140,7 +140,7 @@
 #define EB_OUTPUTRECONBUFFERSIZE                                        (MAX_PICTURE_WIDTH_SIZE*MAX_PICTURE_HEIGHT_SIZE*2)   // Recon Slice Size
 #define EB_OUTPUTSTATISTICSBUFFERSIZE                                   0x30            // 6X8 (8 Bytes for Y, U, V, number of bits, picture number, QP)
 #define EOS_NAL_BUFFER_SIZE                                             0x0010 // Bitstream used to code EOS NAL
-#define EB_OUTPUTSTREAMBUFFERSIZE_MACRO(ResolutionSize)                ((ResolutionSize) < (INPUT_SIZE_1080i_TH) ? 0x1E8480 : (ResolutionSize) < (INPUT_SIZE_1080p_TH) ? 0x2DC6C0 : (ResolutionSize) < (INPUT_SIZE_4K_TH) ? 0x2DC6C0 : 0x2DC6C0  )   
+#define EB_OUTPUTSTREAMBUFFERSIZE_MACRO(ResolutionSize)                ((ResolutionSize) < (INPUT_SIZE_1080i_TH) ? 0x1E8480 : (ResolutionSize) < (INPUT_SIZE_1080p_TH) ? 0x2DC6C0 : (ResolutionSize) < (INPUT_SIZE_4K_TH) ? 0x2DC6C0 : 0x2DC6C0  )
 
 #define ENCDEC_INPUT_PORT_MDC                                0
 #define ENCDEC_INPUT_PORT_ENCDEC                             1
@@ -182,7 +182,7 @@ processorGroup                   lp_group[MAX_PROCESSOR_GROUP];
 #if defined(_MSC_VER)
 # include <intrin.h>
 #endif
-// Helper Functions 
+// Helper Functions
 void RunCpuid(uint32_t eax, uint32_t ecx, int32_t* abcd)
 {
 #if defined(_MSC_VER)
@@ -430,17 +430,16 @@ void SwitchToRealTime(){
 int32_t set_parent_pcs(EbSvtAv1EncConfiguration*   config) {
 
     if (config){
-        uint32_t fps            = (uint32_t)((config->frame_rate > 1000) ? 
-                        config->frame_rate >> 16 : 
+        uint32_t fps            = (uint32_t)((config->frame_rate > 1000) ?
+                        config->frame_rate >> 16 :
                         config->frame_rate);
         uint32_t ppcs_count     = fps;
         uint32_t min_ppcs_count = (2 << config->hierarchical_levels) + 1; // min picture count to start encoding
 
         fps        = fps > 120 ? 120   : fps;
-        fps        = fps < 24  ? 24    : fps; 
+        fps        = fps < 24  ? 24    : fps;
         ppcs_count = MAX(min_ppcs_count, fps);
         ppcs_count = ((ppcs_count * 4) >> 1);  // 2 sec worth of internal buffering
-    
         return (int32_t) ppcs_count;
     }
     else{
@@ -490,9 +489,9 @@ EbErrorType LoadDefaultBufferConfigurationSettings(
         coreCount = lpCount;
 #endif
 
-    sequence_control_set_ptr->input_buffer_fifo_init_count         = 
+    sequence_control_set_ptr->input_buffer_fifo_init_count         =
         inputPic + SCD_LAD + sequence_control_set_ptr->static_config.look_ahead_distance ;
-    sequence_control_set_ptr->output_stream_buffer_fifo_init_count = 
+    sequence_control_set_ptr->output_stream_buffer_fifo_init_count =
         sequence_control_set_ptr->input_buffer_fifo_init_count + 4;
 
     // ME segments
@@ -510,7 +509,7 @@ EbErrorType LoadDefaultBufferConfigurationSettings(
     sequence_control_set_ptr->me_segment_column_count_array[4] = meSegW;
     sequence_control_set_ptr->me_segment_column_count_array[5] = meSegW;
 
-    // EncDec segments     
+    // EncDec segments
     sequence_control_set_ptr->enc_dec_segment_row_count_array[0] = encDecSegH;
     sequence_control_set_ptr->enc_dec_segment_row_count_array[1] = encDecSegH;
     sequence_control_set_ptr->enc_dec_segment_row_count_array[2] = encDecSegH;
@@ -561,7 +560,7 @@ EbErrorType LoadDefaultBufferConfigurationSettings(
     sequence_control_set_ptr->motion_estimation_fifo_init_count           = 300;
     sequence_control_set_ptr->entropy_coding_fifo_init_count              = 300;
     sequence_control_set_ptr->enc_dec_fifo_init_count                     = 300;
-#if FILT_PROC    
+#if FILT_PROC
     sequence_control_set_ptr->dlf_fifo_init_count                         = 300;
     sequence_control_set_ptr->cdef_fifo_init_count                        = 300;
     sequence_control_set_ptr->rest_fifo_init_count                        = 300;
@@ -695,7 +694,7 @@ static EbErrorType eb_enc_handle_ctor(
     encHandlePtr->memory_map_index = 0;
     encHandlePtr->total_lib_memory = sizeof(EbEncHandle_t) + sizeof(EbMemoryMapEntry) * MAX_NUM_PTR;
 
-    // Save Memory Map Pointers 
+    // Save Memory Map Pointers
     total_lib_memory = &encHandlePtr->total_lib_memory;
     memory_map = encHandlePtr->memory_map;
     memory_map_index = &encHandlePtr->memory_map_index;
@@ -732,7 +731,7 @@ static EbErrorType eb_enc_handle_ctor(
     encHandlePtr->referencePicturePoolPtrArray = (EbSystemResource_t**)EB_NULL;
     encHandlePtr->paReferencePicturePoolPtrArray = (EbSystemResource_t**)EB_NULL;
 
-    // Picture Buffer Producer Fifos  
+    // Picture Buffer Producer Fifos
     encHandlePtr->referencePicturePoolProducerFifoPtrDblArray = (EbFifo_t***)EB_NULL;
     encHandlePtr->paReferencePicturePoolProducerFifoPtrDblArray = (EbFifo_t***)EB_NULL;
 
@@ -1766,7 +1765,7 @@ EB_API EbErrorType eb_init_encoder(EbComponentType *svt_enc_component)
         return_error = cdef_context_ctor(
             (CdefContext_t**)&encHandlePtr->cdefContextPtrArray[processIndex],
             encHandlePtr->dlfResultsConsumerFifoPtrArray[processIndex],
-            encHandlePtr->cdefResultsProducerFifoPtrArray[processIndex],  
+            encHandlePtr->cdefResultsProducerFifoPtrArray[processIndex],
             is16bit,
             encHandlePtr->sequence_control_set_instance_array[0]->sequence_control_set_ptr->max_input_luma_width,
             encHandlePtr->sequence_control_set_instance_array[0]->sequence_control_set_ptr->max_input_luma_height
@@ -1783,8 +1782,8 @@ EB_API EbErrorType eb_init_encoder(EbComponentType *svt_enc_component)
         return_error = rest_context_ctor(
             (RestContext_t**)&encHandlePtr->restContextPtrArray[processIndex],
             encHandlePtr->cdefResultsConsumerFifoPtrArray[processIndex],
-            encHandlePtr->restResultsProducerFifoPtrArray[processIndex],             
-            encHandlePtr->pictureDemuxResultsProducerFifoPtrArray[ 
+            encHandlePtr->restResultsProducerFifoPtrArray[processIndex],
+            encHandlePtr->pictureDemuxResultsProducerFifoPtrArray[
                 /*encHandlePtr->sequence_control_set_instance_array[0]->sequence_control_set_ptr->source_based_operations_process_init_count*/ 1+ processIndex],
             is16bit,
             encHandlePtr->sequence_control_set_instance_array[0]->sequence_control_set_ptr->max_input_luma_width,
@@ -1915,7 +1914,7 @@ EB_API EbErrorType eb_init_encoder(EbComponentType *svt_enc_component)
     // Packetization
     EB_CREATETHREAD(EbHandle, encHandlePtr->packetizationThreadHandle, sizeof(EbHandle), EB_THREAD, PacketizationKernel, encHandlePtr->packetizationContextPtr);
 
-    
+
 #if DISPLAY_MEMORY
     EB_MEMORY();
 #endif
@@ -2071,8 +2070,8 @@ static int32_t compute_default_intra_period(
 
     int32_t intra_period               = 0;
     EbSvtAv1EncConfiguration   *config = &sequence_control_set_ptr->static_config;
-    int32_t fps                        = config->frame_rate < 1000 ? 
-                                            config->frame_rate : 
+    int32_t fps                        = config->frame_rate < 1000 ?
+                                            config->frame_rate :
                                             config->frame_rate >> 16;
     int32_t mini_gop_size              = (1 << (config->hierarchical_levels));
     int32_t min_ip                     = ((int)((fps) / mini_gop_size)*(mini_gop_size));
@@ -2117,7 +2116,7 @@ static uint32_t compute_default_look_ahead(
     return lad;
 }
 
-// Only use the maximum look ahead needed if 
+// Only use the maximum look ahead needed if
 static uint32_t cap_look_ahead_distance(
     EbSvtAv1EncConfiguration*   config){
 
@@ -2125,7 +2124,7 @@ static uint32_t cap_look_ahead_distance(
 
     if(config){
         uint32_t fps = config->frame_rate < 1000 ?
-                      config->frame_rate : 
+                      config->frame_rate :
                       config->frame_rate >> 16;
         uint32_t max_cqp_lad = (2 << config->hierarchical_levels) + 1;
         uint32_t max_rc_lad  = fps << 1;
@@ -2189,6 +2188,10 @@ void SetParamBasedOnInput(
         sequence_control_set_ptr->luma_width*sequence_control_set_ptr->luma_height);
  #if DISABLE_128_SB_FOR_SUB_720
     sequence_control_set_ptr->static_config.super_block_size       = (sequence_control_set_ptr->static_config.enc_mode <= ENC_M1 && sequence_control_set_ptr->input_resolution >= INPUT_SIZE_1080i_RANGE) ? 128 : 64;
+#endif
+#if RC
+    sequence_control_set_ptr->static_config.super_block_size = (sequence_control_set_ptr->static_config.rate_control_mode > 1) ? 64 : sequence_control_set_ptr->static_config.super_block_size;
+    sequence_control_set_ptr->static_config.hierarchical_levels = (sequence_control_set_ptr->static_config.rate_control_mode > 1) ? 3 : sequence_control_set_ptr->static_config.hierarchical_levels;
 #endif
 }
 
@@ -2334,7 +2337,7 @@ void CopyApiFromApp(
 
     sequence_control_set_ptr->static_config.min_qp_allowed = (sequence_control_set_ptr->static_config.rate_control_mode) ?
         ((EbSvtAv1EncConfiguration*)pComponentParameterStructure)->min_qp_allowed :
-        0;
+        1; // lossless coding not supported
 
     // Misc
     sequence_control_set_ptr->static_config.encoder_bit_depth = ((EbSvtAv1EncConfiguration*)pComponentParameterStructure)->encoder_bit_depth;
@@ -2501,7 +2504,7 @@ static EbErrorType VerifySettings(
         return_error = EB_ErrorBadParameter;
     }
 #else
-    if (config->hierarchical_levels != 3 ) {
+    if (config->hierarchical_levels != 3) {
         SVT_LOG("Error instance %u: Hierarchical Levels supported [3]\n", channelNumber + 1);
         return_error = EB_ErrorBadParameter;
     }
@@ -2623,11 +2626,23 @@ static EbErrorType VerifySettings(
         SVT_LOG("Error Instance %u: The constrained intra must be [0 - 1] \n", channelNumber + 1);
         return_error = EB_ErrorBadParameter;
     }
+#if RC
+    if (config->rate_control_mode > 3) {
+        SVT_LOG("Error Instance %u: The rate control mode must be [0 - 3] \n", channelNumber + 1);
+        return_error = EB_ErrorBadParameter;
+    }
+#else
     if (config->rate_control_mode > 1) {
         SVT_LOG("Error Instance %u: The rate control mode must be [0 - 1] \n", channelNumber + 1);
         return_error = EB_ErrorBadParameter;
     }
-
+#endif
+#if RC
+    if ((config->rate_control_mode == 3|| config->rate_control_mode == 2) && config->look_ahead_distance != (uint32_t)config->intra_period_length) {
+        SVT_LOG("Error Instance %u: The rate control mode 2/3 LAD must be equal to IntraPeriod \n", channelNumber + 1);
+        return_error = EB_ErrorBadParameter;
+    }
+#endif
     if (config->look_ahead_distance > MAX_LAD && config->look_ahead_distance != (uint32_t)~0) {
         SVT_LOG("Error Instance %u: The lookahead distance must be [0 - %d] \n", channelNumber + 1, MAX_LAD);
 
@@ -2724,7 +2739,7 @@ EbErrorType eb_svt_enc_init_parameter(
     config_ptr->compressed_ten_bit_format = 0;
     config_ptr->source_width = 0;
     config_ptr->source_height = 0;
-    config_ptr->frames_to_be_encoded = 0; 
+    config_ptr->frames_to_be_encoded = 0;
     config_ptr->stat_report = 0;
 #if TILES
     config_ptr->tile_rows = 0;
@@ -2737,7 +2752,11 @@ EbErrorType eb_svt_enc_init_parameter(
     config_ptr->look_ahead_distance = (uint32_t)~0;
     config_ptr->target_bit_rate = 7000000;
     config_ptr->max_qp_allowed = 63;
+#if RC
+    config_ptr->min_qp_allowed = 10;
+#else
     config_ptr->min_qp_allowed = 0;
+#endif
     config_ptr->base_layer_switch_mode = 0;
     config_ptr->enc_mode = MAX_ENC_PRESET;
     config_ptr->intra_period_length = -2;
@@ -2746,7 +2765,7 @@ EbErrorType eb_svt_enc_init_parameter(
     config_ptr->hierarchical_levels = 4;
 #else
     config_ptr->hierarchical_levels = 3;
-#endif    
+#endif
     config_ptr->pred_structure = EB_PRED_RANDOM_ACCESS;
     config_ptr->disable_dlf_flag = EB_FALSE;
     config_ptr->enable_warped_motion = EB_FALSE;
@@ -2855,6 +2874,10 @@ static void PrintLibParams(
     SVT_LOG("\nSVT [config]: HierarchicalLevels / BaseLayerSwitchMode / PredStructure\t\t: %d / %d / %d ", config->hierarchical_levels, config->base_layer_switch_mode, config->pred_structure);
     if (config->rate_control_mode == 1)
         SVT_LOG("\nSVT [config]: RCMode / TargetBitrate / LookaheadDistance / SceneChange\t\t: VBR / %d / %d / %d ", config->target_bit_rate, config->look_ahead_distance, config->scene_change_detection);
+    else if (config->rate_control_mode == 2)
+        SVT_LOG("\nSVT [config]: RCMode / TargetBitrate / LookaheadDistance / SceneChange\t\t: VBR / %d / %d / %d ", config->target_bit_rate, config->look_ahead_distance, config->scene_change_detection);
+    else if (config->rate_control_mode == 3)
+        SVT_LOG("\nSVT [config]: RCMode / TargetBitrate / LookaheadDistance / SceneChange\t\t: Constraint VBR / %d / %d / %d ", config->target_bit_rate, config->look_ahead_distance, config->scene_change_detection);
     else
         SVT_LOG("\nSVT [config]: BRC Mode / QP  / LookaheadDistance / SceneChange\t\t\t: CQP / %d / %d / %d ", scs->qp, config->look_ahead_distance, config->scene_change_detection);
 #ifdef DEBUG_BUFFERS
@@ -3108,7 +3131,7 @@ static EbErrorType CopyFrameBuffer(
         }
 
     }
-    else { // 10bit packed 
+    else { // 10bit packed
 
         uint32_t lumaOffset = 0, chromaOffset = 0;
         uint32_t lumaBufferOffset = (input_picture_ptr->stride_y*sequence_control_set_ptr->top_padding + sequence_control_set_ptr->left_padding);
@@ -3368,12 +3391,12 @@ EbErrorType init_svt_av1_encoder_handle(
     EbComponentType  *svt_enc_component = (EbComponentType*)hComponent;
 
     printf("SVT [version]:\tSVT-AV1 Encoder Lib v%d.%d.%d\n", SVT_VERSION_MAJOR, SVT_VERSION_MINOR, SVT_VERSION_PATCHLEVEL);
-#if ( defined( _MSC_VER ) && (_MSC_VER < 1910) ) 
+#if ( defined( _MSC_VER ) && (_MSC_VER < 1910) )
     printf("SVT [build]  : Visual Studio 2013");
-#elif ( defined( _MSC_VER ) && (_MSC_VER >= 1910) ) 
+#elif ( defined( _MSC_VER ) && (_MSC_VER >= 1910) )
     printf("SVT [build]  :\tVisual Studio 2017");
 #elif defined(__GNUC__)
-    printf("SVT [build]  :\tGCC %d.%d.%d\t", __GNUC__, __GNUC_MINOR__, __GNUC_PATCHLEVEL__);
+    printf("SVT [build]  :\tGCC %s\t", __VERSION__);
 #else
     printf("SVT [build]  :\tunknown compiler");
 #endif
@@ -3423,7 +3446,7 @@ static EbErrorType allocate_frame_buffer(
     input_picture_buffer_desc_init_data.bufferEnableMask = PICTURE_BUFFER_DESC_FULL_MASK;
 
     if (is16bit && config->compressed_ten_bit_format == 1) {
-        input_picture_buffer_desc_init_data.splitMode = EB_FALSE;  //do special allocation for 2bit data down below.        
+        input_picture_buffer_desc_init_data.splitMode = EB_FALSE;  //do special allocation for 2bit data down below.
     }
 
     // Enhanced Picture Buffer
@@ -3517,7 +3540,7 @@ EbErrorType EbOutputReconBufferHeaderCtor(
     // Initialize Header
     recon_buffer->size = sizeof(EbBufferHeaderType);
 
-    // Assign the variables 
+    // Assign the variables
     EB_MALLOC(uint8_t*, recon_buffer->p_buffer, frameSize, EB_N_PTR);
 
     recon_buffer->n_alloc_len = frameSize;
