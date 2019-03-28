@@ -6,7 +6,7 @@ if(NOT CMAKE_BUILD_TYPE)
 endif()
 
 FIND_PACKAGE(PkgConfig REQUIRED)
-pkg_check_modules (GSTREAMER REQUIRED gstreamer-1.0>=1.8)
+pkg_check_modules(GSTREAMER REQUIRED gstreamer-1.0>=1.8)
 include_directories (${GSTREAMER_INCLUDE_DIRS})
 
 pkg_check_modules (GSTREAMER_BASE REQUIRED gstreamer-base-1.0>=1.8)
