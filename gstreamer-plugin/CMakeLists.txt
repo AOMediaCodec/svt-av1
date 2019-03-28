@@ -36,5 +36,5 @@ endif()
 install(TARGETS gstsvtav1enc
     LIBRARY DESTINATION gstreamer-1.0)
 
-message("Build: " ${CMAKE_BUILD_TYPE})
+message(STATUS "   Build: " ${CMAKE_BUILD_TYPE})
 
