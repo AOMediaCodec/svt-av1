@@ -29,7 +29,7 @@ target_link_libraries(gstsvtav1enc
     ${SVT_AV1_LIBRARIES})
 
 if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
-    set (CMAKE_INSTALL_PREFIX "${GSTREAMER_LIBDIR}")
+    set(CMAKE_INSTALL_PREFIX "${GSTREAMER_LIBDIR}")
     message("Install to: " ${GSTREAMER_LIBDIR})
 endif()
 
