@@ -13,7 +13,7 @@ pkg_check_modules(GSTREAMER_BASE REQUIRED gstreamer-base-1.0>=1.8)
 include_directories(${GSTREAMER_BASE_INCLUDE_DIRS})
 
 pkg_check_modules (GSTREAMER_VIDEO REQUIRED gstreamer-video-1.0>=1.8)
-include_directories (${GSTREAMER_VIDEO_INCLUDE_DIRS})
+include_directories(${GSTREAMER_VIDEO_INCLUDE_DIRS})
 
 pkg_check_modules (SVT_AV1 REQUIRED SvtAv1Enc)
 include_directories (${SVT_AV1_INCLUDE_DIRS})
