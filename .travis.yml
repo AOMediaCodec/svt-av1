@@ -39,8 +39,8 @@ before_install:
   - "sudo chown -R travis: $HOME"
   - export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:/usr/local/lib PKG_CONFIG_PATH=${PKG_CONFIG_PATH}:/usr/local/lib/pkgconfig PATH="/usr/local/opt/ccache/libexec:$PATH"
   - cd $TRAVIS_BUILD_DIR
-  - wget -nc --no-check-certificate https://media.xiph.org/video/derf/y4m/akiyo_cif.y4m
-  - wget -nc --no-check-certificate https://media.xiph.org/video/derf/y4m/bus_cif.y4m
+  - wget -nc --no-check-certificate https://github.com/OpenVisualCloud/SVT-AV1-Resources/raw/master/video.tar.gz
+  - tar xf video.tar.gz
   - mkdir -p $TRAVIS_BUILD_DIR/Build/linux/$build_type
 install:
   - pip install --user cpp-coveralls
