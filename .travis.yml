@@ -32,6 +32,7 @@ env:
 stages:
   - name: test
   - name: coveralls
+    if: type != pull_request
   - name: valgrind
     if: type != pull_request
 before_install:
