@@ -32,9 +32,8 @@ env:
 stages:
   - name: test
   - name: coveralls
-    if: branch = master
   - name: valgrind
-    if: branch = master
+    if: type != pull_request
 before_install:
   - "sudo chown -R travis: $HOME/.ccache"
   - export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:/usr/local/lib PKG_CONFIG_PATH=${PKG_CONFIG_PATH}:/usr/local/lib/pkgconfig PATH="/usr/local/opt/ccache/libexec:$PATH"
@@ -84,7 +83,6 @@ matrix:
       compiler: gcc # gcc = clang in macOS, unecessary duplicate
   include:
     # FFmpeg interation build
-    # Might be unnecessary since it will be covered in debug builds. I'll leave it for reference.
     - name: FFmpeg patch
       stage: test
       compiler: gcc
