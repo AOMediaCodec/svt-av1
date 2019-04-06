@@ -36,7 +36,7 @@ stages:
   - name: valgrind
     if: branch = master
 before_install:
-  - "sudo chown -R travis: $HOME"
+  - "sudo chown -R travis: $HOME/.ccache"
   - export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:/usr/local/lib PKG_CONFIG_PATH=${PKG_CONFIG_PATH}:/usr/local/lib/pkgconfig PATH="/usr/local/opt/ccache/libexec:$PATH"
   - cd $TRAVIS_BUILD_DIR
   - wget -nc --no-check-certificate https://github.com/OpenVisualCloud/SVT-AV1-Resources/raw/master/video.tar.gz
@@ -72,7 +72,7 @@ script:
   - *base_script
   - SvtAv1EncApp -enc-mode 8 -w 720 -h 486 -fps 60 -i akiyo_cif.y4m -n 150 -b test1.ivf
 before_cache:
-  - "sudo chown -R travis: $HOME"
+  - "sudo chown -R travis: $HOME/.ccache"
 matrix:
   fast_finish: true
   allow_failures:
