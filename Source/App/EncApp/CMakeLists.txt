@@ -4,13 +4,13 @@
 #
 
 # APP Directory CMakeLists.txt
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/Bin/${CMAKE_BUILD_TYPE}/)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/Bin/${CMAKE_BUILD_TYPE}/)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/Bin/${CMAKE_BUILD_TYPE}/)
-set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/Bin/${CMAKE_BUILD_TYPE}/)
 
 # Include Subdirectories
-include_directories (${PROJECT_SOURCE_DIR}/Source/API/)
-include_directories (${PROJECT_SOURCE_DIR}/Bin/${CMAKE_BUILD_TYPE}/)
+include_directories(${PROJECT_SOURCE_DIR}/Source/API/)
+include_directories(${PROJECT_SOURCE_DIR}/Bin/${CMAKE_BUILD_TYPE}/)
 
 file(GLOB all_files
     "*.h"
@@ -18,9 +18,8 @@ file(GLOB all_files
     "*.c")
 
 # App Source Files
-add_executable (SvtAv1EncApp
-    ${all_files}
-)
+add_executable(SvtAv1EncApp
+    ${all_files})
 
 #********** SET COMPILE FLAGS************
 
