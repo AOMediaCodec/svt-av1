@@ -1,31 +1,26 @@
-# 
+#
 # Copyright(c) 2019 Intel Corporation
 # SPDX - License - Identifier: BSD - 2 - Clause - Patent
-# 
+#
 
 # ASM_SSE4.1 Directory CMakeLists.txt
 
 # Include Encoder Subdirectories
-include_directories (${PROJECT_SOURCE_DIR}/Source/API/)
-include_directories (${PROJECT_SOURCE_DIR}/Source/Lib/Common/Codec/)
-include_directories (${PROJECT_SOURCE_DIR}/Source/Lib/Common/C_DEFAULT/)
-include_directories (${PROJECT_SOURCE_DIR}/Source/Lib/Common/ASM_SSE2/)
-include_directories (${PROJECT_SOURCE_DIR}/Source/Lib/Common/ASM_SSSE3/)
-include_directories (${PROJECT_SOURCE_DIR}/Source/Lib/Common/ASM_SSE4_1/)
-include_directories (${PROJECT_SOURCE_DIR}/Source/Lib/Common/ASM_AVX2/)
+include_directories(${PROJECT_SOURCE_DIR}/Source/API/)
+include_directories(${PROJECT_SOURCE_DIR}/Source/Lib/Common/Codec/)
+include_directories(${PROJECT_SOURCE_DIR}/Source/Lib/Common/C_DEFAULT/)
+include_directories(${PROJECT_SOURCE_DIR}/Source/Lib/Common/ASM_SSE2/)
+include_directories(${PROJECT_SOURCE_DIR}/Source/Lib/Common/ASM_SSSE3/)
+include_directories(${PROJECT_SOURCE_DIR}/Source/Lib/Common/ASM_SSE4_1/)
+include_directories(${PROJECT_SOURCE_DIR}/Source/Lib/Common/ASM_AVX2/)
 
-if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
-    SET(CMAKE_C_FLAGS "/MP")    
-endif(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
-
-if(CMAKE_C_COMPILER_ID STREQUAL "GNU")
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -msse4.1")
+if(NOT (MSVC OR (WIN32 AND CMAKE_C_COMPILER_ID STREQUAL "INTEL")))
+    if(CMAKE_C_COMPILER_ID STREQUAL "Intel")
+        set(CMAKE_C_FLAGS "-static-intel -w")
+    else()
+        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -msse4.1")
+    endif()
 endif()
-
-if(CMAKE_C_COMPILER_ID STREQUAL "Intel")
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC -static-intel -w")
-endif()
-
 
 file(GLOB all_files
     "*.h"
@@ -33,9 +28,4 @@ file(GLOB all_files
     "*.c")
 
 add_library(COMMON_ASM_SSE4_1
-    ${all_files}
-)
-
-
-
-
+    ${all_files})
