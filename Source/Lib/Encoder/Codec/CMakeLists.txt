@@ -1,39 +1,34 @@
-# 
+#
 # Copyright(c) 2019 Intel Corporation
 # SPDX - License - Identifier: BSD - 2 - Clause - Patent
-# 
+#
 # EncoderLib Directory CMakeLists.txt
 
 # Include Encoder Subdirectories
-include_directories (${PROJECT_SOURCE_DIR}/Source/API/)
-include_directories (${PROJECT_SOURCE_DIR}/Source/Lib/Common/Codec/)
-include_directories (${PROJECT_SOURCE_DIR}/Source/Lib/Common/C_DEFAULT/)
-include_directories (${PROJECT_SOURCE_DIR}/Source/Lib/Common/ASM_SSE2/)
-include_directories (${PROJECT_SOURCE_DIR}/Source/Lib/Common/ASM_SSSE3/)
-include_directories (${PROJECT_SOURCE_DIR}/Source/Lib/Common/ASM_SSE4_1/)
-include_directories (${PROJECT_SOURCE_DIR}/Source/Lib/Common/ASM_AVX2/)
-include_directories (${PROJECT_SOURCE_DIR}/Source/Lib/Encoder/Codec/)
+include_directories(${PROJECT_SOURCE_DIR}/Source/API/)
+include_directories(${PROJECT_SOURCE_DIR}/Source/Lib/Common/Codec/)
+include_directories(${PROJECT_SOURCE_DIR}/Source/Lib/Common/C_DEFAULT/)
+include_directories(${PROJECT_SOURCE_DIR}/Source/Lib/Common/ASM_SSE2/)
+include_directories(${PROJECT_SOURCE_DIR}/Source/Lib/Common/ASM_SSSE3/)
+include_directories(${PROJECT_SOURCE_DIR}/Source/Lib/Common/ASM_SSE4_1/)
+include_directories(${PROJECT_SOURCE_DIR}/Source/Lib/Common/ASM_AVX2/)
+include_directories(${PROJECT_SOURCE_DIR}/Source/Lib/Encoder/Codec/)
 
+link_directories(${PROJECT_SOURCE_DIR}/Source/Lib/Common/C_DEFAULT/)
+link_directories(${PROJECT_SOURCE_DIR}/Source/Lib/Common/ASM_SSE2/)
+link_directories(${PROJECT_SOURCE_DIR}/Source/Lib/Common/ASM_SSSE3/)
+link_directories(${PROJECT_SOURCE_DIR}/Source/Lib/Common/ASM_SSE4_1/)
+link_directories(${PROJECT_SOURCE_DIR}/Source/Lib/Common/ASM_AVX2/)
+link_directories(${PROJECT_SOURCE_DIR}/Source/Lib/Common/Codec/)
 
-link_directories (${PROJECT_SOURCE_DIR}/Source/Lib/Common/ASM_SSE2/)
-link_directories (${PROJECT_SOURCE_DIR}/Source/Lib/Common/C_DEFAULT/)
-link_directories (${PROJECT_SOURCE_DIR}/Source/Lib/Common/ASM_SSSE3/)
-link_directories (${PROJECT_SOURCE_DIR}/Source/Lib/Common/ASM_SSE4_1/)
-link_directories (${PROJECT_SOURCE_DIR}/Source/Lib/Common/ASM_AVX2/)
-link_directories (${PROJECT_SOURCE_DIR}/Source/Lib/Common/Codec/)
-
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/Bin/${CMAKE_BUILD_TYPE}/)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/Bin/${CMAKE_BUILD_TYPE}/)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/Bin/${CMAKE_BUILD_TYPE}/)
-set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/Bin/${CMAKE_BUILD_TYPE}/)
-
-if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
-   SET(CMAKE_C_FLAGS "/MP")    
-endif(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 
 file(GLOB all_files
     "*.h"
     "*.c")
- 
+
 # Encoder Lib Source Files
 add_library(SvtAv1Enc SHARED
     ${all_files}
