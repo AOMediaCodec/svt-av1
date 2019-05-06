@@ -31,26 +31,27 @@ file(GLOB all_files
 
 # Decoder Lib Source Files
 add_library(SvtAv1Dec SHARED
-    ${all_files}
-)
-    
-if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
-target_link_libraries(SvtAv1Dec
-    COMMON_CODEC
-    COMMON_C_DEFAULT
-    COMMON_ASM_SSE2
-    COMMON_ASM_SSSE3
-    COMMON_ASM_SSE4_1
-    COMMON_ASM_AVX2
-    m)
+    ${all_files})
+
+if(UNIX)
+    target_link_libraries(SvtAv1Dec
+        COMMON_CODEC
+        COMMON_C_DEFAULT
+        COMMON_ASM_SSE2
+        COMMON_ASM_SSSE3
+        COMMON_ASM_SSE4_1
+        COMMON_ASM_AVX2
+        m)
+    set(LIBS "${LIBS} -lpthread -lm")
 else()
-target_link_libraries(SvtAv1Dec
-    COMMON_CODEC
-    COMMON_C_DEFAULT
-    COMMON_ASM_SSE2
-    COMMON_ASM_SSSE3
-    COMMON_ASM_SSE4_1
-    COMMON_ASM_AVX2)
+    target_link_libraries(SvtAv1Dec
+        COMMON_CODEC
+        COMMON_C_DEFAULT
+        COMMON_ASM_SSE2
+        COMMON_ASM_SSSE3
+        COMMON_ASM_SSE4_1
+        COMMON_ASM_AVX2)
+    set(LIBS "${LIBS}")
 endif()
 
 if(NOT DEFINED CMAKE_INSTALL_LIBDIR)
@@ -60,8 +61,11 @@ endif()
 if(NOT DEFINED CMAKE_INSTALL_INCLUDEDIR)
     set(CMAKE_INSTALL_INCLUDEDIR "include/svt-av1")
 endif()
-    
+
 configure_file(../pkg-config.pc.in ${CMAKE_BINARY_DIR}/SvtAv1Dec.pc @ONLY)
-install(FILES ${CMAKE_BINARY_DIR}/SvtAv1Dec.pc DESTINATION "${CMAKE_INSTALL_LIBDIR}/pkgconfig")
+install(FILES ${CMAKE_BINARY_DIR}/SvtAv1Dec.pc
+    DESTINATION "${CMAKE_INSTALL_LIBDIR}/pkgconfig")
 install(TARGETS SvtAv1Dec DESTINATION "${CMAKE_INSTALL_LIBDIR}")
-install(DIRECTORY ../../../API/ DESTINATION "${CMAKE_INSTALL_PREFIX}/include/svt-av1" FILES_MATCHING PATTERN "*.h")
+install(DIRECTORY ../../../API/
+    DESTINATION "${CMAKE_INSTALL_PREFIX}/include/svt-av1"
+    FILES_MATCHING PATTERN "*.h")
