@@ -36,7 +36,7 @@ int32_t av1_loop_restoration_corners_in_sb(Av1Common *cm, int32_t plane,
     int32_t mi_row, int32_t mi_col, BlockSize bsize,
     int32_t *rcol0, int32_t *rcol1, int32_t *rrow0,
     int32_t *rrow1, int32_t *tile_tl_idx);
-    
+
 static INLINE int has_second_ref(const MbModeInfo *mbmi) {
     return mbmi->ref_frame[1] > INTRA_FRAME;
 }
@@ -46,7 +46,9 @@ static INLINE int has_uni_comp_refs(const MbModeInfo *mbmi) {
         (mbmi->ref_frame[1] >= BWDREF_FRAME)));
 }
 int32_t is_inter_block(const MbModeInfo *mbmi);
+#ifndef CHAR_BIT
 #define CHAR_BIT      8         /* number of bits in a char */
+#endif
 #if ADD_DELTA_QP_SUPPORT
 #define OD_CLZ0 (1)
 #define OD_CLZ(x) (-get_msb(x))
@@ -370,7 +372,7 @@ void get_txb_ctx(
         } while (++k < txb_w_unit);
     }
 
-    if (dc_sign_level_coeff_neighbor_array->left_array[dcSignLevelCoeffLeftNeighborIndex] != INVALID_NEIGHBOR_DATA){ 
+    if (dc_sign_level_coeff_neighbor_array->left_array[dcSignLevelCoeffLeftNeighborIndex] != INVALID_NEIGHBOR_DATA){
         k = 0;
         do {
             sign = ((uint8_t)dc_sign_level_coeff_neighbor_array->left_array[k + dcSignLevelCoeffLeftNeighborIndex] >> COEFF_CONTEXT_BITS);
@@ -1660,7 +1662,7 @@ static void WriteInterMode(
 
         if (mode != GLOBALMV) {
             int16_t refmv_ctx = (mode_ctx >> REFMV_OFFSET) & REFMV_CTX_MASK;
-            assert(refmv_ctx<REFMV_MODE_CONTEXTS);            
+            assert(refmv_ctx<REFMV_MODE_CONTEXTS);
             aom_write_symbol(ec_writer, mode != NEARESTMV, frameContext->refmv_cdf[refmv_ctx], 2);
         }
     }
@@ -1706,7 +1708,7 @@ void WriteDrlIdx(
             if (xd->ref_mv_count[ref_frame_type] > idx + 1) {
                 uint8_t drl_ctx =
                     av1_drl_ctx(xd->final_ref_mv_stack, idx);
-    
+
                 aom_write_symbol(ec_writer, cu_ptr->drl_index != (idx - 1),
                     frameContext->drl_cdf[drl_ctx], 2);
 
@@ -3345,7 +3347,7 @@ void av1_get_tile_limits(PictureParentControlSet * pcs_ptr) {
     cm->min_log2_tile_cols = tile_log2(cm->max_tile_width_sb, sb_cols);
     cm->max_log2_tile_cols = tile_log2(1, AOMMIN(sb_cols, MAX_TILE_COLS));
     cm->max_log2_tile_rows = tile_log2(1, AOMMIN(sb_rows, MAX_TILE_ROWS));
-    cm->min_log2_tile_rows = 0; // CHKN Tiles 
+    cm->min_log2_tile_rows = 0; // CHKN Tiles
     cm->min_log2_tiles = tile_log2(max_tile_area_sb, sb_cols * sb_rows);
     cm->min_log2_tiles = AOMMAX(cm->min_log2_tiles, cm->min_log2_tile_cols);
 }
@@ -3387,7 +3389,7 @@ void av1_calculate_tile_cols(PictureParentControlSet * pcs_ptr) {
         }
         if (cm->min_log2_tiles)
             max_tile_area_sb >>= (cm->min_log2_tiles + 1);
-        
+
         cm->max_tile_height_sb = AOMMAX(max_tile_area_sb / widest_tile_sb, 1);
     }
 }
@@ -3424,16 +3426,16 @@ void av1_calculate_tile_rows(PictureParentControlSet * pcs_ptr)
 
      /*  Tiling algorithm:
         input : log2_tile_count ==> tile_count = 1<<log2_tile_count
-        
+
         step1) compute pic_size_in_sb
-        step2) then round up to the closed n.tile_count. 
+        step2) then round up to the closed n.tile_count.
         step3) tile_size = rounded_pic_size_in_sb / tile_count.
         step4) we fill tiles of size tile_size until we reach the end of the pic
 
-        Note that: the last tile could have smaller size, and the final number 
+        Note that: the last tile could have smaller size, and the final number
         of tiles could be less than tile_count
      */
-   
+
     Av1Common * cm = pcs_ptr->av1_cm;
     int i, start_sb;
     //to connect later if non uniform tile spacing is needed.
@@ -3446,7 +3448,7 @@ void av1_calculate_tile_rows(PictureParentControlSet * pcs_ptr)
 
 
     // configure tile columns
-    if (tile_width_count == 0 || tile_height_count == 0) 
+    if (tile_width_count == 0 || tile_height_count == 0)
     {
         cm->uniform_tile_spacing_flag = 1;
         cm->log2_tile_cols = AOMMAX(pcs_ptr->sequence_control_set_ptr->static_config.tile_columns, cm->min_log2_tile_cols);
@@ -5745,7 +5747,7 @@ assert(bsize < BlockSizeS_ALL);
 
                 if (picture_control_set_ptr->parent_pcs_ptr->switchable_motion_mode
                     && rf[1] != INTRA_FRAME) {
-                    write_motion_mode(  
+                    write_motion_mode(
                         frameContext,
                         ec_writer,
                         bsize,
