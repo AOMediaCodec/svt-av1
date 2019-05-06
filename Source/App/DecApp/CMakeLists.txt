@@ -23,19 +23,16 @@ add_executable(SvtAv1DecApp
 
 #********** SET COMPILE FLAGS************
 
-if (UNIX)
+if(UNIX)
     # Link the Decoder App
-     target_link_libraries (SvtAv1DecApp
+    target_link_libraries(SvtAv1DecApp
         SvtAv1Dec
         pthread
         m)
-endif()
-
-if (MSVC OR MSYS OR MINGW OR WIN32)
-
+else()
     # Link the Decoder App
-    target_link_libraries (SvtAv1DecApp
-                           SvtAv1Dec)
+    target_link_libraries(SvtAv1DecApp
+        SvtAv1Dec)
 endif()
 
 install(TARGETS SvtAv1DecApp RUNTIME DESTINATION bin)
