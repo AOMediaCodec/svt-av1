@@ -80,7 +80,6 @@ void compressed_packmsb(
             outPixel = in8_bit_buffer[kIdx * 4 + 3 + row * in8_stride] << 2;
             out16_bit_buffer[kIdx * 4 + 3 + row * out_stride] = outPixel | nBitPixel;
 
-
         }
     }
 }
@@ -119,7 +118,6 @@ void c_pack_c(
     }
 
 }
-
 
 /************************************************
 * unpack 10 bit data into  8 and 2 bit 2D data
@@ -196,7 +194,6 @@ void unpack_avg(
 
         }
     }
-
 
 }
 

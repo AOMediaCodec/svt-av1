@@ -18,6 +18,6 @@ EB_API EbErrorType eb_svt_dec_set_parameter(
 {
     svt_dec_component->size = 0;
     pComponentParameterStructure->compressed_ten_bit_format=0;
-    
+
     return EB_ErrorNone;
 }

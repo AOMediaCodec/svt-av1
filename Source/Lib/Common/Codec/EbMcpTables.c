@@ -367,4 +367,3 @@ const ChromaFilterOutRaw bi_pred_chroma_if_function_ptr_array_new[ASM_TYPE_TOTAL
         chroma_interpolation_filter_two_d_out_raw_ssse3,            //hh
     },
 };
-

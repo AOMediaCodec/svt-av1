@@ -40,7 +40,6 @@ extern "C" {
         }
     };
 
-
     EbEncPack2DType compressed_pack_func_ptr_array[ASM_TYPE_TOTAL] =
     {
         // NON_AVX2

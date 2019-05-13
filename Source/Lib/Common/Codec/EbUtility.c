@@ -109,7 +109,6 @@ void eb_memcpy(void  *dst_ptr, void  *src_ptr, size_t size) {
  *****************************************/
 static TxSize blocksize_to_txsize[BlockSizeS_ALL] = {
 
-
       TX_4X4    ,      // BLOCK_4X4
       TX_4X8    ,      // BLOCK_4X8
       TX_8X4    ,      // BLOCK_8X4
@@ -132,8 +131,6 @@ static TxSize blocksize_to_txsize[BlockSizeS_ALL] = {
       TX_32X8   ,      // BLOCK_32X8
       TX_16X64  ,      // BLOCK_16X64
       TX_64X16         // BLOCK_64X16
-
-
 
 };
 EbErrorType z_order_increment(
@@ -477,23 +474,18 @@ uint64_t log2f_high_precision(uint64_t x, uint8_t precision)
 
 }
 
-
 // concatenate two linked list, and return the pointer to the new concatenated list
 EbLinkedListNode* concat_eb_linked_list(EbLinkedListNode* a, EbLinkedListNode* b)
 {
     if (a)
     {
         while (a->next)
-        {
             a = a->next;
-        }
         a->next = b;
         return a;
     }
     else
-    {
         return b;
-    }
 }
 
 // split a linked list
@@ -507,13 +499,9 @@ EbLinkedListNode* split_eb_linked_list(EbLinkedListNode* input, EbLinkedListNode
         EbLinkedListNode* next = input->next;
         input->next = (EbLinkedListNode *)EB_NULL;
         if (predicate_func(input))
-        {
             llTruePtr = concat_eb_linked_list(input, llTruePtr);
-        }
         else
-        {
             llRestPtr = concat_eb_linked_list(input, llRestPtr);
-        }
         input = next;
     }
 
@@ -548,7 +536,6 @@ const MiniGopStats* get_mini_gop_stats(const uint32_t mini_gop_index)
 {
     return &MiniGopStatsArray[mini_gop_index];
 }
-
 
 void EbStartTime(uint64_t *Startseconds, uint64_t *Startuseconds) {
 
@@ -631,7 +618,6 @@ void EbComputeOverallElapsedTimeMs(uint64_t Startseconds, uint64_t Startuseconds
 #endif
 
 }
-
 
 uint32_t ns_quarter_off_mult[9/*Up to 9 part*/][2/*x+y*/][4/*Up to 4 ns blocks per part*/] =
 {
@@ -780,7 +766,7 @@ static INLINE TxSize av1_get_tx_size(
     UNUSED(plane);
 }
 
-#if RED_CU 
+#if RED_CU
 void md_scan_all_blks(uint32_t *idx_mds, uint32_t sq_size, uint32_t x, uint32_t y, int32_t is_last_quadrant, uint8_t quad_it)
 #else
 void md_scan_all_blks(uint32_t *idx_mds, uint32_t sq_size, uint32_t x, uint32_t y, int32_t is_last_quadrant)
@@ -818,7 +804,7 @@ void md_scan_all_blks(uint32_t *idx_mds, uint32_t sq_size, uint32_t x, uint32_t 
 
             blk_geom_mds[*idx_mds].sq_size = sq_size;
             blk_geom_mds[*idx_mds].is_last_quadrant = is_last_quadrant;
-#if RED_CU 
+#if RED_CU
             blk_geom_mds[*idx_mds].quadi = quad_it;
 #endif
 
@@ -874,7 +860,6 @@ void md_scan_all_blks(uint32_t *idx_mds, uint32_t sq_size, uint32_t x, uint32_t 
                 blk_geom_mds[*idx_mds].txsize[txb_itr] = av1_get_tx_size(blk_geom_mds[*idx_mds].bsize, 0);
                 blk_geom_mds[*idx_mds].txsize_uv[txb_itr] = av1_get_tx_size(blk_geom_mds[*idx_mds].bsize, 1);
 
-
                 if (blk_geom_mds[*idx_mds].bsize == BLOCK_128X128)
                 {
                     blk_geom_mds[*idx_mds].tx_org_x[txb_itr] = (txb_itr == 0 || txb_itr == 2) ? blk_geom_mds[*idx_mds].origin_x : blk_geom_mds[*idx_mds].origin_x + 64;
@@ -896,7 +881,6 @@ void md_scan_all_blks(uint32_t *idx_mds, uint32_t sq_size, uint32_t x, uint32_t 
                     blk_geom_mds[*idx_mds].tx_org_y[txb_itr] = blk_geom_mds[*idx_mds].origin_y;
                 }
 
-
                 blk_geom_mds[*idx_mds].tx_boff_x[txb_itr] = blk_geom_mds[*idx_mds].tx_org_x[txb_itr] - blk_geom_mds[*idx_mds].origin_x;
                 blk_geom_mds[*idx_mds].tx_boff_y[txb_itr] = blk_geom_mds[*idx_mds].tx_org_y[txb_itr] - blk_geom_mds[*idx_mds].origin_y;
                 blk_geom_mds[*idx_mds].tx_width[txb_itr] = tx_size_wide[blk_geom_mds[*idx_mds].txsize[txb_itr]];
@@ -904,8 +888,6 @@ void md_scan_all_blks(uint32_t *idx_mds, uint32_t sq_size, uint32_t x, uint32_t 
                 blk_geom_mds[*idx_mds].tx_width_uv[txb_itr] = tx_size_wide[blk_geom_mds[*idx_mds].txsize_uv[txb_itr]];
                 blk_geom_mds[*idx_mds].tx_height_uv[txb_itr] = tx_size_high[blk_geom_mds[*idx_mds].txsize_uv[txb_itr]];
             }
-
-
 
             blk_geom_mds[*idx_mds].blkidx_mds = (*idx_mds);
             (*idx_mds) = (*idx_mds) + 1;
@@ -916,7 +898,7 @@ void md_scan_all_blks(uint32_t *idx_mds, uint32_t sq_size, uint32_t x, uint32_t 
     uint32_t min_size = max_sb >> (max_depth - 1);
     if (halfsize >= min_size)
     {
-#if RED_CU 
+#if RED_CU
         md_scan_all_blks(idx_mds, halfsize, x, y, 0,0);
         md_scan_all_blks(idx_mds, halfsize, x + halfsize, y, 0,1);
         md_scan_all_blks(idx_mds, halfsize, x, y + halfsize, 0,2);
@@ -930,7 +912,6 @@ void md_scan_all_blks(uint32_t *idx_mds, uint32_t sq_size, uint32_t x, uint32_t 
     }
 
 }
-
 
 void depth_scan_all_blks()
 {
@@ -1093,9 +1074,7 @@ uint32_t count_total_num_of_active_blks()
                         part_it < 7 ? 3 : 4;
 
                     for (nsq_it = 0; nsq_it < tot_num_ns_per_part; nsq_it++)
-                    {
                         depth_scan_idx++;
-                    }
                 }
             }
         }
@@ -1130,7 +1109,7 @@ void log_redundancy_similarity(uint32_t  max_block_count)
                 cur_geom->similar_list.list_size++;
 #if 0
                 // exclude the first split
-                if (cur_geom->nsi == 0 && search_geom->nsi == 0 && cur_geom->depth == search_geom->depth) 
+                if (cur_geom->nsi == 0 && search_geom->nsi == 0 && cur_geom->depth == search_geom->depth)
 #else
                 if (cur_geom->nsi == 0 && search_geom->nsi==0)
 #endif
@@ -1140,18 +1119,17 @@ void log_redundancy_similarity(uint32_t  max_block_count)
                     cur_geom->redund_list.list_size++;
                 }
 
-
             }
         }
-    }    
-    
+    }
+
 }
 #endif
 void build_blk_geom(int32_t use_128x128)
 {
     max_sb = use_128x128 ? 128 : 64;
     max_depth = use_128x128 ? 6 : 5;
-    uint32_t  max_block_count = use_128x128 ? BLOCK_MAX_COUNT_SB_128 : BLOCK_MAX_COUNT_SB_64; 
+    uint32_t  max_block_count = use_128x128 ? BLOCK_MAX_COUNT_SB_128 : BLOCK_MAX_COUNT_SB_64;
 
     //(0)compute total number of blocks using the information provided
     max_num_active_blocks = count_total_num_of_active_blks();
@@ -1163,7 +1141,7 @@ void build_blk_geom(int32_t use_128x128)
 
     //(2) Construct md scan blk_geom_mds:  use info from dps
     uint32_t idx_mds = 0;
-#if RED_CU  
+#if RED_CU
     md_scan_all_blks(&idx_mds, max_sb, 0, 0, 0,0);
 #else
     md_scan_all_blks(&idx_mds, max_sb, 0, 0, 0);
@@ -1172,7 +1150,7 @@ void build_blk_geom(int32_t use_128x128)
     //(3) Fill more info from mds to dps - print using dps
     finish_depth_scan_all_blks();
 
-#if RED_CU 
+#if RED_CU
     log_redundancy_similarity(max_block_count);
 #endif
 
@@ -1187,4 +1165,3 @@ const BlockGeom * get_blk_geom_mds(uint32_t bidx_mds)
 {
     return &blk_geom_mds[bidx_mds];
 }
-

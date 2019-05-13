@@ -53,7 +53,6 @@ typedef enum AppPortActiveType
     APP_PortInactive
 } AppPortActiveType;
 
-
 /** The EbPtr type is intended to be used to pass pointers to and from the svt
 API.  This is a 32 bit pointer and is aligned on a 32 bit word boundary.
 */
@@ -164,7 +163,6 @@ extern rsize_t strnlen_ss(const char *s, rsize_t smax);
 #define FOPEN(f,s,m) f=fopen(s,m)
 #endif
 
-
 typedef struct EbPerformanceContext {
 
     /****************************************
@@ -246,7 +244,6 @@ typedef struct EbConfig
     uint32_t                 intra_refresh_type;
     uint32_t                 hierarchical_levels;
     uint32_t                 pred_structure;
-
 
     /****************************************
      * Quantization

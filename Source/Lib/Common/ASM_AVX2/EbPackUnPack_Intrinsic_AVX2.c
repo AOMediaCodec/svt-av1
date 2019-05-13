@@ -9,7 +9,6 @@
 #include <immintrin.h>
 #include <stdint.h>
 
-
 void eb_enc_un_pack8_bit_data_avx2_intrin(
     uint16_t *in_16bit_buffer,
     uint32_t  in_stride,
@@ -365,4 +364,3 @@ void eb_enc_un_pack8_bit_data_avx2_intrin(
         }
     }
 }
-

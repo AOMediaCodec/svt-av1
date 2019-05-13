@@ -46,8 +46,6 @@ EbErrorType enc_dec_segments_ctor(
     return EB_ErrorNone;
 }
 
-
-
 void enc_dec_segments_init(
     EncDecSegments *segments_ptr,
     uint32_t            segColCount,
@@ -107,17 +105,14 @@ void enc_dec_segments_init(
             // Check that segment is valid
             if (segments_ptr->valid_lcu_count_array[segment_index]) {
                 // Right Neighbor
-                if (segment_index < segments_ptr->row_array[row_index].ending_seg_index) {
+                if (segment_index < segments_ptr->row_array[row_index].ending_seg_index)
                     ++segments_ptr->dep_map.dependency_map[segment_index + 1];
-                }
                 // Bottom Neighbor
-                if (row_index < segments_ptr->segment_row_count - 1 && segment_index + segments_ptr->segment_band_count >= segments_ptr->row_array[row_index + 1].starting_seg_index) {
+                if (row_index < segments_ptr->segment_row_count - 1 && segment_index + segments_ptr->segment_band_count >= segments_ptr->row_array[row_index + 1].starting_seg_index)
                     ++segments_ptr->dep_map.dependency_map[segment_index + segments_ptr->segment_band_count];
-                }
             }
         }
     }
 
     return;
 }
-

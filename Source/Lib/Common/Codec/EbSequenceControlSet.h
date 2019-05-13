@@ -24,7 +24,6 @@
 #include "EbPredictionStructure.h"
 #include "noise_model.h"
 
-
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -58,7 +57,7 @@ extern "C" {
         uint16_t                                max_input_chroma_height;
         uint16_t                                max_input_pad_bottom;
         uint16_t                                max_input_pad_right;
-        
+
         uint16_t                                luma_width;
         uint16_t                                luma_height;
         uint32_t                                chroma_width;
@@ -77,7 +76,7 @@ extern "C" {
         int32_t                                 cropping_right_offset;
         int32_t                                 cropping_top_offset;
         int32_t                                 cropping_bottom_offset;
- 
+
         // Conformance Window flag
         uint32_t                                conformance_window_flag;
 
@@ -164,7 +163,7 @@ extern "C" {
         uint32_t                                cdef_process_init_count;
         uint32_t                                rest_process_init_count;
         uint32_t                                total_process_init_count;
-        
+
         uint16_t                                film_grain_random_seed;
         SbParams                               *sb_params_array;
         uint8_t                                 picture_width_in_sb;

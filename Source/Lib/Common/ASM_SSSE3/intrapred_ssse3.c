@@ -185,15 +185,12 @@ static INLINE void load_pixel_w8(const uint8_t *above, const uint8_t *left,
 
     pixels[3] = _mm_set1_epi16((uint16_t)above[7]);
 
-    if (height == 4) {
+    if (height == 4)
         pixels[2] = _mm_cvtsi32_si128(((const uint32_t *)left)[0]);
-    }
-    else if (height == 8) {
+    else if (height == 8)
         pixels[2] = _mm_loadl_epi64((const __m128i *)left);
-    }
-    else if (height == 16) {
+    else if (height == 16)
         pixels[2] = _mm_load_si128((const __m128i *)left);
-    }
     else {
         pixels[2] = _mm_load_si128((const __m128i *)left);
         pixels[4] = pixels[0];
@@ -943,15 +940,12 @@ static INLINE void load_pixel_h_w8(const uint8_t *above, const uint8_t *left,
     int32_t height, __m128i *pixels) {
     pixels[1] = _mm_set1_epi16((uint16_t)above[7]);
 
-    if (height == 4) {
+    if (height == 4)
         pixels[0] = _mm_cvtsi32_si128(((const uint32_t *)left)[0]);
-    }
-    else if (height == 8) {
+    else if (height == 8)
         pixels[0] = _mm_loadl_epi64((const __m128i *)left);
-    }
-    else if (height == 16) {
+    else if (height == 16)
         pixels[0] = _mm_load_si128((const __m128i *)left);
-    }
     else {
         pixels[0] = _mm_load_si128((const __m128i *)left);
         pixels[2] = _mm_load_si128((const __m128i *)(left + 16));
@@ -1170,7 +1164,6 @@ void aom_smooth_h_predictor_64x16_ssse3(uint8_t *dst, ptrdiff_t stride,
     const uint8_t *left) {
     smooth_h_predictor_wxh(dst, stride, above, left, 64, 16);
 }
-
 
 void eb_smooth_v_predictor_all_ssse3(uint8_t *dst, ptrdiff_t stride, int32_t bw,
     int32_t bh, const uint8_t *above,

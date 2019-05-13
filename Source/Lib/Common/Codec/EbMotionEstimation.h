@@ -41,15 +41,12 @@ extern "C" {
         uint32_t                   decim_stride,
         uint32_t                   decim_step);
 
-    
     extern EbErrorType open_loop_intra_search_sb(
         PictureParentControlSet   *picture_control_set_ptr,
         uint32_t                       sb_index,
         MotionEstimationContext_t   *context_ptr,
         EbPictureBufferDesc       *input_ptr,
         EbAsm                       asm_type);
-
-
 
     int8_t sort_3_elements(uint32_t a, uint32_t b, uint32_t c);
 #define a_b_c  0
@@ -74,9 +71,7 @@ extern "C" {
 #define F1 1
 #define F2 2
 
-
 #define  MAX_SAD_VALUE 128*128*255
-
 
 // Interpolation Filters
     static const int32_t me_if_coeff[3][4] = {
@@ -84,7 +79,6 @@ extern "C" {
         { -4, 36, 36, -4 }, // F1
         { -2, 16, 54, -4 }, // F2
     };
-
 
     static const uint32_t tab16x16[16] = {
         0, 1, 4, 5,
@@ -106,7 +100,6 @@ extern "C" {
         0, 1,
     };
 
-
     static const uint32_t tab8x8[64] = {
         0, 1, 4, 5, 16, 17, 20, 21,
         2, 3, 6, 7, 18, 19, 22, 23,
@@ -118,8 +111,6 @@ extern "C" {
         42, 43, 46, 47, 58, 59, 62, 63
     };
 
-
-
     static const uint32_t tab32x16[8] = {
         0, 2,
         1, 3,
@@ -127,13 +118,10 @@ extern "C" {
         5, 7,
     };
 
-
-
     static const uint32_t tab16x32[8] = {
         0, 1, 2, 3,
         4, 5, 6, 7,
     };
-
 
     static const uint32_t tab32x8[16] = {
         0, 4,
@@ -170,10 +158,6 @@ extern "C" {
         20, 21, 22, 23, 28, 29, 30, 31,
     };
 
-
-
-
-
     static const uint32_t partition_width[MAX_ME_PU_COUNT] = {
         64,                                                                          // (1)
         32, 32, 32, 32,                                                              // (4)
@@ -206,8 +190,6 @@ extern "C" {
 
     };
 
-
-
     static const uint32_t partition_height[MAX_ME_PU_COUNT] = {
         64,                                                                          // (1)
         32, 32, 32, 32,                                                              // (4)
@@ -239,7 +221,6 @@ extern "C" {
          64,64,64,64
     };
 
-
     static const uint32_t pu_search_index_map[MAX_ME_PU_COUNT][2] = {
         { 0, 0 },
         { 0, 0 }, { 32, 0 }, { 0, 32 }, { 32, 32 },
@@ -257,8 +238,6 @@ extern "C" {
         { 0, 40 }, { 8, 40 }, { 16, 40 }, { 24, 40 }, { 32, 40 }, { 40, 40 }, { 48, 40 }, { 56, 40 },
         { 0, 48 }, { 8, 48 }, { 16, 48 }, { 24, 48 }, { 32, 48 }, { 40, 48 }, { 48, 48 }, { 56, 48 },
         { 0, 56 }, { 8, 56 }, { 16, 56 }, { 24, 56 }, { 32, 56 }, { 40, 56 }, { 48, 56 }, { 56, 56 },
-
-
 
         //H  Partitions
         { 0, 0 },
@@ -278,13 +257,11 @@ extern "C" {
         { 0, 48 }, { 16, 48 }, { 32, 48 }, { 48, 48 },
         { 0, 56 }, { 16, 56 }, { 32, 56 }, { 48, 56 },
 
-
         //V  Partitions
         { 0, 0 }, { 32, 0 },
 
         { 0, 0 }, { 16, 0 }, { 32, 0 }, { 48, 0 },
         { 0, 32 }, { 16, 32 }, { 32, 32 }, { 48, 32 },
-
 
         { 0, 0 }, { 8, 0 }, { 16, 0 }, { 24, 0 }, { 32, 0 }, { 40, 0 }, { 48, 0 }, { 56, 0 },
         { 0, 16 }, { 8, 16 }, { 16, 16 }, { 24, 16 }, { 32, 16 }, { 40, 16 }, { 48, 16 }, { 56, 16 },
@@ -301,7 +278,6 @@ extern "C" {
         { 0, 48 }, { 32, 48 },
         { 0, 56 }, { 32, 56 },
 
-
         // V4 Partitions
         { 0, 0  }, { 8, 0  }, { 16, 0  }, { 24, 0  }, { 32, 0  }, { 40, 0  }, { 48, 0  }, { 56, 0 },
         { 0, 32 }, { 8, 32 }, { 16, 32 }, { 24, 32 }, { 32, 32 }, { 40, 32 }, { 48, 32 }, { 56, 32 },
@@ -312,7 +288,6 @@ extern "C" {
         { 0, 0}, { 16, 0},{ 32, 0}, { 48, 0}
 
     };
-
 
     static const uint32_t in_loop_me_block_width_128_sb[MAX_SS_ME_PU_COUNT] = {
         //4x4 (256)
@@ -836,7 +811,6 @@ extern "C" {
         128
 
     };
-
 
     static const uint32_t in_loop_me_block_index_128_sb[MAX_SS_ME_PU_COUNT][2] = {
         //4x4
@@ -1495,7 +1469,6 @@ extern "C" {
         { 0,32 }, { 32,32 },
         { 0,48 }, { 32,48 },
 
-
         //16x32 (8)
         { 0,0 },  { 16,0 },  { 32,0 },  { 48,0 },
         { 0,32 }, { 16,32 }, { 32,32 }, { 48,32 },
@@ -1521,7 +1494,6 @@ extern "C" {
         uint8_t                is_128_sb,
         const BlockGeom        *blk_geom
     );
-
 
     static const uint8_t sub_position_type[16] = { 0, 2, 1, 2, 2, 2, 2, 2, 1, 2, 1, 2, 2, 2, 2, 2 };
 
@@ -1603,7 +1575,6 @@ extern "C" {
         , uint32_t               geom_offset_x,
         uint32_t                 geom_offset_y
     );
-
 
 #ifdef __cplusplus
 }

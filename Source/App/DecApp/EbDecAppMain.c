@@ -6,13 +6,11 @@
 //  Dummy decoder application file
 //    -- not functioning yet
 
-
 /***************************************
  * Includes
  ***************************************/
 #include <stdio.h>
 #include "EbSvtAv1Dec.h"
-
 
 #ifdef _MSC_VER
 #include <io.h>     /* _setmode() */
@@ -30,15 +28,15 @@ int32_t main()
 #endif
     // GLOBAL VARIABLES
     EbErrorType            return_error = EB_ErrorNone;            // Error Handling
-    
+
     EbComponentType svt_dec;
     EbSvtAv1DecConfiguration eb_dec_parameters;
-    
+
     return_error = eb_svt_dec_set_parameter(
                        &svt_dec,
                        &eb_dec_parameters);
-    
+
     printf ("The decoder has not been implemented yet.");
 
-    return (return_error == 0) ? 0 : 1;    
+    return (return_error == 0) ? 0 : 1;
 }

@@ -121,7 +121,6 @@ extern void invoke_safe_str_constraint_handler(
     void *ptr,
     errno_t error);
 
-
 static void handle_error(char *orig_dest, rsize_t orig_dmax,
     char *err_msg, errno_t err_code)
 {
@@ -138,12 +137,10 @@ invoke_safe_str_constraint_handler(const char *msg,
 void *ptr,
 errno_t error)
 {
-    if (NULL != str_handler) {
+    if (NULL != str_handler)
         str_handler(msg, ptr, error);
-    }
-    else {
+    else
         sl_default_handler(msg, ptr, error);
-    }
 }
 
 void ignore_handler_s(const char *msg, void *ptr, errno_t error)
@@ -207,7 +204,6 @@ strncpy_ss(char *dest, rsize_t dmax, const char *src, rsize_t slen)
         return RCNEGATE(ESLEMAX);
     }
 
-
     if (dest < src) {
         overlap_bumper = src;
 
@@ -229,10 +225,8 @@ strncpy_ss(char *dest, rsize_t dmax, const char *src, rsize_t slen)
             }
 
             *dest = *src;
-            if (*dest == '\0') {
+            if (*dest == '\0')
                 return RCNEGATE(EOK);
-            }
-
             dmax--;
             slen--;
             dest++;
@@ -261,10 +255,8 @@ strncpy_ss(char *dest, rsize_t dmax, const char *src, rsize_t slen)
             }
 
             *dest = *src;
-            if (*dest == '\0') {
+            if (*dest == '\0')
                 return RCNEGATE(EOK);
-            }
-
             dmax--;
             slen--;
             dest++;
@@ -314,10 +306,8 @@ strcpy_ss(char *dest, rsize_t dmax, const char *src)
         return RCNEGATE(ESNULLP);
     }
 
-    if (dest == src) {
+    if (dest == src)
         return RCNEGATE(EOK);
-    }
-
     /* hold base of dest in case src was not copied */
     orig_dmax = dmax;
     orig_dest = dest;
@@ -334,10 +324,8 @@ strcpy_ss(char *dest, rsize_t dmax, const char *src)
             }
 
             *dest = *src;
-            if (*dest == '\0') {
+            if (*dest == '\0')
                 return RCNEGATE(EOK);
-            }
-
             dmax--;
             dest++;
             src++;
@@ -356,10 +344,8 @@ strcpy_ss(char *dest, rsize_t dmax, const char *src)
             }
 
             *dest = *src;
-            if (*dest == '\0') {
+            if (*dest == '\0')
                 return RCNEGATE(EOK);
-            }
-
             dmax--;
             dest++;
             src++;
@@ -382,10 +368,8 @@ strnlen_ss(const char *dest, rsize_t dmax)
 {
     rsize_t count;
 
-    if (dest == NULL) {
+    if (dest == NULL)
         return RCNEGATE(0);
-    }
-
     if (dmax == 0) {
         invoke_safe_str_constraint_handler((char*)("strnlen_ss: dmax is 0"),
             NULL, ESZEROL);

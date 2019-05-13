@@ -61,7 +61,6 @@ extern "C" {
     } PredictionUnit;
 #pragma pack(pop)
 
-
 #ifdef __cplusplus
 }
 #endif

@@ -75,7 +75,6 @@ extern "C" {
         uint32_t   granularity_top_left,
         uint32_t   type_mask);
 
-
     extern EbErrorType neighbor_array_unit_ctor(
         NeighborArrayUnit **na_unit_dbl_ptr,
         uint32_t   max_picture_width,
@@ -88,7 +87,6 @@ extern "C" {
     extern void neighbor_array_unit_reset(NeighborArrayUnit *na_unit_ptr);
 
     extern void neighbor_array_unit_reset32(NeighborArrayUnit32 *na_unit_ptr);
-
 
     /*************************************************
      * Neighbor Array Unit Get Left Index
@@ -149,7 +147,6 @@ extern "C" {
         uint32_t             pic_origin_y,
         uint32_t             block_width,
         uint32_t             block_height);
-
 
     void copy_neigh_arr(
         NeighborArrayUnit *na_src,

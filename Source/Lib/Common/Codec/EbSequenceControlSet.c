@@ -57,13 +57,10 @@ EbErrorType eb_sequence_control_set_ctor(
     }
 
     // Encode Context
-    if (scsInitData != EB_NULL) {
+    if (scsInitData != EB_NULL)
         sequence_control_set_ptr->encode_context_ptr = scsInitData->encode_context_ptr;
-    }
-    else {
+    else
         sequence_control_set_ptr->encode_context_ptr = (EncodeContext *)EB_NULL;
-    }
-
     sequence_control_set_ptr->conformance_window_flag = 0;
 
     // Profile & ID
@@ -97,7 +94,6 @@ EbErrorType eb_sequence_control_set_ctor(
     sequence_control_set_ptr->max_ref_count = 1;
     sequence_control_set_ptr->intra_period_length = 0;
     sequence_control_set_ptr->intra_refresh_type = 0;
-
 
     // LCU
     sequence_control_set_ptr->sb_sz = 64;
@@ -157,8 +153,6 @@ EbErrorType eb_sequence_control_set_ctor(
         sequence_control_set_ptr->mib_size = 16;        // Size of the superblock in units of MI blocks
         sequence_control_set_ptr->mib_size_log2 = 4;
     }
-
-
 
     sequence_control_set_ptr->enable_dual_filter = 1;
     // 0 - disable dual interpolation filter
@@ -236,7 +230,6 @@ EbErrorType eb_sequence_control_set_ctor(
 
     return EB_ErrorNone;
 }
-
 
 /************************************************
  * Sequence Control Set Copy
@@ -382,9 +375,8 @@ EbErrorType eb_sequence_control_set_instance_ctor(
     return_error = encode_context_ctor(
         (void **) &(*object_dbl_ptr)->encode_context_ptr,
         EB_NULL);
-    if (return_error == EB_ErrorInsufficientResources) {
+    if (return_error == EB_ErrorInsufficientResources)
         return EB_ErrorInsufficientResources;
-    }
     scsInitData.encode_context_ptr = (*object_dbl_ptr)->encode_context_ptr;
 
     scsInitData.sb_size = 64;
@@ -392,12 +384,9 @@ EbErrorType eb_sequence_control_set_instance_ctor(
     return_error = eb_sequence_control_set_ctor(
         (void **) &(*object_dbl_ptr)->sequence_control_set_ptr,
         (void *)&scsInitData);
-    if (return_error == EB_ErrorInsufficientResources) {
+    if (return_error == EB_ErrorInsufficientResources)
         return EB_ErrorInsufficientResources;
-    }
-
     EB_CREATEMUTEX(EbHandle*, (*object_dbl_ptr)->config_mutex, sizeof(EbHandle), EB_MUTEX);
-
 
     return EB_ErrorNone;
 }
@@ -444,7 +433,6 @@ extern EbErrorType sb_params_init(
             (sequence_control_set_ptr->sb_params_array[sb_index].origin_y < sequence_control_set_ptr->sb_sz) ||
             (sequence_control_set_ptr->sb_params_array[sb_index].origin_x > sequence_control_set_ptr->luma_width - sequence_control_set_ptr->sb_sz) ||
             (sequence_control_set_ptr->sb_params_array[sb_index].origin_y > sequence_control_set_ptr->luma_height - sequence_control_set_ptr->sb_sz) ? 1 : 0;
-
 
         uint8_t potential_logo_sb = 0;
 
@@ -546,7 +534,6 @@ EbErrorType sb_geom_init(SequenceControlSet * sequence_control_set_ptr)
 
     EB_MALLOC(SbGeom*, sequence_control_set_ptr->sb_geom, sizeof(SbGeom) * pictureLcuWidth * pictureLcuHeight, EB_N_PTR);
 
-
     for (sb_index = 0; sb_index < pictureLcuWidth * pictureLcuHeight; ++sb_index) {
 
         sequence_control_set_ptr->sb_geom[sb_index].horizontal_index = sb_index % pictureLcuWidth;
@@ -567,7 +554,6 @@ EbErrorType sb_geom_init(SequenceControlSet * sequence_control_set_ptr)
                 1 :
                 0);
 
-        
         uint16_t max_block_count = sequence_control_set_ptr->max_block_cnt;
 
         for (md_scan_block_index = 0; md_scan_block_index < max_block_count ; md_scan_block_index++) {
@@ -590,4 +576,3 @@ EbErrorType sb_geom_init(SequenceControlSet * sequence_control_set_ptr)
 
     return 0;
 }
-

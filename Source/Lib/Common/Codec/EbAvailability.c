@@ -3,7 +3,6 @@
 * SPDX - License - Identifier: BSD - 2 - Clause - Patent
 */
 
-
 #include "EbAvailability.h"
 
 // Bottom left availability function

@@ -51,7 +51,6 @@ extern "C" {
         uint64_t                         *y_coeff_bits,
         uint64_t                         *y_full_distortion);
 
-
     void product_full_loop_tx_search(
         ModeDecisionCandidateBuffer  *candidateBuffer,
         ModeDecisionContext          *context_ptr,
@@ -67,12 +66,9 @@ extern "C" {
         MdRateEstimationContext      *md_rate_estimation_ptr,
         PictureControlSet            *picture_control_set_ptr);
 
-
     void  d1_non_square_block_decision(
         ModeDecisionContext               *context_ptr
     );
-
-
 
 #ifdef __cplusplus
 }

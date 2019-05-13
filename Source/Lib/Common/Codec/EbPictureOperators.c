@@ -205,14 +205,12 @@ uint64_t ComputeNxMSatd8x8Units_U8(
     EbSatdU8Type Compute8x8SatdFunction = compute8x8_satd_u8_func_ptr_array[asm_type];
 
     for (blockIndexInHeight = 0; blockIndexInHeight < height >> 3; ++blockIndexInHeight) {
-        for (blockIndexInWidth = 0; blockIndexInWidth < width >> 3; ++blockIndexInWidth) {
+        for (blockIndexInWidth = 0; blockIndexInWidth < width >> 3; ++blockIndexInWidth)
             satd += Compute8x8SatdFunction(&(src[(blockIndexInWidth << 3) + (blockIndexInHeight << 3) * src_stride]), dc_value, src_stride);
-        }
     }
 
     return satd;
 }
-
 
 uint64_t ComputeNxMSatd4x4Units_U8(
     uint8_t  *src,       //int16_t *diff,       // input parameter, diff samples Ptr
@@ -227,10 +225,8 @@ uint64_t ComputeNxMSatd4x4Units_U8(
     uint32_t blockIndexInHeight;
 
     for (blockIndexInHeight = 0; blockIndexInHeight < height >> 2; ++blockIndexInHeight) {
-        for (blockIndexInWidth = 0; blockIndexInWidth < width >> 2; ++blockIndexInWidth) {
+        for (blockIndexInWidth = 0; blockIndexInWidth < width >> 2; ++blockIndexInWidth)
             satd += compute4x4_satd_u8(&(src[(blockIndexInWidth << 2) + (blockIndexInHeight << 2) * src_stride]), dc_value, src_stride);
-
-        }
     }
 
     return satd;
@@ -374,7 +370,6 @@ EbErrorType picture_full_distortion32_bits(
         y_distortion[0] = 0;
         y_distortion[1] = 0;
 
-
         bwidth = bwidth < 64 ? bwidth : 32;
         bheight = bheight < 64 ? bheight : 32;
 
@@ -494,7 +489,6 @@ void unpack_l0l1_avg(
         width,
         height);
 
-
 }
 void extract8_bitdata_safe_sub(
     uint16_t      *in16_bit_buffer,
@@ -543,7 +537,6 @@ void unpack_l0l1_avg_safe_sub(
         sub_pred,
         width,
         height);
-
 
 }
 void un_pack2d(
@@ -607,7 +600,6 @@ void compressed_pack_lcu(
 )
 {
 
-
     compressed_pack_func_ptr_array[(width == 64 || width == 32) ? asm_type : ASM_NON_AVX2](
         in8_bit_buffer,
         in8_stride,
@@ -652,9 +644,8 @@ void memcpy16bit(
 {
     uint64_t i;
 
-    for (i = 0; i < num_of_elements; i++) {
+    for (i = 0; i < num_of_elements; i++)
         out_ptr[i] = in_ptr[i];
-    }
 }
 
 /*******************************************
@@ -667,9 +658,8 @@ void memcpy32bit(
 {
     uint64_t i;
 
-    for (i = 0; i < num_of_elements; i++) {
+    for (i = 0; i < num_of_elements; i++)
         out_ptr[i] = in_ptr[i];
-    }
 }
 
 int32_t  sum_residual(int16_t * in_ptr,
@@ -813,8 +803,6 @@ void aom_yv12_extend_frame_borders_c(Yv12BufferConfig *ybf,
     }
 }
 
-
-
 static void memcpy_short_addr(uint8_t *dst8, const uint8_t *src8, int32_t num) {
     uint16_t *dst = CONVERT_TO_SHORTPTR(dst8);
     uint16_t *src = CONVERT_TO_SHORTPTR(src8);
@@ -858,7 +846,6 @@ void aom_yv12_copy_frame_c(const Yv12BufferConfig *src_bc,
     }
     aom_yv12_extend_frame_borders_c(dst_bc, num_planes);
 }
-
 
 void aom_yv12_copy_y_c(const Yv12BufferConfig *src_ybc,
     Yv12BufferConfig *dst_ybc) {
@@ -931,4 +918,3 @@ void aom_yv12_copy_v_c(const Yv12BufferConfig *src_bc,
         dst += dst_bc->uv_stride;
     }
 }
-

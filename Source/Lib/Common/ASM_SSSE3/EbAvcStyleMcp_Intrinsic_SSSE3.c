@@ -11,7 +11,6 @@
 #include "emmintrin.h"
 #include "tmmintrin.h"
 
-
 EB_EXTERN EB_ALIGN(16) const int8_t AvcStyleLumaIFCoeff8_SSSE3[] = {
     -1, 25, -1, 25, -1, 25, -1, 25, -1, 25, -1, 25, -1, 25, -1, 25,
      9, -1,  9, -1,  9, -1,  9, -1,  9, -1,  9, -1,  9, -1,  9, -1,
@@ -20,7 +19,6 @@ EB_EXTERN EB_ALIGN(16) const int8_t AvcStyleLumaIFCoeff8_SSSE3[] = {
     -1,  9, -1,  9, -1,  9, -1,  9, -1,  9, -1,  9, -1,  9, -1,  9,
     25, -1, 25, -1, 25, -1, 25, -1, 25, -1, 25, -1, 25, -1, 25, -1
 };
-
 
 void PictureCopyKernel_SSSE3(
     EbByte                  src,
@@ -123,7 +121,6 @@ void avc_style_luma_interpolation_filter_posj_ssse3(
     avc_style_luma_interpolation_filter_vertical_ssse3_intrin(temp_buf + pu_width, pu_width, dst, dst_stride, pu_width, pu_height, 0, skip, 2);
 }
 
-
 void avc_style_luma_interpolation_filter_posk_ssse3(
     EbByte               ref_pic,
     uint32_t                src_stride,
@@ -159,7 +156,6 @@ void avc_style_luma_interpolation_filter_posp_ssse3(
     avc_style_luma_interpolation_filter_horizontal_ssse3_intrin(ref_pic + src_stride, src_stride, temp_buf + tempBufSize, pu_width, pu_width, pu_height, 0, skip, 2);
     picture_average_kernel_sse2(temp_buf, pu_width, temp_buf + tempBufSize, pu_width, dst, dst_stride, pu_width, pu_height);
 }
-
 
 void avc_style_luma_interpolation_filter_posq_ssse3(
     EbByte               ref_pic,

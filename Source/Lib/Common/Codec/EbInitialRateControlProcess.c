@@ -17,14 +17,11 @@
 #include "EbUtility.h"
 #include "EbReferenceObject.h"
 
-
-
 /**************************************
 * Macros
 **************************************/
 #define PAN_LCU_PERCENTAGE                    75
 #define LOW_AMPLITUDE_TH                      16
-
 
 void GetMv(
     PictureParentControlSet    *picture_control_set_ptr,
@@ -32,7 +29,6 @@ void GetMv(
     int32_t                        *xCurrentMv,
     int32_t                        *yCurrentMv)
 {
-
 
     uint32_t             meCandidateIndex;
 
@@ -55,9 +51,6 @@ void GetMv(
     }
 #else
     MeCuResults * cuResults = &picture_control_set_ptr->me_results[sb_index][0];
-
-
-
 
     for (meCandidateIndex = 0; meCandidateIndex < cuResults->total_me_candidate_index; meCandidateIndex++) {
         if (cuResults->distortion_direction[meCandidateIndex].direction == UNI_PRED_LIST_0) {
@@ -98,10 +91,8 @@ EbBool CheckMvForPanHighAmp(
         return(EB_TRUE);
     }
 
-    else {
+    else
         return(EB_FALSE);
-    }
-
 }
 
 EbBool CheckMvForTiltHighAmp(
@@ -118,10 +109,8 @@ EbBool CheckMvForTiltHighAmp(
         return(EB_TRUE);
     }
 
-    else {
+    else
         return(EB_FALSE);
-    }
-
 }
 
 EbBool CheckMvForPan(
@@ -142,10 +131,8 @@ EbBool CheckMvForPan(
         return(EB_TRUE);
     }
 
-    else {
+    else
         return(EB_FALSE);
-    }
-
 }
 
 EbBool CheckMvForTilt(
@@ -166,10 +153,8 @@ EbBool CheckMvForTilt(
         return(EB_TRUE);
     }
 
-    else {
+    else
         return(EB_FALSE);
-    }
-
 }
 
 EbBool CheckMvForNonUniformMotion(
@@ -180,13 +165,10 @@ EbBool CheckMvForNonUniformMotion(
 {
     int32_t mvThreshold = 40;//LOW_AMPLITUDE_TH + 18;
     // Either the x or the y direction is greater than threshold
-    if ((ABS(*xCurrentMv - *xCandidateMv) > mvThreshold) || (ABS(*yCurrentMv - *yCandidateMv) > mvThreshold)) {
+    if ((ABS(*xCurrentMv - *xCandidateMv) > mvThreshold) || (ABS(*yCurrentMv - *yCandidateMv) > mvThreshold))
         return(EB_TRUE);
-    }
-    else {
+    else
         return(EB_FALSE);
-    }
-
 }
 
 void CheckForNonUniformMotionVectorField(
@@ -226,10 +208,8 @@ void CheckForNonUniformMotionVectorField(
                 xLeftMv = 0;
                 yLeftMv = 0;
             }
-            else {
+            else
                 GetMv(picture_control_set_ptr, sb_count - 1, &xLeftMv, &yLeftMv);
-            }
-
             countOfNonUniformNeighbors += CheckMvForNonUniformMotion(&xCurrentMv, &yCurrentMv, &xLeftMv, &yLeftMv);
 
             // Top MV
@@ -237,10 +217,8 @@ void CheckForNonUniformMotionVectorField(
                 xTopMv = 0;
                 yTopMv = 0;
             }
-            else {
+            else
                 GetMv(picture_control_set_ptr, sb_count - picture_width_in_sb, &xTopMv, &yTopMv);
-            }
-
             countOfNonUniformNeighbors += CheckMvForNonUniformMotion(&xCurrentMv, &yCurrentMv, &xTopMv, &yTopMv);
 
             // Right MV
@@ -248,10 +226,8 @@ void CheckForNonUniformMotionVectorField(
                 xRightMv = 0;
                 yRightMv = 0;
             }
-            else {
+            else
                 GetMv(picture_control_set_ptr, sb_count + 1, &xRightMv, &yRightMv);
-            }
-
             countOfNonUniformNeighbors += CheckMvForNonUniformMotion(&xCurrentMv, &yCurrentMv, &xRightMv, &yRightMv);
 
             // Bottom MV
@@ -259,15 +235,12 @@ void CheckForNonUniformMotionVectorField(
                 xBottomMv = 0;
                 yBottomMv = 0;
             }
-            else {
+            else
                 GetMv(picture_control_set_ptr, sb_count + picture_width_in_sb, &xBottomMv, &yBottomMv);
-            }
-
             countOfNonUniformNeighbors += CheckMvForNonUniformMotion(&xCurrentMv, &yCurrentMv, &xBottomMv, &yBottomMv);
         }
     }
 }
-
 
 void DetectGlobalMotion(
     PictureParentControlSet    *picture_control_set_ptr)
@@ -301,13 +274,10 @@ void DetectGlobalMotion(
 
     for (sb_count = 0; sb_count < picture_control_set_ptr->sb_total_count; ++sb_count) {
 
-
         sb_origin_x = (sb_count % picture_width_in_sb) * BLOCK_SIZE_64;
         sb_origin_y = (sb_count / picture_width_in_sb) * BLOCK_SIZE_64;
         if (((sb_origin_x + BLOCK_SIZE_64) <= picture_control_set_ptr->enhanced_picture_ptr->width) &&
             ((sb_origin_y + BLOCK_SIZE_64) <= picture_control_set_ptr->enhanced_picture_ptr->height)) {
-
-
 
             // Current MV
             GetMv(picture_control_set_ptr, sb_count, &xCurrentMv, &yCurrentMv);
@@ -317,37 +287,29 @@ void DetectGlobalMotion(
                 xLeftMv = 0;
                 yLeftMv = 0;
             }
-            else {
+            else
                 GetMv(picture_control_set_ptr, sb_count - 1, &xLeftMv, &yLeftMv);
-            }
-
             // Top MV
             if (sb_origin_y == 0) {
                 xTopMv = 0;
                 yTopMv = 0;
             }
-            else {
+            else
                 GetMv(picture_control_set_ptr, sb_count - picture_width_in_sb, &xTopMv, &yTopMv);
-            }
-
             // Right MV
             if ((sb_origin_x + (BLOCK_SIZE_64 << 1)) > picture_control_set_ptr->enhanced_picture_ptr->width) {
                 xRightMv = 0;
                 yRightMv = 0;
             }
-            else {
+            else
                 GetMv(picture_control_set_ptr, sb_count + 1, &xRightMv, &yRightMv);
-            }
-
             // Bottom MV
             if ((sb_origin_y + (BLOCK_SIZE_64 << 1)) > picture_control_set_ptr->enhanced_picture_ptr->height) {
                 xBottomMv = 0;
                 yBottomMv = 0;
             }
-            else {
+            else
                 GetMv(picture_control_set_ptr, sb_count + picture_width_in_sb, &xBottomMv, &yBottomMv);
-            }
-
             totalCheckedLcus++;
 
             if ((EbBool)(CheckMvForPan(picture_control_set_ptr->hierarchical_levels, picture_control_set_ptr->temporal_layer_index, &xCurrentMv, &yCurrentMv, &xLeftMv, &yLeftMv) ||
@@ -360,14 +322,12 @@ void DetectGlobalMotion(
                 xPanMvSum += xCurrentMv;
                 yPanMvSum += yCurrentMv;
 
-
             }
 
             if ((EbBool)(CheckMvForTilt(picture_control_set_ptr->hierarchical_levels, picture_control_set_ptr->temporal_layer_index, &xCurrentMv, &yCurrentMv, &xLeftMv, &yLeftMv) ||
                 CheckMvForTilt(picture_control_set_ptr->hierarchical_levels, picture_control_set_ptr->temporal_layer_index, &xCurrentMv, &yCurrentMv, &xTopMv, &yTopMv) ||
                 CheckMvForTilt(picture_control_set_ptr->hierarchical_levels, picture_control_set_ptr->temporal_layer_index, &xCurrentMv, &yCurrentMv, &xRightMv, &yRightMv) ||
                 CheckMvForTilt(picture_control_set_ptr->hierarchical_levels, picture_control_set_ptr->temporal_layer_index, &xCurrentMv, &yCurrentMv, &xBottomMv, &yBottomMv))) {
-
 
                 totalTiltLcus++;
 
@@ -382,14 +342,12 @@ void DetectGlobalMotion(
 
                 totalPanHighAmpLcus++;
 
-
             }
 
             if ((EbBool)(CheckMvForTiltHighAmp(picture_control_set_ptr->hierarchical_levels, picture_control_set_ptr->temporal_layer_index, &yCurrentMv, &yLeftMv) ||
                 CheckMvForTiltHighAmp(picture_control_set_ptr->hierarchical_levels, picture_control_set_ptr->temporal_layer_index, &yCurrentMv, &yTopMv) ||
                 CheckMvForTiltHighAmp(picture_control_set_ptr->hierarchical_levels, picture_control_set_ptr->temporal_layer_index, &yCurrentMv, &yRightMv) ||
                 CheckMvForTiltHighAmp(picture_control_set_ptr->hierarchical_levels, picture_control_set_ptr->temporal_layer_index, &yCurrentMv, &yBottomMv))) {
-
 
                 totalTiltHighAmpLcus++;
 
@@ -404,7 +362,6 @@ void DetectGlobalMotion(
     picture_control_set_ptr->panMvy = 0;
     picture_control_set_ptr->tiltMvx = 0;
     picture_control_set_ptr->tiltMvy = 0;
-
 
     // If more than PAN_LCU_PERCENTAGE % of LCUs are PAN
     if ((totalCheckedLcus > 0) && ((totalPanLcus * 100 / totalCheckedLcus) > PAN_LCU_PERCENTAGE)) {
@@ -518,17 +475,13 @@ void MeBasedGlobalMotionDetection(
     picture_control_set_ptr->is_pan = EB_FALSE;
     picture_control_set_ptr->is_tilt = EB_FALSE;
 
-    if (picture_control_set_ptr->slice_type != I_SLICE) {
+    if (picture_control_set_ptr->slice_type != I_SLICE)
         DetectGlobalMotion(picture_control_set_ptr);
-    }
-
     // Check if the motion vector field for temporal layer 0 pictures
-    if (picture_control_set_ptr->slice_type != I_SLICE && picture_control_set_ptr->temporal_layer_index == 0) {
+    if (picture_control_set_ptr->slice_type != I_SLICE && picture_control_set_ptr->temporal_layer_index == 0)
         CheckForNonUniformMotionVectorField(picture_control_set_ptr);
-    }
     return;
 }
-
 
 void StationaryEdgeCountLcu(
     SequenceControlSet        *sequence_control_set_ptr,
@@ -549,9 +502,8 @@ void StationaryEdgeCountLcu(
 
             if (tempLcuStatPtr->check1_for_logo_stationary_edge_over_time_flag)
             {
-                for (rasterScanCuIndex = RASTER_SCAN_CU_INDEX_16x16_0; rasterScanCuIndex <= RASTER_SCAN_CU_INDEX_16x16_15; rasterScanCuIndex++) {
+                for (rasterScanCuIndex = RASTER_SCAN_CU_INDEX_16x16_0; rasterScanCuIndex <= RASTER_SCAN_CU_INDEX_16x16_15; rasterScanCuIndex++)
                     sb_stat_ptr->cu_stat_array[rasterScanCuIndex].similar_edge_count += tempLcuStatPtr->cu_stat_array[rasterScanCuIndex].edge_cu;
-                }
             }
         }
 
@@ -562,12 +514,10 @@ void StationaryEdgeCountLcu(
 
             if (tempLcuStatPtr->pm_check1_for_logo_stationary_edge_over_time_flag)
             {
-                for (rasterScanCuIndex = RASTER_SCAN_CU_INDEX_16x16_0; rasterScanCuIndex <= RASTER_SCAN_CU_INDEX_16x16_15; rasterScanCuIndex++) {
+                for (rasterScanCuIndex = RASTER_SCAN_CU_INDEX_16x16_0; rasterScanCuIndex <= RASTER_SCAN_CU_INDEX_16x16_15; rasterScanCuIndex++)
                     sb_stat_ptr->cu_stat_array[rasterScanCuIndex].pm_similar_edge_count += tempLcuStatPtr->cu_stat_array[rasterScanCuIndex].edge_cu;
-                }
             }
         }
-
 
     }
 
@@ -606,21 +556,14 @@ void StationaryEdgeOverUpdateOverTimeLcuPart1(
                 ((int32_t)(var2 - averageVar) * (int32_t)(var2 - averageVar)) +
                 ((int32_t)(var3 - averageVar) * (int32_t)(var3 - averageVar))) >> 2;
 
-            if ((varOfVar <= 50000) || !lowMotion) {
+            if ((varOfVar <= 50000) || !lowMotion)
                 sb_stat_ptr->check1_for_logo_stationary_edge_over_time_flag = 0;
-            }
-            else {
+            else
                 sb_stat_ptr->check1_for_logo_stationary_edge_over_time_flag = 1;
-            }
-
-            if ((varOfVar <= 1000)) {
+            if ((varOfVar <= 1000))
                 sb_stat_ptr->pm_check1_for_logo_stationary_edge_over_time_flag = 0;
-            }
-            else {
+            else
                 sb_stat_ptr->pm_check1_for_logo_stationary_edge_over_time_flag = 1;
-            }
-
-
         }
         else {
             sb_stat_ptr->check1_for_logo_stationary_edge_over_time_flag = 0;
@@ -649,9 +592,8 @@ void StationaryEdgeOverUpdateOverTimeLcuPart2(
 
             EbBool lowSad = EB_FALSE;
 
-            if (picture_control_set_ptr->slice_type == B_SLICE) {
+            if (picture_control_set_ptr->slice_type == B_SLICE)
                 GetMeDist(picture_control_set_ptr, sb_index, &meDist);
-            }
             lowSad = (picture_control_set_ptr->slice_type != B_SLICE) ?
 
                 EB_FALSE : (meDist < 64 * 64 * lowSadTh) ? EB_TRUE : EB_FALSE;
@@ -696,10 +638,8 @@ void StationaryEdgeOverUpdateOverTimeLcu(
             uint32_t rasterScanCuIndex;
             uint32_t similarEdgeCountLcu = 0;
             // CU Loop
-            for (rasterScanCuIndex = RASTER_SCAN_CU_INDEX_16x16_0; rasterScanCuIndex <= RASTER_SCAN_CU_INDEX_16x16_15; rasterScanCuIndex++) {
+            for (rasterScanCuIndex = RASTER_SCAN_CU_INDEX_16x16_0; rasterScanCuIndex <= RASTER_SCAN_CU_INDEX_16x16_15; rasterScanCuIndex++)
                 similarEdgeCountLcu += (sb_stat_ptr->cu_stat_array[rasterScanCuIndex].similar_edge_count > slideWindowTh) ? 1 : 0;
-            }
-
             sb_stat_ptr->stationary_edge_over_time_flag = (similarEdgeCountLcu >= 4) ? EB_TRUE : EB_FALSE;
         }
 
@@ -709,10 +649,8 @@ void StationaryEdgeOverUpdateOverTimeLcu(
             uint32_t rasterScanCuIndex;
             uint32_t similarEdgeCountLcu = 0;
             // CU Loop
-            for (rasterScanCuIndex = RASTER_SCAN_CU_INDEX_16x16_0; rasterScanCuIndex <= RASTER_SCAN_CU_INDEX_16x16_15; rasterScanCuIndex++) {
+            for (rasterScanCuIndex = RASTER_SCAN_CU_INDEX_16x16_0; rasterScanCuIndex <= RASTER_SCAN_CU_INDEX_16x16_15; rasterScanCuIndex++)
                 similarEdgeCountLcu += (sb_stat_ptr->cu_stat_array[rasterScanCuIndex].pm_similar_edge_count > slideWindowTh) ? 1 : 0;
-            }
-
             sb_stat_ptr->pm_stationary_edge_over_time_flag = (similarEdgeCountLcu >= 4) ? EB_TRUE : EB_FALSE;
         }
 
@@ -745,14 +683,11 @@ void StationaryEdgeOverUpdateOverTimeLcu(
                     countOfNeighbors = 0;
                     for (lcuVer = lcuVerS; lcuVer <= lcuVerE; lcuVer++) {
                         lcuVerOffset = lcuVer * (int32_t)picture_width_in_sb;
-                        for (lcuHor = lcuHorS; lcuHor <= lcuHorE; lcuHor++) {
+                        for (lcuHor = lcuHorS; lcuHor <= lcuHorE; lcuHor++)
                             countOfNeighbors += (picture_control_set_ptr->sb_stat_array[sb_index + lcuVerOffset + lcuHor].stationary_edge_over_time_flag == 1);
-
-                        }
                     }
-                    if (countOfNeighbors == 1) {
+                    if (countOfNeighbors == 1)
                         sb_stat_ptr->stationary_edge_over_time_flag = 0;
-                    }
                 }
             }
 
@@ -765,20 +700,17 @@ void StationaryEdgeOverUpdateOverTimeLcu(
                     countOfNeighborsPm = 0;
                     for (lcuVer = lcuVerS; lcuVer <= lcuVerE; lcuVer++) {
                         lcuVerOffset = lcuVer * (int32_t)picture_width_in_sb;
-                        for (lcuHor = lcuHorS; lcuHor <= lcuHorE; lcuHor++) {
+                        for (lcuHor = lcuHorS; lcuHor <= lcuHorE; lcuHor++)
                             countOfNeighborsPm += (picture_control_set_ptr->sb_stat_array[sb_index + lcuVerOffset + lcuHor].pm_stationary_edge_over_time_flag == 1);
-                        }
                     }
 
-                    if (countOfNeighborsPm == 1) {
+                    if (countOfNeighborsPm == 1)
                         sb_stat_ptr->pm_stationary_edge_over_time_flag = 0;
-                    }
                 }
             }
 
         }
     }
-
 
     {
 
@@ -807,15 +739,11 @@ void StationaryEdgeOverUpdateOverTimeLcu(
                     countOfNeighbors = 0;
                     for (lcuVer = lcuVerS; lcuVer <= lcuVerE; lcuVer++) {
                         lcuVerOffset = lcuVer * (int32_t)picture_width_in_sb;
-                        for (lcuHor = lcuHorS; lcuHor <= lcuHorE; lcuHor++) {
+                        for (lcuHor = lcuHorS; lcuHor <= lcuHorE; lcuHor++)
                             countOfNeighbors += (picture_control_set_ptr->sb_stat_array[sb_index + lcuVerOffset + lcuHor].stationary_edge_over_time_flag == 1);
-
-                        }
                     }
-                    if (countOfNeighbors > 0) {
+                    if (countOfNeighbors > 0)
                         sb_stat_ptr->stationary_edge_over_time_flag = 2;
-                    }
-
                 }
             }
         }
@@ -838,15 +766,11 @@ void StationaryEdgeOverUpdateOverTimeLcu(
                     countOfNeighbors = 0;
                     for (lcuVer = lcuVerS; lcuVer <= lcuVerE; lcuVer++) {
                         lcuVerOffset = lcuVer * (int32_t)picture_width_in_sb;
-                        for (lcuHor = lcuHorS; lcuHor <= lcuHorE; lcuHor++) {
+                        for (lcuHor = lcuHorS; lcuHor <= lcuHorE; lcuHor++)
                             countOfNeighbors += (picture_control_set_ptr->sb_stat_array[sb_index + lcuVerOffset + lcuHor].stationary_edge_over_time_flag == 2);
-
-                        }
                     }
-                    if (countOfNeighbors > 3) {
+                    if (countOfNeighbors > 3)
                         sb_stat_ptr->stationary_edge_over_time_flag = 3;
-                    }
-
                 }
             }
         }
@@ -879,15 +803,11 @@ void StationaryEdgeOverUpdateOverTimeLcu(
                     countOfNeighbors = 0;
                     for (lcuVer = lcuVerS; lcuVer <= lcuVerE; lcuVer++) {
                         lcuVerOffset = lcuVer * (int32_t)picture_width_in_sb;
-                        for (lcuHor = lcuHorS; lcuHor <= lcuHorE; lcuHor++) {
+                        for (lcuHor = lcuHorS; lcuHor <= lcuHorE; lcuHor++)
                             countOfNeighbors += (picture_control_set_ptr->sb_stat_array[sb_index + lcuVerOffset + lcuHor].pm_stationary_edge_over_time_flag == 1);
-
-                        }
                     }
-                    if (countOfNeighbors > 0) {
+                    if (countOfNeighbors > 0)
                         sb_stat_ptr->pm_stationary_edge_over_time_flag = 2;
-                    }
-
                 }
             }
         }
@@ -910,15 +830,11 @@ void StationaryEdgeOverUpdateOverTimeLcu(
                     countOfNeighbors = 0;
                     for (lcuVer = lcuVerS; lcuVer <= lcuVerE; lcuVer++) {
                         lcuVerOffset = lcuVer * (int32_t)picture_width_in_sb;
-                        for (lcuHor = lcuHorS; lcuHor <= lcuHorE; lcuHor++) {
+                        for (lcuHor = lcuHorS; lcuHor <= lcuHorE; lcuHor++)
                             countOfNeighbors += (picture_control_set_ptr->sb_stat_array[sb_index + lcuVerOffset + lcuHor].pm_stationary_edge_over_time_flag == 2);
-
-                        }
                     }
-                    if (countOfNeighbors > 3) {
+                    if (countOfNeighbors > 3)
                         sb_stat_ptr->pm_stationary_edge_over_time_flag = 3;
-                    }
-
                 }
             }
         }
@@ -947,7 +863,6 @@ void UpdateGlobalMotionDetectionOverTime(
     uint32_t                                updateIsPanFramesToCheck;
     uint32_t                                inputQueueIndex;
     uint32_t                                framesToCheckIndex;
-
 
     (void)sequence_control_set_ptr;
 
@@ -982,9 +897,8 @@ void UpdateGlobalMotionDetectionOverTime(
 
     if (totalCheckedPictures) {
         if (picture_control_set_ptr->slice_type != I_SLICE) {
-            if ((totalPanPictures * 100 / totalCheckedPictures) > 75) {
+            if ((totalPanPictures * 100 / totalCheckedPictures) > 75)
                 picture_control_set_ptr->is_pan = EB_TRUE;
-            }
         }
 
     }
@@ -1010,7 +924,6 @@ void UpdateBeaInfoOverTime(
     uint64_t                                nonMovingIndexSum = 0;
     uint32_t                                inputQueueIndex;
 
-
     SequenceControlSet *sequence_control_set_ptr = (SequenceControlSet*)picture_control_set_ptr->sequence_control_set_wrapper_ptr->object_ptr;
     // Update motionIndexArray of the current picture by averaging the motionIndexArray of the N future pictures
     // Determine number of frames to check N
@@ -1018,7 +931,7 @@ void UpdateBeaInfoOverTime(
 
     // SB Loop
     for (lcuIdx = 0; lcuIdx < picture_control_set_ptr->sb_total_count; ++lcuIdx) {
-#if !MEMORY_FOOTPRINT_OPT 
+#if !MEMORY_FOOTPRINT_OPT
         uint32_t zzCostOverSlidingWindow = picture_control_set_ptr->zz_cost_array[lcuIdx];
 #endif
         uint16_t nonMovingIndexOverSlidingWindow = picture_control_set_ptr->non_moving_index_array[lcuIdx];
@@ -1027,15 +940,12 @@ void UpdateBeaInfoOverTime(
         inputQueueIndex = (encode_context_ptr->initial_rate_control_reorder_queue_head_index == INITIAL_RATE_CONTROL_REORDER_QUEUE_MAX_DEPTH - 1) ? 0 : encode_context_ptr->initial_rate_control_reorder_queue_head_index + 1;
         for (framesToCheckIndex = 0; framesToCheckIndex < updateNonMovingIndexArrayFramesToCheck - 1; framesToCheckIndex++) {
 
-
             temporaryQueueEntryPtr = encode_context_ptr->initial_rate_control_reorder_queue[inputQueueIndex];
             temporaryPictureControlSetPtr = ((PictureParentControlSet*)(temporaryQueueEntryPtr->parent_pcs_wrapper_ptr)->object_ptr);
 
-
-            if (temporaryPictureControlSetPtr->slice_type == I_SLICE || temporaryPictureControlSetPtr->end_of_sequence_flag) {
+            if (temporaryPictureControlSetPtr->slice_type == I_SLICE || temporaryPictureControlSetPtr->end_of_sequence_flag)
                 break;
-            }
-#if !MEMORY_FOOTPRINT_OPT 
+#if !MEMORY_FOOTPRINT_OPT
             zzCostOverSlidingWindow += temporaryPictureControlSetPtr->zz_cost_array[lcuIdx];
 #endif
             nonMovingIndexOverSlidingWindow += temporaryPictureControlSetPtr->non_moving_index_array[lcuIdx];
@@ -1043,7 +953,7 @@ void UpdateBeaInfoOverTime(
             // Increment the inputQueueIndex Iterator
             inputQueueIndex = (inputQueueIndex == INITIAL_RATE_CONTROL_REORDER_QUEUE_MAX_DEPTH - 1) ? 0 : inputQueueIndex + 1;
         }
-#if !MEMORY_FOOTPRINT_OPT 
+#if !MEMORY_FOOTPRINT_OPT
         picture_control_set_ptr->zz_cost_array[lcuIdx] = (uint8_t)(zzCostOverSlidingWindow / (framesToCheckIndex + 1));
 #endif
         picture_control_set_ptr->non_moving_index_array[lcuIdx] = (uint8_t)(nonMovingIndexOverSlidingWindow / (framesToCheckIndex + 1));
@@ -1064,20 +974,16 @@ void InitZzCostInfo(
     PictureParentControlSet         *picture_control_set_ptr)
 {
     uint16_t lcuIdx;
-#if !MEMORY_FOOTPRINT_OPT 
+#if !MEMORY_FOOTPRINT_OPT
     // SB loop
-    for (lcuIdx = 0; lcuIdx < picture_control_set_ptr->sb_total_count; ++lcuIdx) {
+    for (lcuIdx = 0; lcuIdx < picture_control_set_ptr->sb_total_count; ++lcuIdx)
         picture_control_set_ptr->zz_cost_array[lcuIdx] = INVALID_ZZ_COST;
-
-    }
 #endif
     picture_control_set_ptr->non_moving_index_average = INVALID_ZZ_COST;
 
     // SB Loop
-    for (lcuIdx = 0; lcuIdx < picture_control_set_ptr->sb_total_count; ++lcuIdx) {
+    for (lcuIdx = 0; lcuIdx < picture_control_set_ptr->sb_total_count; ++lcuIdx)
         picture_control_set_ptr->non_moving_index_array[lcuIdx] = INVALID_ZZ_COST;
-    }
-
     return;
 }
 
@@ -1099,7 +1005,6 @@ void UpdateMotionFieldUniformityOverTime(
     uint32_t                                framesToCheckIndex;
     //printf("To update POC %d\tframesInSw = %d\n", picture_control_set_ptr->picture_number, picture_control_set_ptr->frames_in_sw);
 
-
     //Check conditions for statinary edge over time
     StationaryEdgeOverUpdateOverTimeLcuPart2(
         sequence_control_set_ptr,
@@ -1112,13 +1017,11 @@ void UpdateMotionFieldUniformityOverTime(
     inputQueueIndex = (encode_context_ptr->initial_rate_control_reorder_queue_head_index == INITIAL_RATE_CONTROL_REORDER_QUEUE_MAX_DEPTH - 1) ? 0 : encode_context_ptr->initial_rate_control_reorder_queue_head_index;
     for (framesToCheckIndex = 0; framesToCheckIndex < NoFramesToCheck - 1; framesToCheckIndex++) {
 
-
         temporaryQueueEntryPtr = encode_context_ptr->initial_rate_control_reorder_queue[inputQueueIndex];
         temporaryPictureControlSetPtr = ((PictureParentControlSet*)(temporaryQueueEntryPtr->parent_pcs_wrapper_ptr)->object_ptr);
 
-        if (temporaryPictureControlSetPtr->end_of_sequence_flag) {
+        if (temporaryPictureControlSetPtr->end_of_sequence_flag)
             break;
-        }
         // The values are calculated for every 4th frame
         if ((temporaryPictureControlSetPtr->picture_number & 3) == 0) {
             StationaryEdgeCountLcu(
@@ -1184,14 +1087,10 @@ void UpdateHomogeneityOverTime(
         inputQueueIndex = (encode_context_ptr->initial_rate_control_reorder_queue_head_index == INITIAL_RATE_CONTROL_REORDER_QUEUE_MAX_DEPTH - 1) ? 0 : encode_context_ptr->initial_rate_control_reorder_queue_head_index;
         for (framesToCheckIndex = 0; framesToCheckIndex < NoFramesToCheck - 1; framesToCheckIndex++) {
 
-
             temporaryQueueEntryPtr = encode_context_ptr->initial_rate_control_reorder_queue[inputQueueIndex];
             temporaryPictureControlSetPtr = ((PictureParentControlSet*)(temporaryQueueEntryPtr->parent_pcs_wrapper_ptr)->object_ptr);
-            if (temporaryPictureControlSetPtr->scene_change_flag || temporaryPictureControlSetPtr->end_of_sequence_flag) {
-
+            if (temporaryPictureControlSetPtr->scene_change_flag || temporaryPictureControlSetPtr->end_of_sequence_flag)
                 break;
-            }
-
             variancePtr = temporaryPictureControlSetPtr->variance[lcuIdx];
 
             meanSqrvariance64x64Based += (variancePtr[ME_TIER_ZERO_PU_64x64])*(variancePtr[ME_TIER_ZERO_PU_64x64]);
@@ -1208,15 +1107,11 @@ void UpdateHomogeneityOverTime(
         // Compute variance
         picture_control_set_ptr->sb_variance_of_variance_over_time[lcuIdx] = meanSqrvariance64x64Based - meanvariance64x64Based * meanvariance64x64Based;
 
-        if (picture_control_set_ptr->sb_variance_of_variance_over_time[lcuIdx] <= (VAR_BASED_DETAIL_PRESERVATION_SELECTOR_THRSLHD)) {
+        if (picture_control_set_ptr->sb_variance_of_variance_over_time[lcuIdx] <= (VAR_BASED_DETAIL_PRESERVATION_SELECTOR_THRSLHD))
             picture_control_set_ptr->is_sb_homogeneous_over_time[lcuIdx] = EB_TRUE;
-        }
-
         countOfHomogeneousOverTime += picture_control_set_ptr->is_sb_homogeneous_over_time[lcuIdx];
 
-
     } // SB loop
-
 
     picture_control_set_ptr->pic_homogenous_over_time_sb_percentage = (uint8_t)(countOfHomogeneousOverTime * 100 / picture_control_set_ptr->sb_total_count);
 
@@ -1255,8 +1150,6 @@ InitialRateControlReorderEntry  * DeterminePictureOffsetInQueue(
     queueEntryPtr->parent_pcs_wrapper_ptr = inputResultsPtr->picture_control_set_wrapper_ptr;
     queueEntryPtr->picture_number = picture_control_set_ptr->picture_number;
 
-
-
     return queueEntryPtr;
 }
 
@@ -1276,7 +1169,6 @@ void GetHistogramQueueData(
         histogramQueueEntryIndex - HIGH_LEVEL_RATE_CONTROL_HISTOGRAM_QUEUE_MAX_DEPTH :
         histogramQueueEntryIndex;
     histogramQueueEntryPtr = encode_context_ptr->hl_rate_control_historgram_queue[histogramQueueEntryIndex];
-
 
     //histogramQueueEntryPtr->parent_pcs_wrapper_ptr  = inputResultsPtr->picture_control_set_wrapper_ptr;
     histogramQueueEntryPtr->picture_number = picture_control_set_ptr->picture_number;
@@ -1309,7 +1201,6 @@ void GetHistogramQueueData(
     eb_release_mutex(sequence_control_set_ptr->encode_context_ptr->hl_rate_control_historgram_queue_mutex);
     //printf("Test1 POC: %d\t POC: %d\t LifeCount: %d\n", histogramQueueEntryPtr->picture_number, picture_control_set_ptr->picture_number,  histogramQueueEntryPtr->life_count);
 
-
     return;
 
 }
@@ -1338,13 +1229,10 @@ void UpdateHistogramQueueEntry(
     histogramQueueEntryPtr = encode_context_ptr->hl_rate_control_historgram_queue[histogramQueueEntryIndex];
     histogramQueueEntryPtr->passed_to_hlrc = EB_TRUE;
 #if RC
-    if (sequence_control_set_ptr->static_config.rate_control_mode == 3) {
+    if (sequence_control_set_ptr->static_config.rate_control_mode == 3)
         histogramQueueEntryPtr->life_count += (int16_t)(sequence_control_set_ptr->static_config.intra_period_length + 1) - 3; // FramelevelRC does not decrease the life count for first picture in each temporal layer
-
-    }
-    else {
+    else
         histogramQueueEntryPtr->life_count += picture_control_set_ptr->historgram_life_count;
-    }
     histogramQueueEntryPtr->frames_in_sw = frames_in_sw;
 #endif
     eb_release_mutex(sequence_control_set_ptr->encode_context_ptr->hl_rate_control_historgram_queue_mutex);
@@ -1352,7 +1240,7 @@ void UpdateHistogramQueueEntry(
     return;
 
 }
-#if !MEMORY_FOOTPRINT_OPT 
+#if !MEMORY_FOOTPRINT_OPT
 /******************************************************
 * Derive Similar Collocated Flag
 ******************************************************/
@@ -1393,9 +1281,8 @@ void DeriveSimilarCollocatedFlag(
             if ((ABS((int64_t)curMean - (int64_t)refMean) < MEAN_DIFF_THRSHOLD) &&
                 ((ABS((int64_t)curVar * 100 / (int64_t)refVar - 100) < VAR_DIFF_THRSHOLD) || (ABS((int64_t)curVar - (int64_t)refVar) < VAR_DIFF_THRSHOLD))) {
 
-                if (picture_control_set_ptr->is_used_as_reference_flag) {
+                if (picture_control_set_ptr->is_used_as_reference_flag)
                     picture_control_set_ptr->similar_colocated_sb_array[sb_index] = EB_TRUE;
-                }
                 picture_control_set_ptr->similar_colocated_sb_array_ii[sb_index] = EB_TRUE;
             }
         }
@@ -1422,7 +1309,6 @@ void QpmGatherStatisticsSW(
     uint32_t                  oisSad;
     uint32_t                  meSad;
 
-
     uint8_t                   cu_depth;
     SbParams sb_params = sequence_control_set_ptr->sb_params_array[sb_index];
 
@@ -1435,13 +1321,10 @@ void QpmGatherStatisticsSW(
             if (sb_params.raster_scan_cu_validity[rasterScanCuIndex]) {
                 mdScanCuIndex = raster_scan_to_md_scan[rasterScanCuIndex];
 
-
-
             OisSbResults        *ois_sb_results_ptr = picture_control_set_ptr->ois_sb_results[sb_index];
-    
+
             OisCandidate *ois_cu_ptr = ois_sb_results_ptr->ois_candidate_array[mdScanCuIndex];
             oisSad = ois_cu_ptr[ois_sb_results_ptr->best_distortion_index[mdScanCuIndex]].distortion;
-
 
 #if MRP_CONNECTION
                 meSad = picture_control_set_ptr->me_results[sb_index]->me_candidate[rasterScanCuIndex][0].distortion;
@@ -1462,20 +1345,15 @@ void QpmGatherStatisticsSW(
 
         }
 
-
-
     }
-
-
-
 
     cu_depth = 2;
     for (rasterScanCuIndex = RASTER_SCAN_CU_INDEX_16x16_0; rasterScanCuIndex <= RASTER_SCAN_CU_INDEX_16x16_15; rasterScanCuIndex++) {
         if (sb_params.raster_scan_cu_validity[rasterScanCuIndex]) {
-            
+
             mdScanCuIndex = raster_scan_to_md_scan[rasterScanCuIndex];
 
-            OisSbResults        *ois_sb_results_ptr = picture_control_set_ptr->ois_sb_results[sb_index];    
+            OisSbResults        *ois_sb_results_ptr = picture_control_set_ptr->ois_sb_results[sb_index];
             OisCandidate *ois_cu_ptr = ois_sb_results_ptr->ois_candidate_array[mdScanCuIndex];
             oisSad = ois_cu_ptr[ois_sb_results_ptr->best_distortion_index[mdScanCuIndex]].distortion;
 #if MRP_CONNECTION
@@ -1502,7 +1380,7 @@ void QpmGatherStatisticsSW(
 
              mdScanCuIndex = raster_scan_to_md_scan[rasterScanCuIndex];
 
-            OisSbResults        *ois_sb_results_ptr = picture_control_set_ptr->ois_sb_results[sb_index];    
+            OisSbResults        *ois_sb_results_ptr = picture_control_set_ptr->ois_sb_results[sb_index];
             OisCandidate *ois_cu_ptr = ois_sb_results_ptr->ois_candidate_array[mdScanCuIndex];
             oisSad = ois_cu_ptr[ois_sb_results_ptr->best_distortion_index[mdScanCuIndex]].distortion;
 #if MRP_CONNECTION
@@ -1528,7 +1406,7 @@ void QpmGatherStatisticsSW(
     if (sb_params.raster_scan_cu_validity[RASTER_SCAN_CU_INDEX_64x64]) {
             mdScanCuIndex = 0;
 
-            OisSbResults        *ois_sb_results_ptr = picture_control_set_ptr->ois_sb_results[sb_index];    
+            OisSbResults        *ois_sb_results_ptr = picture_control_set_ptr->ois_sb_results[sb_index];
             OisCandidate *ois_cu_ptr = ois_sb_results_ptr->ois_candidate_array[mdScanCuIndex];
             oisSad = ois_cu_ptr[ois_sb_results_ptr->best_distortion_index[mdScanCuIndex]].distortion;
 #if MRP_CONNECTION
@@ -1547,8 +1425,6 @@ void QpmGatherStatisticsSW(
         picture_control_set_ptr->inter_complexity_accum[cu_depth] += meSad;
         picture_control_set_ptr->processed_leaf_count[cu_depth]++;
     }
-
-
 
 }
 
@@ -1577,75 +1453,61 @@ EbBool IsSpatiallyComplexArea(
     // Check the variance of left SB if available
     if (sb_origin_x != 0) {
         availableLcusCount++;
-        if ((parentPcs->variance[lcuAdrr - 1][ME_TIER_ZERO_PU_64x64]) > IS_COMPLEX_LCU_VARIANCE_TH) {
+        if ((parentPcs->variance[lcuAdrr - 1][ME_TIER_ZERO_PU_64x64]) > IS_COMPLEX_LCU_VARIANCE_TH)
             highVarianceLcusCount++;
-        }
     }
 
     // Check the variance of right SB if available
     if ((sb_origin_x + BLOCK_SIZE_64) < parentPcs->enhanced_picture_ptr->width) {
         availableLcusCount++;
-        if ((parentPcs->variance[lcuAdrr + 1][ME_TIER_ZERO_PU_64x64]) > IS_COMPLEX_LCU_VARIANCE_TH) {
+        if ((parentPcs->variance[lcuAdrr + 1][ME_TIER_ZERO_PU_64x64]) > IS_COMPLEX_LCU_VARIANCE_TH)
             highVarianceLcusCount++;
-        }
-
     }
 
     // Check the variance of top SB if available
     if (sb_origin_y != 0) {
         availableLcusCount++;
-        if ((parentPcs->variance[lcuAdrr - pictureWidthInLcus][ME_TIER_ZERO_PU_64x64]) > IS_COMPLEX_LCU_VARIANCE_TH) {
+        if ((parentPcs->variance[lcuAdrr - pictureWidthInLcus][ME_TIER_ZERO_PU_64x64]) > IS_COMPLEX_LCU_VARIANCE_TH)
             highVarianceLcusCount++;
-        }
     }
 
     // Check the variance of bottom LCU
     if ((sb_origin_y + BLOCK_SIZE_64) < parentPcs->enhanced_picture_ptr->height) {
         availableLcusCount++;
-        if ((parentPcs->variance[lcuAdrr + pictureWidthInLcus][ME_TIER_ZERO_PU_64x64]) > IS_COMPLEX_LCU_VARIANCE_TH) {
+        if ((parentPcs->variance[lcuAdrr + pictureWidthInLcus][ME_TIER_ZERO_PU_64x64]) > IS_COMPLEX_LCU_VARIANCE_TH)
             highVarianceLcusCount++;
-        }
-
     }
 
     // Check the variance of top-left LCU
     if ((sb_origin_x >= BLOCK_SIZE_64) && (sb_origin_y >= BLOCK_SIZE_64)) {
         availableLcusCount++;
-        if ((parentPcs->variance[lcuAdrr - pictureWidthInLcus - 1][ME_TIER_ZERO_PU_64x64]) > IS_COMPLEX_LCU_VARIANCE_TH) {
+        if ((parentPcs->variance[lcuAdrr - pictureWidthInLcus - 1][ME_TIER_ZERO_PU_64x64]) > IS_COMPLEX_LCU_VARIANCE_TH)
             highVarianceLcusCount++;
-        }
-
     }
 
     // Check the variance of top-right LCU
     if ((sb_origin_x < parentPcs->enhanced_picture_ptr->width - BLOCK_SIZE_64) && (sb_origin_y >= BLOCK_SIZE_64)) {
         availableLcusCount++;
-        if ((parentPcs->variance[lcuAdrr - pictureWidthInLcus + 1][ME_TIER_ZERO_PU_64x64]) > IS_COMPLEX_LCU_VARIANCE_TH) {
+        if ((parentPcs->variance[lcuAdrr - pictureWidthInLcus + 1][ME_TIER_ZERO_PU_64x64]) > IS_COMPLEX_LCU_VARIANCE_TH)
             highVarianceLcusCount++;
-        }
     }
 
     // Check the variance of bottom-left LCU
     if ((sb_origin_x >= BLOCK_SIZE_64) && (sb_origin_y < parentPcs->enhanced_picture_ptr->height - BLOCK_SIZE_64)) {
         availableLcusCount++;
-        if ((parentPcs->variance[lcuAdrr + pictureWidthInLcus - 1][ME_TIER_ZERO_PU_64x64]) > IS_COMPLEX_LCU_VARIANCE_TH) {
+        if ((parentPcs->variance[lcuAdrr + pictureWidthInLcus - 1][ME_TIER_ZERO_PU_64x64]) > IS_COMPLEX_LCU_VARIANCE_TH)
             highVarianceLcusCount++;
-        }
-
     }
 
     // Check the variance of bottom-right LCU
     if ((sb_origin_x < parentPcs->enhanced_picture_ptr->width - BLOCK_SIZE_64) && (sb_origin_y < parentPcs->enhanced_picture_ptr->height - BLOCK_SIZE_64)) {
         availableLcusCount++;
-        if ((parentPcs->variance[lcuAdrr + pictureWidthInLcus + 1][ME_TIER_ZERO_PU_64x64]) > IS_COMPLEX_LCU_VARIANCE_TH) {
+        if ((parentPcs->variance[lcuAdrr + pictureWidthInLcus + 1][ME_TIER_ZERO_PU_64x64]) > IS_COMPLEX_LCU_VARIANCE_TH)
             highVarianceLcusCount++;
-        }
     }
 
-    if (highVarianceLcusCount == availableLcusCount) {
+    if (highVarianceLcusCount == availableLcusCount)
         return EB_TRUE;
-    }
-
     return EB_FALSE;
 
 }
@@ -1671,24 +1533,18 @@ void DeriveBlockinessPresentFlag(
             lcuParamPtr->origin_y)) {
 
             // Active SB within an active scene (added a check on 4K & non-BASE to restrict the action - could be generated for all resolutions/layers)
-            if (picture_control_set_ptr->non_moving_index_array[sb_index] == SB_COMPLEXITY_NON_MOVING_INDEX_TH_0 && picture_control_set_ptr->non_moving_index_average >= SB_COMPLEXITY_NON_MOVING_INDEX_TH_1 && picture_control_set_ptr->temporal_layer_index > 0 && sequence_control_set_ptr->input_resolution == INPUT_SIZE_4K_RANGE) {
+            if (picture_control_set_ptr->non_moving_index_array[sb_index] == SB_COMPLEXITY_NON_MOVING_INDEX_TH_0 && picture_control_set_ptr->non_moving_index_average >= SB_COMPLEXITY_NON_MOVING_INDEX_TH_1 && picture_control_set_ptr->temporal_layer_index > 0 && sequence_control_set_ptr->input_resolution == INPUT_SIZE_4K_RANGE)
                 picture_control_set_ptr->complex_sb_array[sb_index] = SB_COMPLEXITY_STATUS_2;
-            }
             // Active SB within a scene with a moderate acitivity (eg. active foregroud & static background)
-            else if (picture_control_set_ptr->non_moving_index_array[sb_index] == SB_COMPLEXITY_NON_MOVING_INDEX_TH_0 && picture_control_set_ptr->non_moving_index_average >= SB_COMPLEXITY_NON_MOVING_INDEX_TH_2 && picture_control_set_ptr->non_moving_index_average < SB_COMPLEXITY_NON_MOVING_INDEX_TH_1) {
+            else if (picture_control_set_ptr->non_moving_index_array[sb_index] == SB_COMPLEXITY_NON_MOVING_INDEX_TH_0 && picture_control_set_ptr->non_moving_index_average >= SB_COMPLEXITY_NON_MOVING_INDEX_TH_2 && picture_control_set_ptr->non_moving_index_average < SB_COMPLEXITY_NON_MOVING_INDEX_TH_1)
                 picture_control_set_ptr->complex_sb_array[sb_index] = SB_COMPLEXITY_STATUS_1;
-            }
-            else {
+            else
                 picture_control_set_ptr->complex_sb_array[sb_index] = SB_COMPLEXITY_STATUS_0;
-            }
         }
-        else {
+        else
             picture_control_set_ptr->complex_sb_array[sb_index] = SB_COMPLEXITY_STATUS_0;
-        }
-
     }
 }
-
 
 /************************************************
 * Initial Rate Control Kernel
@@ -1755,7 +1611,7 @@ void* initial_rate_control_kernel(void *input_ptr)
             //reset intraCodedEstimationLcu
             MeBasedGlobalMotionDetection(
                 picture_control_set_ptr);
-#if !MEMORY_FOOTPRINT_OPT 
+#if !MEMORY_FOOTPRINT_OPT
             // Derive Similar Collocated Flag
             DeriveSimilarCollocatedFlag(
                 picture_control_set_ptr);
@@ -1789,10 +1645,8 @@ void* initial_rate_control_kernel(void *input_ptr)
                 }
             }
 
-            for (temporal_layer_index = 0; temporal_layer_index < EB_MAX_TEMPORAL_LAYERS; temporal_layer_index++) {
+            for (temporal_layer_index = 0; temporal_layer_index < EB_MAX_TEMPORAL_LAYERS; temporal_layer_index++)
                 picture_control_set_ptr->frames_in_interval[temporal_layer_index] = 0;
-            }
-
             picture_control_set_ptr->frames_in_sw = 0;
             picture_control_set_ptr->historgram_life_count = 0;
             picture_control_set_ptr->scene_change_in_gop = EB_FALSE;
@@ -1802,7 +1656,6 @@ void* initial_rate_control_kernel(void *input_ptr)
             StationaryEdgeOverUpdateOverTimeLcuPart1(
                 sequence_control_set_ptr,
                 picture_control_set_ptr);
-
 
             if (sequence_control_set_ptr->static_config.improve_sharpness) {
 
@@ -1824,8 +1677,6 @@ void* initial_rate_control_kernel(void *input_ptr)
                     picture_control_set_ptr->processed_leaf_count[cu_depth] = 0;
                 }
 
-
-
                 for (sb_index = 0; sb_index < picture_control_set_ptr->sb_total_count; sb_index++) {
 
                     QpmGatherStatisticsSW(
@@ -1833,7 +1684,6 @@ void* initial_rate_control_kernel(void *input_ptr)
                         picture_control_set_ptr,
                         sb_index);
                 }
-
 
                 picture_control_set_ptr->intra_complexity_min_pre = picture_control_set_ptr->intra_complexity_min[0];
                 picture_control_set_ptr->intra_complexity_max_pre = picture_control_set_ptr->intra_complexity_max[0];
@@ -1888,19 +1738,15 @@ void* initial_rate_control_kernel(void *input_ptr)
                 }
             }
 
-
-
             moveSlideWondowFlag = EB_TRUE;
             while (moveSlideWondowFlag) {
 
                 // Check if the sliding window condition is valid
                 queueEntryIndexTemp = encode_context_ptr->initial_rate_control_reorder_queue_head_index;
-                if (encode_context_ptr->initial_rate_control_reorder_queue[queueEntryIndexTemp]->parent_pcs_wrapper_ptr != EB_NULL) {
+                if (encode_context_ptr->initial_rate_control_reorder_queue[queueEntryIndexTemp]->parent_pcs_wrapper_ptr != EB_NULL)
                     end_of_sequence_flag = (((PictureParentControlSet*)(encode_context_ptr->initial_rate_control_reorder_queue[queueEntryIndexTemp]->parent_pcs_wrapper_ptr)->object_ptr))->end_of_sequence_flag;
-                }
-                else {
+                else
                     end_of_sequence_flag = EB_FALSE;
-                }
                 frames_in_sw = 0;
                 while (moveSlideWondowFlag && !end_of_sequence_flag &&
                     queueEntryIndexTemp <= encode_context_ptr->initial_rate_control_reorder_queue_head_index + sequence_control_set_ptr->static_config.look_ahead_distance) {
@@ -1915,12 +1761,10 @@ void* initial_rate_control_kernel(void *input_ptr)
                         // check if it is the last frame. If we have reached the last frame, we would output the buffered frames in the Queue.
                         end_of_sequence_flag = ((PictureParentControlSet*)(encode_context_ptr->initial_rate_control_reorder_queue[queueEntryIndexTemp2]->parent_pcs_wrapper_ptr)->object_ptr)->end_of_sequence_flag;
                     }
-                    else {
+                    else
                         end_of_sequence_flag = EB_FALSE;
-                    }
                     queueEntryIndexTemp++;
                 }
-
 
                 if (moveSlideWondowFlag) {
 
@@ -1949,8 +1793,6 @@ void* initial_rate_control_kernel(void *input_ptr)
                         end_of_sequence_flag = pictureControlSetPtrTemp->end_of_sequence_flag;
                         queueEntryIndexTemp++;
                     }
-
-
 
                     if ((sequence_control_set_ptr->static_config.look_ahead_distance != 0) && (frames_in_sw < (sequence_control_set_ptr->static_config.look_ahead_distance + 1)))
                         picture_control_set_ptr->end_of_sequence_region = EB_TRUE;
@@ -1986,9 +1828,8 @@ void* initial_rate_control_kernel(void *input_ptr)
                             picture_control_set_ptr);
                     }
                     else {
-                        if (picture_control_set_ptr->slice_type != I_SLICE) {
+                        if (picture_control_set_ptr->slice_type != I_SLICE)
                             DetectGlobalMotion(picture_control_set_ptr);
-                        }
                     }
 
                     // BACKGROUND ENHANCEMENT PART II
@@ -2014,7 +1855,7 @@ void* initial_rate_control_kernel(void *input_ptr)
                             sequence_control_set_ptr,
                             picture_control_set_ptr);
                     }
-#if !MEMORY_FOOTPRINT_OPT  
+#if !MEMORY_FOOTPRINT_OPT
                     if (!picture_control_set_ptr->end_of_sequence_flag && sequence_control_set_ptr->static_config.look_ahead_distance != 0) {
                         // Compute and store variance of LCus over time and determine homogenuity temporally
                         UpdateHomogeneityOverTime(
@@ -2049,7 +1890,6 @@ void* initial_rate_control_kernel(void *input_ptr)
 
                     picture_control_set_ptr->output_stream_wrapper_ptr = output_stream_wrapper_ptr;
 
-
                     // Get Empty Results Object
                     eb_get_empty_object(
                         context_ptr->initialrate_control_results_output_fifo_ptr,
@@ -2080,4 +1920,3 @@ void* initial_rate_control_kernel(void *input_ptr)
     }
     return EB_NULL;
 }
-

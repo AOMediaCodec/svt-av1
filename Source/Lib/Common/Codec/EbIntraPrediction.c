@@ -29,7 +29,6 @@
 
 void *aom_memset16(void *dest, int32_t val, size_t length);
 
-
 int32_t is_inter_block(const MbModeInfo *mbmi);
 
 // Some basic checks on weights for smooth predictor.
@@ -127,7 +126,6 @@ EbErrorType intra_reference16bit_samples_ctor(
     return EB_ErrorNone;
 }
 
-
 static int is_smooth(const MbModeInfo *mbmi, int plane) {
     if (plane == 0) {
         const PredictionMode mode = mbmi->mode;
@@ -164,15 +162,12 @@ static int get_filt_type(const MacroBlockD *xd, int plane) {
     return (ab_sm || le_sm) ? 1 : 0;
 }
 
-
-
 static int32_t use_intra_edge_upsample(int32_t bs0, int32_t bs1, int32_t delta, int32_t type) {
     const int32_t d = abs(delta);
     const int32_t blk_wh = bs0 + bs1;
     if (d <= 0 || d >= 40) return 0;
     return type ? (blk_wh <= 8) : (blk_wh <= 16);
 }
-
 
 #define INTRA_EDGE_FILT 3
 #define INTRA_EDGE_TAPS 5
@@ -224,6 +219,7 @@ void av1_filter_intra_edge_high_c_left(uint8_t *p, int32_t sz, int32_t strength,
         p[i - 1] = (uint8_t)s;
     }
 }
+
 static int32_t intra_edge_filter_strength(int32_t bs0, int32_t bs1, int32_t delta, int32_t type) {
     const int32_t d = abs(delta);
     int32_t strength = 0;
@@ -231,42 +227,58 @@ static int32_t intra_edge_filter_strength(int32_t bs0, int32_t bs1, int32_t delt
     const int32_t blk_wh = bs0 + bs1;
     if (type == 0) {
         if (blk_wh <= 8) {
-            if (d >= 56) strength = 1;
+            if (d >= 56)
+                strength = 1;
         }
         else if (blk_wh <= 12) {
-            if (d >= 40) strength = 1;
+            if (d >= 40)
+                strength = 1;
         }
         else if (blk_wh <= 16) {
-            if (d >= 40) strength = 1;
+            if (d >= 40)
+                strength = 1;
         }
         else if (blk_wh <= 24) {
-            if (d >= 8) strength = 1;
-            if (d >= 16) strength = 2;
-            if (d >= 32) strength = 3;
+            if (d >= 8)
+                strength = 1;
+            if (d >= 16)
+                strength = 2;
+            if (d >= 32)
+                strength = 3;
         }
         else if (blk_wh <= 32) {
-            if (d >= 1) strength = 1;
-            if (d >= 4) strength = 2;
-            if (d >= 32) strength = 3;
+            if (d >= 1)
+                strength = 1;
+            if (d >= 4)
+                strength = 2;
+            if (d >= 32)
+                strength = 3;
         }
         else {
-            if (d >= 1) strength = 3;
+            if (d >= 1)
+                strength = 3;
         }
     }
     else {
         if (blk_wh <= 8) {
-            if (d >= 40) strength = 1;
-            if (d >= 64) strength = 2;
+            if (d >= 40)
+                strength = 1;
+            if (d >= 64)
+                strength = 2;
         }
         else if (blk_wh <= 16) {
-            if (d >= 20) strength = 1;
-            if (d >= 48) strength = 2;
+            if (d >= 20)
+                strength = 1;
+            if (d >= 48)
+                strength = 2;
         }
         else if (blk_wh <= 24) {
-            if (d >= 4) strength = 3;
+            if (d >= 4)
+                strength = 3;
         }
         else {
-            if (d >= 1) strength = 3;
+            if (d >= 1)
+                strength = 3;
         }
     }
     return strength;
@@ -281,9 +293,8 @@ void av1_upsample_intra_edge_high_c_old(uint8_t *p, int32_t sz, int32_t bd) {
     // copy p[-1..(sz-1)] and extend first and last samples
     in[0] = p[-1];
     in[1] = p[-1];
-    for (int32_t i = 0; i < sz; i++) {
+    for (int32_t i = 0; i < sz; i++)
         in[i + 2] = p[i];
-    }
     in[sz + 2] = p[sz - 1];
 
     // interpolate half-sample edge positions
@@ -296,7 +307,6 @@ void av1_upsample_intra_edge_high_c_old(uint8_t *p, int32_t sz, int32_t bd) {
         p[2 * i] = in[i + 2];
     }
 }
-
 
 const uint16_t dr_intra_derivative[90] = {
     // More evenly spread out angles and limited to 10-bit
@@ -340,12 +350,10 @@ const uint16_t dr_intra_derivative[90] = {
 #define divide_round(value, bits) (((value) + (1 << ((bits)-1))) >> (bits))
 
 static INLINE uint16_t get_dy(int32_t angle) {
-    if (angle > 90 && angle < 180) {
+    if (angle > 90 && angle < 180)
         return dr_intra_derivative[angle - 90];
-    }
-    else if (angle > 180 && angle < 270) {
+    else if (angle > 180 && angle < 270)
         return dr_intra_derivative[270 - angle];
-    }
     else {
         // In this case, we are not really going to use dy. We may return any value.
         return 1;
@@ -356,12 +364,10 @@ static INLINE uint16_t get_dy(int32_t angle) {
 // If angle > 90 && angle < 180, dx = (int32_t)(256 / t);
 // If angle > 180 && angle < 270, dx = 1;
 static INLINE uint16_t get_dx(int32_t angle) {
-    if (angle > 0 && angle < 90) {
+    if (angle > 0 && angle < 90)
         return dr_intra_derivative[angle];
-    }
-    else if (angle > 90 && angle < 180) {
+    else if (angle > 90 && angle < 180)
         return dr_intra_derivative[180 - angle];
-    }
     else {
         // In this case, we are not really going to use dx. We may return any value.
         return 1;
@@ -433,9 +439,8 @@ void av1_dr_prediction_z1_c(uint8_t *dst, ptrdiff_t stride, int32_t bw, int32_t 
                 val = ROUND_POWER_OF_TWO(val, 5);
                 dst[c] = (uint8_t)clip_pixel_highbd(val, 8);
             }
-            else {
+            else
                 dst[c] = above[max_base_x];
-            }
         }
     }
 }
@@ -476,7 +481,6 @@ void av1_dr_prediction_z2_c(uint8_t *dst, ptrdiff_t stride, int32_t bw, int32_t 
     }
 }
 
-
 /* clang-format on */
 void intra_mode_planar(
     const uint32_t   size,                       //input parameter, denotes the size of the current PU
@@ -486,12 +490,9 @@ void intra_mode_planar(
     const EbBool  skip)                       //skip half rows
 {
 
-
-
     uint32_t rowStride = skip ? 2 : 1;
     uint32_t leftOffset = 0;
     uint32_t topOffset = (size << 1) + 1;
-
 
     const uint8_t below_pred = ref_samples[leftOffset + size - 1];   // estimated by bottom-left pixel
     const uint8_t right_pred = ref_samples[topOffset + size - 1];  // estimated by top-right pixel
@@ -514,9 +515,8 @@ void intra_mode_planar(
             uint32_t this_pred = 0;
             int32_t i;
             assert(scale >= sm_weights_h[r] && scale >= sm_weights_w[c]);
-            for (i = 0; i < 4; ++i) {
+            for (i = 0; i < 4; ++i)
                 this_pred += weights[i] * pixels[i];
-            }
             dst[c] = (uint8_t)divide_round(this_pred, log2_scale);
         }
         dst += rowStride * prediction_buffer_stride;
@@ -524,9 +524,6 @@ void intra_mode_planar(
 
     return;
 }
-
-
-
 
 /*static INLINE*/ void smooth_v_predictor_c(uint8_t *dst, ptrdiff_t stride, int32_t bw,
     int32_t bh, const uint8_t *above,
@@ -548,9 +545,8 @@ void intra_mode_planar(
             uint32_t this_pred = 0;
             assert(scale >= sm_weights[r]);
             int32_t i;
-            for (i = 0; i < 2; ++i) {
+            for (i = 0; i < 2; ++i)
                 this_pred += weights[i] * pixels[i];
-            }
             dst[c] = (uint8_t)divide_round(this_pred, log2_scale);
         }
         dst += stride;
@@ -577,9 +573,8 @@ void intra_mode_planar(
             uint32_t this_pred = 0;
             assert(scale >= sm_weights[c]);
             int32_t i;
-            for (i = 0; i < 2; ++i) {
+            for (i = 0; i < 2; ++i)
                 this_pred += weights[i] * pixels[i];
-            }
             dst[c] = (uint8_t)divide_round(this_pred, log2_scale);
         }
         dst += stride;
@@ -615,9 +610,8 @@ void ebav1_smooth_v_predictor(
             uint32_t this_pred = 0;
             assert(scale >= sm_weights[r]);
             int32_t i;
-            for (i = 0; i < 2; ++i) {
+            for (i = 0; i < 2; ++i)
                 this_pred += weights[i] * pixels[i];
-            }
             dst[c] = (uint8_t)divide_round(this_pred, log2_scale);
         }
         dst += prediction_buffer_stride;
@@ -651,18 +645,14 @@ void ebav1_smooth_h_predictor(
             uint32_t this_pred = 0;
             assert(scale >= sm_weights[c]);
             int32_t i;
-            for (i = 0; i < 2; ++i) {
+            for (i = 0; i < 2; ++i)
                 this_pred += weights[i] * pixels[i];
-            }
             dst[c] = (uint8_t)divide_round(this_pred, log2_scale);
         }
         dst += prediction_buffer_stride;
     }
     return;
 }
-
-
-
 
 void ebav1_v_predictor(uint8_t *dst, const uint32_t stride, int32_t bw, int32_t bh,
     const uint8_t *ref_samples) {
@@ -677,7 +667,6 @@ void ebav1_v_predictor(uint8_t *dst, const uint32_t stride, int32_t bw, int32_t 
         }
     }
 }
-
 
 void ebav1_h_predictor(uint8_t *dst, const uint32_t stride, int32_t bw, int32_t bh,
     const uint8_t *ref_samples) {
@@ -709,7 +698,6 @@ void IntraModeAngular_AV1_Z1(
     uint32_t toAboveOffset = (size << 1) + 1;
     uint32_t rowStride = skip ? 2 : 1;
 
-
     uint32_t r, c;
     int32_t  x, base, shift, val;
     const int32_t max_base_x = ((size + size) - 1);
@@ -717,7 +705,6 @@ void IntraModeAngular_AV1_Z1(
     const int32_t base_inc = 1;
 
     x = dx;
-
 
     for (r = 0; r < size; ++r, dst += (rowStride* prediction_buffer_stride), x += dx) {
         base = x >> frac_bits;
@@ -739,13 +726,10 @@ void IntraModeAngular_AV1_Z1(
                 dst[c] = (uint8_t)clip_pixel_highbd(val, 8);
 
             }
-            else {
+            else
                 dst[c] = ref_samples[toAboveOffset + max_base_x];
-            }
         }
     }
-
-
 
     return;
 }
@@ -766,7 +750,6 @@ void IntraModeAngular_AV1_Z2(
     uint32_t shiftToAboveLeft = 0;
     uint32_t toLeftOffset = 0;
     uint32_t rowStride = skip ? 2 : 1;
-
 
     uint32_t r, c;
     int32_t x, y, shift, val, base;
@@ -801,8 +784,6 @@ void IntraModeAngular_AV1_Z2(
         dst += (rowStride* prediction_buffer_stride);
     }
 
-
-
     return;
 }
 void IntraModeAngular_AV1_Z3(
@@ -820,7 +801,6 @@ void IntraModeAngular_AV1_Z3(
     //    uint32_t toAboveOffset = (size << 1) + 1 ;
     uint32_t toLeftOffset = 0;
     uint32_t rowStride = skip ? 2 : 1;
-
 
     uint32_t r, c;
     int32_t y, base, shift, val;
@@ -852,10 +832,8 @@ void IntraModeAngular_AV1_Z3(
         }
     }
 
-
     return;
 }
-
 
 void highbd_dc_predictor_16bit(
     EbBool        is_left_availble,
@@ -881,27 +859,22 @@ void highbd_dc_predictor_16bit(
 
     if (is_left_availble && !is_above_availble) {
 
-        for (i = 0; i < size; i++) {
+        for (i = 0; i < size; i++)
             sum += ref_samples[leftOffset + i];
-        }
         expected_dc = (sum + (size >> 1)) / size;
     }
     else if (is_above_availble && !is_left_availble) {
-        for (i = 0; i < size; i++) {
+        for (i = 0; i < size; i++)
             sum += ref_samples[topOffset + i];
-        }
         expected_dc = (sum + (size >> 1)) / size;
     }
     else {
 
-        for (i = 0; i < size; i++) {
+        for (i = 0; i < size; i++)
             sum += ref_samples[topOffset + i];
-        }
-        for (i = 0; i < size; i++) {
+        for (i = 0; i < size; i++)
             sum += ref_samples[leftOffset + i];
-        }
         expected_dc = (sum + (count >> 1)) / count;
-
 
     }
 
@@ -935,14 +908,9 @@ void IntraModePlanar_16bit(
     const EbBool  skip)                       //skip half rows
 {
 
-
-
     uint32_t rowStride = skip ? 2 : 1;
     uint32_t leftOffset = 0;
     uint32_t topOffset = (size << 1) + 1;
-
-
-
 
     const uint16_t below_pred = ref_samples[leftOffset + size - 1];   // estimated by bottom-left pixel
     const uint16_t right_pred = ref_samples[topOffset + size - 1];  // estimated by top-right pixel
@@ -962,9 +930,8 @@ void IntraModePlanar_16bit(
             uint32_t this_pred = 0;
             int32_t i;
             assert(scale >= sm_weights_h[r] && scale >= sm_weights_w[c]);
-            for (i = 0; i < 4; ++i) {
+            for (i = 0; i < 4; ++i)
                 this_pred += weights[i] * pixels[i];
-            }
             dst[c] = (uint16_t)divide_round(this_pred, log2_scale);
         }
         dst += rowStride * prediction_buffer_stride;
@@ -986,7 +953,6 @@ void v_predictor_16bit(uint16_t *dst, const uint32_t stride, int32_t bw, int32_t
         }
     }
 }
-
 
 void h_predictor_16bit(uint16_t *dst, const uint32_t stride, int32_t bw, int32_t bh,
     const uint16_t *ref_samples) {
@@ -1017,7 +983,6 @@ void intra_mode_angular_av1_z1_16bit(
     uint32_t toAboveOffset = (size << 1) + 1;
     uint32_t rowStride = skip ? 2 : 1;
 
-
     uint32_t r, c;
     int32_t x, base, shift, val;
     const int32_t max_base_x = ((size + size) - 1);
@@ -1025,7 +990,6 @@ void intra_mode_angular_av1_z1_16bit(
     const int32_t base_inc = 1;
 
     x = dx;
-
 
     for (r = 0; r < size; ++r, dst += (rowStride* prediction_buffer_stride), x += dx) {
         base = x >> frac_bits;
@@ -1045,13 +1009,10 @@ void intra_mode_angular_av1_z1_16bit(
                 val = ROUND_POWER_OF_TWO(val, 5);
                 dst[c] = clip_pixel_highbd(val, bd);
             }
-            else {
+            else
                 dst[c] = ref_samples[toAboveOffset + max_base_x];
-            }
         }
     }
-
-
 
     return;
 }
@@ -1072,7 +1033,6 @@ void intra_mode_angular_av1_z2_16bit(
     uint32_t shiftToAboveLeft = 0;
     uint32_t toLeftOffset = 0;
     uint32_t rowStride = skip ? 2 : 1;
-
 
     uint32_t r, c;
     int32_t x, y, shift, val, base;
@@ -1106,8 +1066,6 @@ void intra_mode_angular_av1_z2_16bit(
         dst += (rowStride* prediction_buffer_stride);
     }
 
-
-
     return;
 }
 void intra_mode_angular_av1_z3_16bit(
@@ -1125,7 +1083,6 @@ void intra_mode_angular_av1_z3_16bit(
     //    uint32_t toAboveOffset = (size << 1) + 1;
     uint32_t toLeftOffset = 0;
     uint32_t rowStride = skip ? 2 : 1;
-
 
     uint32_t r, c;
     int32_t  y, base, shift, val;
@@ -1155,10 +1112,8 @@ void intra_mode_angular_av1_z3_16bit(
         }
     }
 
-
     return;
 }
-
 
 /**********************************************
  * Intra Reference Samples Ctor
@@ -1179,8 +1134,6 @@ EbErrorType intra_open_loop_reference_samples_ctor(
 
     return EB_ErrorNone;
 }
-
-
 
 /** UpdateNeighborSamplesArrayOpenLoop()
         updates neighbor sample array
@@ -1238,11 +1191,8 @@ EbErrorType UpdateNeighborSamplesArrayOpenLoop(
         dst_ptr += (blockSizeHalf - count);
 
     }
-    else {
-
+    else
         dst_ptr += count;
-    }
-
     // Get the upper left sample
     if (src_origin_x != 0 && src_origin_y != 0) {
 
@@ -1250,11 +1200,8 @@ EbErrorType UpdateNeighborSamplesArrayOpenLoop(
         *dst_ptr = *readPtr;
         dst_ptr++;
     }
-    else {
-
+    else
         dst_ptr++;
-    }
-
     // Get the top-row
     count = blockSizeHalf;
     if (src_origin_y != 0) {
@@ -1266,12 +1213,8 @@ EbErrorType UpdateNeighborSamplesArrayOpenLoop(
         dst_ptr += (blockSizeHalf - count);
 
     }
-    else {
-
+    else
         dst_ptr += count;
-    }
-
-
     //at the begining of a CU Loop, the Above/Left scratch buffers are not ready to be used.
     intra_ref_ptr->above_ready_flag_y = EB_FALSE;
     intra_ref_ptr->left_ready_flag_y = EB_FALSE;
@@ -1343,9 +1286,8 @@ void subtract_average_c(
     int16_t *pred_buf = pred_buf_q3;
     for (int32_t j = 0; j < height; j++) {
         // assert(pred_buf_q3 + tx_width <= cfl->pred_buf_q3 + CFL_BUF_SQUARE);
-        for (int32_t i = 0; i < width; i++) {
+        for (int32_t i = 0; i < width; i++)
             sum_q3 += pred_buf[i];
-        }
         pred_buf += CFL_BUF_LINE;
     }
     const int32_t avg_q3 = (sum_q3 + round_offset) >> num_pel_log2;
@@ -1353,9 +1295,8 @@ void subtract_average_c(
     // assert(abs((avg_q3 * (1 << num_pel_log2)) - sum_q3) <= 1 << num_pel_log2 >>
     //       1);
     for (int32_t j = 0; j < height; j++) {
-        for (int32_t i = 0; i < width; i++) {
+        for (int32_t i = 0; i < width; i++)
             pred_buf_q3[i] -= (int16_t)(avg_q3);
-        }
         pred_buf_q3 += CFL_BUF_LINE;
     }
 }
@@ -1400,7 +1341,6 @@ void cfl_predict_hbd_c(
         pred_buf_q3 += CFL_BUF_LINE;
     }
 }
-
 
 enum {
     NEED_LEFT = 1 << 1,
@@ -1559,9 +1499,8 @@ static const uint8_t *get_has_tr_table(PartitionType partition,
         assert(bsize < BlockSizeS);
         ret = has_tr_vert_tables[bsize];
     }
-    else {
+    else
         ret = has_tr_tables[bsize];
-    }
     assert(ret);
     return ret;
 }
@@ -1608,10 +1547,8 @@ static int32_t has_top_right(const Av1Common *cm, BlockSize bsize, int32_t mi_ro
 
         // Rightmost column of superblock (and not the top row): so top-right pixels
         // fall in the right superblock, which is not available yet.
-        if (((blk_col_in_sb + 1) << bw_in_mi_log2) >= sb_mi_size) {
+        if (((blk_col_in_sb + 1) << bw_in_mi_log2) >= sb_mi_size)
             return 0;
-        }
-
         // General case (neither top row nor rightmost column): check if the
         // top-right block is coded before the current block.
         const int32_t this_blk_index =
@@ -1747,9 +1684,8 @@ static const uint8_t *get_has_bl_table(PartitionType partition,
         assert(bsize < BlockSizeS);
         ret = has_bl_vert_tables[bsize];
     }
-    else {
+    else
         ret = has_bl_tables[bsize];
-    }
     assert(ret);
     return ret;
 }
@@ -1826,16 +1762,11 @@ static int32_t has_bottom_left(const Av1Common *cm, BlockSize bsize, int32_t mi_
     }
 }
 
-
-
 static IntraPredFn pred[INTRA_MODES][TX_SIZES_ALL];
 static IntraPredFn dc_pred[2][2][TX_SIZES_ALL];
 
 static IntraHighPredFn pred_high[INTRA_MODES][TX_SIZES_ALL];
 static IntraHighPredFn dc_pred_high[2][2][TX_SIZES_ALL];
-
-
-
 
 static INLINE void dc_128_predictor(uint8_t *dst, ptrdiff_t stride, int32_t bw,
     int32_t bh, const uint8_t *above,
@@ -1883,13 +1814,10 @@ static INLINE void dc_predictor(uint8_t *dst, ptrdiff_t stride, int32_t bw, int3
     int32_t i, r, expected_dc, sum = 0;
     const int32_t count = bw + bh;
 
-    for (i = 0; i < bw; i++) {
+    for (i = 0; i < bw; i++)
         sum += above[i];
-    }
-    for (i = 0; i < bh; i++) {
+    for (i = 0; i < bh; i++)
         sum += left[i];
-    }
-
     expected_dc = (sum + (count >> 1)) / count;
 
     for (r = 0; r < bh; r++) {
@@ -1941,15 +1869,13 @@ static INLINE void smooth_predictor(uint8_t *dst, ptrdiff_t stride, int32_t bw,
             uint32_t this_pred = 0;
             int32_t i;
             assert(scale >= sm_weights_h[r] && scale >= sm_weights_w[c]);
-            for (i = 0; i < 4; ++i) {
+            for (i = 0; i < 4; ++i)
                 this_pred += weights[i] * pixels[i];
-            }
             dst[c] = (uint8_t)divide_round(this_pred, log2_scale);
         }
         dst += stride;
     }
 }
-
 
 static INLINE void smooth_v_predictor(uint8_t *dst, ptrdiff_t stride, int32_t bw,
     int32_t bh, const uint8_t *above,
@@ -1971,9 +1897,8 @@ static INLINE void smooth_v_predictor(uint8_t *dst, ptrdiff_t stride, int32_t bw
             uint32_t this_pred = 0;
             assert(scale >= sm_weights[r]);
             int32_t i;
-            for (i = 0; i < 2; ++i) {
+            for (i = 0; i < 2; ++i)
                 this_pred += weights[i] * pixels[i];
-            }
             dst[c] = (uint8_t)divide_round(this_pred, log2_scale);
         }
         dst += stride;
@@ -2000,9 +1925,8 @@ static INLINE void smooth_h_predictor(uint8_t *dst, ptrdiff_t stride, int32_t bw
             uint32_t this_pred = 0;
             assert(scale >= sm_weights[c]);
             int32_t i;
-            for (i = 0; i < 2; ++i) {
+            for (i = 0; i < 2; ++i)
                 this_pred += weights[i] * pixels[i];
-            }
             dst[c] = (uint8_t)divide_round(this_pred, log2_scale);
         }
         dst += stride;
@@ -2112,9 +2036,8 @@ static INLINE void highbd_smooth_predictor(uint16_t *dst, ptrdiff_t stride,
             uint32_t this_pred = 0;
             int32_t i;
             assert(scale >= sm_weights_h[r] && scale >= sm_weights_w[c]);
-            for (i = 0; i < 4; ++i) {
+            for (i = 0; i < 4; ++i)
                 this_pred += weights[i] * pixels[i];
-            }
             dst[c] = (uint16_t)divide_round(this_pred, log2_scale);
         }
         dst += stride;
@@ -2143,9 +2066,8 @@ static INLINE void highbd_smooth_v_predictor(uint16_t *dst, ptrdiff_t stride,
             uint32_t this_pred = 0;
             assert(scale >= sm_weights[r]);
             int32_t i;
-            for (i = 0; i < 2; ++i) {
+            for (i = 0; i < 2; ++i)
                 this_pred += weights[i] * pixels[i];
-            }
             dst[c] = (uint16_t)divide_round(this_pred, log2_scale);
         }
         dst += stride;
@@ -2174,9 +2096,8 @@ static INLINE void highbd_smooth_h_predictor(uint16_t *dst, ptrdiff_t stride,
             uint32_t this_pred = 0;
             assert(scale >= sm_weights[c]);
             int32_t i;
-            for (i = 0; i < 2; ++i) {
+            for (i = 0; i < 2; ++i)
                 this_pred += weights[i] * pixels[i];
-            }
             dst[c] = (uint16_t)divide_round(this_pred, log2_scale);
         }
         dst += stride;
@@ -2238,13 +2159,10 @@ static INLINE void highbd_dc_predictor(uint16_t *dst, ptrdiff_t stride, int32_t 
     const int32_t count = bw + bh;
     (void)bd;
 
-    for (i = 0; i < bw; i++) {
+    for (i = 0; i < bw; i++)
         sum += above[i];
-    }
-    for (i = 0; i < bh; i++) {
+    for (i = 0; i < bh; i++)
         sum += left[i];
-    }
-
     expected_dc = (sum + (count >> 1)) / count;
 
     for (r = 0; r < bh; r++) {
@@ -2252,7 +2170,6 @@ static INLINE void highbd_dc_predictor(uint16_t *dst, ptrdiff_t stride, int32_t 
         dst += stride;
     }
 }
-
 
 //static INLINE void highbd_dc_predictor_rect(uint16_t *dst, ptrdiff_t stride,
 //    int32_t bw, int32_t bh,
@@ -2382,7 +2299,6 @@ static INLINE void highbd_dc_predictor(uint16_t *dst, ptrdiff_t stride, int32_t 
 //#undef HIGHBD_DC_MULTIPLIER_1X2
 //#undef HIGHBD_DC_MULTIPLIER_1X4
 
-
 #define intra_pred_sized(type, width, height)                  \
   void aom_##type##_predictor_##width##x##height##_c(          \
       uint8_t *dst, ptrdiff_t stride, const uint8_t *above,    \
@@ -2410,7 +2326,6 @@ intra_pred_sized(dc, 32, 16)
 intra_pred_sized(dc, 32, 64)
 intra_pred_sized(dc, 64, 16)
 intra_pred_sized(dc, 64, 32)
-
 
 intra_pred_sized(dc_128, 2, 2)
 intra_pred_sized(dc_128, 4, 4)
@@ -2622,7 +2537,6 @@ intra_pred_highbd_sized(dc, 32, 64)
 intra_pred_highbd_sized(dc, 64, 16)
 intra_pred_highbd_sized(dc, 64, 32)
 
-
 intra_pred_highbd_sized(dc_128, 2, 2)
 intra_pred_highbd_sized(dc_128, 4, 4)
 intra_pred_highbd_sized(dc_128, 8, 8)
@@ -2666,7 +2580,6 @@ intra_pred_highbd_sized(dc_left, 32, 16)
 intra_pred_highbd_sized(dc_left, 32, 64)
 intra_pred_highbd_sized(dc_left, 64, 16)
 intra_pred_highbd_sized(dc_left, 64, 32)
-
 
 intra_pred_highbd_sized(dc_top, 2, 2)
 intra_pred_highbd_sized(dc_top, 4, 4)
@@ -2712,7 +2625,6 @@ intra_pred_highbd_sized(v, 32, 64)
 intra_pred_highbd_sized(v, 64, 16)
 intra_pred_highbd_sized(v, 64, 32)
 
-
 intra_pred_highbd_sized(h, 2, 2)
 intra_pred_highbd_sized(h, 4, 4)
 intra_pred_highbd_sized(h, 8, 8)
@@ -2757,14 +2669,12 @@ intra_pred_highbd_sized(smooth, 32, 64)
 intra_pred_highbd_sized(smooth, 64, 16)
 intra_pred_highbd_sized(smooth, 64, 32)
 
-
 intra_pred_highbd_sized(smooth_h, 2, 2)
 intra_pred_highbd_sized(smooth_h, 4, 4)
 intra_pred_highbd_sized(smooth_h, 8, 8)
 intra_pred_highbd_sized(smooth_h, 16, 16)
 intra_pred_highbd_sized(smooth_h, 32, 32)
 intra_pred_highbd_sized(smooth_h, 64, 64)
-
 
 intra_pred_highbd_sized(smooth_h, 4, 8)
 intra_pred_highbd_sized(smooth_h, 4, 16)
@@ -2787,7 +2697,6 @@ intra_pred_highbd_sized(smooth_v, 8, 8)
 intra_pred_highbd_sized(smooth_v, 16, 16)
 intra_pred_highbd_sized(smooth_v, 32, 32)
 intra_pred_highbd_sized(smooth_v, 64, 64)
-
 
 intra_pred_highbd_sized(smooth_v, 4, 8)
 intra_pred_highbd_sized(smooth_v, 4, 16)
@@ -2825,8 +2734,6 @@ intra_pred_highbd_sized(paeth, 32, 64)
 intra_pred_highbd_sized(paeth, 64, 16)
 intra_pred_highbd_sized(paeth, 64, 32)
 
-
-
 IntraPredFnC  dc_pred_c[2][2];
 IntraHighBdPredFnC  highbd_dc_pred_c[2][2];
 void init_intra_dc_predictors_c_internal(void)
@@ -2842,9 +2749,7 @@ void init_intra_dc_predictors_c_internal(void)
     highbd_dc_pred_c[1][1] = highbd_dc_predictor;
 }
 
-
 /*static*/ void init_intra_predictors_internal(void) {
-
 
     pred[V_PRED][TX_4X4] = aom_v_predictor_4x4;
     pred[V_PRED][TX_8X8] = aom_v_predictor_8x8;
@@ -2869,7 +2774,6 @@ void init_intra_dc_predictors_c_internal(void)
 
     pred[V_PRED][TX_64X16] = aom_v_predictor_64x16;
     pred[V_PRED][TX_64X32] = aom_v_predictor_64x32;
-
 
     pred[H_PRED][TX_4X4] = aom_h_predictor_4x4;
     pred[H_PRED][TX_8X8] = aom_h_predictor_8x8;
@@ -2896,8 +2800,6 @@ void init_intra_dc_predictors_c_internal(void)
     pred[H_PRED][TX_64X16] = aom_h_predictor_64x16;
     pred[H_PRED][TX_64X32] = aom_h_predictor_64x32;
 
-
-
     pred[SMOOTH_PRED][TX_4X4] = aom_smooth_predictor_4x4;
     pred[SMOOTH_PRED][TX_8X8] = aom_smooth_predictor_8x8;
     pred[SMOOTH_PRED][TX_16X16] = aom_smooth_predictor_16x16;
@@ -2922,7 +2824,6 @@ void init_intra_dc_predictors_c_internal(void)
 
     pred[SMOOTH_PRED][TX_64X16] = aom_smooth_predictor_64x16;
     pred[SMOOTH_PRED][TX_64X32] = aom_smooth_predictor_64x32;
-
 
     pred[SMOOTH_V_PRED][TX_4X4] = aom_smooth_v_predictor_4x4;
     pred[SMOOTH_V_PRED][TX_8X8] = aom_smooth_v_predictor_8x8;
@@ -2949,7 +2850,6 @@ void init_intra_dc_predictors_c_internal(void)
     pred[SMOOTH_V_PRED][TX_64X16] = aom_smooth_v_predictor_64x16;
     pred[SMOOTH_V_PRED][TX_64X32] = aom_smooth_v_predictor_64x32;
 
-
     pred[SMOOTH_H_PRED][TX_4X4] = aom_smooth_h_predictor_4x4;
     pred[SMOOTH_H_PRED][TX_8X8] = aom_smooth_h_predictor_8x8;
     pred[SMOOTH_H_PRED][TX_16X16] = aom_smooth_h_predictor_16x16;
@@ -2974,7 +2874,6 @@ void init_intra_dc_predictors_c_internal(void)
 
     pred[SMOOTH_H_PRED][TX_64X16] = aom_smooth_h_predictor_64x16;
     pred[SMOOTH_H_PRED][TX_64X32] = aom_smooth_h_predictor_64x32;
-
 
     pred[PAETH_PRED][TX_4X4] = aom_paeth_predictor_4x4;
     pred[PAETH_PRED][TX_8X8] = aom_paeth_predictor_8x8;
@@ -3074,7 +2973,6 @@ void init_intra_dc_predictors_c_internal(void)
     dc_pred[1][0][TX_64X16] = aom_dc_left_predictor_64x16;
     dc_pred[1][0][TX_64X32] = aom_dc_left_predictor_64x32;
 
-
     dc_pred[1][1][TX_4X4] = aom_dc_predictor_4x4;
     dc_pred[1][1][TX_8X8] = aom_dc_predictor_8x8;
     dc_pred[1][1][TX_16X16] = aom_dc_predictor_16x16;
@@ -3098,8 +2996,6 @@ void init_intra_dc_predictors_c_internal(void)
 
     dc_pred[1][1][TX_64X16] = aom_dc_predictor_64x16;
     dc_pred[1][1][TX_64X32] = aom_dc_predictor_64x32;
-
-
 
     pred_high[V_PRED][TX_4X4] = aom_highbd_v_predictor_4x4;
     pred_high[V_PRED][TX_8X8] = aom_highbd_v_predictor_8x8;
@@ -3374,12 +3270,10 @@ static void dr_predictor(uint8_t *dst, ptrdiff_t stride, TxSize tx_size,
         av1_dr_prediction_z3(dst, stride, bw, bh, above, left, upsample_left, dx,
             dy);
     }
-    else if (angle == 90) {
+    else if (angle == 90)
         pred[V_PRED][tx_size](dst, stride, above, left);
-    }
-    else if (angle == 180) {
+    else if (angle == 180)
         pred[H_PRED][tx_size](dst, stride, above, left);
-    }
 }
 
 static void filter_intra_edge_corner(uint8_t *p_above, uint8_t *p_left) {
@@ -3427,9 +3321,8 @@ void av1_highbd_dr_prediction_z1_c(uint16_t *dst, ptrdiff_t stride, int32_t bw,
                 val = ROUND_POWER_OF_TWO(val, 5);
                 dst[c] = (uint16_t)clip_pixel_highbd(val, bd);
             }
-            else {
+            else
                 dst[c] = above[max_base_x];
-            }
         }
     }
 }
@@ -3530,12 +3423,10 @@ static void highbd_dr_predictor(uint16_t *dst, ptrdiff_t stride,
         av1_highbd_dr_prediction_z3(dst, stride, bw, bh, above, left, upsample_left,
             dx, dy, bd);
     }
-    else if (angle == 90) {
+    else if (angle == 90)
         pred_high[V_PRED][tx_size](dst, stride, above, left, bd);
-    }
-    else if (angle == 180) {
+    else if (angle == 180)
         pred_high[H_PRED][tx_size](dst, stride, above, left, bd);
-    }
 }
 
 void av1_filter_intra_edge_high_c(uint16_t *p, int32_t sz, int32_t strength) {
@@ -3579,9 +3470,8 @@ void av1_upsample_intra_edge_high_c(uint16_t *p, int32_t sz, int32_t bd) {
     // copy p[-1..(sz-1)] and extend first and last samples
     in[0] = p[-1];
     in[1] = p[-1];
-    for (int32_t i = 0; i < sz; i++) {
+    for (int32_t i = 0; i < sz; i++)
         in[i + 2] = p[i];
-    }
     in[sz + 2] = p[sz - 1];
 
     // interpolate half-sample edge positions
@@ -3595,7 +3485,6 @@ void av1_upsample_intra_edge_high_c(uint16_t *p, int32_t sz, int32_t bd) {
     }
 }
 
-
 void av1_upsample_intra_edge_c(uint8_t *p, int32_t sz) {
     // interpolate half-sample positions
     assert(sz <= MAX_UPSAMPLE_SZ);
@@ -3604,9 +3493,8 @@ void av1_upsample_intra_edge_c(uint8_t *p, int32_t sz) {
     // copy p[-1..(sz-1)] and extend first and last samples
     in[0] = p[-1];
     in[1] = p[-1];
-    for (int32_t i = 0; i < sz; i++) {
+    for (int32_t i = 0; i < sz; i++)
         in[i + 2] = p[i];
-    }
     in[sz + 2] = p[sz - 1];
 
     // interpolate half-sample edge positions
@@ -3668,7 +3556,6 @@ void av1_upsample_intra_edge_c(uint8_t *p, int32_t sz) {
 }
 static void build_intra_predictors(
 
-
     const MacroBlockD *xd,
     uint8_t* topNeighArray,
     uint8_t* leftNeighArray,
@@ -3719,12 +3606,10 @@ static void build_intra_predictors(
 
     if ((!need_above && n_left_px == 0) || (!need_left && n_top_px == 0)) {
         int32_t val;
-        if (need_left) {
+        if (need_left)
             val = (n_top_px > 0) ? above_ref[0] : 129;
-        }
-        else {
+        else
             val = (n_left_px > 0) ? left_ref[0] : 127;
-        }
         for (i = 0; i < txhpx; ++i) {
             memset(dst, val, txwpx);
             dst += dst_stride;
@@ -3750,12 +3635,10 @@ static void build_intra_predictors(
                 memset(&left_col[i], left_col[i - 1], num_left_pixels_needed - i);
         }
         else {
-            if (n_top_px > 0) {
+            if (n_top_px > 0)
                 memset(left_col, above_ref[0], num_left_pixels_needed);
-            }
-            else {
+            else
                 memset(left_col, 129, num_left_pixels_needed);
-            }
         }
     }
 
@@ -3777,28 +3660,22 @@ static void build_intra_predictors(
                 memset(&above_row[i], above_row[i - 1], num_top_pixels_needed - i);
         }
         else {
-            if (n_left_px > 0) {
+            if (n_left_px > 0)
                 memset(above_row, left_ref[0], num_top_pixels_needed);
-            }
-            else {
+            else
                 memset(above_row, 127, num_top_pixels_needed);
-            }
         }
     }
 
     if (need_above_left) {
-        if (n_top_px > 0 && n_left_px > 0) {
+        if (n_top_px > 0 && n_left_px > 0)
             above_row[-1] = above_ref[-1];
-        }
-        else if (n_top_px > 0) {
+        else if (n_top_px > 0)
             above_row[-1] = above_ref[0];
-        }
-        else if (n_left_px > 0) {
+        else if (n_left_px > 0)
             above_row[-1] = left_ref[0];
-        }
-        else {
+        else
             above_row[-1] = 128;
-        }
         left_col[-1] = above_row[-1];
     }
 
@@ -3818,9 +3695,8 @@ static void build_intra_predictors(
 
             if (p_angle != 90 && p_angle != 180) {
                 const int32_t ab_le = need_above_left ? 1 : 0;
-                if (need_above && need_left && (txwpx + txhpx >= 24)) {
+                if (need_above && need_left && (txwpx + txhpx >= 24))
                     filter_intra_edge_corner(above_row, left_col);
-                }
                 if (need_above && n_top_px > 0) {
                     const int32_t strength =
                         intra_edge_filter_strength(txwpx, txhpx, p_angle - 90, filt_type);
@@ -3857,9 +3733,8 @@ static void build_intra_predictors(
         dc_pred[n_left_px > 0][n_top_px > 0][tx_size](dst, dst_stride, above_row,
             left_col);
     }
-    else {
+    else
         pred[mode][tx_size](dst, dst_stride, above_row, left_col);
-    }
 }
 static void build_intra_predictors_high(
     const MacroBlockD *xd,
@@ -3876,7 +3751,6 @@ static void build_intra_predictors_high(
     int32_t i;
     //uint16_t *dst = CONVERT_TO_SHORTPTR(dst8);
     //uint16_t *ref = CONVERT_TO_SHORTPTR(ref8);
-
 
     DECLARE_ALIGNED(16, uint16_t, left_data[MAX_TX_SIZE * 2 + 32]);
     DECLARE_ALIGNED(16, uint16_t, above_data[MAX_TX_SIZE * 2 + 32]);
@@ -3923,12 +3797,10 @@ static void build_intra_predictors_high(
 
     if ((!need_above && n_left_px == 0) || (!need_left && n_top_px == 0)) {
         int32_t val;
-        if (need_left) {
+        if (need_left)
             val = (n_top_px > 0) ? above_ref[0] : base + 1;
-        }
-        else {
+        else
             val = (n_left_px > 0) ? left_ref[0] : base - 1;
-        }
         for (i = 0; i < txhpx; ++i) {
             aom_memset16(dst, val, txwpx);
             dst += dst_stride;
@@ -3954,12 +3826,10 @@ static void build_intra_predictors_high(
                 aom_memset16(&left_col[i], left_col[i - 1], num_left_pixels_needed - i);
         }
         else {
-            if (n_top_px > 0) {
+            if (n_top_px > 0)
                 aom_memset16(left_col, above_ref[0], num_left_pixels_needed);
-            }
-            else {
+            else
                 aom_memset16(left_col, base + 1, num_left_pixels_needed);
-            }
         }
     }
 
@@ -3983,28 +3853,22 @@ static void build_intra_predictors_high(
                     num_top_pixels_needed - i);
         }
         else {
-            if (n_left_px > 0) {
+            if (n_left_px > 0)
                 aom_memset16(above_row, left_ref[0], num_top_pixels_needed);
-            }
-            else {
+            else
                 aom_memset16(above_row, base - 1, num_top_pixels_needed);
-            }
         }
     }
 
     if (need_above_left) {
-        if (n_top_px > 0 && n_left_px > 0) {
+        if (n_top_px > 0 && n_left_px > 0)
             above_row[-1] = above_ref[-1];
-        }
-        else if (n_top_px > 0) {
+        else if (n_top_px > 0)
             above_row[-1] = above_ref[0];
-        }
-        else if (n_left_px > 0) {
+        else if (n_left_px > 0)
             above_row[-1] = left_ref[0];
-        }
-        else {
+        else
             above_row[-1] = (uint16_t)base;
-        }
         left_col[-1] = above_row[-1];
     }
     // not added yet
@@ -4024,9 +3888,8 @@ static void build_intra_predictors_high(
             const int32_t filt_type = get_filt_type(xd, plane);
             if (p_angle != 90 && p_angle != 180) {
                 const int32_t ab_le = need_above_left ? 1 : 0;
-                if (need_above && need_left && (txwpx + txhpx >= 24)) {
+                if (need_above && need_left && (txwpx + txhpx >= 24))
                     filter_intra_edge_corner_high(above_row, left_col);
-                }
                 if (need_above && n_top_px > 0) {
                     const int32_t strength =
                         intra_edge_filter_strength(txwpx, txhpx, p_angle - 90, filt_type);
@@ -4070,12 +3933,9 @@ static void build_intra_predictors_high(
             dst, dst_stride, above_row, left_col, bd);
 
     }
-    else {
+    else
         pred_high[mode][tx_size](dst, dst_stride, above_row, left_col, bd);
-    }
 }
-
-
 
 extern void av1_predict_intra_block(
     TileInfo * tile,
@@ -4166,7 +4026,6 @@ extern void av1_predict_intra_block(
 
     }
 
-
     int32_t chroma_up_available = xd->up_available;
     int32_t chroma_left_available = xd->left_available;
     const int32_t ss_x = plane == 0 ? 0 : 1; //CHKN
@@ -4177,7 +4036,6 @@ extern void av1_predict_intra_block(
     if (ss_y && bh < mi_size_high[BLOCK_8X8])
         chroma_up_available = (mirow - 1) > tile->mi_row_start;
 
-   
     int mi_stride = cm->mi_stride;
     const int32_t offset = mirow * mi_stride + micol;
     xd->mi = cm->pcs_ptr->mi_grid_base + offset;
@@ -4187,26 +4045,21 @@ extern void av1_predict_intra_block(
        // xd->above_mbmi = xd->mi[-xd->mi_stride].mbmi;
         xd->above_mbmi = &miPtr[-mi_stride].mbmi;
     }
-    else {
+    else
         xd->above_mbmi = NULL;
-    }
-
     if (xd->left_available) {
         //xd->left_mbmi = xd->mi[-1].mbmi;
         xd->left_mbmi = &miPtr[-1].mbmi;
     }
-    else {
+    else
         xd->left_mbmi = NULL;
-    }
-
-
     const int chroma_ref = ((mirow & 0x01) || !(bh & 0x01) || !ss_y) &&
         ((micol & 0x01) || !(bw & 0x01) || !ss_x);
     if (chroma_ref) {
         // To help calculate the "above" and "left" chroma blocks, note that the
         // current block may cover multiple luma blocks (eg, if partitioned into
         // 4x4 luma blocks).
-        // First, find the top-left-most luma block covered by this chroma block   
+        // First, find the top-left-most luma block covered by this chroma block
 
         ModeInfo *miPtr = xd->mi[-(mirow & ss_y) * mi_stride - (micol & ss_x)];
 
@@ -4223,13 +4076,11 @@ extern void av1_predict_intra_block(
         xd->chroma_left_mbmi = chroma_left_mi;
     }
 
-
     //CHKN  const MbModeInfo *const mbmi = xd->mi[0];
     const int32_t txwpx = tx_size_wide[tx_size];
     const int32_t txhpx = tx_size_high[tx_size];
     const int32_t x = col_off << tx_size_wide_log2[0];
     const int32_t y = row_off << tx_size_high_log2[0];
-
 
     //if (use_palette) {
     //  int32_t r, c;
@@ -4257,13 +4108,10 @@ extern void av1_predict_intra_block(
     //CHKN BlockSize bsize = mbmi->sb_type;
     struct MacroblockdPlane  pd_s;
     struct MacroblockdPlane * pd = &pd_s;
-    if (plane == 0) {
+    if (plane == 0)
         pd->subsampling_x = pd->subsampling_y = 0;
-    }
-    else {
+    else
         pd->subsampling_x = pd->subsampling_y = 1;
-    }
-
     const int32_t txw = tx_size_wide_unit[tx_size];
     const int32_t txh = tx_size_high_unit[tx_size];
     const int32_t have_top = row_off || (pd->subsampling_y ? /*xd->*/chroma_up_available
@@ -4301,7 +4149,6 @@ extern void av1_predict_intra_block(
     const int32_t have_bottom_left = has_bottom_left(
         cm, bsize, mi_row, mi_col, bottom_available, have_left, partition,
         tx_size, row_off, col_off, pd->subsampling_x, pd->subsampling_y);
-
 
 #if DIS_EDGE_FIL
     const int32_t disable_edge_filter = 1;
@@ -4414,7 +4261,6 @@ void av1_predict_intra_block_16bit(
 
     }
 
-
     int32_t chroma_up_available = xd->up_available;
     int32_t chroma_left_available = xd->left_available;
 
@@ -4426,8 +4272,6 @@ void av1_predict_intra_block_16bit(
     if (ss_y && bh < mi_size_high[BLOCK_8X8])
         chroma_up_available = (mirow - 1) > tile->mi_row_start;
 
-    
-
     int mi_stride = cm->mi_stride;
     const int32_t offset = mirow * mi_stride + micol;
     xd->mi = cm->pcs_ptr->mi_grid_base + offset;
@@ -4437,26 +4281,21 @@ void av1_predict_intra_block_16bit(
         // xd->above_mbmi = xd->mi[-xd->mi_stride].mbmi;
         xd->above_mbmi = &miPtr[-mi_stride].mbmi;
     }
-    else {
+    else
         xd->above_mbmi = NULL;
-    }
-
     if (xd->left_available) {
         //xd->left_mbmi = xd->mi[-1].mbmi;
         xd->left_mbmi = &miPtr[-1].mbmi;
     }
-    else {
+    else
         xd->left_mbmi = NULL;
-    }
-
-
     const int chroma_ref = ((mirow & 0x01) || !(bh & 0x01) || !ss_y) &&
         ((micol & 0x01) || !(bw & 0x01) || !ss_x);
     if (chroma_ref) {
         // To help calculate the "above" and "left" chroma blocks, note that the
         // current block may cover multiple luma blocks (eg, if partitioned into
         // 4x4 luma blocks).
-        // First, find the top-left-most luma block covered by this chroma block   
+        // First, find the top-left-most luma block covered by this chroma block
 
         ModeInfo *miPtr = xd->mi[-(mirow & ss_y) * mi_stride - (micol & ss_x)];
 
@@ -4506,13 +4345,10 @@ void av1_predict_intra_block_16bit(
 
     struct MacroblockdPlane  pd_s;
     struct MacroblockdPlane * pd = &pd_s;
-    if (plane == 0) {
+    if (plane == 0)
         pd->subsampling_x = pd->subsampling_y = 0;
-    }
-    else {
+    else
         pd->subsampling_x = pd->subsampling_y = 1;
-    }
-
     const int32_t txw = tx_size_wide_unit[tx_size];
     const int32_t txh = tx_size_high_unit[tx_size];
     const int32_t have_top = row_off || (pd->subsampling_y ? /*xd->*/chroma_up_available
@@ -4551,7 +4387,6 @@ void av1_predict_intra_block_16bit(
         cm, bsize, mi_row, mi_col, bottom_available, have_left, partition,
         tx_size, row_off, col_off, pd->subsampling_x, pd->subsampling_y);
 
-
 #if DIS_EDGE_FIL
     const int32_t disable_edge_filter = 1;
 #else
@@ -4585,8 +4420,6 @@ EbErrorType av1_intra_prediction_cl(
 
     (void)asm_type;
     EbErrorType return_error = EB_ErrorNone;
-
-    
 
     uint32_t modeTypeLeftNeighborIndex = get_neighbor_array_unit_left_index(
         md_context_ptr->mode_type_neighbor_array,
@@ -4640,7 +4473,7 @@ EbErrorType av1_intra_prediction_cl(
 #else
     uint8_t end_plane = (md_context_ptr->blk_geom->has_uv && md_context_ptr->chroma_level <= CHROMA_MODE_1) ? (int) MAX_MB_PLANE : 1;
     for (int32_t plane = 0; plane < end_plane; ++plane) {
-#endif      
+#endif
         if (plane == 0) {
             if (md_context_ptr->cu_origin_y != 0)
                 memcpy(topNeighArray + 1, md_context_ptr->luma_recon_neighbor_array->top_array + md_context_ptr->cu_origin_x, md_context_ptr->blk_geom->bwidth * 2);
@@ -4673,7 +4506,6 @@ EbErrorType av1_intra_prediction_cl(
             if (md_context_ptr->round_origin_y != 0 && md_context_ptr->round_origin_x != 0)
                 topNeighArray[0] = leftNeighArray[0] = md_context_ptr->cr_recon_neighbor_array->top_left_array[MAX_PICTURE_HEIGHT_SIZE / 2 + md_context_ptr->round_origin_x / 2 - md_context_ptr->round_origin_y / 2];
 
-
         }
 
         if (plane)
@@ -4682,8 +4514,8 @@ EbErrorType av1_intra_prediction_cl(
             mode = candidate_buffer_ptr->candidate_ptr->pred_mode;
 
         av1_predict_intra_block(
-            &md_context_ptr->sb_ptr->tile_info, 
-        
+            &md_context_ptr->sb_ptr->tile_info,
+
             MD_STAGE,
             md_context_ptr->blk_geom,
             picture_control_set_ptr->parent_pcs_ptr->av1_cm,                                      //const Av1Common *cm,
@@ -4713,7 +4545,6 @@ EbErrorType av1_intra_prediction_cl(
         );
     }
 
-
     return return_error;
 }
 
@@ -4734,7 +4565,6 @@ EbErrorType update_neighbor_samples_array_open_loop(
     uint8_t  *src_ptr;
     uint8_t  *read_ptr;
     uint32_t count;
-
 
     uint32_t width = input_ptr->width;
     uint32_t height = input_ptr->height;
@@ -4770,9 +4600,9 @@ EbErrorType update_neighbor_samples_array_open_loop(
             left_ref++;
         }
         left_ref += (block_size_half - count);
-    }else 
+    }else
         left_ref += count;
-    
+
     // Get the top-row
     count = block_size_half;
     if (src_origin_y != 0) {
@@ -4780,7 +4610,7 @@ EbErrorType update_neighbor_samples_array_open_loop(
         count = ((src_origin_x + count) > width) ? count - ((src_origin_x + count) - width) : count;
         EB_MEMCPY(above_ref, read_ptr, count);
         above_ref += (block_size_half - count);
-    }else 
+    }else
         above_ref += count;
 
     return return_error;
@@ -4797,7 +4627,7 @@ EbErrorType intra_prediction_open_loop(
         uint8_t                         *above_row,
         uint8_t                         *left_col,
         MotionEstimationContext_t       *context_ptr)                  // input parameter, ME context
-        
+
 {
     EbErrorType                return_error = EB_ErrorNone;
     PredictionMode mode = ois_intra_mode;
@@ -4805,16 +4635,14 @@ EbErrorType intra_prediction_open_loop(
     uint8_t *dst = (&(context_ptr->me_context_ptr->sb_buffer[0]));
     uint32_t dst_stride = context_ptr->me_context_ptr->sb_buffer_stride;
 
-    if (is_dr_mode) {
-        dr_predictor(dst, dst_stride, tx_size, above_row, left_col, 0, 0, p_angle);         
-    }
+    if (is_dr_mode)
+        dr_predictor(dst, dst_stride, tx_size, above_row, left_col, 0, 0, p_angle);
     else {
         // predict
         if (mode == DC_PRED) {
-            dc_pred[src_origin_x > 0][src_origin_y > 0][tx_size](dst, dst_stride, above_row, left_col);     
-        } else {
+            dc_pred[src_origin_x > 0][src_origin_y > 0][tx_size](dst, dst_stride, above_row, left_col);
+        } else
             pred[mode][tx_size](dst, dst_stride, above_row, left_col);
-        }
     }
     return return_error;
 }

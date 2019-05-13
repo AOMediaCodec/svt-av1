@@ -10,10 +10,7 @@
 #include <emmintrin.h>
 #include <tmmintrin.h>
 
-
 #define SSSE3/// __SSSE3__
-
-
 
 #ifdef __cplusplus
 extern "C" const int16_t coeff_tbl[48 * 8];
@@ -22,7 +19,6 @@ extern "C" const int16_t coeff_tbl2[48 * 8];
 extern const int16_t coeff_tbl[48 * 8];
 extern const int16_t coeff_tbl2[48 * 8];
 #endif
-
 
 // Reverse order of 16-bit elements within 128-bit vector
 // This can be done more efficiently with _mm_shuffle_epi8 but requires SSSE3
@@ -37,7 +33,6 @@ static __m128i reverse_epi16(__m128i x)
     return x;
 #endif
 }
-
 
 // transpose 16x16 block of data
 static void transpose16(int16_t *src, uint32_t src_stride, int16_t *dst, uint32_t dst_stride)
@@ -256,7 +251,6 @@ static void transform16(int16_t *src, uint32_t src_stride, int16_t *dst, uint32_
         y0 = _mm_loadu_si128((const __m128i *)(src + i * src_stride + 0x00));
         y1 = _mm_loadu_si128((const __m128i *)(src + i * src_stride + 0x08));
 
-
         // 16-point butterfly
         y1 = reverse_epi16(y1);
 
@@ -298,7 +292,6 @@ static void transform16(int16_t *src, uint32_t src_stride, int16_t *dst, uint32_
         _mm_storeu_si128((__m128i *)(dst + i * dst_stride + 0x08), y1);
     }
 }
-
 
 // forward 16x16 transform
 void low_precision_transform16x16_ssse3(int16_t *src, uint32_t src_stride, int16_t *dst, uint32_t dst_stride, int16_t *intermediate, uint32_t addshift)
@@ -445,18 +438,13 @@ static void invTransform16Half(int16_t *src, uint32_t src_stride, int16_t *dst, 
     } while (--numRows);
 }
 
-
 static void invTransform16Partial(int16_t *src, uint32_t src_stride, int16_t *dst, uint32_t dst_stride, uint32_t shift, uint32_t pattern)
 {
     uint32_t numRows = 16 - 4 * (pattern & 2);
     if (pattern & 1)
-    {
         invTransform16Half(src, src_stride, dst, dst_stride, shift, numRows);
-    }
     else
-    {
         invTransform16(src, src_stride, dst, dst_stride, shift, numRows);
-    }
 }
 
 // inverse 16x16 transform
@@ -696,7 +684,6 @@ static void transform32(int16_t *src, uint32_t src_stride, int16_t *dst, uint32_
         x2 = _mm_loadu_si128((const __m128i *)(src + 0x10));
         x3 = _mm_loadu_si128((const __m128i *)(src + 0x18));
 
-
         // 32-point butterfly
         x2 = reverse_epi16(x2);
         x3 = reverse_epi16(x3);
@@ -712,7 +699,6 @@ static void transform32(int16_t *src, uint32_t src_stride, int16_t *dst, uint32_
 
         x0 = _mm_add_epi16(y0, y1);
         x1 = _mm_sub_epi16(y0, y1);
-
 
         x2 = y2;
         x3 = y3;
@@ -1503,7 +1489,6 @@ void p_finv_transform32x32_ssse3(int16_t *src, uint32_t src_stride, int16_t *dst
     invTransform32Partial(intermediate, 32, dst, dst_stride, 12 - addshift, pattern);
 
 }
-
 
 void quantize_inv_quantize_nx_n_sse3(
     int16_t          *coeff,

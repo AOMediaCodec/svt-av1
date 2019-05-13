@@ -26,9 +26,9 @@ extern "C" {
 #define IBC_CAND 2 //two intra bc candidates
 #if CHECK_CAND
 #if MRP_DUPLICATION_FIX
-#define MODE_DECISION_CANDIDATE_MAX_COUNT               (440 +IBC_CAND) 
+#define MODE_DECISION_CANDIDATE_MAX_COUNT               (440 +IBC_CAND)
 #else
-#define MODE_DECISION_CANDIDATE_MAX_COUNT               (170 +IBC_CAND) 
+#define MODE_DECISION_CANDIDATE_MAX_COUNT               (170 +IBC_CAND)
 #endif
 #else
 #define MODE_DECISION_CANDIDATE_MAX_COUNT               (124+IBC_CAND) /* 61 Intra & 18+2x8+2x8 Inter*/
@@ -61,7 +61,6 @@ extern "C" {
 
     } MdEncPassCuData;
 
-
     typedef struct MdCodingUnit
     {
         unsigned                    tested_cu_flag                  : 1;   //tells whether this CU is tested in MD.
@@ -89,7 +88,6 @@ extern "C" {
 #endif
 
     } MdCodingUnit;
-
 
     typedef struct ModeDecisionContext
     {
@@ -221,11 +219,11 @@ extern "C" {
         int16_t                           injected_mv_x_l0_array[MODE_DECISION_CANDIDATE_MAX_COUNT]; // used to do not inject existing MV
         int16_t                           injected_mv_y_l0_array[MODE_DECISION_CANDIDATE_MAX_COUNT]; // used to do not inject existing MV
         uint8_t                           injected_mv_count_l0;
-                                          
+
         int16_t                           injected_mv_x_l1_array[MODE_DECISION_CANDIDATE_MAX_COUNT]; // used to do not inject existing MV
         int16_t                           injected_mv_y_l1_array[MODE_DECISION_CANDIDATE_MAX_COUNT]; // used to do not inject existing MV
         uint8_t                           injected_mv_count_l1;
-                                          
+
         int16_t                           injected_mv_x_bipred_l0_array[MODE_DECISION_CANDIDATE_MAX_COUNT]; // used to do not inject existing MV
         int16_t                           injected_mv_y_bipred_l0_array[MODE_DECISION_CANDIDATE_MAX_COUNT]; // used to do not inject existing MV
         int16_t                           injected_mv_x_bipred_l1_array[MODE_DECISION_CANDIDATE_MAX_COUNT]; // used to do not inject existing MV
@@ -233,10 +231,10 @@ extern "C" {
         uint8_t                           injected_mv_count_bipred;
         uint32_t                          fast_candidate_intra_count;
         uint32_t                          fast_candidate_inter_count;
-#if MEMORY_FOOTPRINT_OPT_ME_MV   
+#if MEMORY_FOOTPRINT_OPT_ME_MV
         uint32_t                          me_block_offset;
 #endif
-        // Multi-modes signal(s) 
+        // Multi-modes signal(s)
         uint8_t                           nfl_level;
         uint8_t                           skip_interpolation_search;
         uint8_t                           parent_sq_type[MAX_PARENT_SQ];
@@ -244,7 +242,7 @@ extern "C" {
         uint8_t                           parent_sq_pred_mode[MAX_PARENT_SQ];
         uint8_t                           chroma_level;
         PART                              nsq_table[NSQ_TAB_SIZE];
-        uint8_t                           decoupled_fast_loop_search_method; 
+        uint8_t                           decoupled_fast_loop_search_method;
         uint8_t                           decouple_intra_inter_fast_loop;
         uint8_t                           full_loop_escape;
         uint8_t                           global_mv_injection;
@@ -267,7 +265,7 @@ extern "C" {
 #endif
 #if  BLK_SKIP_DECISION
         EbBool                            blk_skip_decision;
-#endif  
+#endif
 #if OPT_QUANT_COEFF
         EbBool                            trellis_quant_coeff_optimization;
 #endif
@@ -349,7 +347,6 @@ extern "C" {
         uint8_t                  picture_qp,
         uint8_t                  sb_qp);
 
-
     extern void cfl_rd_pick_alpha(
         PictureControlSet             *picture_control_set_ptr,
         ModeDecisionCandidateBuffer   *candidateBuffer,
@@ -359,7 +356,6 @@ extern "C" {
         uint32_t                         inputCbOriginIndex,
         uint32_t                         cuChromaOriginIndex,
         EbAsm                            asm_type);
-
 
 #ifdef __cplusplus
 }

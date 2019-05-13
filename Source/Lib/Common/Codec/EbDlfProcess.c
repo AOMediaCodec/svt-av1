@@ -47,8 +47,6 @@ EbErrorType dlf_context_ctor(
     context_ptr->dlf_input_fifo_ptr = dlf_input_fifo_ptr;
     context_ptr->dlf_output_fifo_ptr = dlf_output_fifo_ptr;
 
-
-
     context_ptr->temp_lf_recon_picture16bit_ptr = (EbPictureBufferDesc *)EB_NULL;
     context_ptr->temp_lf_recon_picture_ptr = (EbPictureBufferDesc *)EB_NULL;
     EbPictureBufferDescInitData temp_lf_recon_desc_init_data;
@@ -76,7 +74,6 @@ EbErrorType dlf_context_ctor(
             (EbPtr*)&(context_ptr->temp_lf_recon_picture_ptr),
             (EbPtr)&temp_lf_recon_desc_init_data);
     }
-
 
     return return_error;
 }
@@ -123,12 +120,10 @@ void* dlf_kernel(void *input_ptr)
             if (picture_control_set_ptr->parent_pcs_ptr->is_used_as_reference_flag == EB_TRUE) {
 
                 //get the 16bit form of the input LCU
-                if (is16bit) {
+                if (is16bit)
                     recon_buffer = ((EbReferenceObject*)picture_control_set_ptr->parent_pcs_ptr->reference_picture_wrapper_ptr->object_ptr)->reference_picture16bit;
-                }
-                else {
+                else
                     recon_buffer = ((EbReferenceObject*)picture_control_set_ptr->parent_pcs_ptr->reference_picture_wrapper_ptr->object_ptr)->reference_picture;
-                }
             }
             else { // non ref pictures
                 recon_buffer = is16bit ? picture_control_set_ptr->recon_picture16bit_ptr : picture_control_set_ptr->recon_picture_ptr;
@@ -186,10 +181,8 @@ void* dlf_kernel(void *input_ptr)
                 recon_picture_ptr,
                 cm->frame_to_show);
 
-            if (sequence_control_set_ptr->enable_restoration) {
+            if (sequence_control_set_ptr->enable_restoration)
                 av1_loop_restoration_save_boundary_lines(cm->frame_to_show, cm, 0);
-            }
-
             if (sequence_control_set_ptr->enable_cdef && picture_control_set_ptr->parent_pcs_ptr->cdef_filter_mode)
             {
 
@@ -255,7 +248,6 @@ void* dlf_kernel(void *input_ptr)
             // Post DLF Results
             eb_post_full_object(dlf_results_wrapper_ptr);
         }
-
 
             // Release EncDec Results
             eb_release_object(enc_dec_results_wrapper_ptr);

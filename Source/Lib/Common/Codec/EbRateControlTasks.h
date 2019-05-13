@@ -10,7 +10,6 @@
 #include "EbSystemResourceManager.h"
 #include "EbPictureControlSet.h"
 
-
 /**************************************
  * Tasks Types
  **************************************/
@@ -47,6 +46,5 @@ typedef struct RateControlTasksInitData {
 extern EbErrorType rate_control_tasks_ctor(
     EbPtr *object_dbl_ptr,
     EbPtr  object_init_data_ptr);
-
 
 #endif // EbRateControlTasks_h

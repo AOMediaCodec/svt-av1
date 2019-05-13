@@ -18,7 +18,6 @@
 #include "EbModeDecisionProcess.h"
 #endif
 
-
 #define DETAILED_FRAME_OUTPUT 0
 
 static EbBool IsPassthroughData(EbLinkedListNode* dataNode)
@@ -35,7 +34,6 @@ static EbLinkedListNode* ExtractPassthroughData(EbLinkedListNode** llPtrPtr)
     *llPtrPtr = llRestPtr;
     return llPassPtr;
 }
-
 
 EbErrorType packetization_context_ctor(
     PacketizationContext **context_dbl_ptr,
@@ -57,7 +55,7 @@ EbErrorType packetization_context_ctor(
 #define OBU_FRAME_HEADER_SIZE       3
 #define TILES_GROUP_SIZE            1
 
-// Write TD after offsetting the stream buffer 
+// Write TD after offsetting the stream buffer
 static void write_td (
     EbBufferHeaderType  *out_str_ptr,
     EbBool               show_ex,
@@ -83,7 +81,7 @@ static void write_td (
         encode_td_av1((uint8_t*)(&td_buff));
 
         EB_MEMCPY(src_address,
-                  &td_buff, 
+                  &td_buff,
                   TD_SIZE);
     }
 }
@@ -103,7 +101,6 @@ void update_rc_rate_tables(
 
     uint32_t  sb_index;
     int32_t   qp_index;
-
 
     // LCU Loop
     if (sequence_control_set_ptr->static_config.rate_control_mode > 0) {
@@ -262,7 +259,7 @@ void* packetization_kernel(void *input_ptr)
     EbBufferHeaderType             *output_stream_ptr;
     EbObjectWrapper              *rateControlTasksWrapperPtr;
     RateControlTasks             *rateControlTasksPtr;
-    
+
     // Queue variables
     int32_t                         queueEntryIndex;
     PacketizationReorderEntry    *queueEntryPtr;
@@ -383,7 +380,7 @@ void* packetization_kernel(void *input_ptr)
         queueEntryPtr->ref_poc_list0 = picture_control_set_ptr->parent_pcs_ptr->ref_pic_poc_array[REF_LIST_0];
         queueEntryPtr->ref_poc_list1 = picture_control_set_ptr->parent_pcs_ptr->ref_pic_poc_array[REF_LIST_1];
 #endif
-#if REF_ORDER        
+#if REF_ORDER
         memcpy(queueEntryPtr->ref_poc_array, picture_control_set_ptr->parent_pcs_ptr->av1RefSignal.ref_poc_array, 7 * sizeof(uint64_t));
 #endif
 #endif
@@ -404,10 +401,8 @@ void* packetization_kernel(void *input_ptr)
         // Calling callback functions to release the memory allocated for data linked list in the application
         while (picture_control_set_ptr->parent_pcs_ptr->data_ll_head_ptr != EB_NULL) {
             appDataLLHeadTempPtr = picture_control_set_ptr->parent_pcs_ptr->data_ll_head_ptr->next;
-            if (picture_control_set_ptr->parent_pcs_ptr->data_ll_head_ptr->release_cb_fnc_ptr != EB_NULL) {
+            if (picture_control_set_ptr->parent_pcs_ptr->data_ll_head_ptr->release_cb_fnc_ptr != EB_NULL)
                 picture_control_set_ptr->parent_pcs_ptr->data_ll_head_ptr->release_cb_fnc_ptr(picture_control_set_ptr->parent_pcs_ptr->data_ll_head_ptr);
-            }
-
             picture_control_set_ptr->parent_pcs_ptr->data_ll_head_ptr = appDataLLHeadTempPtr;
         }
 
@@ -426,7 +421,6 @@ void* packetization_kernel(void *input_ptr)
 
         // Release the Entropy Coding Result
         eb_release_object(entropyCodingResultsWrapperPtr);
-
 
         //****************************************************
         // Process the head of the queue
@@ -527,7 +521,6 @@ void* packetization_kernel(void *input_ptr)
                             exit(0);
                         }
 
-
 #if REF_ORDER
                         for (int rr = 0; rr < 7; rr++)
                         {
@@ -549,7 +542,6 @@ void* packetization_kernel(void *input_ptr)
                             (int32_t)showTab[queueEntryPtr->show_frame], (int32_t)context_ptr->tot_shown_frames);
                     }
 
-
                     //Update the DPB
                     for (i = 0; i < 8; i++)
                     {
@@ -563,7 +555,7 @@ void* packetization_kernel(void *input_ptr)
             }
 #endif
 #if ADP_STATS_PER_LAYER
-            if (queueEntryPtr->picture_number == sequence_control_set_ptr->static_config.frames_to_be_encoded - 1) {         
+            if (queueEntryPtr->picture_number == sequence_control_set_ptr->static_config.frames_to_be_encoded - 1) {
                 uint8_t layerIndex;
                 SVT_LOG("\nsq_search_count\tsq_non4_search_count\tmdc_count\tpred_count\tpred1_nfl_count");
                 for (layerIndex = 0; layerIndex < 5; layerIndex++) {
@@ -601,9 +593,8 @@ void* packetization_kernel(void *input_ptr)
             queueEntryPtr->picture_number += PACKETIZATION_REORDER_QUEUE_MAX_DEPTH;
             queueEntryPtr->output_stream_wrapper_ptr = (EbObjectWrapper *)EB_NULL;
 
-            if (encode_context_ptr->statistics_port_active) {
+            if (encode_context_ptr->statistics_port_active)
                 queueEntryPtr->outputStatisticsWrapperPtr = (EbObjectWrapper *)EB_NULL;
-            }
             // Increment the Reorder Queue head Ptr
             encode_context_ptr->packetization_reorder_queue_head_index =
                 (encode_context_ptr->packetization_reorder_queue_head_index == PACKETIZATION_REORDER_QUEUE_MAX_DEPTH - 1) ? 0 : encode_context_ptr->packetization_reorder_queue_head_index + 1;

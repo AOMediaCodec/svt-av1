@@ -64,8 +64,3 @@ uint64_t spatial_full_distortion_kernel(
     }
     return spatialDistortion;
 }
-
-
-
-
-

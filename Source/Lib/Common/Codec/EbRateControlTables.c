@@ -2187,10 +2187,6 @@ static const EbBitNumber initial_rate_control_intra_sad64x64_tables[] = {
 286,    305,    276,    321
 };
 
-
-
-
-
 /**************************************
  * Function Declarations
  **************************************/
@@ -2227,13 +2223,11 @@ EbErrorType rate_control_tables_ctor(
 
                 }
 
-
             }
         }
     }
     return EB_ErrorNone;
 }
-
 
 #else
 
@@ -3165,8 +3159,6 @@ static const EbBitNumber initialRateControlSad64x64Tables[] = {
                                                                       73,       77,       83,      122,
 };
 
-
-
 static const EbBitNumber initialRateControlIntraSad64x64Tables[] = {
     // QP = 0 NEW
         0,        0,        0,        0,
@@ -4095,10 +4087,6 @@ static const EbBitNumber initialRateControlIntraSad64x64Tables[] = {
                                                    122,      104,      119,      166,
 };
 
-
-
-
-
 /**************************************
  * Function Declarations
  **************************************/
@@ -4134,7 +4122,6 @@ EbErrorType rate_control_tables_ctor(
                             initialRateControlIntraSad64x64Tables[qp_index*(NUMBER_OF_SAD_INTERVALS >> 1) + ((NUMBER_OF_SAD_INTERVALS >> 1) - 1)]);
 
                 }
-
 
             }
         }

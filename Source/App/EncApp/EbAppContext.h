@@ -32,7 +32,6 @@ typedef struct EbAppContext {
 
 } EbAppContext;
 
-
 /********************************
  * External Function
  ********************************/

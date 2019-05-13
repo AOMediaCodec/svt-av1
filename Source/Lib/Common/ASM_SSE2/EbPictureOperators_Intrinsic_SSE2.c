@@ -378,7 +378,6 @@ void residual_kernel_sub_sampled32x32_sse2_intrin(
     input_stride <<= 1;
     pred_stride <<= 1;
 
-
     for (y = 0; y < area_height; ++y) {
 
         residual_0_7 = _mm_sub_epi16(_mm_unpacklo_epi8(_mm_loadu_si128((__m128i *)input), xmm0), _mm_unpacklo_epi8(_mm_loadu_si128((__m128i *)pred), xmm0));
@@ -422,7 +421,6 @@ void residual_kernel_sub_sampled32x32_sse2_intrin(
 
     return;
 }
-
 
 void residual_kernel_sub_sampled64x64_sse2_intrin(
     uint8_t   *input,
@@ -672,7 +670,6 @@ void residual_kernel16bit_sse2_intrin(
 /******************************************************************************************************
                                    picture_addition_kernel16bit_sse2_intrin
 ******************************************************************************************************/
-
 
 void picture_addition_kernel16bit_sse2_intrin(
     uint16_t  *pred_ptr,

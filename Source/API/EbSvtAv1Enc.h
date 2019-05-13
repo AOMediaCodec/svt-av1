@@ -425,7 +425,6 @@ typedef struct EbSvtAv1EncConfiguration
 
 } EbSvtAv1EncConfiguration;
 
-
     /* STEP 1: Call the library to construct a Component Handle.
      *
      * Parameter:

@@ -33,7 +33,7 @@ typedef struct EbAV1StreamInfo
     uint32_t    max_picture_width;
     uint32_t    max_picture_height;
 
-    /* Operating points present in the bitstream */    
+    /* Operating points present in the bitstream */
     uint32_t    num_operating_points;
     EbAv1OperatingPoint op_points[EB_MAX_NUM_OPERATING_POINTS];
 
@@ -49,9 +49,9 @@ typedef struct EbAV1StreamInfo
     EbColorFormat   color_format;
 
     /* Color description */
-    
-    EbBool          color_description_present_flag; 
-    
+
+    EbBool          color_description_present_flag;
+
     EbColorPrimaries color_primaries;
     EbTransferCharacteristics transfer_characteristics;
     EbMatrixCoefficients matrix_coefficients;
@@ -78,26 +78,26 @@ typedef struct EbAV1FrameInfo
 
 } EbAV1FrameInfo;
 
-typedef struct EbSvtAv1DecConfiguration 
+typedef struct EbSvtAv1DecConfiguration
 {
 
-    /* Bitstream operating point to decode. 
-     * 
+    /* Bitstream operating point to decode.
+     *
      * Default is -1, the highest operating point present in the bitstream
-     * A value higher than the maximum number of operating points present 
+     * A value higher than the maximum number of operating points present
      * returns the highest available operating point. */
 
     int32_t                operating_point;   // Operating point to decode
 
-    /* When set to 1, returns output pictures from all scalable layers present in the bitstream. 
-     * 
+    /* When set to 1, returns output pictures from all scalable layers present in the bitstream.
+     *
      * Default is 0, only one output layer is returned, defined by operating_point parameter */
-    uint32_t                output_all_layers; 
+    uint32_t                output_all_layers;
 
-    /* Skip film grain synthesis if it is present in the bitstream. Can be used for debugging purpose.  
-     * 
+    /* Skip film grain synthesis if it is present in the bitstream. Can be used for debugging purpose.
+     *
      * Default is 0 */
-    EbBool                  skip_film_grain; 
+    EbBool                  skip_film_grain;
 
     /* Skip N output frames in the display order.
      *
@@ -112,7 +112,6 @@ typedef struct EbSvtAv1DecConfiguration
      *
      * Default is 0. */
     uint64_t                 frames_to_be_decoded;
-
 
     /* Offline packing of the 2bits: requires two bits packed input.
      *
@@ -160,7 +159,6 @@ typedef struct EbSvtAv1DecConfiguration
     uint32_t                 stat_report;
 
 } EbSvtAv1DecConfiguration;
-
 
     /* STEP 1: Call the library to construct a Component Handle.
      *
@@ -293,17 +291,17 @@ typedef struct EbSvtAv1DecConfiguration
 
     /*  Flush a decoder
      *
-     *  Clears the decoder frame buffers. 
+     *  Clears the decoder frame buffers.
      *  The decoder is ready to parse a new sequence header.
      *
      *  Parameter:
      *  @ *svt_dec_component     Decoder handle
      *
      *  Returns EB_ErrorNone if the decode buffer has been flushed successfully.
-     */    
+     */
     EB_API EbErrorType eb_dec_flush(
         EbComponentType     *svt_dec_component);
-    
+
     /* Initialize callback functions.
      *
      * Parameter:
@@ -311,7 +309,7 @@ typedef struct EbSvtAv1DecConfiguration
      * @ allocate_buffer        callback function to allocate frame buffer
      * @ release_buffer         callback function to release frame buffer
      * @ priv_data              private data used by the allocator */
-    
+
     EB_API EbErrorType eb_dec_set_frame_buffer_callbacks(
         EbComponentType             *svt_dec_component,
         eb_allocate_frame_buffer    allocate_buffer,

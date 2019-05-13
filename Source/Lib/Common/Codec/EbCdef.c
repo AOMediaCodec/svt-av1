@@ -94,7 +94,6 @@ void *aom_memset16(void *dest, int32_t val, size_t length) {
 }
 //-------------------------------
 
-
 extern INLINE int32_t get_msb(uint32_t n);
 
 static INLINE int32_t sign(int32_t i) { return i < 0 ? -1 : 1; }
@@ -105,7 +104,6 @@ static INLINE int32_t constrain(int32_t diff, int32_t threshold, int32_t damping
     return sign(diff) *
         AOMMIN(abs(diff), AOMMAX(0, threshold - (abs(diff) >> shift)));
 }
-
 
 /* Generated from gen_filter_tables.c. */
 DECLARE_ALIGNED(16, const int32_t, cdef_directions[8][2]) = {
@@ -172,9 +170,8 @@ int32_t cdef_find_dir_c(const uint16_t *img, int32_t stride, int32_t *var,
     cost[4] += partial[4][7] * partial[4][7] * div_table[8];
     for (i = 1; i < 8; i += 2) {
         int32_t j;
-        for (j = 0; j < 4 + 1; j++) {
+        for (j = 0; j < 4 + 1; j++)
             cost[i] += partial[i][3 + j] * partial[i][3 + j];
-        }
         cost[i] *= div_table[8];
         for (j = 0; j < 4 - 1; j++) {
             cost[i] += (partial[i][j] * partial[i][j] +
@@ -430,12 +427,10 @@ int32_t sb_compute_cdef_list(PictureControlSet            *picture_control_set_p
 void copy_rect8_8bit_to_16bit_c(uint16_t *dst, int32_t dstride, const uint8_t *src,
     int32_t sstride, int32_t v, int32_t h) {
     for (int32_t i = 0; i < v; i++) {
-        for (int32_t j = 0; j < h; j++) {
+        for (int32_t j = 0; j < h; j++)
             dst[i * dstride + j] = src[i * sstride + j];
-        }
     }
 }
-
 
 static void copy_sb8_16(uint16_t *dst, int32_t dstride,
     const uint8_t *src, int32_t src_voffset, int32_t src_hoffset,
@@ -449,22 +444,19 @@ static void copy_sb8_16(uint16_t *dst, int32_t dstride,
         }
 }
 
-
 static INLINE void fill_rect(uint16_t *dst, int32_t dstride, int32_t v, int32_t h,
     uint16_t x) {
     for (int32_t i = 0; i < v; i++) {
-        for (int32_t j = 0; j < h; j++) {
+        for (int32_t j = 0; j < h; j++)
             dst[i * dstride + j] = x;
-        }
     }
 }
 
 static INLINE void copy_rect(uint16_t *dst, int32_t dstride, const uint16_t *src,
     int32_t sstride, int32_t v, int32_t h) {
     for (int32_t i = 0; i < v; i++) {
-        for (int32_t j = 0; j < h; j++) {
+        for (int32_t j = 0; j < h; j++)
             dst[i * dstride + j] = src[i * sstride + j];
-        }
     }
 }
 
@@ -477,22 +469,16 @@ void av1_cdef_frame(
     struct PictureParentControlSet     *pPcs = pCs->parent_pcs_ptr;
     Av1Common*   cm = pPcs->av1_cm;
 
-
     EbPictureBufferDesc  * recon_picture_ptr;
-
 
     if (pPcs->is_used_as_reference_flag == EB_TRUE)
         recon_picture_ptr = ((EbReferenceObject*)pCs->parent_pcs_ptr->reference_picture_wrapper_ptr->object_ptr)->reference_picture;
     else
         recon_picture_ptr = pCs->recon_picture_ptr;
 
-
     EbByte  reconBufferY = &((recon_picture_ptr->buffer_y)[recon_picture_ptr->origin_x + recon_picture_ptr->origin_y * recon_picture_ptr->stride_y]);
     EbByte  reconBufferCb = &((recon_picture_ptr->buffer_cb)[recon_picture_ptr->origin_x / 2 + recon_picture_ptr->origin_y / 2 * recon_picture_ptr->stride_cb]);
     EbByte  reconBufferCr = &((recon_picture_ptr->buffer_cr)[recon_picture_ptr->origin_x / 2 + recon_picture_ptr->origin_y / 2 * recon_picture_ptr->stride_cr]);
-
-
-
 
     const int32_t num_planes = 3;// av1_num_planes(cm);
     DECLARE_ALIGNED(16, uint16_t, src[CDEF_INBUF_SIZE]);
@@ -640,7 +626,6 @@ void av1_cdef_frame(
                         CDEF_VBORDER, hsize + 2 * CDEF_HBORDER, CDEF_VERY_LARGE);
                 }
 
-
                 uint8_t* recBuff = 0;
                 uint32_t recStride = 0;
 
@@ -659,7 +644,6 @@ void av1_cdef_frame(
                     recStride = recon_picture_ptr->stride_cr;
                     break;
                 }
-
 
                 /* Copy in the pixels we need from the current superblock for
                    deringing.*/
@@ -684,7 +668,6 @@ void av1_cdef_frame(
                         CDEF_VERY_LARGE);
                 }
 
-
                 if (!prev_row_cdef[fbc - 1]) {
                     copy_sb8_16(//cm,
                         src, CDEF_BSTRIDE, recBuff/*xd->plane[pli].dst.buf*/,
@@ -700,7 +683,6 @@ void av1_cdef_frame(
                     fill_rect(src, CDEF_BSTRIDE, CDEF_VBORDER, CDEF_HBORDER,
                         CDEF_VERY_LARGE);
                 }
-
 
                 if (!prev_row_cdef[fbc + 1]) {
                     copy_sb8_16(//cm,
@@ -719,7 +701,6 @@ void av1_cdef_frame(
                     fill_rect(&src[hsize + CDEF_HBORDER], CDEF_BSTRIDE, CDEF_VBORDER,
                         CDEF_HBORDER, CDEF_VERY_LARGE);
                 }
-
 
                 if (cdef_left) {
                     /* If we deringed the superblock on the left then we need to copy in
@@ -804,9 +785,7 @@ void av1_cdef_frame16bit(
     struct PictureParentControlSet     *pPcs = pCs->parent_pcs_ptr;
     Av1Common*   cm = pPcs->av1_cm;
 
-
     EbPictureBufferDesc  * recon_picture_ptr;
-
 
     if (pPcs->is_used_as_reference_flag == EB_TRUE)
         recon_picture_ptr = ((EbReferenceObject*)pCs->parent_pcs_ptr->reference_picture_wrapper_ptr->object_ptr)->reference_picture16bit;
@@ -817,8 +796,6 @@ void av1_cdef_frame16bit(
     uint16_t*  reconBufferY = (uint16_t*)recon_picture_ptr->buffer_y + (recon_picture_ptr->origin_x + recon_picture_ptr->origin_y     * recon_picture_ptr->stride_y);
     uint16_t*  reconBufferCb = (uint16_t*)recon_picture_ptr->buffer_cb + (recon_picture_ptr->origin_x / 2 + recon_picture_ptr->origin_y / 2 * recon_picture_ptr->stride_cb);
     uint16_t*  reconBufferCr = (uint16_t*)recon_picture_ptr->buffer_cr + (recon_picture_ptr->origin_x / 2 + recon_picture_ptr->origin_y / 2 * recon_picture_ptr->stride_cr);
-
-
 
     const int32_t num_planes = 3;// av1_num_planes(cm);
     DECLARE_ALIGNED(16, uint16_t, src[CDEF_INBUF_SIZE]);
@@ -966,7 +943,6 @@ void av1_cdef_frame16bit(
                         CDEF_VBORDER, hsize + 2 * CDEF_HBORDER, CDEF_VERY_LARGE);
                 }
 
-
                 uint16_t* recBuff = 0;
                 uint32_t recStride = 0;
 
@@ -996,9 +972,6 @@ void av1_cdef_frame16bit(
                     (MI_SIZE_64X64 << mi_high_l2[pli]) * fbr, coffset + cstart,
                     recStride/*xd->plane[pli].dst.stride*/, rend, cend - cstart);
 
-
-
-
                 if (!prev_row_cdef[fbc]) {
                     copy_sb16_16(//cm,
                         &src[CDEF_HBORDER], CDEF_BSTRIDE,
@@ -1015,7 +988,6 @@ void av1_cdef_frame16bit(
                         CDEF_VERY_LARGE);
                 }
 
-
                 if (!prev_row_cdef[fbc - 1]) {
                     copy_sb16_16(//cm,
                         src, CDEF_BSTRIDE, recBuff/*xd->plane[pli].dst.buf*/,
@@ -1031,9 +1003,6 @@ void av1_cdef_frame16bit(
                     fill_rect(src, CDEF_BSTRIDE, CDEF_VBORDER, CDEF_HBORDER,
                         CDEF_VERY_LARGE);
                 }
-
-
-
 
                 if (!prev_row_cdef[fbc + 1]) {
                     copy_sb16_16(//cm,
@@ -1053,14 +1022,12 @@ void av1_cdef_frame16bit(
                         CDEF_HBORDER, CDEF_VERY_LARGE);
                 }
 
-
                 if (cdef_left) {
                     /* If we deringed the superblock on the left then we need to copy in
                     saved pixels. */
                     copy_rect(src, CDEF_BSTRIDE, colbuf[pli], CDEF_HBORDER,
                         rend + CDEF_VBORDER, CDEF_HBORDER);
                 }
-
 
                 /* Saving pixels in case we need to dering the superblock on the
                 right. */
@@ -1089,9 +1056,6 @@ void av1_cdef_frame16bit(
                     fill_rect(&src[hsize + CDEF_HBORDER], CDEF_BSTRIDE,
                         vsize + 2 * CDEF_VBORDER, CDEF_HBORDER, CDEF_VERY_LARGE);
                 }
-
-
-
 
                 //if (cm->use_highbitdepth) {
                 //  cdef_filter_fb(
@@ -1153,12 +1117,11 @@ static uint64_t search_one(int32_t *lev, int32_t nb_strengths,
         uint64_t best_mse = (uint64_t)1 << 63;
         /* Find best mse among already selected options. */
         for (gi = 0; gi < nb_strengths; gi++) {
-            if (mse[i][lev[gi]] < best_mse) {
+            if (mse[i][lev[gi]] < best_mse)
                 best_mse = mse[i][lev[gi]];
-            }
         }
         /* Find best mse when adding each possible new option. */
-        
+
         for (j = start_gi; j < total_strengths; j++) {
             uint64_t best = best_mse;
             if (mse[i][j] < best) best = mse[i][j];
@@ -1195,9 +1158,8 @@ uint64_t search_one_dual_c(int *lev0, int *lev1, int nb_strengths,
         for (gi = 0; gi < nb_strengths; gi++) {
             uint64_t curr = mse[0][i][lev0[gi]];
             curr += mse[1][i][lev1[gi]];
-            if (curr < best_mse) {
+            if (curr < best_mse)
                 best_mse = curr;
-            }
         }
         /* Find best mse when adding each possible new option. */
         for (j = start_gi; j < total_strengths; j++) {
@@ -1235,9 +1197,8 @@ static uint64_t joint_strength_search(int32_t *best_lev, int32_t nb_strengths,
     int32_t i;
     best_tot_mse = (uint64_t)1 << 63;
     /* Greedy search: add one strength options at a time. */
-    for (i = 0; i < nb_strengths; i++) {
+    for (i = 0; i < nb_strengths; i++)
         best_tot_mse = search_one(best_lev, i, mse, sb_count, fast, start_gi, end_gi);
-    }
     /* Trying to refine the greedy search by reconsidering each
     already-selected option. */
     if (!fast) {
@@ -1260,9 +1221,8 @@ static uint64_t joint_strength_search_dual(int32_t *best_lev0, int32_t *best_lev
     int32_t i;
     best_tot_mse = (uint64_t)1 << 63;
     /* Greedy search: add one strength options at a time. */
-    for (i = 0; i < nb_strengths; i++) {
+    for (i = 0; i < nb_strengths; i++)
         best_tot_mse = search_one_dual(best_lev0, best_lev1, i, mse, sb_count, fast, start_gi, end_gi);
-    }
     /* Trying to refine the greedy search by reconsidering each
     already-selected option. */
     for (i = 0; i < 4 * nb_strengths; i++) {
@@ -1353,9 +1313,8 @@ uint64_t compute_cdef_dist_c(const uint16_t *dst, int32_t dstride, const uint16_
                 sum += dist_8x8_16bit_c(&src[bi << (3 + 3)], &dst[(by << 3) * dstride + (bx << 3)], dstride,
                     coeff_shift);
             }
-            else {
+            else
                 sum += mse_8_16bit(&src[bi << (3 + 3)], &dst[(by << 3) * dstride + (bx << 3)], dstride, 8);
-            }
         }
     }
     else if (bsize == BLOCK_4X8) {
@@ -1440,10 +1399,6 @@ void finish_cdef_search(
     mse[0] = (uint64_t(*)[64])malloc(sizeof(**mse) * nvfb * nhfb);
     mse[1] = (uint64_t(*)[64])malloc(sizeof(**mse) * nvfb * nhfb);
 
-
-
-
-
     sb_count = 0;
     for (fbr = 0; fbr < nvfb; ++fbr) {
         for (fbc = 0; fbc < nhfb; ++fbc) {
@@ -1458,8 +1413,6 @@ void finish_cdef_search(
             {
                 continue;
             }
-
-
 
             // No filtering if the entire filter block is skipped
             if (sb_all_skip(picture_control_set_ptr, cm, fbr * MI_SIZE_64X64, fbc * MI_SIZE_64X64))
@@ -1528,7 +1481,7 @@ void finish_cdef_search(
 
         switch (sb_type)
         {
-        case BLOCK_128X128: 
+        case BLOCK_128X128:
             picture_control_set_ptr->mi_grid_base[sb_index[i] + MI_SIZE_64X64]->mbmi.cdef_strength = (int8_t)best_gi;
             picture_control_set_ptr->mi_grid_base[sb_index[i] + MI_SIZE_64X64 * picture_control_set_ptr->mi_stride]->mbmi.cdef_strength = (int8_t)best_gi;
             picture_control_set_ptr->mi_grid_base[sb_index[i] + MI_SIZE_64X64 * picture_control_set_ptr->mi_stride + MI_SIZE_64X64]->mbmi.cdef_strength = (int8_t)best_gi;
@@ -1539,11 +1492,9 @@ void finish_cdef_search(
         case BLOCK_64X128:
             picture_control_set_ptr->mi_grid_base[sb_index[i] + MI_SIZE_64X64 * picture_control_set_ptr->mi_stride]->mbmi.cdef_strength = (int8_t)best_gi;
             break;
-        default:          
-            break;            
+        default:
+            break;
         }
-
-
 
     }
 
@@ -1555,9 +1506,8 @@ void finish_cdef_search(
     }
     pPcs->cdef_pri_damping = pri_damping;
     pPcs->cdef_sec_damping = sec_damping;
-    for (int i = 0; i < total_strengths; i++) {
+    for (int i = 0; i < total_strengths; i++)
         best_frame_gi_cnt += selected_strength_cnt[i] > best_frame_gi_cnt ? 1 : 0;
-    }
     pPcs->cdef_frame_strength = ((best_frame_gi_cnt + 4) / 4) * 4;
 
     free(mse[0]);
@@ -1565,7 +1515,6 @@ void finish_cdef_search(
     free(sb_index);
     free(selected_strength);
 }
-
 
 void av1_cdef_search(
     EncDecContext                *context_ptr,
@@ -1595,12 +1544,10 @@ void av1_cdef_search(
     EbByte  reconBufferCb = &((recon_picture_ptr->buffer_cb)[recon_picture_ptr->origin_x / 2 + recon_picture_ptr->origin_y / 2 * recon_picture_ptr->stride_cb]);
     EbByte  reconBufferCr = &((recon_picture_ptr->buffer_cr)[recon_picture_ptr->origin_x / 2 + recon_picture_ptr->origin_y / 2 * recon_picture_ptr->stride_cr]);
 
-
     EbPictureBufferDesc *input_picture_ptr = (EbPictureBufferDesc*)picture_control_set_ptr->parent_pcs_ptr->enhanced_picture_ptr;
     EbByte  inputBufferY = &((input_picture_ptr->buffer_y)[input_picture_ptr->origin_x + input_picture_ptr->origin_y * input_picture_ptr->stride_y]);
     EbByte  inputBufferCb = &((input_picture_ptr->buffer_cb)[input_picture_ptr->origin_x / 2 + input_picture_ptr->origin_y / 2 * input_picture_ptr->stride_cb]);
     EbByte  inputBufferCr = &((input_picture_ptr->buffer_cr)[input_picture_ptr->origin_x / 2 + input_picture_ptr->origin_y / 2 * input_picture_ptr->stride_cr]);
-
 
     int32_t r, c;
     int32_t fbr, fbc;
@@ -1655,7 +1602,6 @@ void av1_cdef_search(
     int32_t start_gi = pPcs->use_ref_frame_cdef_strength && pPcs->cdef_filter_mode == 1 ? (AOMMAX(0, mid_gi - gi_step)) : 0;
     int32_t end_gi = pPcs->use_ref_frame_cdef_strength ? AOMMIN(total_strengths, mid_gi + gi_step) : pPcs->cdef_filter_mode == 1 ? 8 : total_strengths;
 
-
     quantizer =
         //CHKN av1_ac_quant_Q3(cm->base_qindex, 0, cm->bit_depth) >> (cm->bit_depth - 8);
         av1_ac_quant_Q3(pPcs->base_qindex, 0, (AomBitDepth)sequence_control_set_ptr->static_config.encoder_bit_depth) >> (sequence_control_set_ptr->static_config.encoder_bit_depth - 8);
@@ -1665,8 +1611,6 @@ void av1_cdef_search(
 
     mse[0] = (uint64_t(*)[64])aom_malloc(sizeof(**mse) * nvfb * nhfb);
     mse[1] = (uint64_t(*)[64])aom_malloc(sizeof(**mse) * nvfb * nhfb);
-
-
 
     for (pli = 0; pli < num_planes; pli++) {
 
@@ -1696,7 +1640,6 @@ void av1_cdef_search(
             break;
         }
 
-
         ///CHKN: allocate one frame 16bit for src and recon!!
         src[pli] = (uint16_t*)aom_memalign(32, sizeof(*src)       * mi_rows * mi_cols * MI_SIZE * MI_SIZE);
         ref_coeff[pli] = (uint16_t*)aom_memalign(32, sizeof(*ref_coeff) * mi_rows * mi_cols * MI_SIZE * MI_SIZE);
@@ -1715,8 +1658,6 @@ void av1_cdef_search(
 
         const int32_t frame_height = (cm->mi_rows * MI_SIZE) >> subsampling_y;//CHKN  xd->plane[pli].subsampling_y;
         const int32_t frame_width = (cm->mi_cols * MI_SIZE) >> subsampling_x;//CHKN  xd->plane[pli].subsampling_x;
-
-
 
         for (r = 0; r < frame_height; ++r) {
             for (c = 0; c < frame_width; ++c) {
@@ -1820,7 +1761,6 @@ void av1_cdef_search(
                     else
                         mse[1][sb_count][gi] += curr_mse;
 
-
                     sb_index[sb_count] = MI_SIZE_64X64 * fbr * picture_control_set_ptr->mi_stride + MI_SIZE_64X64 * fbc;//CHKN
                 }
             }
@@ -1885,15 +1825,9 @@ void av1_cdef_search(
             picture_control_set_ptr->mi_grid_base[sb_index[i] + MI_SIZE_64X64 * picture_control_set_ptr->mi_stride + MI_SIZE_64X64]->mbmi.cdef_strength = (int8_t)best_gi;
         }
         else if (sb_type == BLOCK_128X64)
-        {
             picture_control_set_ptr->mi_grid_base[sb_index[i] + MI_SIZE_64X64]->mbmi.cdef_strength = (int8_t)best_gi;
-        }
         else if (sb_type == BLOCK_64X128)
-        {
             picture_control_set_ptr->mi_grid_base[sb_index[i] + MI_SIZE_64X64 * picture_control_set_ptr->mi_stride]->mbmi.cdef_strength = (int8_t)best_gi;
-        }
-
-
     }
 
     if (fast) {
@@ -1903,15 +1837,12 @@ void av1_cdef_search(
         }
     }
 
-    for (int i = 0; i < total_strengths; i++) {
+    for (int i = 0; i < total_strengths; i++)
         best_frame_gi_cnt += selected_strength_cnt[i] > best_frame_gi_cnt ? 1 : 0;
-    }
     pPcs->cdef_frame_strength = ((best_frame_gi_cnt + 4) / 4) * 4;
-
 
     pPcs->cdef_pri_damping = pri_damping;
     pPcs->cdef_sec_damping = sec_damping;
-
 
     aom_free(mse[0]);
     aom_free(mse[1]);
@@ -1947,17 +1878,14 @@ void av1_cdef_search16bit(
     else
         recon_picture_ptr = picture_control_set_ptr->recon_picture16bit_ptr;
 
-
     uint16_t*  reconBufferY = (uint16_t*)recon_picture_ptr->buffer_y + (recon_picture_ptr->origin_x + recon_picture_ptr->origin_y     * recon_picture_ptr->stride_y);
     uint16_t*  reconBufferCb = (uint16_t*)recon_picture_ptr->buffer_cb + (recon_picture_ptr->origin_x / 2 + recon_picture_ptr->origin_y / 2 * recon_picture_ptr->stride_cb);
     uint16_t*  reconBufferCr = (uint16_t*)recon_picture_ptr->buffer_cr + (recon_picture_ptr->origin_x / 2 + recon_picture_ptr->origin_y / 2 * recon_picture_ptr->stride_cr);
-
 
     EbPictureBufferDesc *input_picture_ptr = picture_control_set_ptr->input_frame16bit;
     uint16_t*  inputBufferY = (uint16_t*)input_picture_ptr->buffer_y + (input_picture_ptr->origin_x + input_picture_ptr->origin_y * input_picture_ptr->stride_y);
     uint16_t*  inputBufferCb = (uint16_t*)input_picture_ptr->buffer_cb + (input_picture_ptr->origin_x / 2 + input_picture_ptr->origin_y / 2 * input_picture_ptr->stride_cb);
     uint16_t*  inputBufferCr = (uint16_t*)input_picture_ptr->buffer_cr + (input_picture_ptr->origin_x / 2 + input_picture_ptr->origin_y / 2 * input_picture_ptr->stride_cr);
-
 
     int32_t r, c;
     int32_t fbr, fbc;
@@ -2013,7 +1941,6 @@ void av1_cdef_search16bit(
     int32_t start_gi = pPcs->use_ref_frame_cdef_strength && pPcs->cdef_filter_mode == 1 ? (AOMMAX(0, mid_gi - gi_step)) : 0;
     int32_t end_gi = pPcs->use_ref_frame_cdef_strength ? AOMMIN(total_strengths, mid_gi + gi_step) : pPcs->cdef_filter_mode == 1 ? 8 : total_strengths;
 
-
     quantizer =
         //CHKN av1_ac_quant_Q3(cm->base_qindex, 0, cm->bit_depth) >> (cm->bit_depth - 8);
         av1_ac_quant_Q3(pPcs->base_qindex, 0, (AomBitDepth)sequence_control_set_ptr->static_config.encoder_bit_depth) >> (sequence_control_set_ptr->static_config.encoder_bit_depth - 8);
@@ -2023,7 +1950,6 @@ void av1_cdef_search16bit(
 
     mse[0] = (uint64_t(*)[64])aom_malloc(sizeof(**mse) * nvfb * nhfb);
     mse[1] = (uint64_t(*)[64])aom_malloc(sizeof(**mse) * nvfb * nhfb);
-
 
     for (pli = 0; pli < num_planes; pli++) {
 
@@ -2071,8 +1997,6 @@ void av1_cdef_search16bit(
 
         const int32_t frame_height = (cm->mi_rows * MI_SIZE) >> subsampling_y;//CHKN  xd->plane[pli].subsampling_y;
         const int32_t frame_width = (cm->mi_cols * MI_SIZE) >> subsampling_x;//CHKN  xd->plane[pli].subsampling_x;
-
-
 
         for (r = 0; r < frame_height; ++r) {
             for (c = 0; c < frame_width; ++c) {
@@ -2176,7 +2100,6 @@ void av1_cdef_search16bit(
                     else
                         mse[1][sb_count][gi] += curr_mse;
 
-
                     sb_index[sb_count] = MI_SIZE_64X64 * fbr * picture_control_set_ptr->mi_stride + MI_SIZE_64X64 * fbc;//CHKN
                 }
             }
@@ -2240,14 +2163,9 @@ void av1_cdef_search16bit(
             picture_control_set_ptr->mi_grid_base[sb_index[i] + MI_SIZE_64X64 * picture_control_set_ptr->mi_stride + MI_SIZE_64X64]->mbmi.cdef_strength = (int8_t)best_gi;
         }
         else if (sb_type == BLOCK_128X64)
-        {
             picture_control_set_ptr->mi_grid_base[sb_index[i] + MI_SIZE_64X64]->mbmi.cdef_strength = (int8_t)best_gi;
-        }
         else if (sb_type == BLOCK_64X128)
-        {
             picture_control_set_ptr->mi_grid_base[sb_index[i] + MI_SIZE_64X64 * picture_control_set_ptr->mi_stride]->mbmi.cdef_strength = (int8_t)best_gi;
-        }
-
         //ModeInfo *miPtr = *(picture_control_set_ptr->mi_grid_base + sb_index[i]);
         //uint8_t  miX, miY;
         //for (miY = 0; miY < (block_size_high[sb_type] >> MI_SIZE_LOG2); miY++) {
@@ -2255,8 +2173,6 @@ void av1_cdef_search16bit(
         //        miPtr[miX + miY * picture_control_set_ptr->mi_stride].mbmi.cdef_strength = (int8_t)best_gi;
         //    }
         //}
-
-
 
     }
 
@@ -2269,9 +2185,8 @@ void av1_cdef_search16bit(
     pPcs->cdef_pri_damping = pri_damping;
     pPcs->cdef_sec_damping = sec_damping;
 
-    for (int i = 0; i < total_strengths; i++) {
+    for (int i = 0; i < total_strengths; i++)
         best_frame_gi_cnt += selected_strength_cnt[i] > best_frame_gi_cnt ? 1 : 0;
-    }
     pPcs->cdef_frame_strength = ((best_frame_gi_cnt + 4) / 4) * 4;
 
     aom_free(mse[0]);

@@ -35,7 +35,6 @@ typedef struct RestContext
                                                     // later we can have a search version that does not need the exact right recon
     int32_t *rst_tmpbuf;
 
-
 } RestContext;
 
 /**************************************

@@ -53,7 +53,6 @@ void av1_cdef_frame(
     PictureControlSet            *pCs);
 void av1_loop_restoration_save_boundary_lines(const Yv12BufferConfig *frame, Av1Common *cm, int32_t after_cdef);
 
-
 /******************************************************
  * Cdef Context Constructor
  ******************************************************/
@@ -69,7 +68,6 @@ EbErrorType cdef_context_ctor(
     (void)max_input_luma_width;
     (void)max_input_luma_height;
 
-
     CdefContext_t *context_ptr;
     EB_MALLOC(CdefContext_t*, context_ptr, sizeof(CdefContext_t), EB_N_PTR);
     *context_dbl_ptr = context_ptr;
@@ -78,10 +76,8 @@ EbErrorType cdef_context_ctor(
     context_ptr->cdef_input_fifo_ptr = cdef_input_fifo_ptr;
     context_ptr->cdef_output_fifo_ptr = cdef_output_fifo_ptr;
 
-
     return EB_ErrorNone;
 }
-
 
 void cdef_seg_search(
     PictureControlSet            *picture_control_set_ptr,
@@ -135,7 +131,6 @@ void cdef_seg_search(
     int32_t mid_gi;
     int32_t start_gi;
     int32_t end_gi;
-
 
     for (pli = 0; pli < num_planes; pli++) {
 
@@ -426,7 +421,6 @@ void cdef_seg_search16bit(
 
 }
 
-
 /******************************************************
  * CDEF Kernel
  ******************************************************/
@@ -446,7 +440,6 @@ void* cdef_kernel(void *input_ptr)
     CdefResults                           *cdef_results_ptr;
 
     // SB Loop variables
-
 
     for (;;) {
 
@@ -479,7 +472,6 @@ void* cdef_kernel(void *input_ptr)
                     dlf_results_ptr->segment_index);
         }
 
-
         //all seg based search is done. update total processed segments. if all done, finish the search and perfrom application.
         eb_block_on_mutex(picture_control_set_ptr->cdef_search_mutex);
 
@@ -487,10 +479,7 @@ void* cdef_kernel(void *input_ptr)
         if (picture_control_set_ptr->tot_seg_searched_cdef == picture_control_set_ptr->cdef_segments_total_count)
         {
 
-
            // printf("    CDEF all seg here  %i\n", picture_control_set_ptr->picture_number);
-
-
 
         if (sequence_control_set_ptr->enable_cdef && picture_control_set_ptr->parent_pcs_ptr->cdef_filter_mode) {
                 finish_cdef_search(
@@ -544,8 +533,6 @@ void* cdef_kernel(void *input_ptr)
 
         }
 
-
-
         picture_control_set_ptr->rest_segments_column_count = sequence_control_set_ptr->rest_segment_column_count;
         picture_control_set_ptr->rest_segments_row_count =   sequence_control_set_ptr->rest_segment_row_count;
         picture_control_set_ptr->rest_segments_total_count = (uint16_t)(picture_control_set_ptr->rest_segments_column_count  * picture_control_set_ptr->rest_segments_row_count);
@@ -565,10 +552,8 @@ void* cdef_kernel(void *input_ptr)
 
         }
 
-
         }
         eb_release_mutex(picture_control_set_ptr->cdef_search_mutex);
-
 
         // Release Dlf Results
         eb_release_object(dlf_results_wrapper_ptr);

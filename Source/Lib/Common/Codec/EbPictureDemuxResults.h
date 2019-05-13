@@ -11,7 +11,7 @@
 /**************************************
  * Enums
  **************************************/
-typedef enum EbPicType 
+typedef enum EbPicType
 {
     EB_PIC_INVALID = 0,
     EB_PIC_INPUT = 1,
@@ -45,6 +45,5 @@ typedef struct PictureResultInitData {
 extern EbErrorType picture_results_ctor(
     EbPtr *object_dbl_ptr,
     EbPtr  object_init_data_ptr);
-
 
 #endif //EbPictureResults_h

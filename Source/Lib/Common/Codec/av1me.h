@@ -16,8 +16,6 @@
 #include "EbCodingUnit.h"
 #include "EbUtility.h"
 
-
-
 //#include "av1/encoder/block.h"
 //#include "aom_dsp/variance.h"
 
@@ -59,7 +57,6 @@ typedef struct {
   int coord_offset;
 } search_neighbors;
 
-
 void av1_init_dsmotion_compensation(SearchSiteConfig *cfg, int stride);
 void av1_init3smotion_compensation(SearchSiteConfig *cfg, int stride);
 void av1_set_mv_search_range(MvLimits *mv_limits, const MV *mv);
@@ -71,7 +68,6 @@ int av1_full_pixel_search(struct PictureControlSet *pcs, IntraBcContext /*MACROB
                           int method, int run_mesh_search, int error_per_bit,
                           int *cost_list, const MV *ref_mv, int var_max, int rd,
                           int x_pos, int y_pos, int intra);
-
 
 #ifdef __cplusplus
 }  // extern "C"

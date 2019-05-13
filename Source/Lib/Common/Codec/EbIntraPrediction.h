@@ -40,7 +40,7 @@ extern "C" {
         const uint16_t *above, const uint16_t *left,
         int32_t bd);
 
-    typedef struct IntraReferenceSamples 
+    typedef struct IntraReferenceSamples
     {
 
         uint8_t                  *y_intra_reference_array;
@@ -71,7 +71,7 @@ extern "C" {
 
     } IntraReferenceSamples;
 
-    typedef struct IntraReference16bitSamples 
+    typedef struct IntraReference16bitSamples
     {
 
         uint16_t                  *y_intra_reference_array;
@@ -119,7 +119,6 @@ extern "C" {
 #define SMOOTHING_THRESHOLD                 8
 #define SMOOTHING_THRESHOLD_10BIT          32
 
-
     extern EbErrorType av1_intra_prediction_cl(
         struct ModeDecisionContext           *context_ptr,
         PictureControlSet                    *picture_control_set_ptr,
@@ -133,8 +132,6 @@ extern "C" {
         uint32_t            prediction_buffer_stride,
         const EbBool     skip,
         int32_t            intra_pred_angle);
-
-
 
     extern EbErrorType intra_open_loop_reference_samples_ctor(
         IntraReferenceSamplesOpenLoop **context_dbl_ptr);
@@ -483,7 +480,6 @@ extern "C" {
         int32_t round_offset,
         int32_t num_pel_log2);
 
-
 #define ROUND_POWER_OF_TWO_SIGNED(value, n)           \
   (((value) < 0) ? -ROUND_POWER_OF_TWO(-(value), (n)) \
                  : ROUND_POWER_OF_TWO((value), (n)))
@@ -494,8 +490,6 @@ extern "C" {
     }
 
     //CFL_PREDICT_FN(c, lbd)
-
-
 
     void cfl_predict_lbd_c(
         const int16_t *pred_buf_q3,
@@ -519,7 +513,6 @@ extern "C" {
         int32_t width,
         int32_t height);
 
-
     static INLINE int32_t cfl_idx_to_alpha(int32_t alpha_idx, int32_t joint_sign,
         CflPredType pred_type) {
         const int32_t alpha_sign = (pred_type == CFL_PRED_U) ? CFL_SIGN_U(joint_sign)
@@ -529,10 +522,6 @@ extern "C" {
             (pred_type == CFL_PRED_U) ? CFL_IDX_U(alpha_idx) : CFL_IDX_V(alpha_idx);
         return (alpha_sign == CFL_SIGN_POS) ? abs_alpha_q3 + 1 : -abs_alpha_q3 - 1;
     }
-
-
-
-
 
 #ifdef __cplusplus
 }
