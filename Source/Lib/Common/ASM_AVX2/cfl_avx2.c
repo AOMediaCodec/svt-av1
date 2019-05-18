@@ -221,10 +221,8 @@ static INLINE __m256i _mm256_addl_epi16(__m256i a) {
                     _mm_unpacklo_epi16(l1, zeros)));
             }
             else {
-                if (width == 8) {
-                    l0 = _mm_add_epi16(_mm_loadu_si128(src),
-                        _mm_loadu_si128(src + CFL_BUF_LINE_I128));
-                }
+                l0 = _mm_add_epi16(_mm_loadu_si128(src),
+                    _mm_loadu_si128(src + CFL_BUF_LINE_I128));
                 sum = _mm_add_epi32(sum, _mm_add_epi32(_mm_unpacklo_epi16(l0, zeros),
                     _mm_unpackhi_epi16(l0, zeros)));
             }

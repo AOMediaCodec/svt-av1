@@ -174,12 +174,12 @@ void decimation_2d(
     uint32_t   input_area_height,   // input parameter, input area height
     uint8_t *  decim_samples,      // output parameter, decimated samples Ptr
     uint32_t   decim_stride,       // input parameter, output stride
-    uint32_t   decim_step)        // input parameter, area height
+    uint32_t   decim_step)        // input parameter, decimation amount in pixels
 {
 
     uint32_t horizontal_index;
     uint32_t vertical_index;
-
+    uint32_t input_stripe_stride = input_stride * decim_step;
 
     for (vertical_index = 0; vertical_index < input_area_height; vertical_index += decim_step) {
         for (horizontal_index = 0; horizontal_index < input_area_width; horizontal_index += decim_step) {
@@ -187,7 +187,42 @@ void decimation_2d(
             decim_samples[(horizontal_index >> (decim_step >> 1))] = input_samples[horizontal_index];
 
         }
-        input_samples += (input_stride << (decim_step >> 1));
+        input_samples += input_stripe_stride;
+        decim_samples += decim_stride;
+    }
+
+    return;
+}
+
+/********************************************
+ * downsample_2d
+ *      downsamples the input
+ * Alternative implementation to decimation_2d that performs filtering (2x2, 0-phase)
+ ********************************************/
+void downsample_2d(
+                   uint8_t *  input_samples,      // input parameter, input samples Ptr
+                   uint32_t   input_stride,       // input parameter, input stride
+                   uint32_t   input_area_width,    // input parameter, input area width
+                   uint32_t   input_area_height,   // input parameter, input area height
+                   uint8_t *  decim_samples,      // output parameter, decimated samples Ptr
+                   uint32_t   decim_stride,       // input parameter, output stride
+                   uint32_t   decim_step)        // input parameter, decimation amount in pixels
+{
+
+    uint32_t horizontal_index;
+    uint32_t vertical_index;
+    uint32_t input_stripe_stride = input_stride * decim_step;
+    uint32_t decim_horizontal_index;
+    const uint32_t half_decim_step = decim_step >> 1;
+
+    for (input_samples += half_decim_step * input_stride, vertical_index = half_decim_step; vertical_index < input_area_height; vertical_index += decim_step) {
+        uint8_t *prev_input_line = input_samples - input_stride;
+        for (horizontal_index = half_decim_step, decim_horizontal_index = 0; horizontal_index < input_area_width; horizontal_index += decim_step, decim_horizontal_index++) {
+            uint32_t sum = (uint32_t) prev_input_line[horizontal_index - 1] + (uint32_t) prev_input_line[horizontal_index] + (uint32_t) input_samples[horizontal_index - 1] + (uint32_t) input_samples[horizontal_index];
+            decim_samples[decim_horizontal_index] = (sum + 2) >> 2;
+
+        }
+        input_samples += input_stripe_stride;
         decim_samples += decim_stride;
     }
 
@@ -4916,10 +4951,12 @@ void DecimateInputPicture(
     EbPictureBufferDesc           *sixteenth_decimated_picture_ptr) {
 
 
+//#define DECIMATION
     // Decimate input picture for HME L0 and L1
     if (picture_control_set_ptr->enable_hme_flag) {
 
         if (picture_control_set_ptr->enable_hme_level1_flag) {
+#ifdef DECIMATION
             decimation_2d(
                 &input_padded_picture_ptr->buffer_y[input_padded_picture_ptr->origin_x + input_padded_picture_ptr->origin_y * input_padded_picture_ptr->stride_y],
                 input_padded_picture_ptr->stride_y,
@@ -4928,6 +4965,16 @@ void DecimateInputPicture(
                 &quarter_decimated_picture_ptr->buffer_y[quarter_decimated_picture_ptr->origin_x + quarter_decimated_picture_ptr->origin_x*quarter_decimated_picture_ptr->stride_y],
                 quarter_decimated_picture_ptr->stride_y,
                 2);
+#else
+            downsample_2d(
+                &input_padded_picture_ptr->buffer_y[input_padded_picture_ptr->origin_x + input_padded_picture_ptr->origin_y * input_padded_picture_ptr->stride_y],
+                input_padded_picture_ptr->stride_y,
+                input_padded_picture_ptr->width,
+                input_padded_picture_ptr->height,
+                &quarter_decimated_picture_ptr->buffer_y[quarter_decimated_picture_ptr->origin_x + quarter_decimated_picture_ptr->origin_x*quarter_decimated_picture_ptr->stride_y],
+                quarter_decimated_picture_ptr->stride_y,
+                2);
+#endif
             generate_padding(
                 &quarter_decimated_picture_ptr->buffer_y[0],
                 quarter_decimated_picture_ptr->stride_y,
@@ -4941,6 +4988,7 @@ void DecimateInputPicture(
         if (picture_control_set_ptr->enable_hme_level0_flag) {
 
             // Sixteenth Input Picture Decimation
+#ifdef DECIMATION
             decimation_2d(
                 &input_padded_picture_ptr->buffer_y[input_padded_picture_ptr->origin_x + input_padded_picture_ptr->origin_y * input_padded_picture_ptr->stride_y],
                 input_padded_picture_ptr->stride_y,
@@ -4949,7 +4997,27 @@ void DecimateInputPicture(
                 &sixteenth_decimated_picture_ptr->buffer_y[sixteenth_decimated_picture_ptr->origin_x + sixteenth_decimated_picture_ptr->origin_x*sixteenth_decimated_picture_ptr->stride_y],
                 sixteenth_decimated_picture_ptr->stride_y,
                 4);
-
+#else
+            if (picture_control_set_ptr->enable_hme_level1_flag) {
+                downsample_2d(
+                    &quarter_decimated_picture_ptr->buffer_y[quarter_decimated_picture_ptr->origin_x + quarter_decimated_picture_ptr->origin_y * quarter_decimated_picture_ptr->stride_y],
+                    quarter_decimated_picture_ptr->stride_y,
+                    quarter_decimated_picture_ptr->width,
+                    quarter_decimated_picture_ptr->height,
+                    &sixteenth_decimated_picture_ptr->buffer_y[sixteenth_decimated_picture_ptr->origin_x + sixteenth_decimated_picture_ptr->origin_x*sixteenth_decimated_picture_ptr->stride_y],
+                    sixteenth_decimated_picture_ptr->stride_y,
+                    2);
+            } else {
+                downsample_2d(
+                    &input_padded_picture_ptr->buffer_y[input_padded_picture_ptr->origin_x + input_padded_picture_ptr->origin_y * input_padded_picture_ptr->stride_y],
+                    input_padded_picture_ptr->stride_y,
+                    input_padded_picture_ptr->width,
+                    input_padded_picture_ptr->height,
+                    &sixteenth_decimated_picture_ptr->buffer_y[sixteenth_decimated_picture_ptr->origin_x + sixteenth_decimated_picture_ptr->origin_x*sixteenth_decimated_picture_ptr->stride_y],
+                    sixteenth_decimated_picture_ptr->stride_y,
+                    4);
+            }
+#endif
             generate_padding(
                 &sixteenth_decimated_picture_ptr->buffer_y[0],
                 sixteenth_decimated_picture_ptr->stride_y,
