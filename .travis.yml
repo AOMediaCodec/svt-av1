@@ -41,7 +41,7 @@ before_install:
   - cd $TRAVIS_BUILD_DIR
   - wget -nc https://raw.githubusercontent.com/OpenVisualCloud/SVT-AV1-Resources/master/video.tar.gz || wget -nc http://randomderp.com/video.tar.gz
   - tar xf video.tar.gz
-  - mkdir -p $TRAVIS_BUILD_DIR/Build/linux/${build_type:-Release}
+  - mkdir -p $TRAVIS_BUILD_DIR/Build/posix/${build_type:-Release}
 install:
   - pip install --user cpp-coveralls
   - export PATH=/Users/travis/Library/Python/2.7/bin:${PATH}
@@ -52,7 +52,7 @@ install:
     fi
   #- if [ $TRAVIS_OS_NAME = osx ]; then brew install --HEAD valgrind; fi
 base_script: &base_script |
-  cd $TRAVIS_BUILD_DIR/Build/linux/${build_type:-Release}
+  cd $TRAVIS_BUILD_DIR/Build/posix/${build_type:-Release}
   cmake $TRAVIS_BUILD_DIR -G"${generator:-Unix Makefiles}" -DCMAKE_BUILD_TYPE=${build_type:-Release} ${CMAKE_EFLAGS[@]}
   cmake -j $(if [ $TRAVIS_OS_NAME = osx ]; then sysctl -n hw.ncpu; else nproc; fi) --build . &&
   sudo cmake --build . --target install && cd $TRAVIS_BUILD_DIR
