@@ -86,7 +86,7 @@ The SVT-AV1 Encoder library supports the x86 architecture
   - YASM Assembler version 1.2.0 or later
 
 - __Build Instructions__
-  - `cd Build/linux`
+  - `cd Build/posix`
   - `./build.sh <release | debug>`
 
   - __Note about macOS__
