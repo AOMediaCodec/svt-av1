@@ -35,6 +35,8 @@ stages:
     if: type != pull_request
   - name: valgrind
     if: type != pull_request
+  - name: Coverity Scan
+    if: type != pull_request
 before_install:
   - "sudo chown -R travis: $HOME/.ccache"
   - export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:/usr/local/lib PKG_CONFIG_PATH=${PKG_CONFIG_PATH}:/usr/local/lib/pkgconfig PATH="/usr/local/opt/ccache/libexec:$PATH"
@@ -122,6 +124,29 @@ matrix:
                   travis_terminate 1;
               fi;
           done
+    - name: Coverity Scan
+      if: branch = coverity_scan
+      stage: test
+      compiler: clang
+      env: build_type=release
+      addons:
+        coverity_scan:
+          project:
+            name: "1480c1/SVT-AV1"
+            description: "The Scalable Video Technology for AV1 Encoder (SVT-AV1 Encoder) is an AV1-compliant encoder library core"
+          notification_email: ccom@randomderp.com
+          build_command_prepend: "cd Build && cmake .. -DCMAKE_BUILD_TYPE=release"
+          build_command: "make -j"
+          branch_pattern: "coverity_scan"
+        apt:
+          packages:
+            - cmake
+            - yasm
+            - llvm
+            - clang
+      before_install:
+        - "sudo chown -R travis: $HOME/.ccache"
+        - echo -n | openssl s_client -connect scan.coverity.com:443 | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' | sudo tee -a /etc/ssl/certs/ca-certificates.crt
     # FFmpeg interation build
     - name: FFmpeg patch
       stage: test
