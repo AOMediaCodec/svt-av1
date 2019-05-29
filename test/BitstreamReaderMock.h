@@ -47,6 +47,8 @@ typedef struct od_ec_dec od_ec_dec;
 #define od_ec_dec_bits(dec, ftb, str) od_ec_dec_bits_(dec, ftb)
 #endif
 
+#define OD_EC_WINDOW_SIZE ((int)sizeof(od_ec_window) * CHAR_BIT)
+
 /*The entropy decoder context.*/
 struct od_ec_dec {
     /*The start of the current input buffer.*/
