@@ -8268,8 +8268,14 @@ EbErrorType motion_estimate_lcu(
             referenceObject = (EbPaReferenceObject*)picture_control_set_ptr->ref_pa_pic_ptr_array[listIndex]->object_ptr;
 #endif
             refPicPtr = (EbPictureBufferDesc*)referenceObject->input_padded_picture_ptr;
+#define FILTERING 0
+#if (FILTERING==1)
+            quarterRefPicPtr = (EbPictureBufferDesc*)referenceObject->quarter_filtered_picture_ptr;
+            sixteenthRefPicPtr = (EbPictureBufferDesc*)referenceObject->sixteenth_filtered_picture_ptr;
+#else
             quarterRefPicPtr = (EbPictureBufferDesc*)referenceObject->quarter_decimated_picture_ptr;
             sixteenthRefPicPtr = (EbPictureBufferDesc*)referenceObject->sixteenth_decimated_picture_ptr;
+#endif
 #if BASE_LAYER_REF
             if (picture_control_set_ptr->temporal_layer_index > 0 || listIndex == 0 || ((ref0Poc != ref1Poc) && (listIndex == 1))) {
 #else

@@ -48,6 +48,14 @@ extern "C" {
         uint8_t                   *decim_samples,
         uint32_t                   decim_stride,
         uint32_t                   decim_step);
+    extern void downsample_2d_4(
+        uint8_t                   *input_samples,
+        uint32_t                   input_stride,
+        uint32_t                   input_area_width,
+        uint32_t                   input_area_height,
+        uint8_t                   *decim_samples,
+        uint32_t                   decim_stride,
+        uint32_t                   decim_step);
 
     
     extern EbErrorType open_loop_intra_search_sb(

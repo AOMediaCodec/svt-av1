@@ -200,13 +200,13 @@ void decimation_2d(
  * Alternative implementation to decimation_2d that performs filtering (2x2, 0-phase)
  ********************************************/
 void downsample_2d(
-                   uint8_t *  input_samples,      // input parameter, input samples Ptr
-                   uint32_t   input_stride,       // input parameter, input stride
-                   uint32_t   input_area_width,    // input parameter, input area width
-                   uint32_t   input_area_height,   // input parameter, input area height
-                   uint8_t *  decim_samples,      // output parameter, decimated samples Ptr
-                   uint32_t   decim_stride,       // input parameter, output stride
-                   uint32_t   decim_step)        // input parameter, decimation amount in pixels
+    uint8_t *  input_samples,      // input parameter, input samples Ptr
+    uint32_t   input_stride,       // input parameter, input stride
+    uint32_t   input_area_width,    // input parameter, input area width
+    uint32_t   input_area_height,   // input parameter, input area height
+    uint8_t *  decim_samples,      // output parameter, decimated samples Ptr
+    uint32_t   decim_stride,       // input parameter, output stride
+    uint32_t   decim_step)        // input parameter, decimation amount in pixels
 {
 
     uint32_t horizontal_index;
@@ -220,6 +220,43 @@ void downsample_2d(
         for (horizontal_index = half_decim_step, decim_horizontal_index = 0; horizontal_index < input_area_width; horizontal_index += decim_step, decim_horizontal_index++) {
             uint32_t sum = (uint32_t) prev_input_line[horizontal_index - 1] + (uint32_t) prev_input_line[horizontal_index] + (uint32_t) input_samples[horizontal_index - 1] + (uint32_t) input_samples[horizontal_index];
             decim_samples[decim_horizontal_index] = (sum + 2) >> 2;
+
+        }
+        input_samples += input_stripe_stride;
+        decim_samples += decim_stride;
+    }
+
+    return;
+}
+
+/********************************************
+ * downsample_2d_4
+ *      downsamples the input by a factor of 4
+ * Alternative implementation to decimation_2d that performs filtering (4x4, 0-phase)
+ ********************************************/
+void downsample_2d_4(
+    uint8_t *  input_samples,      // input parameter, input samples Ptr
+    uint32_t   input_stride,       // input parameter, input stride
+    uint32_t   input_area_width,    // input parameter, input area width
+    uint32_t   input_area_height,   // input parameter, input area height
+    uint8_t *  decim_samples,      // output parameter, decimated samples Ptr
+    uint32_t   decim_stride,       // input parameter, output stride
+    uint32_t   decim_step)        // input parameter, decimation amount in pixels - should be =4
+{
+
+    uint32_t horizontal_index;
+    uint32_t vertical_index;
+    uint32_t input_stripe_stride = input_stride * decim_step;
+    uint32_t decim_horizontal_index;
+    const uint32_t half_decim_step = decim_step >> 1;
+
+    for (input_samples += half_decim_step * input_stride, vertical_index = half_decim_step; vertical_index < input_area_height; vertical_index += decim_step) {
+        uint8_t *prev2_input_line = input_samples - 2*input_stride;
+        uint8_t *prev1_input_line = input_samples - 1*input_stride;
+        uint8_t *next1_input_line = input_samples + 1*input_stride;
+        for (horizontal_index = half_decim_step, decim_horizontal_index = 0; horizontal_index < input_area_width; horizontal_index += decim_step, decim_horizontal_index++) {
+            uint32_t sum = (uint32_t) prev2_input_line[horizontal_index - 2] + (uint32_t) prev2_input_line[horizontal_index - 1] + (uint32_t) prev2_input_line[horizontal_index] + (uint32_t) prev2_input_line[horizontal_index + 1] + (uint32_t) prev1_input_line[horizontal_index - 2] + (uint32_t) prev1_input_line[horizontal_index - 1] + (uint32_t) prev1_input_line[horizontal_index] + (uint32_t) prev1_input_line[horizontal_index + 1] + (uint32_t) input_samples[horizontal_index - 2] + (uint32_t) input_samples[horizontal_index - 1] + (uint32_t) input_samples[horizontal_index] + (uint32_t) input_samples[horizontal_index + 1] + (uint32_t) next1_input_line[horizontal_index - 2] + (uint32_t) next1_input_line[horizontal_index - 1] + (uint32_t) next1_input_line[horizontal_index] + (uint32_t) next1_input_line[horizontal_index + 1];
+            decim_samples[decim_horizontal_index] = (sum + 8) >> 4;
 
         }
         input_samples += input_stripe_stride;
@@ -3712,7 +3749,7 @@ EbErrorType SubSampleFilterNoise(
 EbErrorType QuarterSampleDetectNoise(
     PictureAnalysisContext    *context_ptr,
     PictureParentControlSet   *picture_control_set_ptr,
-    EbPictureBufferDesc       *quarter_decimated_picture_ptr,
+    EbPictureBufferDesc       *quarter_picture_ptr,
     EbPictureBufferDesc       *noise_picture_ptr,
     EbPictureBufferDesc       *denoised_picture_ptr,
     uint32_t                         picture_width_in_sb,
@@ -3743,24 +3780,24 @@ EbErrorType QuarterSampleDetectNoise(
     uint32_t lcuCodingOrder;
 
     // Loop over 64x64 blocks on the downsampled domain (each block would contain 16 LCUs on the full sampled domain)
-    for (vert64x64Index = 0; vert64x64Index < (quarter_decimated_picture_ptr->height / 64); vert64x64Index++) {
-        for (horz64x64Index = 0; horz64x64Index < (quarter_decimated_picture_ptr->width / 64); horz64x64Index++) {
+    for (vert64x64Index = 0; vert64x64Index < (quarter_picture_ptr->height / 64); vert64x64Index++) {
+        for (horz64x64Index = 0; horz64x64Index < (quarter_picture_ptr->width / 64); horz64x64Index++) {
 
             block64x64X = horz64x64Index * 64;
             block64x64Y = vert64x64Index * 64;
 
             if (block64x64X == 0)
                 weak_luma_filter_func_ptr_array[asm_type](
-                    quarter_decimated_picture_ptr,
+                    quarter_picture_ptr,
                     denoised_picture_ptr,
                     noise_picture_ptr,
                     block64x64Y,
                     block64x64X);
 
-            if (block64x64Y + BLOCK_SIZE_64 > quarter_decimated_picture_ptr->width)
+            if (block64x64Y + BLOCK_SIZE_64 > quarter_picture_ptr->width)
             {
                 noise_extract_luma_weak(
-                    quarter_decimated_picture_ptr,
+                    quarter_picture_ptr,
                     denoised_picture_ptr,
                     noise_picture_ptr,
                     block64x64Y,
@@ -3776,7 +3813,7 @@ EbErrorType QuarterSampleDetectNoise(
                     block32x32Y = block64x64Y + vert32x32Index * 32;
 
                     //do it only for complete 32x32 blocks (i.e, complete 64x64 blocks in full resolution)
-                    if ((block32x32X + 32 <= quarter_decimated_picture_ptr->width) && (block32x32Y + 32 <= quarter_decimated_picture_ptr->height))
+                    if ((block32x32X + 32 <= quarter_picture_ptr->width) && (block32x32Y + 32 <= quarter_picture_ptr->height))
                     {
 
                         lcuCodingOrder = ((vert64x64Index * 2) + vert32x32Index) * picture_width_in_sb + ((horz64x64Index * 2) + horz32x32Index);
@@ -3851,7 +3888,7 @@ EbErrorType SubSampleDetectNoise(
     PictureAnalysisContext    *context_ptr,
     SequenceControlSet        *sequence_control_set_ptr,
     PictureParentControlSet   *picture_control_set_ptr,
-    EbPictureBufferDesc       *sixteenth_decimated_picture_ptr,
+    EbPictureBufferDesc       *sixteenth_picture_ptr,
     EbPictureBufferDesc       *noise_picture_ptr,
     EbPictureBufferDesc       *denoised_picture_ptr,
     uint32_t                         picture_width_in_sb,
@@ -3882,24 +3919,24 @@ EbErrorType SubSampleDetectNoise(
     uint32_t lcuCodingOrder;
 
     // Loop over 64x64 blocks on the downsampled domain (each block would contain 16 LCUs on the full sampled domain)
-    for (vert64x64Index = 0; vert64x64Index < (sixteenth_decimated_picture_ptr->height / 64); vert64x64Index++) {
-        for (horz64x64Index = 0; horz64x64Index < (sixteenth_decimated_picture_ptr->width / 64); horz64x64Index++) {
+    for (vert64x64Index = 0; vert64x64Index < (sixteenth_picture_ptr->height / 64); vert64x64Index++) {
+        for (horz64x64Index = 0; horz64x64Index < (sixteenth_picture_ptr->width / 64); horz64x64Index++) {
 
             block64x64X = horz64x64Index * 64;
             block64x64Y = vert64x64Index * 64;
 
             if (block64x64X == 0)
                 weak_luma_filter_func_ptr_array[asm_type](
-                    sixteenth_decimated_picture_ptr,
+                    sixteenth_picture_ptr,
                     denoised_picture_ptr,
                     noise_picture_ptr,
                     block64x64Y,
                     block64x64X);
 
-            if (block64x64Y + BLOCK_SIZE_64 > sixteenth_decimated_picture_ptr->width)
+            if (block64x64Y + BLOCK_SIZE_64 > sixteenth_picture_ptr->width)
             {
                 noise_extract_luma_weak(
-                    sixteenth_decimated_picture_ptr,
+                    sixteenth_picture_ptr,
                     denoised_picture_ptr,
                     noise_picture_ptr,
                     block64x64Y,
@@ -3915,7 +3952,7 @@ EbErrorType SubSampleDetectNoise(
                     block16x16Y = block64x64Y + vert16x16Index * 16;
 
                     //do it only for complete 16x16 blocks (i.e, complete 64x64 blocks in full resolution)
-                    if (block16x16X + 16 <= sixteenth_decimated_picture_ptr->width && block16x16Y + 16 <= sixteenth_decimated_picture_ptr->height)
+                    if (block16x16X + 16 <= sixteenth_picture_ptr->width && block16x16Y + 16 <= sixteenth_picture_ptr->height)
                     {
 
                         lcuCodingOrder = ((vert64x64Index * 4) + vert16x16Index) * picture_width_in_sb + ((horz64x64Index * 4) + horz16x16Index);
@@ -3987,7 +4024,7 @@ EbErrorType QuarterSampleDenoise(
     PictureAnalysisContext    *context_ptr,
     SequenceControlSet        *sequence_control_set_ptr,
     PictureParentControlSet   *picture_control_set_ptr,
-    EbPictureBufferDesc        *quarter_decimated_picture_ptr,
+    EbPictureBufferDesc        *quarter_picture_ptr,
     uint32_t                       sb_total_count,
     EbBool                      denoise_flag,
     uint32_t                         picture_width_in_sb,
@@ -4013,15 +4050,15 @@ EbErrorType QuarterSampleDenoise(
         input_picture_ptr->stride_y,
         input_picture_ptr->width,
         input_picture_ptr->height,
-        &quarter_decimated_picture_ptr->buffer_y[quarter_decimated_picture_ptr->origin_x + (quarter_decimated_picture_ptr->origin_y * quarter_decimated_picture_ptr->stride_y)],
-        quarter_decimated_picture_ptr->stride_y,
+        &quarter_picture_ptr->buffer_y[quarter_picture_ptr->origin_x + (quarter_picture_ptr->origin_y * quarter_picture_ptr->stride_y)],
+        quarter_picture_ptr->stride_y,
         2);
 
 
     QuarterSampleDetectNoise(
         context_ptr,
         picture_control_set_ptr,
-        quarter_decimated_picture_ptr,
+        quarter_picture_ptr,
         noise_picture_ptr,
         denoised_picture_ptr,
         picture_width_in_sb,
@@ -4054,7 +4091,7 @@ EbErrorType SubSampleDenoise(
     PictureAnalysisContext    *context_ptr,
     SequenceControlSet        *sequence_control_set_ptr,
     PictureParentControlSet   *picture_control_set_ptr,
-    EbPictureBufferDesc        *sixteenth_decimated_picture_ptr,
+    EbPictureBufferDesc        *sixteenth_picture_ptr,
     uint32_t                       sb_total_count,
     EbBool                      denoise_flag,
     uint32_t                         picture_width_in_sb,
@@ -4080,15 +4117,15 @@ EbErrorType SubSampleDenoise(
         input_picture_ptr->stride_y,
         input_picture_ptr->width,
         input_picture_ptr->height,
-        &sixteenth_decimated_picture_ptr->buffer_y[sixteenth_decimated_picture_ptr->origin_x + (sixteenth_decimated_picture_ptr->origin_y * sixteenth_decimated_picture_ptr->stride_y)],
-        sixteenth_decimated_picture_ptr->stride_y,
+        &sixteenth_picture_ptr->buffer_y[sixteenth_picture_ptr->origin_x + (sixteenth_picture_ptr->origin_y * sixteenth_picture_ptr->stride_y)],
+        sixteenth_picture_ptr->stride_y,
         4);
 
     SubSampleDetectNoise(
         context_ptr,
         sequence_control_set_ptr,
         picture_control_set_ptr,
-        sixteenth_decimated_picture_ptr,
+        sixteenth_picture_ptr,
         noise_picture_ptr,
         denoised_picture_ptr,
         picture_width_in_sb,
@@ -4144,13 +4181,13 @@ void PicturePreProcessingOperations(
     PictureParentControlSet       *picture_control_set_ptr,
     EbPictureBufferDesc           *input_picture_ptr,
     SequenceControlSet            *sequence_control_set_ptr,
-    EbPictureBufferDesc           *quarter_decimated_picture_ptr,
-    EbPictureBufferDesc           *sixteenth_decimated_picture_ptr,
+    EbPictureBufferDesc           *quarter_picture_ptr,
+    EbPictureBufferDesc           *sixteenth_picture_ptr,
     uint32_t                           sb_total_count,
     EbAsm                           asm_type) {
 
-    UNUSED(quarter_decimated_picture_ptr);
-    UNUSED(sixteenth_decimated_picture_ptr);
+    UNUSED(quarter_picture_ptr);
+    UNUSED(sixteenth_picture_ptr);
     UNUSED(input_picture_ptr);
 
     if (sequence_control_set_ptr->film_grain_denoise_strength) {
@@ -4801,7 +4838,7 @@ void GatheringPictureStatistics(
     PictureParentControlSet       *picture_control_set_ptr,
     EbPictureBufferDesc           *input_picture_ptr,
     EbPictureBufferDesc           *input_padded_picture_ptr,
-    EbPictureBufferDesc            *sixteenth_decimated_picture_ptr,
+    EbPictureBufferDesc            *sixteenth_picture_ptr,
     uint32_t                           sb_total_count,
     EbAsm                           asm_type)
 {
@@ -4816,7 +4853,7 @@ void GatheringPictureStatistics(
     SubSampleLumaGeneratePixelIntensityHistogramBins(
         sequence_control_set_ptr,
         picture_control_set_ptr,
-        sixteenth_decimated_picture_ptr,
+        sixteenth_picture_ptr,
         &sumAverageIntensityTotalRegionsLuma,
         asm_type);
 
@@ -4947,65 +4984,97 @@ void PadPictureToMultipleOfLcuDimensions(
 void DecimateInputPicture(
     PictureParentControlSet       *picture_control_set_ptr,
     EbPictureBufferDesc           *input_padded_picture_ptr,
-    EbPictureBufferDesc           *quarter_decimated_picture_ptr,
-    EbPictureBufferDesc           *sixteenth_decimated_picture_ptr) {
+    EbPictureBufferDesc           *quarter_picture_ptr,
+    EbPictureBufferDesc           *sixteenth_picture_ptr) {
 
 
-//#define DECIMATION
     // Decimate input picture for HME L0 and L1
     if (picture_control_set_ptr->enable_hme_flag) {
 
         if (picture_control_set_ptr->enable_hme_level1_flag) {
-#ifdef DECIMATION
             decimation_2d(
                 &input_padded_picture_ptr->buffer_y[input_padded_picture_ptr->origin_x + input_padded_picture_ptr->origin_y * input_padded_picture_ptr->stride_y],
                 input_padded_picture_ptr->stride_y,
                 input_padded_picture_ptr->width,
                 input_padded_picture_ptr->height,
-                &quarter_decimated_picture_ptr->buffer_y[quarter_decimated_picture_ptr->origin_x + quarter_decimated_picture_ptr->origin_x*quarter_decimated_picture_ptr->stride_y],
-                quarter_decimated_picture_ptr->stride_y,
+                &quarter_picture_ptr->buffer_y[quarter_picture_ptr->origin_x + quarter_picture_ptr->origin_x*quarter_picture_ptr->stride_y],
+                quarter_picture_ptr->stride_y,
                 2);
-#else
-            downsample_2d(
-                &input_padded_picture_ptr->buffer_y[input_padded_picture_ptr->origin_x + input_padded_picture_ptr->origin_y * input_padded_picture_ptr->stride_y],
-                input_padded_picture_ptr->stride_y,
-                input_padded_picture_ptr->width,
-                input_padded_picture_ptr->height,
-                &quarter_decimated_picture_ptr->buffer_y[quarter_decimated_picture_ptr->origin_x + quarter_decimated_picture_ptr->origin_x*quarter_decimated_picture_ptr->stride_y],
-                quarter_decimated_picture_ptr->stride_y,
-                2);
-#endif
             generate_padding(
-                &quarter_decimated_picture_ptr->buffer_y[0],
-                quarter_decimated_picture_ptr->stride_y,
-                quarter_decimated_picture_ptr->width,
-                quarter_decimated_picture_ptr->height,
-                quarter_decimated_picture_ptr->origin_x,
-                quarter_decimated_picture_ptr->origin_y);
+                &quarter_picture_ptr->buffer_y[0],
+                quarter_picture_ptr->stride_y,
+                quarter_picture_ptr->width,
+                quarter_picture_ptr->height,
+                quarter_picture_ptr->origin_x,
+                quarter_picture_ptr->origin_y);
 
         }
 
         if (picture_control_set_ptr->enable_hme_level0_flag) {
 
             // Sixteenth Input Picture Decimation
-#ifdef DECIMATION
             decimation_2d(
                 &input_padded_picture_ptr->buffer_y[input_padded_picture_ptr->origin_x + input_padded_picture_ptr->origin_y * input_padded_picture_ptr->stride_y],
                 input_padded_picture_ptr->stride_y,
                 input_padded_picture_ptr->width,
                 input_padded_picture_ptr->height,
-                &sixteenth_decimated_picture_ptr->buffer_y[sixteenth_decimated_picture_ptr->origin_x + sixteenth_decimated_picture_ptr->origin_x*sixteenth_decimated_picture_ptr->stride_y],
-                sixteenth_decimated_picture_ptr->stride_y,
+                &sixteenth_picture_ptr->buffer_y[sixteenth_picture_ptr->origin_x + sixteenth_picture_ptr->origin_x*sixteenth_picture_ptr->stride_y],
+                sixteenth_picture_ptr->stride_y,
                 4);
-#else
+            generate_padding(
+                &sixteenth_picture_ptr->buffer_y[0],
+                sixteenth_picture_ptr->stride_y,
+                sixteenth_picture_ptr->width,
+                sixteenth_picture_ptr->height,
+                sixteenth_picture_ptr->origin_x,
+                sixteenth_picture_ptr->origin_y);
+
+        }
+    }
+}
+/************************************************
+ * 1/4 & 1/16 input picture downsampling (filtering)
+ ************************************************/
+void DownsampleInputPicture(
+    PictureParentControlSet       *picture_control_set_ptr,
+    EbPictureBufferDesc           *input_padded_picture_ptr,
+    EbPictureBufferDesc           *quarter_picture_ptr,
+    EbPictureBufferDesc           *sixteenth_picture_ptr) {
+
+
+    // Downsample input picture for HME L0 and L1
+    if (picture_control_set_ptr->enable_hme_flag) {
+
+        if (picture_control_set_ptr->enable_hme_level1_flag) {
+            downsample_2d(
+                &input_padded_picture_ptr->buffer_y[input_padded_picture_ptr->origin_x + input_padded_picture_ptr->origin_y * input_padded_picture_ptr->stride_y],
+                input_padded_picture_ptr->stride_y,
+                input_padded_picture_ptr->width,
+                input_padded_picture_ptr->height,
+                &quarter_picture_ptr->buffer_y[quarter_picture_ptr->origin_x + quarter_picture_ptr->origin_x * quarter_picture_ptr->stride_y],
+                quarter_picture_ptr->stride_y,
+                2);
+            generate_padding(
+                &quarter_picture_ptr->buffer_y[0],
+                quarter_picture_ptr->stride_y,
+                quarter_picture_ptr->width,
+                quarter_picture_ptr->height,
+                quarter_picture_ptr->origin_x,
+                quarter_picture_ptr->origin_y);
+
+        }
+
+        if (picture_control_set_ptr->enable_hme_level0_flag) {
+
+            // Sixteenth Input Picture Downsampling
             if (picture_control_set_ptr->enable_hme_level1_flag) {
                 downsample_2d(
-                    &quarter_decimated_picture_ptr->buffer_y[quarter_decimated_picture_ptr->origin_x + quarter_decimated_picture_ptr->origin_y * quarter_decimated_picture_ptr->stride_y],
-                    quarter_decimated_picture_ptr->stride_y,
-                    quarter_decimated_picture_ptr->width,
-                    quarter_decimated_picture_ptr->height,
-                    &sixteenth_decimated_picture_ptr->buffer_y[sixteenth_decimated_picture_ptr->origin_x + sixteenth_decimated_picture_ptr->origin_x*sixteenth_decimated_picture_ptr->stride_y],
-                    sixteenth_decimated_picture_ptr->stride_y,
+                    &quarter_picture_ptr->buffer_y[quarter_picture_ptr->origin_x + quarter_picture_ptr->origin_y * quarter_picture_ptr->stride_y],
+                    quarter_picture_ptr->stride_y,
+                    quarter_picture_ptr->width,
+                    quarter_picture_ptr->height,
+                    &sixteenth_picture_ptr->buffer_y[sixteenth_picture_ptr->origin_x + sixteenth_picture_ptr->origin_x*sixteenth_picture_ptr->stride_y],
+                    sixteenth_picture_ptr->stride_y,
                     2);
             } else {
                 downsample_2d(
@@ -5013,18 +5082,17 @@ void DecimateInputPicture(
                     input_padded_picture_ptr->stride_y,
                     input_padded_picture_ptr->width,
                     input_padded_picture_ptr->height,
-                    &sixteenth_decimated_picture_ptr->buffer_y[sixteenth_decimated_picture_ptr->origin_x + sixteenth_decimated_picture_ptr->origin_x*sixteenth_decimated_picture_ptr->stride_y],
-                    sixteenth_decimated_picture_ptr->stride_y,
+                    &sixteenth_picture_ptr->buffer_y[sixteenth_picture_ptr->origin_x + sixteenth_picture_ptr->origin_x*sixteenth_picture_ptr->stride_y],
+                    sixteenth_picture_ptr->stride_y,
                     4);
             }
-#endif
             generate_padding(
-                &sixteenth_decimated_picture_ptr->buffer_y[0],
-                sixteenth_decimated_picture_ptr->stride_y,
-                sixteenth_decimated_picture_ptr->width,
-                sixteenth_decimated_picture_ptr->height,
-                sixteenth_decimated_picture_ptr->origin_x,
-                sixteenth_decimated_picture_ptr->origin_y);
+                &sixteenth_picture_ptr->buffer_y[0],
+                sixteenth_picture_ptr->stride_y,
+                sixteenth_picture_ptr->width,
+                sixteenth_picture_ptr->height,
+                sixteenth_picture_ptr->origin_x,
+                sixteenth_picture_ptr->origin_y);
 
         }
     }
@@ -5093,8 +5161,6 @@ void* picture_analysis_kernel(void *input_ptr)
     EbPaReferenceObject           *paReferenceObject;
 
     EbPictureBufferDesc           *input_padded_picture_ptr;
-    EbPictureBufferDesc           *quarter_decimated_picture_ptr;
-    EbPictureBufferDesc           *sixteenth_decimated_picture_ptr;
     EbPictureBufferDesc           *input_picture_ptr;
 
     // Variance
@@ -5117,8 +5183,6 @@ void* picture_analysis_kernel(void *input_ptr)
 
         paReferenceObject = (EbPaReferenceObject*)picture_control_set_ptr->pa_reference_picture_wrapper_ptr->object_ptr;
         input_padded_picture_ptr = (EbPictureBufferDesc*)paReferenceObject->input_padded_picture_ptr;
-        quarter_decimated_picture_ptr = (EbPictureBufferDesc*)paReferenceObject->quarter_decimated_picture_ptr;
-        sixteenth_decimated_picture_ptr = (EbPictureBufferDesc*)paReferenceObject->sixteenth_decimated_picture_ptr;
 
         // Variance
         picture_width_in_sb = (sequence_control_set_ptr->luma_width + sequence_control_set_ptr->sb_sz - 1) / sequence_control_set_ptr->sb_sz;
@@ -5143,8 +5207,8 @@ void* picture_analysis_kernel(void *input_ptr)
             picture_control_set_ptr,
             input_picture_ptr,
             sequence_control_set_ptr,
-            quarter_decimated_picture_ptr,
-            sixteenth_decimated_picture_ptr,
+            (EbPictureBufferDesc*)paReferenceObject->quarter_decimated_picture_ptr,
+            (EbPictureBufferDesc*)paReferenceObject->sixteenth_decimated_picture_ptr,
             sb_total_count,
             asm_type);
 
@@ -5166,8 +5230,15 @@ void* picture_analysis_kernel(void *input_ptr)
         DecimateInputPicture(
             picture_control_set_ptr,
             input_padded_picture_ptr,
-            quarter_decimated_picture_ptr,
-            sixteenth_decimated_picture_ptr);
+            (EbPictureBufferDesc*)paReferenceObject->quarter_decimated_picture_ptr,
+            (EbPictureBufferDesc*)paReferenceObject->sixteenth_decimated_picture_ptr);
+
+        // 1/4 & 1/16 input picture downsampling through filtering
+        DownsampleInputPicture(
+            picture_control_set_ptr,
+            input_padded_picture_ptr,
+            (EbPictureBufferDesc*)paReferenceObject->quarter_filtered_picture_ptr,
+            (EbPictureBufferDesc*)paReferenceObject->sixteenth_filtered_picture_ptr);
 
         // Gathering statistics of input picture, including Variance Calculation, Histogram Bins
         GatheringPictureStatistics(
@@ -5175,7 +5246,7 @@ void* picture_analysis_kernel(void *input_ptr)
             picture_control_set_ptr,
             picture_control_set_ptr->chroma_downsampled_picture_ptr, //420 input_picture_ptr
             input_padded_picture_ptr,
-            sixteenth_decimated_picture_ptr,
+            (EbPictureBufferDesc*)paReferenceObject->sixteenth_decimated_picture_ptr,
             sb_total_count,
             asm_type);
         if (sequence_control_set_ptr->static_config.screen_content_mode == 2){ // auto detect

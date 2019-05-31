@@ -52,6 +52,8 @@ typedef struct EbPaReferenceObject
     EbPictureBufferDesc          *input_padded_picture_ptr;
     EbPictureBufferDesc          *quarter_decimated_picture_ptr;
     EbPictureBufferDesc          *sixteenth_decimated_picture_ptr;
+    EbPictureBufferDesc          *quarter_filtered_picture_ptr;
+    EbPictureBufferDesc          *sixteenth_filtered_picture_ptr;
     uint16_t                        variance[MAX_NUMBER_OF_TREEBLOCKS_PER_PICTURE];
     uint8_t                         y_mean[MAX_NUMBER_OF_TREEBLOCKS_PER_PICTURE];
     EB_SLICE                        slice_type;
@@ -70,6 +72,8 @@ typedef struct EbPaReferenceObjectDescInitData
     EbPictureBufferDescInitData   reference_picture_desc_init_data;
     EbPictureBufferDescInitData   quarter_picture_desc_init_data;
     EbPictureBufferDescInitData   sixteenth_picture_desc_init_data;
+    EbPictureBufferDescInitData   quarter_filtered_picture_desc_init_data;
+    EbPictureBufferDescInitData   sixteenth_filtered_picture_desc_init_data;
 } EbPaReferenceObjectDescInitData;
 
 /**************************************

@@ -1182,6 +1182,8 @@ EB_API EbErrorType eb_init_encoder(EbComponentType *svt_enc_component)
         EbPictureBufferDescInitData       referencePictureBufferDescInitData;
         EbPictureBufferDescInitData       quarterDecimPictureBufferDescInitData;
         EbPictureBufferDescInitData       sixteenthDecimPictureBufferDescInitData;
+        EbPictureBufferDescInitData       quarterFilteredPictureBufferDescInitData;
+        EbPictureBufferDescInitData       sixteenthFilteredPictureBufferDescInitData;
 
         // Initialize the various Picture types
         referencePictureBufferDescInitData.max_width = enc_handle_ptr->sequence_control_set_instance_array[instance_index]->sequence_control_set_ptr->max_input_luma_width;
@@ -1246,6 +1248,7 @@ EB_API EbErrorType eb_init_encoder(EbComponentType *svt_enc_component)
         quarterDecimPictureBufferDescInitData.bot_padding = enc_handle_ptr->sequence_control_set_instance_array[instance_index]->sequence_control_set_ptr->sb_sz >> 1;
         quarterDecimPictureBufferDescInitData.split_mode = EB_FALSE;
 
+        memcpy(&quarterFilteredPictureBufferDescInitData, &quarterDecimPictureBufferDescInitData, sizeof(quarterDecimPictureBufferDescInitData));
 
         sixteenthDecimPictureBufferDescInitData.max_width = enc_handle_ptr->sequence_control_set_instance_array[instance_index]->sequence_control_set_ptr->max_input_luma_width >> 2;
         sixteenthDecimPictureBufferDescInitData.max_height = enc_handle_ptr->sequence_control_set_instance_array[instance_index]->sequence_control_set_ptr->max_input_luma_height >> 2;
@@ -1258,9 +1261,13 @@ EB_API EbErrorType eb_init_encoder(EbComponentType *svt_enc_component)
         sixteenthDecimPictureBufferDescInitData.bot_padding = enc_handle_ptr->sequence_control_set_instance_array[instance_index]->sequence_control_set_ptr->sb_sz >> 2;
         sixteenthDecimPictureBufferDescInitData.split_mode = EB_FALSE;
 
+        memcpy(&sixteenthFilteredPictureBufferDescInitData, &sixteenthDecimPictureBufferDescInitData, sizeof(sixteenthDecimPictureBufferDescInitData));
+
         EbPaReferenceObjectDescInitDataStructure.reference_picture_desc_init_data = referencePictureBufferDescInitData;
         EbPaReferenceObjectDescInitDataStructure.quarter_picture_desc_init_data = quarterDecimPictureBufferDescInitData;
         EbPaReferenceObjectDescInitDataStructure.sixteenth_picture_desc_init_data = sixteenthDecimPictureBufferDescInitData;
+        EbPaReferenceObjectDescInitDataStructure.quarter_filtered_picture_desc_init_data = quarterFilteredPictureBufferDescInitData;
+        EbPaReferenceObjectDescInitDataStructure.sixteenth_filtered_picture_desc_init_data = sixteenthFilteredPictureBufferDescInitData;
 
         // Reference Picture Buffers
         return_error = eb_system_resource_ctor(

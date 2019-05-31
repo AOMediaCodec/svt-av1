@@ -269,6 +269,24 @@ EbErrorType eb_pa_reference_object_ctor(
         return EB_ErrorInsufficientResources;
     }
 
+    // Quarter Filtered reference picture constructor
+    paReferenceObject->quarter_filtered_picture_ptr = (EbPictureBufferDesc*)EB_NULL;
+    return_error = eb_picture_buffer_desc_ctor(
+        (EbPtr*) &(paReferenceObject->quarter_filtered_picture_ptr),
+        (EbPtr)(pictureBufferDescInitDataPtr + 3));
+    if (return_error == EB_ErrorInsufficientResources) {
+        return EB_ErrorInsufficientResources;
+    }
+
+    // Sixteenth Filtered reference picture constructor
+    paReferenceObject->sixteenth_filtered_picture_ptr = (EbPictureBufferDesc*)EB_NULL;
+    return_error = eb_picture_buffer_desc_ctor(
+        (EbPtr*) &(paReferenceObject->sixteenth_filtered_picture_ptr),
+        (EbPtr)(pictureBufferDescInitDataPtr + 4));
+    if (return_error == EB_ErrorInsufficientResources) {
+        return EB_ErrorInsufficientResources;
+    }
+
     return EB_ErrorNone;
 }
 
