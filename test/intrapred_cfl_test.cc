@@ -50,7 +50,7 @@ using CFL_PRED_LBD = void (*)(const int16_t *pred_buf_q3, uint8_t *pred,
  * alpha_q3: [-16, 16]
  * BitDepth: 8bit and 10bit
  */
-template <typename Pixel, typename FuncType>
+template <typename Sample, typename FuncType>
 class CflPredTest {
   public:
     CflPredTest() {
@@ -120,18 +120,18 @@ class CflPredTest {
 
   protected:
     void common_init() {
-        dst_buf_ref_ = reinterpret_cast<Pixel *>(
+        dst_buf_ref_ = reinterpret_cast<Sample *>(
             ((intptr_t)(dst_buf_ref_data_) + alignment - 1) & ~(alignment - 1));
-        dst_buf_tst_ = reinterpret_cast<Pixel *>(
+        dst_buf_tst_ = reinterpret_cast<Sample *>(
             ((intptr_t)(dst_buf_tst_data_) + alignment - 1) & ~(alignment - 1));
     }
 
     static const int alignment = 32;
     int16_t pred_buf_q3[CFL_BUF_SQUARE];
-    Pixel dst_buf_ref_data_[CFL_BUF_SQUARE + alignment - 1];
-    Pixel dst_buf_tst_data_[CFL_BUF_SQUARE + alignment - 1];
-    Pixel *dst_buf_ref_;
-    Pixel *dst_buf_tst_;
+    Sample dst_buf_ref_data_[CFL_BUF_SQUARE + alignment - 1];
+    Sample dst_buf_tst_data_[CFL_BUF_SQUARE + alignment - 1];
+    Sample *dst_buf_ref_;
+    Sample *dst_buf_tst_;
     FuncType ref_func_;
     FuncType tst_func_;
     int bd_;

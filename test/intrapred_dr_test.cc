@@ -129,7 +129,7 @@ using Z3_HBD = void (*)(uint16_t *dst, ptrdiff_t stride, int bw, int bh,
  * BitDepth: 8bit and 10bit
  *
  */
-template <typename Pixel, typename FuncType>
+template <typename Sample, typename FuncType>
 class DrPredTest {
   public:
     static const int num_tests = 10;
@@ -222,16 +222,16 @@ class DrPredTest {
         }
     }
 
-    Pixel dst_ref_data_[pred_buf_size];
-    Pixel dst_tst_data_[pred_buf_size];
+    Sample dst_ref_data_[pred_buf_size];
+    Sample dst_tst_data_[pred_buf_size];
 
-    Pixel left_data_[neighbor_buf_size];
-    Pixel above_data_[neighbor_buf_size];
+    Sample left_data_[neighbor_buf_size];
+    Sample above_data_[neighbor_buf_size];
 
-    Pixel *dst_ref_;
-    Pixel *dst_tst_;
-    Pixel *above_;
-    Pixel *left_;
+    Sample *dst_ref_;
+    Sample *dst_tst_;
+    Sample *above_;
+    Sample *left_;
     int dst_stride_;
 
     int upsample_above_;

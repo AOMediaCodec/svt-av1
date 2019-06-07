@@ -48,7 +48,7 @@ using UPSAMPLE_LBD = void (*)(uint8_t *p, int size);
  * according to spec 7.11.2
  * BitDepth: 8bit
  */
-template <typename Pixel, typename Func>
+template <typename Sample, typename Func>
 class UpsampleTest {
   public:
     UpsampleTest() {
@@ -95,7 +95,7 @@ class UpsampleTest {
         for (; i < start_offset + numPx_; ++i)
             edge_ref_data_[i] = edge_tst_data_[i] = pix_rnd.random();
 
-        Pixel last = edge_ref_data_[start_offset + numPx_ - 1];
+        Sample last = edge_ref_data_[start_offset + numPx_ - 1];
         for (; i < edge_buf_size; ++i)
             edge_ref_data_[i] = edge_tst_data_[i] = last;
     }
@@ -103,11 +103,11 @@ class UpsampleTest {
     virtual void run_upsample() {
     }
 
-    Pixel edge_ref_data_[edge_buf_size];
-    Pixel edge_tst_data_[edge_buf_size];
+    Sample edge_ref_data_[edge_buf_size];
+    Sample edge_tst_data_[edge_buf_size];
 
-    Pixel *edge_ref_;
-    Pixel *edge_tst_;
+    Sample *edge_ref_;
+    Sample *edge_tst_;
 
     Func ref_func_;
     Func tst_func_;
@@ -193,7 +193,7 @@ using FILTER_EDGE_HBD = void (*)(uint16_t *p, int size, int strength);
  * numPx: [5, 129] // Min(w, (MaxX-x+1)) + (pAngle < 90 ? h : 0) + 1
  * BitDepth: 8bit and 10bit
  */
-template <typename Pixel, typename Func>
+template <typename Sample, typename Func>
 class FilterEdgeTest {
   public:
     FilterEdgeTest() {
@@ -244,11 +244,11 @@ class FilterEdgeTest {
         tst_func_(edge_tst_, numPx_, strength_);
     }
 
-    Pixel edge_ref_data_[edge_buf_size];
-    Pixel edge_tst_data_[edge_buf_size];
+    Sample edge_ref_data_[edge_buf_size];
+    Sample edge_tst_data_[edge_buf_size];
 
-    Pixel *edge_ref_;
-    Pixel *edge_tst_;
+    Sample *edge_ref_;
+    Sample *edge_tst_;
 
     Func ref_func_;
     Func tst_func_;

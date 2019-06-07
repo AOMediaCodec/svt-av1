@@ -57,7 +57,7 @@ using HBD_PARAMS = tuple<INTRAPRED_HBD, INTRAPRED_HBD, int, int, int>;
  * BitDepth: 8bit and 10bit
  *
  */
-template <typename FuncType, typename Pixel, typename TupleType>
+template <typename FuncType, typename Sample, typename TupleType>
 class AV1IntraPredTest : public ::testing::TestWithParam<TupleType> {
   protected:
     void prepare_data(SVTRandom &rnd, int cnt) {
@@ -116,14 +116,14 @@ class AV1IntraPredTest : public ::testing::TestWithParam<TupleType> {
 
     virtual void Predict() = 0;
 
-    Pixel *above_row_;
-    Pixel *left_col_;
-    Pixel *dst_tst_;
-    Pixel *dst_ref_;
-    DECLARE_ALIGNED(16, Pixel, left_col_data_[2 * 64]);
-    DECLARE_ALIGNED(16, Pixel, above_row_data_[2 * 64 + 64]);
-    DECLARE_ALIGNED(16, Pixel, dst_tst_data_[3 * 64 * 64]);
-    DECLARE_ALIGNED(16, Pixel, dst_ref_data_[3 * 64 * 64]);
+    Sample *above_row_;
+    Sample *left_col_;
+    Sample *dst_tst_;
+    Sample *dst_ref_;
+    DECLARE_ALIGNED(16, Sample, left_col_data_[2 * 64]);
+    DECLARE_ALIGNED(16, Sample, above_row_data_[2 * 64 + 64]);
+    DECLARE_ALIGNED(16, Sample, dst_tst_data_[3 * 64 * 64]);
+    DECLARE_ALIGNED(16, Sample, dst_ref_data_[3 * 64 * 64]);
 
     ptrdiff_t stride_;
     int bw_;  // block width
