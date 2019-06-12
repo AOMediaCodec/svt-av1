@@ -67,6 +67,10 @@ endif()
 #    setup_target_for_coverage(${PROJECT_NAME}_coverage ${PROJECT_TEST_NAME} coverage)
 #endif()
 
+# CMake requires target names to be globally unique, but SVT-AV1/HEVC/VP9 include
+# some common libraries with the same name. Use this as a prefix.
+set(SVT_COMMON_LIBRARY_PREFIX AV1_)
+
 # Add Subdirectories
 add_subdirectory (Source/Lib/Common)
 add_subdirectory (Source/Lib/Encoder)

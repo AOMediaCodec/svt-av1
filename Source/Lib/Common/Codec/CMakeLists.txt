@@ -21,4 +21,4 @@ file(GLOB all_files
     "*.h"
     "*.c")
 
-add_library(COMMON_CODEC OBJECT ${all_files})
+add_library(${SVT_COMMON_LIBRARY_PREFIX}CODEC OBJECT ${all_files})

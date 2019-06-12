@@ -18,4 +18,4 @@ file(GLOB all_files
     "*.h"
     "*.c")
 
-add_library(COMMON_C_DEFAULT OBJECT ${all_files})
+add_library(${SVT_COMMON_LIBRARY_PREFIX}C_DEFAULT OBJECT ${all_files})

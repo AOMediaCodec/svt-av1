@@ -37,7 +37,7 @@ file(GLOB all_files
     "*.asm"
     "*.c")
 
-add_library(COMMON_ASM_AVX2 OBJECT ${all_files})
+add_library(${SVT_COMMON_LIBRARY_PREFIX}ASM_AVX2 OBJECT ${all_files})
 
 
 
