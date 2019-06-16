@@ -32,6 +32,7 @@
 #include <stdio.h>
 #include <string>
 #include "aom/aom_image.h"
+#include "RefDecoder.h"
 
 #define MAX_NUM_OP_POINTS 32
 
@@ -51,11 +52,13 @@ class SequenceHeaderParser {
     }
 
   public:
-    /** input OBU data to parser
+    /** Parse obu data and update stream info
      * @param obu_data the OBU data block buffer
      * @param size the size of OBU data block in bytes
      */
-    void input_obu_data(const uint8_t* obu_data, const uint32_t size);
+    void input_obu_data(const uint8_t* obu_data, const uint32_t size,
+                        RefDecoder::StreamInfo* stream_info);
+
     /** get parameter value by its name
      * @param name the name of paramter in string
      * @return

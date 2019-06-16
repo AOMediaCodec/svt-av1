@@ -21,9 +21,9 @@
  *
  ******************************************************************************/
 
+#include "EbDefinitions.h"
 #include "ParseUtil.h"
 #include "gtest/gtest.h"
-#include "EbDefinitions.h"
 
 namespace svt_av1_e2e_tools {
 
@@ -1031,88 +1031,9 @@ int parse_sequence_header_from_file(const char *ivf_file) {
     return 0;
 }
 
-/** @brief SPSFeatureTest targets to test for sequence parser
- * SPSFeatureTest.sequence_header_test is a test case to verify the parser can
- * get the sequence header correctly.
- *
- * Test strategy: <br>
- * Input a encoded AV1 IVF file, and run parser to get the sequence header in
- * frames.
- *
- * Expect result: <br>
- * Parser can get sequence header correctly.
- *
- * Comments:
- * Enabled only E2E Param Coverage test failed with parsing errors.
- */
-#if ENABLE_SELF_TEST
-TEST(SPSFeatureTest, sequence_header_test) {
-    FILE *f = fopen("../../vectors/test.ivf", "rb");
-    ASSERT_NE(f, nullptr) << "IVF source file open failed!";
-    struct AvxInputContext input_ctx = {
-        "../../vectors/test.ivf", f, 0, 0, 0, {0, 0}};
-    ASSERT_TRUE(file_is_ivf(&input_ctx)) << "file is not IVF";
-
-    uint8_t *stream_buf = (uint8_t *)malloc(1024);
-    size_t buf_sz = 1024;
-    aom_codec_pts_t pts;
-    size_t frame_sz = 0;
-    int frame_cnt = 0;
-    while (ivf_read_frame(f, &stream_buf, &frame_sz, &buf_sz, &pts) == 0) {
-        // read one frame; process obu
-        printf("frame count: %d\n", frame_cnt++);
-        uint8_t *frame_buf = stream_buf;
-        AomCodecErr err;
-        do {
-            struct aom_read_bit_buffer rb = {
-                frame_buf, frame_buf + frame_sz, 0, NULL, NULL};
-            ObuHeader ou;
-            err = read_obu_header(&rb, 0, &ou);
-            if (ou.has_size_field) {
-                uint64_t u64_payload_length = 0;
-                int header_size = ou.has_extension ? 2 : 1;
-                int value_len = 0;
-
-                frame_buf += header_size;
-                frame_sz -= header_size;
-                for (int len = 0; len < OBU_MAX_LENGTH_FIELD_SIZE; ++len) {
-                    if ((frame_buf[len] >> 7) == 0) {
-                        ++len;
-                        value_len = len;
-                        break;
-                    }
-                }
-                aom_uleb_decode(
-                    frame_buf, value_len, &u64_payload_length, NULL);
-
-                frame_buf += value_len;
-                frame_sz -= value_len;
-                printf("OBU type: %d, payload length: %lld\n",
-                       ou.type,
-                       u64_payload_length);
-                if (ou.type == OBU_SEQUENCE_HEADER) {
-                    // check the ou type and parse sequence header
-                    struct aom_read_bit_buffer rb = {
-                        frame_buf, frame_buf + frame_sz, 0, NULL, NULL};
-                    SequenceHeader sqs_headers = {0};
-                    EXPECT_NE(read_sequence_header_obu(&sqs_headers, &rb), 0)
-                        << "read seqence header fail";
-                }
-
-                frame_buf += u64_payload_length;
-                frame_sz -= u64_payload_length;
-            }
-        } while (err == 0 && frame_sz > 0);
-    }
-
-    free(stream_buf);
-    fclose(f);
-    SUCCEED();
-}
-#endif  // ENABLE_SELF_TEST
-
 void SequenceHeaderParser::input_obu_data(const uint8_t *obu_data,
-                                          const uint32_t size) {
+                                          const uint32_t size,
+                                          RefDecoder::StreamInfo *stream_info) {
     const uint8_t *frame_buf = obu_data;
     uint32_t frame_sz = size;
     AomCodecErr err = AOM_CODEC_OK;
@@ -1158,20 +1079,34 @@ void SequenceHeaderParser::input_obu_data(const uint8_t *obu_data,
                 printf("SPS header: profile(%u), sb_size(%u)\n",
                        profile_,
                        sb_size_);
+
+                // update stream info
+                stream_info->profile = sqs_headers.profile;
+                stream_info->bit_depth = sqs_headers.bit_depth;
+                stream_info->monochrome = sqs_headers.monochrome;
+                stream_info->sb_size = sb_size_;
+                stream_info->force_integer_mv = sqs_headers.force_integer_mv;
+                stream_info->enable_filter_intra =
+                    sqs_headers.enable_filter_intra;
+                stream_info->enable_intra_edge_filter =
+                    sqs_headers.enable_intra_edge_filter;
+                stream_info->enable_masked_compound =
+                    sqs_headers.enable_masked_compound;
+                stream_info->enable_dual_filter =
+                    sqs_headers.enable_dual_filter;
+                stream_info->enable_jnt_comp = sqs_headers.enable_jnt_comp;
+                stream_info->enable_ref_frame_mvs =
+                    sqs_headers.enable_ref_frame_mvs;
+                stream_info->enable_warped_motion =
+                    sqs_headers.enable_warped_motion;
+                stream_info->enable_cdef = sqs_headers.enable_cdef;
+                stream_info->enable_restoration =
+                    sqs_headers.enable_restoration;
             }
             frame_buf += u64_payload_length;
             frame_sz -= u64_payload_length;
         }
     } while (err == 0 && frame_sz > 0);
-}
-
-std::string SequenceHeaderParser::get_syntax_element(const std::string &name) {
-    if (!name.compare("profile")) {
-        return std::to_string(profile_);
-    } else if (!name.compare("super_block_size")) {
-        return std::to_string(sb_size_);
-    }
-    return "";
 }
 
 }  // namespace svt_av1_e2e_tools

@@ -8,7 +8,7 @@
  *
  * @brief Impelmentation of End to End test framework
  *
- * @author Cidana-Edmond Cidana-Ryan
+ * @author Cidana-Edmond Cidana-Ryan Cidana-Wenyao
  *
  ******************************************************************************/
 
@@ -75,53 +75,50 @@ void SvtAv1E2ETestFramework::setup_src_param(const VideoSource *source,
     config.frames_to_be_encoded = source->get_frame_count();
 }
 
-SvtAv1E2ETestFramework::SvtAv1E2ETestFramework()
-    : video_src_(SvtAv1E2ETestFramework::prepare_video_src(GetParam())),
-      psnr_src_(SvtAv1E2ETestFramework::prepare_video_src(GetParam())) {
+SvtAv1E2ETestFramework::SvtAv1E2ETestFramework() : enc_setting(GetParam()) {
     memset(&av1enc_ctx_, 0, sizeof(av1enc_ctx_));
+    video_src_ = nullptr;
+    psnr_src_ = nullptr;
     recon_queue_ = nullptr;
     refer_dec_ = nullptr;
     output_file_ = nullptr;
     obu_frame_header_size_ = 0;
     collect_ = nullptr;
     ref_compare_ = nullptr;
+    collect_ = new PerformanceCollect(typeid(this).name());
     use_ext_qp_ = false;
-    start_pos_ = std::get<7>(GetParam());
-    frames_to_test_ = std::get<8>(GetParam());
+    enable_recon = false;
+    enable_decoder = false;
+    enable_stat = false;
+    enable_save_bitstream = false;
+    enable_analyzer = false;
 }
 
 SvtAv1E2ETestFramework::~SvtAv1E2ETestFramework() {
-    if (video_src_) {
-        delete video_src_;
-        video_src_ = nullptr;
-    }
-    if (recon_queue_) {
-        delete recon_queue_;
-        recon_queue_ = nullptr;
-    }
-    if (refer_dec_) {
-        delete refer_dec_;
-        refer_dec_ = nullptr;
-    }
-    if (output_file_) {
-        delete output_file_;
-        output_file_ = nullptr;
-    }
     if (collect_) {
         delete collect_;
         collect_ = nullptr;
     }
-    if (psnr_src_) {
-        delete psnr_src_;
-        psnr_src_ = nullptr;
-    }
-    if (ref_compare_) {
-        delete ref_compare_;
-        ref_compare_ = nullptr;
-    }
 }
 
-void SvtAv1E2ETestFramework::SetUp() {
+void SvtAv1E2ETestFramework::config_test() {
+    enable_stat = true;
+}
+
+void SvtAv1E2ETestFramework::update_enc_setting() {
+}
+
+void SvtAv1E2ETestFramework::post_process() {
+    if (enable_stat)
+        output_stat();
+}
+
+void SvtAv1E2ETestFramework::init_test(TestVideoVector &test_vector) {
+    start_pos_ = std::get<7>(test_vector);
+    frames_to_test_ = std::get<8>(test_vector);
+    video_src_ = prepare_video_src(test_vector);
+    psnr_src_ = prepare_video_src(test_vector);
+
     EbErrorType return_error = EB_ErrorNone;
 
     // check for video source
@@ -176,47 +173,29 @@ void SvtAv1E2ETestFramework::SetUp() {
     av1enc_ctx_.output_stream_buffer->p_app_private = nullptr;
     av1enc_ctx_.output_stream_buffer->pic_type = EB_AV1_INVALID_PICTURE;
 
-    // initialize test
-    init_test();
-}
+    // update encoder settings
+    update_enc_setting();
 
-void SvtAv1E2ETestFramework::TearDown() {
-    // close test before teardown
-    close_test();
-
-    EbErrorType return_error = EB_ErrorNone;
-    // Destruct the component
-    return_error = eb_deinit_handle(av1enc_ctx_.enc_handle);
-    ASSERT_EQ(return_error, EB_ErrorNone)
-        << "eb_deinit_handle return error:" << return_error;
-    av1enc_ctx_.enc_handle = nullptr;
-
-    // Clear
-    if (av1enc_ctx_.output_stream_buffer != nullptr) {
-        if (av1enc_ctx_.output_stream_buffer->p_buffer != nullptr) {
-            delete[] av1enc_ctx_.output_stream_buffer->p_buffer;
-        }
-        delete av1enc_ctx_.output_stream_buffer;
-        av1enc_ctx_.output_stream_buffer = nullptr;
-    }
-    if (av1enc_ctx_.input_picture_buffer != nullptr) {
-        delete av1enc_ctx_.input_picture_buffer;
-        av1enc_ctx_.input_picture_buffer = nullptr;
+    if (enable_recon) {
+        // create recon queue to store the recon yuvs
+        VideoFrameParam param;
+        memset(&param, 0, sizeof(param));
+        param.format = video_src_->get_image_format();
+        param.width = video_src_->get_width_with_padding();
+        param.height = video_src_->get_height_with_padding();
+        recon_queue_ = create_frame_queue(param);
+        ASSERT_NE(recon_queue_, nullptr) << "can not create recon sink!!";
+        if (recon_queue_)
+            av1enc_ctx_.enc_params.recon_enabled = 1;
     }
 
-    ASSERT_NE(video_src_, nullptr);
-    ASSERT_NE(psnr_src_, nullptr);
-    video_src_->close_source();
-    psnr_src_->close_source();
-}
-
-/** initialization for test */
-void SvtAv1E2ETestFramework::init_test() {
-    EbErrorType return_error = eb_svt_enc_set_parameter(
-        av1enc_ctx_.enc_handle, &av1enc_ctx_.enc_params);
+    // set the parameter to encoder
+    return_error = eb_svt_enc_set_parameter(av1enc_ctx_.enc_handle,
+                                            &av1enc_ctx_.enc_params);
     ASSERT_EQ(return_error, EB_ErrorNone)
         << "eb_svt_enc_set_parameter return error:" << return_error;
 
+    // initial encoder
     return_error = eb_init_encoder(av1enc_ctx_.enc_handle);
     ASSERT_EQ(return_error, EB_ErrorNone)
         << "eb_init_encoder return error:" << return_error;
@@ -239,17 +218,108 @@ void SvtAv1E2ETestFramework::init_test() {
     obu_frame_header_size_ =
         has_tiles ? OBU_FRAME_HEADER_SIZE + 1 : OBU_FRAME_HEADER_SIZE;
 
+    // create reference decoder if required.
+    if (enable_decoder) {
+        refer_dec_ = create_reference_decoder(enable_analyzer);
+        ASSERT_NE(refer_dec_, nullptr) << "can not create reference decoder!!";
+    }
+
+    // create IvfFile if required.
+    if (enable_save_bitstream) {
+        std::string fn = std::get<0>(test_vector) + ".ivf";
+        output_file_ = new IvfFile(fn.c_str());
+    }
+
     ASSERT_NE(psnr_src_, nullptr) << "PSNR source create failed!";
     EbErrorType err = psnr_src_->open_source(start_pos_, frames_to_test_);
     ASSERT_EQ(err, EB_ErrorNone) << "open_source return error:" << err;
 }
 
-void SvtAv1E2ETestFramework::close_test() {
-    EbErrorType return_error = EB_ErrorNone;
-    // Deinit
-    return_error = eb_deinit_encoder(av1enc_ctx_.enc_handle);
+void SvtAv1E2ETestFramework::deinit_test() {
+    EbErrorType return_error = eb_deinit_encoder(av1enc_ctx_.enc_handle);
     ASSERT_EQ(return_error, EB_ErrorNone)
         << "eb_deinit_encoder return error:" << return_error;
+
+    // Destruct the component
+    return_error = eb_deinit_handle(av1enc_ctx_.enc_handle);
+    ASSERT_EQ(return_error, EB_ErrorNone)
+        << "eb_deinit_handle return error:" << return_error;
+    av1enc_ctx_.enc_handle = nullptr;
+
+    // Clear the intput and output buffer
+    if (av1enc_ctx_.output_stream_buffer != nullptr) {
+        if (av1enc_ctx_.output_stream_buffer->p_buffer != nullptr) {
+            delete[] av1enc_ctx_.output_stream_buffer->p_buffer;
+        }
+        delete av1enc_ctx_.output_stream_buffer;
+        av1enc_ctx_.output_stream_buffer = nullptr;
+    }
+    if (av1enc_ctx_.input_picture_buffer != nullptr) {
+        delete av1enc_ctx_.input_picture_buffer;
+        av1enc_ctx_.input_picture_buffer = nullptr;
+    }
+
+    // release recon queue
+    if (recon_queue_) {
+        delete recon_queue_;
+        recon_queue_ = nullptr;
+    }
+    // release decoder;
+    if (refer_dec_) {
+        delete refer_dec_;
+        refer_dec_ = nullptr;
+    }
+
+    // close and release the video src
+    ASSERT_NE(video_src_, nullptr);
+    ASSERT_NE(psnr_src_, nullptr);
+    video_src_->close_source();
+    psnr_src_->close_source();
+    delete video_src_;
+    video_src_ = nullptr;
+    delete psnr_src_;
+    psnr_src_ = nullptr;
+
+    // close the bitstream file
+    if (output_file_) {
+        delete output_file_;
+        output_file_ = nullptr;
+    }
+
+    if (ref_compare_) {
+        delete ref_compare_;
+        ref_compare_ = nullptr;
+    }
+}
+
+void SvtAv1E2ETestFramework::output_stat() {
+    /** PSNR report */
+    int count = 0;
+    double psnr[4];
+    pnsr_statistics_.get_statistics(count, psnr[0], psnr[1], psnr[2], psnr[3]);
+    if (count > 0) {
+        printf(
+            "PSNR: %d frames, total: %0.4f, luma: %0.4f, cb: %0.4f, cr: "
+            "%0.4f\r\n",
+            count,
+            psnr[0],
+            psnr[1],
+            psnr[2],
+            psnr[3]);
+    }
+    pnsr_statistics_.reset();
+
+    /** performance report */
+    if (collect_) {
+        const char ENCODING[] = "encoding";
+        uint32_t frame_count = video_src_->get_frame_count();
+        uint64_t total_enc_time = collect_->read_count(ENCODING);
+        if (total_enc_time) {
+            printf("Enc Performance: %.2fsec/frame (%.4fFPS)\n",
+                   (double)total_enc_time / frame_count / 1000,
+                   (double)frame_count * 1000 / total_enc_time);
+        }
+    }
 }
 
 void SvtAv1E2ETestFramework::run_encode_process() {
@@ -272,13 +342,15 @@ void SvtAv1E2ETestFramework::run_encode_process() {
     bool src_file_eos = false;
     bool enc_file_eos = false;
     bool rec_file_eos = recon_queue_ ? false : true;
+    bool early_termination = false;
     do {
         if (!src_file_eos) {
             // read yuv frame
-            {
+            if (!early_termination) {
                 TimeAutoCount counter(READ_SRC, collect_);
                 frame = (uint8_t *)video_src_->get_next_frame();
-            }
+            } else
+                frame = nullptr;
 
             // send yuv frame to encoder
             {
@@ -358,6 +430,11 @@ void SvtAv1E2ETestFramework::run_encode_process() {
                         printf("Encoder EOS\n");
                         break;
                     }
+                    // check if the process has encounter error, break out if
+                    // true, like the recon frame does not match with decoded
+                    // frame.
+                    if (HasFatalFailure())
+                        early_termination = true;
                 } else {
                     if (return_error != EB_NoErrorEmptyQueue) {
                         enc_file_eos = true;
@@ -380,32 +457,43 @@ void SvtAv1E2ETestFramework::run_encode_process() {
         delete ref_compare_;
         ref_compare_ = nullptr;
     }
+}
 
-    /** PSNR report */
-    int count = 0;
-    double psnr[4];
-    pnsr_statistics_.get_statistics(count, psnr[0], psnr[1], psnr[2], psnr[3]);
-    if (count > 0) {
-        printf(
-            "PSNR: %d frames, total: %0.4f, luma: %0.4f, cb: %0.4f, cr: "
-            "%0.4f\r\n",
-            count,
-            psnr[0],
-            psnr[1],
-            psnr[2],
-            psnr[3]);
+void SvtAv1E2ETestFramework::run_test() {
+    config_test();
+    for (auto test_vector : enc_setting.test_vectors) {
+        std::string fn = std::get<0>(test_vector);
+        std::cout << "Start test case " << enc_setting.to_string(fn)
+                  << std::endl;
+        init_test(test_vector);
+        EXPECT_NO_FATAL_FAILURE(run_encode_process())
+            << "Fatal Error on running test case " << enc_setting.to_string(fn);
+        post_process();
+        deinit_test();
     }
-    pnsr_statistics_.reset();
+}
 
-    /** performance report */
-    if (collect_) {
-        frame_count = video_src_->get_frame_count();
-        uint64_t total_enc_time = collect_->read_count(ENCODING);
-        if (total_enc_time) {
-            printf("Enc Performance: %.2fsec/frame (%.4fFPS)\n",
-                   (double)total_enc_time / frame_count / 1000,
-                   (double)frame_count * 1000 / total_enc_time);
-        }
+void SvtAv1E2ETestFramework::run_death_test() {
+    ::testing::FLAGS_gtest_death_test_style = "threadsafe";
+    config_test();
+    for (auto test_vector : enc_setting.test_vectors) {
+        std::string fn = std::get<0>(test_vector);
+        std::cout << "Start test case " << enc_setting.to_string(fn)
+                  << std::endl;
+        EXPECT_EXIT(
+            {
+                init_test(test_vector);
+                run_encode_process();
+                post_process();
+                deinit_test();
+                if (HasFatalFailure())
+                    exit(-1);
+                else
+                    exit(0);
+            },
+            ::testing::ExitedWithCode(0),
+            ".*")
+            << "Fatal Error on running test case " << enc_setting.to_string(fn);
     }
 }
 

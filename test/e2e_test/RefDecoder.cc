@@ -30,7 +30,7 @@ typedef enum {
 } FRAME_TYPE;
 
 /** count intra period length from the frame serialization */
-static std::string get_intra_period_length(std::vector<int>& frame_type_vec) {
+static int get_max_intra_period_length(std::vector<int>& frame_type_vec) {
     int period_max = 0;
     int period = 0;
     for (int frame_type : frame_type_vec) {
@@ -48,7 +48,7 @@ static std::string get_intra_period_length(std::vector<int>& frame_type_vec) {
     // if no intra, it should return -1
     if (period_max == 0)
         period_max = -1;
-    return std::to_string(period_max);
+    return period_max;
 }
 
 /** from aom/common/enums.h */
@@ -271,39 +271,46 @@ void RefDecoder::inspect_cb(void* pbi, void* data) {
 
     /* Fetch frame data. */
     ifd_inspect(inspect_data, pbi);
-    pThis->inspect_frame_parse();
+    pThis->parse_frame_info();
 }
 
-// parse the inspect data and extract required syntax element
-void RefDecoder::inspect_frame_parse() {
+// parse the inspect data from decoder to get frame info, and update stream
+// info.
+void RefDecoder::parse_frame_info() {
     insp_frame_data* inspect_data = (insp_frame_data*)insp_frame_data_;
     ASSERT_NE(inspect_data, nullptr) << "inspection frame data is not ready";
 
-    insp_params_.tile_cols = inspect_data->tile_mi_cols;
-    insp_params_.tile_rows = inspect_data->tile_mi_rows;
-
-    insp_params_.frame_type_list.push_back(inspect_data->frame_type);
-    int min_qindex = 255;
-    int max_qindex = 0;
+    // get frame info
+    const int tile_cols = inspect_data->tile_mi_cols;
+    const int tile_rows = inspect_data->tile_mi_rows;
+    uint32_t min_qindex = 255;
+    uint32_t max_qindex = 0;
+    uint32_t min_block_size = 128;
     size_t mi_count = inspect_data->mi_cols * inspect_data->mi_rows;
     for (size_t i = 0; i < mi_count; i++) {
-        insp_params_.min_block_size =
-            std::min(insp_params_.min_block_size,
+        min_block_size =
+            std::min(min_block_size,
                      get_min_block_size(inspect_data->mi_grid[i].sb_type));
-        if (!insp_params_.ext_block_flag)
-            insp_params_.ext_block_flag =
+        if (!stream_info_.ext_block_flag)
+            stream_info_.ext_block_flag =
                 is_ext_block(inspect_data->mi_grid[i].sb_type) ? 1 : 0;
-        // TODO: update reference decoder to set current_qindex in mi_grid.
+
         if (inspect_data->mi_grid[i].current_qindex > max_qindex)
             max_qindex = inspect_data->mi_grid[i].current_qindex;
         if (inspect_data->mi_grid[i].current_qindex < min_qindex)
             min_qindex = inspect_data->mi_grid[i].current_qindex;
     }
-    insp_params_.qindex_list.push_back(inspect_data->base_qindex);
-    insp_params_.max_qindex =
-        std::max(insp_params_.max_qindex, (uint32_t)inspect_data->base_qindex);
-    insp_params_.min_qindex =
-        std::min(insp_params_.min_qindex, (uint32_t)inspect_data->base_qindex);
+
+    // save to frame_type_list
+    stream_info_.frame_type_list.push_back(inspect_data->frame_type);
+
+    // update overall stream info
+    stream_info_.min_block_size =
+        std::min(min_block_size, stream_info_.min_block_size);
+    stream_info_.min_qindex = std::min(min_qindex, stream_info_.min_qindex);
+    stream_info_.max_qindex = std::max(max_qindex, stream_info_.max_qindex);
+    stream_info_.max_intra_period =
+        get_max_intra_period_length(stream_info_.frame_type_list);
 }
 
 static VideoColorFormat trans_video_format(aom_img_fmt_t fmt) {
@@ -385,8 +392,10 @@ RefDecoder::~RefDecoder() {
 RefDecoder::RefDecoderErr RefDecoder::decode(const uint8_t* data,
                                              const uint32_t size) {
     // send to parser
-    if (parser_)
-        ((SequenceHeaderParser*)parser_)->input_obu_data(data, size);
+    if (parser_) {
+        ((SequenceHeaderParser*)parser_)
+            ->input_obu_data(data, size, &stream_info_);
+    }
 
     aom_codec_ctx_t* codec_ = (aom_codec_ctx_t*)codec_handle_;
     aom_codec_err_t err = aom_codec_decode(codec_, data, size, nullptr);
@@ -411,54 +420,6 @@ RefDecoder::RefDecoderErr RefDecoder::get_frame(VideoFrame& frame) {
     video_param_ = (VideoFrameParam)frame;
     dec_frame_cnt_++;
     return REF_CODEC_OK;
-}
-
-std::string RefDecoder::get_syntax_element(const std::string& name) {
-    std::string item_value;
-    // try to get item value from parser first, return directly if succeed.
-    if (parser_)
-        item_value = ((SequenceHeaderParser*)parser_)->get_syntax_element(name);
-
-    if (item_value.size() > 0)
-        return item_value;
-
-    // get from inspection frame info
-    if (!name.compare("intra_period_length"))
-        item_value = get_intra_period_length(insp_params_.frame_type_list);
-    else if (!name.compare("tile_columns"))
-        item_value = std::to_string(insp_params_.tile_cols);
-    else if (!name.compare("tile_rows"))
-        item_value = std::to_string(insp_params_.tile_rows);
-    else if (!name.compare("partition_depth"))
-        item_value = get_partition_depth(insp_params_.min_block_size);
-    else if (!name.compare("ext_block_flag"))
-        item_value = std::to_string(insp_params_.ext_block_flag);
-    else if (!name.compare("qp")) {
-        item_value = std::to_string(get_qp(insp_params_.max_qindex));
-    } else if (!name.compare("max_qp_allowed"))
-        item_value = std::to_string(get_qp(insp_params_.max_qindex));
-    else if (!name.compare("min_qp_allowed"))
-        item_value = std::to_string(get_qp(insp_params_.min_qindex));
-    else if (!name.compare("target_bit_rate"))
-        item_value = std::to_string(enc_bytes_ * 8 / dec_frame_cnt_);
-    else if (!name.compare("burst_bit_per_frame"))
-        item_value = std::to_string(burst_bytes_ * 8);
-    else {
-        printf("this parameter is not supported yet!\n");
-    }
-
-    return item_value;
-}
-
-std::string RefDecoder::get_syntax_element(const std::string& name,
-                                           const uint32_t index) {
-    std::string item_value;
-
-    // get from inspection frame info by index
-    if (!name.compare("use_qp_file"))
-        item_value = std::to_string(get_qp(insp_params_.qindex_list.at(index)));
-
-    return item_value;
 }
 
 void RefDecoder::set_resolution(const uint32_t width, const uint32_t height) {

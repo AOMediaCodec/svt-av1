@@ -48,6 +48,7 @@
  *  @{
  */
 namespace svt_av1_e2e_test {
+#include "E2eTestVectors.h"
 
 using namespace svt_av1_e2e_test_vector;
 using namespace svt_av1_e2e_tools;
@@ -66,8 +67,7 @@ typedef struct {
 
 /** SvtAv1E2ETestFramework is a class with impelmention of video source control,
  * encoding progress, decoding progress, data collection and data comparision */
-class SvtAv1E2ETestFramework
-    : public ::testing::TestWithParam<TestVideoVector> {
+class SvtAv1E2ETestFramework : public ::testing::TestWithParam<EncTestSetting> {
   public:
     typedef struct IvfFile {
         FILE *file;
@@ -89,14 +89,42 @@ class SvtAv1E2ETestFramework
     virtual ~SvtAv1E2ETestFramework();
 
   protected:
-    void SetUp() override;
-    void TearDown() override;
-    /** initialization for test */
-    virtual void init_test();
-    /** close for test */
-    virtual void close_test();
-    /** test processing body */
-    virtual void run_encode_process();
+    /* configure test switches */
+    virtual void config_test();
+
+    /* change the encoder settings */
+    virtual void update_enc_setting();
+
+    /** Add custom process here, which will be invoked after
+     encoding loop is finished, like output stats,
+     analyse the bitstream generated.
+    */
+    virtual void post_process();
+
+    /** Initialize the test, including
+     create and setup encoder, setup input and output buffer
+     create decoder if required.
+    */
+    void init_test(TestVideoVector &test_vector);
+
+    /** deinitialize the test, including destropy the encoder, release
+        the input and output buffer, close the source file;
+    */
+    void deinit_test();
+
+    /** run the encode loop */
+    void run_encode_process();
+
+    /* wrapper of the whole test process, and it will
+       iterate all the test vectors and run the test
+    */
+    void run_test();
+    /* wrapper of the whole test process, and it will
+       iterate all the test vectors and run the test.
+       This test will run in a child process, so it
+       will not break the whole test.
+    */
+    void run_death_test();
 
   public:
     static VideoSource *prepare_video_src(const TestVideoVector &vector);
@@ -131,6 +159,9 @@ class SvtAv1E2ETestFramework
      */
     void check_psnr(const VideoFrame &frame);
 
+    /* TODO: add comments */
+    void output_stat();
+
   protected:
     VideoSource *video_src_;   /**< video source context */
     SvtAv1Context av1enc_ctx_; /**< AV1 encoder context */
@@ -145,6 +176,16 @@ class SvtAv1E2ETestFramework
     ICompareQueue *ref_compare_; /**< sink of reference to compare with recon*/
     PsnrStatistics pnsr_statistics_; /**< psnr statistics recorder.*/
     bool use_ext_qp_; /**< flag of use external qp from video source or not*/
+    EncTestSetting enc_setting;
+    /* test configuration */
+    bool enable_recon; /**< flag to control if make encoder output recon yuvs or
+                          not */
+    bool enable_decoder;        /**< flag to control if create av1 decoder */
+    bool enable_stat;           /**< flag to control if output encoder stat */
+    bool enable_save_bitstream; /**< flag to control if the bitstream is saved
+                                   on disk */
+    bool
+        enable_analyzer; /**< flag to control if create decoder with analyzer */
 };
 
 }  // namespace svt_av1_e2e_test
