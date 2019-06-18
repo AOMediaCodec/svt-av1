@@ -151,7 +151,7 @@ extern "C" {
 
 
 
-#define DIS_EDGE_FIL                      0
+
 #define NFL_PER_SQ_SIZE                   0
 #define SC_HME_ME                         0 // Use sc detector for hme/me setting
 
