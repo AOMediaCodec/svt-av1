@@ -191,7 +191,7 @@ extern "C" {
 #if USE_SAD_HME
 
 
-#define USE_SAD_HMEL2                                   1
+
 #endif
 
 //NEDED FLAGS  ON
