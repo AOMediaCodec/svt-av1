@@ -1291,11 +1291,7 @@ void set_all_ref_frame_type(SequenceControlSet *sequence_control_set_ptr, Pictur
                 }
             }
         }
-#if NORMAL_ORDER
         if (parent_pcs_ptr->ref_list1_count > 2) {
-#else
-        if (parent_pcs_ptr->ref_list1_count > 1) {
-#endif
             rf[0] = BWDREF_FRAME;
             rf[1] = ALTREF_FRAME;
             ref_frame_arr[(*tot_ref_frames)++] = av1_ref_frame_type(rf);
@@ -1646,7 +1642,6 @@ void  Av1GenerateRpsInfo(
             break;
         }
 
-#if  NORMAL_ORDER
         {
             int tmp = av1Rps->ref_dpb_index[ALT];
             av1Rps->ref_dpb_index[ALT] = av1Rps->ref_dpb_index[ALT2];
@@ -1656,7 +1651,6 @@ void  Av1GenerateRpsInfo(
             av1Rps->ref_poc_array[ALT] = av1Rps->ref_poc_array[ALT2];
             av1Rps->ref_poc_array[ALT2] = tmp1;
         }
-#endif
 
         // update RPS for the overlay frame.
         if (picture_control_set_ptr->pred_struct_ptr->pred_type == EB_PRED_LOW_DELAY_P || picture_control_set_ptr->is_overlay)
@@ -2363,7 +2357,6 @@ void  Av1GenerateRpsInfo(
             break;
         }
 
-#if  NORMAL_ORDER
         {
             int tmp = av1Rps->ref_dpb_index[ALT];
             av1Rps->ref_dpb_index[ALT] = av1Rps->ref_dpb_index[ALT2];
@@ -2373,7 +2366,6 @@ void  Av1GenerateRpsInfo(
             av1Rps->ref_poc_array[ALT] = av1Rps->ref_poc_array[ALT2];
             av1Rps->ref_poc_array[ALT2] = tmp1;
         }
-#endif
 
         // update RPS for the overlay frame.
         if (picture_control_set_ptr->pred_struct_ptr->pred_type == EB_PRED_LOW_DELAY_P || picture_control_set_ptr->is_overlay)
