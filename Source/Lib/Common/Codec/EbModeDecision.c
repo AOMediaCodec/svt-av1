@@ -3158,7 +3158,6 @@ void  inject_inter_candidates(
         //----------------------
         if (inject_newmv_candidate && picture_control_set_ptr->parent_pcs_ptr->allow_high_precision_mv) {
             if (allow_bipred) {
-#if IMPROVED_BIPRED_INJECTION
                 //----------------------
                 // Inject eight-pel bi-pred
                 //----------------------
@@ -3174,7 +3173,6 @@ void  inject_inter_candidates(
                             close_loop_me_index,
                             &canTotalCnt);
 
-#endif
 #if IMPROVED_UNIPRED_INJECTION
             //----------------------
             // Inject eight-pel uni-pred
