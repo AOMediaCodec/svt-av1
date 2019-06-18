@@ -240,7 +240,7 @@ extern "C" {
 
 
 
-#define MRP_FLAG                  1
+
 #define MRP_FIX_CLOSE_GOP         1
 
 #define MRP_M1                    1 // replaces MRP_M0_ONLY
