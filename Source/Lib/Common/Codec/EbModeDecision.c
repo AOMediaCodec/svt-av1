@@ -4684,12 +4684,10 @@ void  inject_intra_candidates(
                             candidateArray[canTotalCnt].intra_chroma_mode = disable_cfl_flag ?
                                 context_ptr->best_uv_mode[openLoopIntraCandidate][MAX_ANGLE_DELTA + candidateArray[canTotalCnt].angle_delta[PLANE_TYPE_Y]] :
                                 UV_CFL_PRED ;
-#if CHROMA_SEARCH_FIX
                             candidateArray[canTotalCnt].angle_delta[PLANE_TYPE_UV] = disable_cfl_flag ?
                                 context_ptr->best_uv_angle[candidateArray[canTotalCnt].intra_luma_mode][MAX_ANGLE_DELTA + candidateArray[canTotalCnt].angle_delta[PLANE_TYPE_Y]] : 0;
                             candidateArray[canTotalCnt].is_directional_chroma_mode_flag = disable_cfl_flag ?
                                 (uint8_t)av1_is_directional_mode((PredictionMode)(context_ptr->best_uv_mode[candidateArray[canTotalCnt].intra_luma_mode][MAX_ANGLE_DELTA + candidateArray[canTotalCnt].angle_delta[PLANE_TYPE_Y]])) : 0;
-#endif
                         }
                         else {
                             // Hsan/Omar: why the restriction below ? (i.e. disable_ang_uv)
@@ -4701,10 +4699,8 @@ void  inject_intra_candidates(
                                 UV_DC_PRED;
                             candidateArray[canTotalCnt].intra_chroma_mode = disable_ang_uv && av1_is_directional_mode(candidateArray[canTotalCnt].intra_chroma_mode) ?
                                 UV_DC_PRED : candidateArray[canTotalCnt].intra_chroma_mode;
-#if CHROMA_SEARCH_FIX
                             candidateArray[canTotalCnt].is_directional_chroma_mode_flag = (uint8_t)av1_is_directional_mode((PredictionMode)candidateArray[canTotalCnt].intra_chroma_mode);
                             candidateArray[canTotalCnt].angle_delta[PLANE_TYPE_UV] = 0;
-#endif
                         }
 #else
                         const int32_t disable_ang_uv = (context_ptr->blk_geom->bwidth == 4 || context_ptr->blk_geom->bheight == 4) && context_ptr->blk_geom->has_uv ? 1 : 0;
@@ -4718,17 +4714,11 @@ void  inject_intra_candidates(
 #endif
 #if CHROMA_DC_ONLY
                         candidateArray[canTotalCnt].intra_chroma_mode = UV_DC_PRED;
-#if CHROMA_SEARCH_FIX
                         candidateArray[canTotalCnt].is_directional_chroma_mode_flag = (uint8_t)av1_is_directional_mode((PredictionMode)candidateArray[canTotalCnt].intra_chroma_mode);
                         candidateArray[canTotalCnt].angle_delta[PLANE_TYPE_UV] = 0;
-#endif
 #endif
                         candidateArray[canTotalCnt].cfl_alpha_signs = 0;
                         candidateArray[canTotalCnt].cfl_alpha_idx = 0;
-#if !CHROMA_SEARCH_FIX
-                        candidateArray[canTotalCnt].is_directional_chroma_mode_flag = (uint8_t)av1_is_directional_mode((PredictionMode)candidateArray[canTotalCnt].intra_chroma_mode);
-                        candidateArray[canTotalCnt].angle_delta[PLANE_TYPE_UV] = 0;
-#endif
                         candidateArray[canTotalCnt].transform_type[0] = DCT_DCT;
 
                         if (candidateArray[canTotalCnt].intra_chroma_mode == UV_CFL_PRED)
@@ -4778,12 +4768,10 @@ void  inject_intra_candidates(
                 candidateArray[canTotalCnt].intra_chroma_mode = disable_cfl_flag ?
                     context_ptr->best_uv_mode[openLoopIntraCandidate][MAX_ANGLE_DELTA + candidateArray[canTotalCnt].angle_delta[PLANE_TYPE_Y]] :
                     UV_CFL_PRED;
-#if CHROMA_SEARCH_FIX
                 candidateArray[canTotalCnt].angle_delta[PLANE_TYPE_UV] = disable_cfl_flag ?
                     context_ptr->best_uv_angle[candidateArray[canTotalCnt].intra_luma_mode][MAX_ANGLE_DELTA + candidateArray[canTotalCnt].angle_delta[PLANE_TYPE_Y]] : 0;
                 candidateArray[canTotalCnt].is_directional_chroma_mode_flag = disable_cfl_flag ?
                     (uint8_t)av1_is_directional_mode((PredictionMode)(context_ptr->best_uv_mode[candidateArray[canTotalCnt].intra_luma_mode][MAX_ANGLE_DELTA + candidateArray[canTotalCnt].angle_delta[PLANE_TYPE_Y]])) : 0;
-#endif
             }
             else {
                 // Hsan/Omar: why the restriction below ? (i.e. disable_ang_uv)
@@ -4797,10 +4785,8 @@ void  inject_intra_candidates(
                 candidateArray[canTotalCnt].intra_chroma_mode = disable_ang_uv && av1_is_directional_mode(candidateArray[canTotalCnt].intra_chroma_mode) ?
                     UV_DC_PRED : candidateArray[canTotalCnt].intra_chroma_mode;
 
-#if CHROMA_SEARCH_FIX
                 candidateArray[canTotalCnt].is_directional_chroma_mode_flag = (uint8_t)av1_is_directional_mode((PredictionMode)candidateArray[canTotalCnt].intra_chroma_mode);
                 candidateArray[canTotalCnt].angle_delta[PLANE_TYPE_UV] = 0;
-#endif
 
             }
 #else
@@ -4816,17 +4802,11 @@ void  inject_intra_candidates(
 #endif
 #if CHROMA_DC_ONLY
             candidateArray[canTotalCnt].intra_chroma_mode = UV_DC_PRED;
-#if CHROMA_SEARCH_FIX
             candidateArray[canTotalCnt].is_directional_chroma_mode_flag = (uint8_t)av1_is_directional_mode((PredictionMode)candidateArray[canTotalCnt].intra_chroma_mode);
             candidateArray[canTotalCnt].angle_delta[PLANE_TYPE_UV] = 0;
-#endif
 #endif
             candidateArray[canTotalCnt].cfl_alpha_signs = 0;
             candidateArray[canTotalCnt].cfl_alpha_idx = 0;
-#if !CHROMA_SEARCH_FIX
-            candidateArray[canTotalCnt].is_directional_chroma_mode_flag = (uint8_t)av1_is_directional_mode((PredictionMode)candidateArray[canTotalCnt].intra_chroma_mode);
-            candidateArray[canTotalCnt].angle_delta[PLANE_TYPE_UV] = 0;
-#endif
             candidateArray[canTotalCnt].transform_type[0] = DCT_DCT;
 
             if (candidateArray[canTotalCnt].intra_chroma_mode == UV_CFL_PRED)
