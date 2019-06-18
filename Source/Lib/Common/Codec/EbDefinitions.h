@@ -138,7 +138,7 @@ extern "C" {
 
 
 
-#define RED_CU                            1 // Bypass redundant CU
+
 #define NSQ_ME_OPT                        1 // NSQ ME Restructuring
 #define BYPASS_USELESS_TX_SEARCH          0
 // Testing MACROS
@@ -154,7 +154,7 @@ extern "C" {
 #define DIS_EDGE_FIL                      0
 #define NFL_PER_SQ_SIZE                   0
 #define SC_HME_ME                         0 // Use sc detector for hme/me setting
-#define RED_CU_DEBUG                      0 // Turn off some features known to not work with redudant CUs
+
 //FOR DEBUGGING - Do not remove
 #define NO_ENCDEC                         0 // bypass encDec to test cmpliance of MD. complained achieved when skip_flag is OFF. Port sample code from VCI-SW_AV1_Candidate1 branch
 
