@@ -88,16 +88,12 @@ extern "C" {
 
 /************************* Omar to remove disable_ang_uv *************************/
 
-#if MEMORY_FOOTPRINT_OPT_ME_MV
 
 
 
 
 
 
-
-
-#endif
 
 #define SHUT_LOOKAHEAD                    0
 #define MINI_GOP_PCS                      0
