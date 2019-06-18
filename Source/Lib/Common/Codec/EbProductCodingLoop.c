@@ -2167,11 +2167,7 @@ static void CflPrediction(
     }
 }
 uint8_t get_skip_tx_search_flag(
-#if BYPASS_USELESS_TX_SEARCH
-    const BlockGeom *blk_geom,
-#else
     int32_t                  sq_size,
-#endif
     uint64_t                 ref_fast_cost,
     uint64_t                 cu_cost,
     uint64_t                 weight)
@@ -2179,11 +2175,7 @@ uint8_t get_skip_tx_search_flag(
     //NM: Skip tx search when the fast cost of the current mode candidate is substansially
     // Larger than the best fast_cost (
     uint8_t  tx_search_skip_fag = cu_cost >= ((ref_fast_cost * weight) / 100) ? 1 : 0;
-#if BYPASS_USELESS_TX_SEARCH
-    tx_search_skip_fag = (blk_geom->bwidth >= 32 || blk_geom->bheight >= 32) ? 1 : tx_search_skip_fag;
-#else
     tx_search_skip_fag = sq_size >= 128 ? 1 : tx_search_skip_fag;
-#endif
     return tx_search_skip_fag;
 }
 
@@ -3810,11 +3802,7 @@ void AV1PerformFullLoop(
 
             // Transform partitioning free path
             uint8_t  tx_search_skip_fag = picture_control_set_ptr->parent_pcs_ptr->tx_search_level == TX_SEARCH_FULL_LOOP ? get_skip_tx_search_flag(
-#if BYPASS_USELESS_TX_SEARCH
-                context_ptr->blk_geom,
-#else
                 context_ptr->blk_geom->sq_size,
-#endif
                 ref_fast_cost,
                 *candidateBuffer->fast_cost_ptr,
                 picture_control_set_ptr->parent_pcs_ptr->tx_weight) : 1;
@@ -4233,11 +4221,7 @@ void inter_depth_tx_search(
 {
     // Hsan: if Transform Search ON and INTRA, then Tx Type search is performed @ the full loop
     uint8_t  tx_search_skip_fag = (picture_control_set_ptr->parent_pcs_ptr->tx_search_level == TX_SEARCH_INTER_DEPTH && (picture_control_set_ptr->parent_pcs_ptr->atb_mode == 0 || candidateBuffer ->candidate_ptr->type == INTER_MODE)) ? get_skip_tx_search_flag(
-#if BYPASS_USELESS_TX_SEARCH
-        context_ptr->blk_geom,
-#else
         context_ptr->blk_geom->sq_size,
-#endif
         ref_fast_cost,
         *candidateBuffer->fast_cost_ptr,
         picture_control_set_ptr->parent_pcs_ptr->tx_weight) : 1;

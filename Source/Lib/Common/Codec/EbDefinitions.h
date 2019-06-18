@@ -140,7 +140,7 @@ extern "C" {
 
 
 
-#define BYPASS_USELESS_TX_SEARCH          0
+
 // Testing MACROS
 #define M9_NEAR_INJECTION                 0
 // Under testing
