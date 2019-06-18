@@ -200,7 +200,7 @@ extern "C" {
 
 
 
-#define IMPROVED_UNIPRED_INJECTION                  1
+
 
 //NEEDED FLAGS  OFF
 //M0_HIGH_PRECISION_INTERPOLATION
