@@ -179,7 +179,7 @@ extern "C" {
 
 
 
-#define FRAC_64x64_BUG_FIX                              1
+
 
 
 
