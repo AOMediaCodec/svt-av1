@@ -139,7 +139,7 @@ extern "C" {
 
 
 
-#define NSQ_ME_OPT                        1 // NSQ ME Restructuring
+
 #define BYPASS_USELESS_TX_SEARCH          0
 // Testing MACROS
 #define M9_NEAR_INJECTION                 0
