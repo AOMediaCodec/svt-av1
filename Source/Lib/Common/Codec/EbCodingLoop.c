@@ -613,12 +613,10 @@ static void Av1EncodeLoop(
             cu_ptr->av1xd->use_intrabc,
             EB_TRUE);
 
-#if BLK_SKIP_DECISION
         if (context_ptr->md_skip_blk) {
             count_non_zero_coeffs[0] = 0;
             eob[0] = 0;
         }
-#endif
         txb_ptr->y_has_coeff = count_non_zero_coeffs[0] ? EB_TRUE : EB_FALSE;
 
         if (count_non_zero_coeffs[0] == 0) {
@@ -1014,12 +1012,10 @@ static void Av1EncodeLoop(
             cu_ptr->av1xd->use_intrabc,
             EB_TRUE);
 
-#if BLK_SKIP_DECISION
         if (context_ptr->md_skip_blk) {
             count_non_zero_coeffs[1] = 0;
             eob[1] = 0;
         }
-#endif
         txb_ptr->u_has_coeff = count_non_zero_coeffs[1] ? EB_TRUE : EB_FALSE;
 
         //**********************************
@@ -1080,12 +1076,10 @@ static void Av1EncodeLoop(
             cu_ptr->pred_mode,
             cu_ptr->av1xd->use_intrabc,
             EB_TRUE);
-#if BLK_SKIP_DECISION
         if (context_ptr->md_skip_blk) {
             count_non_zero_coeffs[2] = 0;
             eob[2] = 0;
         }
-#endif
         txb_ptr->v_has_coeff = count_non_zero_coeffs[2] ? EB_TRUE : EB_FALSE;
 
 #if ATB_EP
@@ -1313,12 +1307,10 @@ static void Av1EncodeLoop16bit(
                 cu_ptr->pred_mode,
                 cu_ptr->av1xd->use_intrabc,
                 EB_TRUE);
-#if BLK_SKIP_DECISION
             if (context_ptr->md_skip_blk) {
                 count_non_zero_coeffs[0] = 0;
                 eob[0] = 0;
             }
-#endif
             txb_ptr->y_has_coeff = count_non_zero_coeffs[0] ? EB_TRUE : EB_FALSE;
             if (count_non_zero_coeffs[0] == 0) {
                 // INTER. Chroma follows Luma in transform type
@@ -1521,12 +1513,10 @@ static void Av1EncodeLoop16bit(
                 cu_ptr->av1xd->use_intrabc,
                 EB_TRUE);
 
-#if BLK_SKIP_DECISION
             if (context_ptr->md_skip_blk) {
                 count_non_zero_coeffs[1] = 0;
                 eob[1] = 0;
             }
-#endif
             txb_ptr->u_has_coeff = count_non_zero_coeffs[1] ? EB_TRUE : EB_FALSE;
 
             //**********************************
@@ -1588,12 +1578,10 @@ static void Av1EncodeLoop16bit(
                 cu_ptr->pred_mode,
                 cu_ptr->av1xd->use_intrabc,
                 EB_TRUE);
-#if BLK_SKIP_DECISION
             if (context_ptr->md_skip_blk) {
                 count_non_zero_coeffs[2] = 0;
                 eob[2] = 0;
             }
-#endif
             txb_ptr->v_has_coeff = count_non_zero_coeffs[2] ? EB_TRUE : EB_FALSE;
 
 #if ATB_EP
@@ -2896,9 +2884,7 @@ EB_EXTERN void av1_encode_pass(
                 context_ptr->cu_origin_x = (uint16_t)(sb_origin_x + blk_geom->origin_x);
                 context_ptr->cu_origin_y = (uint16_t)(sb_origin_y + blk_geom->origin_y);
                 cu_ptr->delta_qp = 0;
-#if  BLK_SKIP_DECISION
                 context_ptr->md_skip_blk = context_ptr->md_context->blk_skip_decision ? ((cu_ptr->prediction_mode_flag == INTRA_MODE || cu_ptr->block_has_coeff) ? 0 : 1) : 0;
-#endif
                 cu_ptr->block_has_coeff = 0;
 
                 // if(picture_control_set_ptr->picture_number==4 && context_ptr->cu_origin_x==0 && context_ptr->cu_origin_y==0)
