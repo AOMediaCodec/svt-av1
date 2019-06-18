@@ -166,7 +166,7 @@ extern "C" {
 
 
 
-#define TRELLIS_SKIP                                    0 // Kept as still under testing
+
 
 
 #define CHROMA_DC_ONLY                                  0
