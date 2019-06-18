@@ -95,7 +95,7 @@ extern "C" {
 
 
 
-#define BUG_FIX_INPUT_LIVE_COUNT          0
+
 #define MEM_MAP_OPT                       1
 #endif
 
