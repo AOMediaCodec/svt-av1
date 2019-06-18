@@ -213,7 +213,7 @@ extern "C" {
 
 
 
-#define MD_INJECTION              1
+
 #define MRP_MD                    1
 #define MRP_MD_UNI_DIR_BIPRED     1
 #define NEW_RPS                   1  //RPS supporting MRP
