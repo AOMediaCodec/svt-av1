@@ -1819,9 +1819,7 @@ void AV1CostCalcCfl(
             COMPONENT_CHROMA_CB,
             &cb_coeff_bits,
             &cr_coeff_bits,
-#if SPATIAL_SSE
             0,
-#endif
             asm_type);
 
         full_distortion[DIST_CALC_RESIDUAL] += cbFullDistortion[DIST_CALC_RESIDUAL];
@@ -1890,9 +1888,7 @@ void AV1CostCalcCfl(
             COMPONENT_CHROMA_CR,
             &cb_coeff_bits,
             &cr_coeff_bits,
-#if SPATIAL_SSE
             0,
-#endif
             asm_type);
 
         full_distortion[DIST_CALC_RESIDUAL] += crFullDistortion[DIST_CALC_RESIDUAL];
@@ -2432,9 +2428,7 @@ void check_best_indepedant_cfl(
             COMPONENT_CHROMA,
             cb_coeff_bits,
             cr_coeff_bits,
-#if SPATIAL_SSE
             1,
-#endif
             asm_type);
 
         // End uv search path
@@ -3934,9 +3928,7 @@ void AV1PerformFullLoop(
                 COMPONENT_CHROMA,
                 &cb_coeff_bits,
                 &cr_coeff_bits,
-#if SPATIAL_SSE
                 1,
-#endif
                 asm_type);
         }
 
@@ -4358,9 +4350,7 @@ void inter_depth_tx_search(
                 COMPONENT_CHROMA,
                 &cb_coeff_bits,
                 &cr_coeff_bits,
-#if SPATIAL_SSE
                 1,
-#endif
                 asm_type);
 
             candidate_ptr->block_has_coeff = (candidate_ptr->y_has_coeff | candidate_ptr->u_has_coeff | candidate_ptr->v_has_coeff) ? EB_TRUE : EB_FALSE;
@@ -4965,9 +4955,7 @@ void search_best_independent_uv_mode(
                 COMPONENT_CHROMA,
                 &cb_coeff_bits,
                 &cr_coeff_bits,
-#if SPATIAL_SSE
                 1,
-#endif
                 asm_type);
 
             coeff_rate[uv_mode][MAX_ANGLE_DELTA + uv_angle_delta] = cb_coeff_bits + cr_coeff_bits;
