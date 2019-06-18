@@ -95,7 +95,7 @@ extern "C" {
 
 
 
-#define SHUT_LOOKAHEAD                    0
+
 #define MINI_GOP_PCS                      0
 
 #define CHECK_MEM_REDUCTION               0
