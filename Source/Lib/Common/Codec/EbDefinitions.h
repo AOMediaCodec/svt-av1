@@ -163,7 +163,7 @@ extern "C" {
 
 
 
-#define PF_N2_SUPPORT                     1
+
 
 
 #define TRELLIS_SKIP                                    0 // Kept as still under testing
