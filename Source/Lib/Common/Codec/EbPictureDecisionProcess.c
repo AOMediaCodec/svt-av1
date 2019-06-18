@@ -1177,7 +1177,6 @@ EbErrorType signal_derivation_multi_processes_oq(
             CU_8x8_MODE_1 :
             CU_8x8_MODE_0;
 
-#if ATB_SUPPORT
         // Set atb mode      Settings
         // 0                 OFF: no transform partitioning
         // 1                 Fast: perform transform partitioning for sensitive block sizes
@@ -1187,8 +1186,6 @@ EbErrorType signal_derivation_multi_processes_oq(
             picture_control_set_ptr->atb_mode = 1;
         else
             picture_control_set_ptr->atb_mode = 0;
-
-#endif
 
     return return_error;
 }
@@ -3116,12 +3113,10 @@ void* picture_decision_kernel(void *input_ptr)
                                 sequence_control_set_ptr,
                                     picture_control_set_ptr);
 
-#if ATB_SUPPORT
                             // Set tx_mode
                             picture_control_set_ptr->tx_mode = (picture_control_set_ptr->atb_mode) ?
                                 TX_MODE_SELECT :
                                 TX_MODE_LARGEST;
-#endif
 
                             // Set the default settings of  subpel
                                 if (picture_control_set_ptr->sc_content_detected)

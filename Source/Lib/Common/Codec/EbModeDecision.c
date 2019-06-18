@@ -2659,11 +2659,7 @@ void  inject_intra_candidates_ois(
                     0,
                     0,
                     0,
-#if ATB_SUPPORT
                     context_ptr->blk_geom->txsize_uv[0][0],
-#else
-                    context_ptr->blk_geom->txsize_uv[0],
-#endif
                     picture_control_set_ptr->parent_pcs_ptr->reduced_tx_set_used);
             candidate_array[can_total_cnt].ref_frame_type = INTRA_FRAME;
             candidate_array[can_total_cnt].pred_mode = (PredictionMode)intra_mode;
@@ -2700,11 +2696,7 @@ void  inject_intra_candidates_ois(
                     0,
                     0,
                     0,
-#if ATB_SUPPORT
                     context_ptr->blk_geom->txsize_uv[0][0],
-#else
-                    context_ptr->blk_geom->txsize_uv[0],
-#endif
                     picture_control_set_ptr->parent_pcs_ptr->reduced_tx_set_used);
             candidate_array[can_total_cnt].ref_frame_type = INTRA_FRAME;
             candidate_array[can_total_cnt].pred_mode = (PredictionMode)intra_mode;
@@ -3150,11 +3142,7 @@ void  inject_intra_candidates(
                                 0,
                                 0,
                                 0,
-#if ATB_SUPPORT
                                 context_ptr->blk_geom->txsize_uv[0][0],
-#else
-                                context_ptr->blk_geom->txsize_uv[0],
-#endif
                                 picture_control_set_ptr->parent_pcs_ptr->reduced_tx_set_used);
                         candidateArray[canTotalCnt].ref_frame_type = INTRA_FRAME;
                         candidateArray[canTotalCnt].pred_mode = (PredictionMode)openLoopIntraCandidate;
@@ -3214,11 +3202,7 @@ void  inject_intra_candidates(
                     0,
                     0,
                     0,
-#if ATB_SUPPORT
                     context_ptr->blk_geom->txsize_uv[0][0],
-#else
-                    context_ptr->blk_geom->txsize_uv[0],
-#endif
                     picture_control_set_ptr->parent_pcs_ptr->reduced_tx_set_used);
             candidateArray[canTotalCnt].ref_frame_type = INTRA_FRAME;
             candidateArray[canTotalCnt].pred_mode = (PredictionMode)openLoopIntraCandidate;
@@ -3372,9 +3356,7 @@ uint8_t product_full_mode_decision(
     context_ptr->md_local_cu_unit[cu_ptr->mds_idx].chroma_distortion_inter_depth = (uint32_t)buffer_ptr_array[lowestCostIndex]->candidate_ptr->chroma_distortion_inter_depth;
 
     cu_ptr->prediction_mode_flag = candidate_ptr->type;
-#if ATB_SUPPORT
     cu_ptr->tx_depth = candidate_ptr->tx_depth;
-#endif
     cu_ptr->skip_flag = candidate_ptr->skip_flag; // note, the skip flag is re-checked in the ENCDEC process
     cu_ptr->block_has_coeff = ((candidate_ptr->block_has_coeff) > 0) ? EB_TRUE : EB_FALSE;
     cu_ptr->quantized_dc[1][0] = buffer_ptr_array[lowestCostIndex]->candidate_ptr->quantized_dc[1][0];
@@ -3471,17 +3453,9 @@ uint8_t product_full_mode_decision(
     uint32_t tu_index;
     uint32_t tuTotalCount;
     uint32_t cu_size_log2 = context_ptr->cu_size_log2;
-#if ATB_SUPPORT
     tuTotalCount = context_ptr->blk_geom->txb_count[cu_ptr->tx_depth];
     tu_index = 0;
     txb_itr = 0;
-#else
-    {
-        tuTotalCount = context_ptr->blk_geom->txb_count;
-        tu_index = 0;
-        txb_itr = 0;
-    }
-#endif
 #if NO_ENCDEC
     int32_t txb_1d_offset = 0, txb_1d_offset_uv = 0;
 

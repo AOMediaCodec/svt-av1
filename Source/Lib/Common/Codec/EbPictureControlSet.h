@@ -14106,9 +14106,7 @@ extern "C" {
         uint8_t                               loop_filter_mode;
         uint8_t                               intra_pred_mode;
         uint8_t                               skip_sub_blks;
-#if ATB_SUPPORT
         uint8_t                               atb_mode;
-#endif
         //**********************************************************************************************************//
         FrameType                            av1_frame_type;
         Av1RpsNode                          av1_ref_signal;

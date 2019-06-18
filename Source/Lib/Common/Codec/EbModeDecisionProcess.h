@@ -198,10 +198,8 @@ extern "C" {
         uint32_t                        fast_candidate_intra_count;
         uint32_t                        fast_candidate_inter_count;
         uint32_t                        me_block_offset;
-#if ATB_SUPPORT
         uint8_t                         tx_depth;
         uint8_t                         txb_itr;
-#endif
         uint32_t                        me_sb_addr;
 
         int16_t                         luma_txb_skip_context;
