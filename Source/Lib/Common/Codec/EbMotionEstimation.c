@@ -12069,10 +12069,8 @@ EbErrorType BiPredictionSearch(
         }
     }
 
-#if NO_UNI
     if (sequence_control_set_ptr->mrp_mode == 0)
     {
-#endif
         // NM: Within list 0    bipred: (LAST,LAST2)    (LAST,LAST3) (LAST,GOLD)
         for (firstListRefPictdx = 1;
              firstListRefPictdx < activeRefPicFirstLisNum;
@@ -12111,9 +12109,7 @@ EbErrorType BiPredictionSearch(
 
             candidateIndex++;
         }
-#if NO_UNI
     }
-#endif
     *total_me_candidate_index = candidateIndex;
 
     return return_error;
