@@ -186,7 +186,7 @@ extern "C" {
 #define FIX_INTRA_UV                                    1   //mismatch in intra prediction
 
 #define FRAC_64x64_BUG_FIX                              1
-#define USE_SAD_ME                                      1
+
 #define USE_SAD_HME                                     1
 #if USE_SAD_HME
 
