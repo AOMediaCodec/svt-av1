@@ -64,7 +64,7 @@ extern "C" {
 
 
 
-#define ATB_EP                            1 // Tranform partitioning @ encode passs
+
 
 
 
