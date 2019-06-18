@@ -15008,7 +15008,6 @@ EbErrorType motion_estimate_lcu(
                     }
                     if (picture_control_set_ptr->quarter_pel_mode ==
                         REFINMENT_QP_MODE) {
-#if M0_ME_QUARTER_PEL_SEARCH
                         // Quarter-Pel Refinement [8 search positions]
                         QuarterPelSearch_LCU(
                             context_ptr,
@@ -15073,7 +15072,6 @@ EbErrorType motion_estimate_lcu(
 #else
                             picture_control_set_ptr->pic_depth_mode <=
                                 PIC_ALL_C_DEPTH_MODE);
-#endif
 #endif
                     }
 #else
