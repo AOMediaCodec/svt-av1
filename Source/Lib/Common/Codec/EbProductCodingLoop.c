@@ -3531,9 +3531,7 @@ void perform_intra_tx_partitioning(
                     context_ptr->cu_ptr->luma_dc_sign_context,
 #endif
                     candidateBuffer->candidate_ptr->pred_mode,
-#if RDOQ_INTRA
                     EB_FALSE,
-#endif
                     EB_FALSE);
 
 #if ATB_DC_CONTEXT_SUPPORT_1
@@ -3701,9 +3699,7 @@ void perform_intra_tx_partitioning(
                 context_ptr->cu_ptr->luma_dc_sign_context,
 #endif
                 candidateBuffer->candidate_ptr->pred_mode,
-#if RDOQ_INTRA
                 EB_FALSE,
-#endif
                 EB_FALSE);
 #if ATB_DC_CONTEXT_SUPPORT_1
 #if !DC_SIGN_CONTEXT_FIX
@@ -4031,9 +4027,7 @@ void perform_intra_tx_partitioning(
                 context_ptr->cu_ptr->luma_dc_sign_context,
 #endif
                 candidateBuffer->candidate_ptr->pred_mode,
-#if RDOQ_INTRA
                 EB_FALSE,
-#endif
                 EB_FALSE);
 #if ATB_DC_CONTEXT_SUPPORT_1
 #if !DC_SIGN_CONTEXT_FIX
