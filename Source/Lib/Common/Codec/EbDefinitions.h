@@ -169,7 +169,7 @@ extern "C" {
 
 
 
-#define CHROMA_DC_ONLY                                  0
+
 #define SEARCH_UV_MODE                                  1
 #if SEARCH_UV_MODE
 #define SEARCH_UV_BASE                                  1
