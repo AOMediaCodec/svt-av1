@@ -152,7 +152,7 @@ extern "C" {
 
 
 
-#define NFL_PER_SQ_SIZE                   0
+
 #define SC_HME_ME                         0 // Use sc detector for hme/me setting
 
 //FOR DEBUGGING - Do not remove
