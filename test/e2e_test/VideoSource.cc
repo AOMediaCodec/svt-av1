@@ -11,9 +11,10 @@
  * @author Cidana-Ryan
  *
  ******************************************************************************/
-#include "stdio.h"
+#include <stdio.h>
+#include "EbDefinitions.h"
 #include "VideoSource.h"
-#include "../random.h"
+#include "random.h"
 
 using namespace svt_av1_video_source;
 VideoSource::VideoSource(const VideoColorFormat format, const uint32_t width,
@@ -451,7 +452,7 @@ EbErrorType VideoFileSource::open_source(const uint32_t init_pos,
         return EB_ErrorNone;
     std::string full_path = get_vector_dir() + "/" + file_name_.c_str();
 
-    file_handle_ = fopen(full_path.c_str(), "rb");
+    FOPEN(file_handle_, full_path.c_str(), "rb");
     if (file_handle_ == nullptr) {
         printf(">>> Open video source %s failed!\r\n", full_path.c_str());
         printf(

@@ -38,12 +38,11 @@ bool FrameQueue::compare(FrameQueue *other) {
                other->get_frame_count());
         return false;
     }
-
     bool is_same = true;
-    for (size_t i = 0; i < frame_count_; i++) {
+    for (uint32_t i = 0; i < frame_count_; i++) {
         VideoFrame *frame = take_frame_inorder(i);
         VideoFrame *other_frame = other->take_frame_inorder(i);
-        bool is_same = compare_image(frame, other_frame);
+        is_same = compare_image(frame, other_frame);
         if (!is_same) {
             printf("ref_frame(%u) compare failed!!\n",
                    (uint32_t)frame->timestamp);
