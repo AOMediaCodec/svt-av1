@@ -144,6 +144,7 @@ matrix:
       - *base_script
       # Build GST-SVT-AV1 plugin
       - cd $TRAVIS_BUILD_DIR/gstreamer-plugin
+      - "sudo chown -R travis: $HOME/.ccache"
       - cmake .
       - make --quiet -j$(nproc)
       - sudo make install
