@@ -43,15 +43,15 @@ before_install:
   - cd $TRAVIS_BUILD_DIR
   - wget -nc https://raw.githubusercontent.com/OpenVisualCloud/SVT-AV1-Resources/master/video.tar.gz || wget -nc http://randomderp.com/video.tar.gz
   - tar xf video.tar.gz
-  - mkdir -p $TRAVIS_BUILD_DIR/Build/linux/$build_type
+  - mkdir -p $TRAVIS_BUILD_DIR/Build/linux/${build_type:-Release}
 install:
   - pip install --user cpp-coveralls
   - export PATH=/Users/travis/Library/Python/2.7/bin:${PATH}
   #- if [ $TRAVIS_OS_NAME = osx ]; then brew install --HEAD valgrind; fi
 base_script: &base_script |
-  cd $TRAVIS_BUILD_DIR/Build/linux/$build_type
-  if [ "$CC" = "gcc" ] || { [[ "$TRAVIS_OS_NAME" = "osx" ]] && [[ "$CC" = "clang" ]]; }; then CFLAGS+=" -Werror"; fi
-  cmake $TRAVIS_BUILD_DIR -G"Unix Makefiles" -DCMAKE_BUILD_TYPE=$build_type ${CMAKE_EFLAGS[@]}
+  cd $TRAVIS_BUILD_DIR/Build/linux/${build_type:-Release}
+  if [ "$CC" = "gcc" ] || { [[ "$TRAVIS_OS_NAME" = "osx" ]] && [[ "$CC" = "clang" ]]; }; then export CFLAGS+="-Werror"; fi
+  cmake $TRAVIS_BUILD_DIR -G"${generator:-Unix Makefiles}" -DCMAKE_BUILD_TYPE=${build_type:-Release} ${CMAKE_EFLAGS[@]}
   cmake -j $(if [ $TRAVIS_OS_NAME = osx ]; then sysctl -n hw.ncpu; else nproc; fi) --build . &&
   sudo cmake --build . --target install && cd $TRAVIS_BUILD_DIR
 coveralls_script: &coveralls_script |
@@ -160,7 +160,7 @@ matrix:
         - rm -rf $TRAVIS_BUILD_DIR
         - git clone --depth 1 https://github.com/OpenVisualCloud/SVT-AV1.git $TRAVIS_BUILD_DIR
         - cd $TRAVIS_BUILD_DIR
-        - mkdir -p $TRAVIS_BUILD_DIR/Build/linux/$build_type
+        - mkdir -p $TRAVIS_BUILD_DIR/Build/linux/${build_type:-Release}
         - *base_script
         - cd $HOME
         - SvtAv1EncApp -enc-mode 8 -i akiyo_cif.y4m -n 120 -b test-master-m8.ivf
@@ -200,7 +200,7 @@ matrix:
       env: build_type=debug CMAKE_EFLAGS="-DBUILD_TESTING=ON" SVT_AV1_TEST_VECTOR_PATH=$TRAVIS_BUILD_DIR/test/vectors/
       script:
         - *base_script
-        - cd $TRAVIS_BUILD_DIR/Build/linux/$build_type
+        - cd $TRAVIS_BUILD_DIR/Build/linux/${build_type:-Release}
         - make TestVectors
         - cd $TRAVIS_BUILD_DIR
         - SvtAv1UnitTests
@@ -213,7 +213,7 @@ matrix:
       env: build_type=debug CMAKE_EFLAGS="-DBUILD_TESTING=ON" SVT_AV1_TEST_VECTOR_PATH=$TRAVIS_BUILD_DIR/test/vectors/
       script:
         - *base_script
-        - cd $TRAVIS_BUILD_DIR/Build/linux/$build_type
+        - cd $TRAVIS_BUILD_DIR/Build/linux/${build_type:-Release}
         - make TestVectors
         - cd $TRAVIS_BUILD_DIR
         - SvtAv1UnitTests
