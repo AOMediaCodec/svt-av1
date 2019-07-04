@@ -47,10 +47,10 @@ before_install:
 install:
   - pip install --user cpp-coveralls
   - export PATH=/Users/travis/Library/Python/2.7/bin:${PATH}
+  - if [ "$CC" = "gcc" ] || { [[ "$TRAVIS_OS_NAME" = "osx" ]] && [[ "$CC" = "clang" ]]; }; then export CFLAGS+=" -Werror"; fi
   #- if [ $TRAVIS_OS_NAME = osx ]; then brew install --HEAD valgrind; fi
 base_script: &base_script |
   cd $TRAVIS_BUILD_DIR/Build/linux/${build_type:-Release}
-  if [ "$CC" = "gcc" ] || { [[ "$TRAVIS_OS_NAME" = "osx" ]] && [[ "$CC" = "clang" ]]; }; then export CFLAGS+="-Werror"; fi
   cmake $TRAVIS_BUILD_DIR -G"${generator:-Unix Makefiles}" -DCMAKE_BUILD_TYPE=${build_type:-Release} ${CMAKE_EFLAGS[@]}
   cmake -j $(if [ $TRAVIS_OS_NAME = osx ]; then sysctl -n hw.ncpu; else nproc; fi) --build . &&
   sudo cmake --build . --target install && cd $TRAVIS_BUILD_DIR
