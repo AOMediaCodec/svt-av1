@@ -151,6 +151,8 @@ matrix:
     # Tests if .ivf files are identical on binary level
     - name: Binary Identical?
       stage: test
+      os: linux
+      compiler: gcc
       script:
         - mv -t $HOME akiyo_cif.y4m
         - *base_script
