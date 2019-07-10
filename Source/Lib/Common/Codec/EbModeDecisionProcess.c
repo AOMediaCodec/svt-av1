@@ -69,6 +69,13 @@ EbErrorType mode_decision_context_ctor(
     // Trasform Scratch Memory
     EB_MALLOC(context_ptr->transform_inner_array_ptr, 3120); //refer to EbInvTransform_SSE2.as. case 32x32
 
+    // Cfl scratch memory
+    if (context_ptr->hbd_mode_decision) {
+        EB_ALLIGN_MALLOC(uint16_t *, context_ptr->cfl_temp_luma_recon16bit, sizeof(uint16_t) * 128 * 128, EB_A_PTR);
+    } else {
+        EB_ALLIGN_MALLOC(uint8_t *, context_ptr->cfl_temp_luma_recon, sizeof(uint8_t) * 128 * 128, EB_A_PTR);
+    }
+
     // MD rate Estimation tables
     EB_MALLOC_ARRAY(context_ptr->md_rate_estimation_ptr, 1);
     context_ptr->is_md_rate_estimation_ptr_owner = EB_TRUE;

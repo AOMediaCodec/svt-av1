@@ -1205,7 +1205,7 @@ void AV1PerformInverseTransformReconLuma(
                     candidateBuffer->prediction_ptr->buffer_y,
                     tu_origin_index,
                     candidateBuffer->prediction_ptr->stride_y,
-                    context_ptr->cfl_temp_luma_recon,
+                    picture_control_set_ptr->hbd_mode_decision ? (uint8_t *)context_ptr->cfl_temp_luma_recon16bit : context_ptr->cfl_temp_luma_recon,
                     recLumaOffset,
                     candidateBuffer->recon_ptr->stride_y,
                     (int32_t*) candidateBuffer->recon_coeff_ptr->buffer_y,
@@ -1222,7 +1222,7 @@ void AV1PerformInverseTransformReconLuma(
                     pic_copy_kernel_16bit(
                         ((uint16_t *) candidateBuffer->prediction_ptr->buffer_y) + tu_origin_index,
                         candidateBuffer->prediction_ptr->stride_y,
-                        ((uint16_t *) context_ptr->cfl_temp_luma_recon) + recLumaOffset,
+                        context_ptr->cfl_temp_luma_recon16bit + recLumaOffset,
                         candidateBuffer->recon_ptr->stride_y,
                         tu_width,
                         tu_height);
@@ -2114,7 +2114,7 @@ static void CflPrediction(
             context_ptr->blk_geom->bheight_uv == context_ptr->blk_geom->bheight ? (context_ptr->blk_geom->bheight_uv << 1) : context_ptr->blk_geom->bheight);
     else
         cfl_luma_subsampling_420_hbd_c(
-            ((uint16_t*)context_ptr->cfl_temp_luma_recon) + recLumaOffset,
+            context_ptr->cfl_temp_luma_recon16bit + recLumaOffset,
             candidateBuffer->recon_ptr->stride_y,
             context_ptr->pred_buf_q3,
             context_ptr->blk_geom->bwidth_uv == context_ptr->blk_geom->bwidth ? (context_ptr->blk_geom->bwidth_uv << 1) : context_ptr->blk_geom->bwidth,
@@ -5391,7 +5391,7 @@ void md_encode_block(
             uint32_t rec_luma_offset = context_ptr->blk_geom->origin_x + context_ptr->blk_geom->origin_y * recon_ptr->stride_y;
             if (picture_control_set_ptr->hbd_mode_decision) {
                for (uint32_t j = 0; j < context_ptr->blk_geom->bheight; ++j)
-                    memcpy(((uint16_t *)context_ptr->cfl_temp_luma_recon) + rec_luma_offset + j* recon_ptr->stride_y, ((uint16_t *)recon_ptr->buffer_y) + (rec_luma_offset + j * recon_ptr->stride_y), sizeof(uint16_t) * context_ptr->blk_geom->bwidth);
+                    memcpy(context_ptr->cfl_temp_luma_recon16bit + rec_luma_offset + j* recon_ptr->stride_y, ((uint16_t *)recon_ptr->buffer_y) + (rec_luma_offset + j * recon_ptr->stride_y), sizeof(uint16_t) * context_ptr->blk_geom->bwidth);
             } else {
                 for (uint32_t j = 0; j < context_ptr->blk_geom->bheight; ++j)
                     memcpy(&context_ptr->cfl_temp_luma_recon[rec_luma_offset + j* recon_ptr->stride_y], recon_ptr->buffer_y + rec_luma_offset + j * recon_ptr->stride_y, context_ptr->blk_geom->bwidth);

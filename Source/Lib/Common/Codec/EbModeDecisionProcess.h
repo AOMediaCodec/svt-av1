@@ -235,7 +235,8 @@ extern "C" {
         uint8_t                         bipred3x3_injection;
         uint8_t                         interpolation_filter_search_blk_size;
         uint8_t                         redundant_blk;
-        uint8_t                         cfl_temp_luma_recon[2 * 128 * 128];
+        uint8_t                         *cfl_temp_luma_recon;
+        uint16_t                        *cfl_temp_luma_recon16bit;
         EbBool                          spatial_sse_full_loop;
         EbBool                          blk_skip_decision;
         EbBool                          trellis_quant_coeff_optimization;
