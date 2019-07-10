@@ -271,7 +271,8 @@ static void ResetEncDec(
         &context_ptr->fast_chroma_lambda,
         &context_ptr->full_chroma_lambda,
         (uint8_t)picture_control_set_ptr->parent_pcs_ptr->enhanced_picture_ptr->bit_depth,
-        context_ptr->qp_index);
+        context_ptr->qp_index,
+        picture_control_set_ptr->hbd_mode_decision);
 
     // Slice Type
     slice_type =
@@ -329,7 +330,8 @@ static void EncDecConfigureLcu(
         &context_ptr->fast_chroma_lambda,
         &context_ptr->full_chroma_lambda,
         (uint8_t)picture_control_set_ptr->parent_pcs_ptr->enhanced_picture_ptr->bit_depth,
-        context_ptr->qp_index);
+        context_ptr->qp_index,
+        picture_control_set_ptr->hbd_mode_decision);
 
     return;
 }

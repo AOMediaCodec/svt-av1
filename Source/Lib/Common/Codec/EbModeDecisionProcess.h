@@ -249,7 +249,8 @@ extern "C" {
         uint32_t                    *fast_chroma_lambda,
         uint32_t                    *full_chroma_lambda,
         uint8_t                      bit_depth,
-        uint16_t                     qp_index);
+        uint16_t                     qp_index,
+        EbBool                       hbd_mode_decision);
 
     typedef void(*EbLambdaAssignFunc)(
         uint32_t                    *fast_lambda,

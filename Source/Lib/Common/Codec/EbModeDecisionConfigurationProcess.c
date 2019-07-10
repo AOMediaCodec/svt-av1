@@ -1802,7 +1802,8 @@ void* mode_decision_configuration_kernel(void *input_ptr)
             &lambdaSad,
             &lambdaSse,
             (uint8_t)picture_control_set_ptr->parent_pcs_ptr->enhanced_picture_ptr->bit_depth,
-            context_ptr->qp_index);
+            context_ptr->qp_index,
+            picture_control_set_ptr->hbd_mode_decision);
         context_ptr->lambda = (uint64_t)lambdaSad;
 
         // Slice Type

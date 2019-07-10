@@ -328,8 +328,8 @@ void Av1lambdaAssign(
     uint32_t                    *fast_chroma_lambda,
     uint32_t                    *full_chroma_lambda,
     uint8_t                      bit_depth,
-    uint16_t                     qp_index)
-
+    uint16_t                     qp_index,
+    EbBool                       hbd_mode_decision)
 {
     if (bit_depth == 8) {
         *full_lambda = av1_lambda_mode_decision8_bit_sse[qp_index];
@@ -338,6 +338,10 @@ void Av1lambdaAssign(
     else if (bit_depth == 10) {
         *full_lambda = av1lambda_mode_decision10_bit_sse[qp_index];
         *fast_lambda = av1lambda_mode_decision10_bit_sad[qp_index];
+        if (hbd_mode_decision) {
+            *full_lambda *= 16;
+            *fast_lambda *= 4;
+        }
     }
     else if (bit_depth == 12) {
         *full_lambda = av1lambda_mode_decision12_bit_sse[qp_index];
@@ -388,7 +392,8 @@ void reset_mode_decision(
         &context_ptr->fast_chroma_lambda,
         &context_ptr->full_chroma_lambda,
         (uint8_t)picture_control_set_ptr->parent_pcs_ptr->enhanced_picture_ptr->bit_depth,
-        context_ptr->qp_index);
+        context_ptr->qp_index,
+        picture_control_set_ptr->hbd_mode_decision);
     // Slice Type
     slice_type =
         (picture_control_set_ptr->parent_pcs_ptr->idr_flag == EB_TRUE) ? I_SLICE :
@@ -474,7 +479,8 @@ void mode_decision_configure_lcu(
         &context_ptr->fast_chroma_lambda,
         &context_ptr->full_chroma_lambda,
         (uint8_t)picture_control_set_ptr->parent_pcs_ptr->enhanced_picture_ptr->bit_depth,
-        context_ptr->qp_index);
+        context_ptr->qp_index,
+        picture_control_set_ptr->hbd_mode_decision);
 
     return;
 }

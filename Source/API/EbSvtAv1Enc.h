@@ -244,7 +244,7 @@ typedef struct EbSvtAv1EncConfiguration
     uint32_t                 search_area_height;
 
     // MD Parameters
-    /* Enable the use of HBD (10-bit) at the nmode decision step
+    /* Enable the use of HBD (10-bit) at the mode decision step
     *
     * Default is 0. */
     EbBool                   enable_hbd_mode_decision;
