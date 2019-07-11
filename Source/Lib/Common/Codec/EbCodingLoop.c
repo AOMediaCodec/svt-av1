@@ -102,7 +102,7 @@ void residual_kernel(
     uint32_t   area_height)
 {
 
-    if (hbd)
+    if (hbd) {
         residual_kernel16bit(
             ((uint16_t*)input) + input_offset,
             input_stride,
@@ -112,7 +112,7 @@ void residual_kernel(
             residual_stride,
             area_width,
             area_height);
-    else
+    } else {
         ResidualKernel(
             &(input[input_offset]),
             input_stride,
@@ -122,6 +122,7 @@ void residual_kernel(
             residual_stride,
             area_width,
             area_height);
+    }
 }
 
 /***************************************************
