@@ -857,6 +857,9 @@ static EbErrorType VerifySettings(EbConfig *config, uint32_t channelNumber)
         fprintf(config->error_log_file, "Error instance %u: Invalid HBD mode decision flag [0 - 1], your input: %d\n", channelNumber + 1, config->target_socket);
         return_error = EB_ErrorBadParameter;
     }
+    if (config->enable_hbd_mode_decision == 1 && config->encoder_bit_depth != 10)
+        config->enable_hbd_mode_decision = 0;
+
     return return_error;
 }
 

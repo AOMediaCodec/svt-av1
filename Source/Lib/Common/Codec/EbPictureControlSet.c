@@ -167,10 +167,17 @@ void picture_control_set_dctor(EbPtr p)
         EB_DELETE(obj->md_mode_type_neighbor_array[depth]);
         EB_DELETE(obj->md_leaf_depth_neighbor_array[depth]);
         EB_DELETE(obj->mdleaf_partition_neighbor_array[depth]);
-        EB_DELETE(obj->md_luma_recon_neighbor_array[depth]);
-        EB_DELETE(obj->md_tx_depth_1_luma_recon_neighbor_array[depth]);
-        EB_DELETE(obj->md_cb_recon_neighbor_array[depth]);
-        EB_DELETE(obj->md_cr_recon_neighbor_array[depth]);
+        if (obj->hbd_mode_decision) {
+            EB_DELETE(obj->md_luma_recon_neighbor_array16bit[depth]);
+            EB_DELETE(obj->md_tx_depth_1_luma_recon_neighbor_array16bit[depth]);
+            EB_DELETE(obj->md_cb_recon_neighbor_array16bit[depth]);
+            EB_DELETE(obj->md_cr_recon_neighbor_array16bit[depth]);
+        } else {
+            EB_DELETE(obj->md_luma_recon_neighbor_array[depth]);
+            EB_DELETE(obj->md_tx_depth_1_luma_recon_neighbor_array[depth]);
+            EB_DELETE(obj->md_cb_recon_neighbor_array[depth]);
+            EB_DELETE(obj->md_cr_recon_neighbor_array[depth]);
+        }
         EB_DELETE(obj->md_skip_coeff_neighbor_array[depth]);
         EB_DELETE(obj->md_luma_dc_sign_level_coeff_neighbor_array[depth]);
         EB_DELETE(obj->md_tx_depth_1_luma_dc_sign_level_coeff_neighbor_array[depth]);
@@ -488,7 +495,7 @@ EbErrorType picture_control_set_ctor(
                 PU_NEIGHBOR_ARRAY_GRANULARITY,
                 PU_NEIGHBOR_ARRAY_GRANULARITY,
                 NEIGHBOR_ARRAY_UNIT_TOP_AND_LEFT_ONLY_MASK,
-            }
+            },
             {
                 &object_ptr->md_skip_coeff_neighbor_array[depth],
                 MAX_PICTURE_WIDTH_SIZE,
@@ -571,7 +578,7 @@ EbErrorType picture_control_set_ctor(
             return EB_ErrorInsufficientResources;
 
         if (!initDataPtr->hbd_mode_decision) {
-            InitData data_recon[] = {
+            InitData data[] = {
                 {
                     &object_ptr->md_luma_recon_neighbor_array[depth],
                     MAX_PICTURE_WIDTH_SIZE,
@@ -609,11 +616,11 @@ EbErrorType picture_control_set_ctor(
                     NEIGHBOR_ARRAY_UNIT_FULL_MASK,
                 }
             };
-            return_error = create_neighbor_array_units(data_recon, DIM(data));
+            return_error = create_neighbor_array_units(data, DIM(data));
             if (return_error == EB_ErrorInsufficientResources)
                 return EB_ErrorInsufficientResources;
         } else {
-            InitData data_recon[] = {
+            InitData data[] = {
                 {
                     &object_ptr->md_luma_recon_neighbor_array16bit[depth],
                     MAX_PICTURE_WIDTH_SIZE,
@@ -651,7 +658,7 @@ EbErrorType picture_control_set_ctor(
                     NEIGHBOR_ARRAY_UNIT_FULL_MASK,
                 }
             };
-            return_error = create_neighbor_array_units(data_recon, DIM(data));
+            return_error = create_neighbor_array_units(data, DIM(data));
             if (return_error == EB_ErrorInsufficientResources)
                 return EB_ErrorInsufficientResources;
         }

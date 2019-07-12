@@ -2141,7 +2141,6 @@ void product_full_loop(
                     picture_control_set_ptr->hbd_mode_decision,
                     asm_type);
             }
-            }
 
             EbSpatialFullDistType spatial_full_dist_type_fun = picture_control_set_ptr->hbd_mode_decision ?
                 full_distortion_kernel16_bits :

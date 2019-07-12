@@ -35,8 +35,13 @@ static void mode_decision_context_dctor(EbPtr p)
     EB_FREE_ARRAY(obj->full_cost_merge_ptr);
     if (obj->md_cu_arr_nsq) {
         EB_FREE_ARRAY(obj->md_cu_arr_nsq[0].av1xd);
-        EB_FREE_ARRAY(obj->md_cu_arr_nsq[0].neigh_left_recon[0]);
-        EB_FREE_ARRAY(obj->md_cu_arr_nsq[0].neigh_top_recon[0]);
+        if (obj->hbd_mode_decision) {
+            EB_FREE_ARRAY(obj->md_cu_arr_nsq[0].neigh_left_recon_16bit[0]);
+            EB_FREE_ARRAY(obj->md_cu_arr_nsq[0].neigh_top_recon_16bit[0]);
+        } else {
+            EB_FREE_ARRAY(obj->md_cu_arr_nsq[0].neigh_left_recon[0]);
+            EB_FREE_ARRAY(obj->md_cu_arr_nsq[0].neigh_top_recon[0]);
+        }
     }
 
     EB_FREE_ARRAY(obj->md_local_cu_unit);
@@ -71,9 +76,9 @@ EbErrorType mode_decision_context_ctor(
 
     // Cfl scratch memory
     if (context_ptr->hbd_mode_decision) {
-        EB_ALLIGN_MALLOC(uint16_t *, context_ptr->cfl_temp_luma_recon16bit, sizeof(uint16_t) * 128 * 128, EB_A_PTR);
+        EB_MALLOC_ALIGNED(context_ptr->cfl_temp_luma_recon16bit, sizeof(uint16_t) * 128 * 128);
     } else {
-        EB_ALLIGN_MALLOC(uint8_t *, context_ptr->cfl_temp_luma_recon, sizeof(uint8_t) * 128 * 128, EB_A_PTR);
+        EB_MALLOC_ALIGNED(context_ptr->cfl_temp_luma_recon, sizeof(uint8_t) * 128 * 128);
     }
 
     // MD rate Estimation tables
@@ -122,6 +127,8 @@ EbErrorType mode_decision_context_ctor(
     context_ptr->md_cu_arr_nsq[0].av1xd = NULL;
     context_ptr->md_cu_arr_nsq[0].neigh_left_recon[0] = NULL;
     context_ptr->md_cu_arr_nsq[0].neigh_top_recon[0] = NULL;
+    context_ptr->md_cu_arr_nsq[0].neigh_left_recon_16bit[0] = NULL;
+    context_ptr->md_cu_arr_nsq[0].neigh_top_recon_16bit[0] = NULL;
     EB_MALLOC_ARRAY(context_ptr->md_cu_arr_nsq[0].av1xd, BLOCK_MAX_COUNT_SB_128);
     uint16_t sz = sizeof(uint16_t);
     if (context_ptr->hbd_mode_decision) {
@@ -129,7 +136,7 @@ EbErrorType mode_decision_context_ctor(
         EB_MALLOC_ARRAY(context_ptr->md_cu_arr_nsq[0].neigh_top_recon_16bit[0], BLOCK_MAX_COUNT_SB_128 * 128 * 3 * sz);
     } else {
         EB_MALLOC_ARRAY(context_ptr->md_cu_arr_nsq[0].neigh_left_recon[0], BLOCK_MAX_COUNT_SB_128 * 128 * 3);
-        EB_MALLOC_ARRAY(context_ptr->md_cu_arr_nsq[0].neigh_top_recon[0], BLOCK_MAX_COUNT_SB_128 * 128 * 3);     
+        EB_MALLOC_ARRAY(context_ptr->md_cu_arr_nsq[0].neigh_top_recon[0], BLOCK_MAX_COUNT_SB_128 * 128 * 3);
     }
     uint32_t codedLeafIndex, tu_index;
     for (codedLeafIndex = 0; codedLeafIndex < BLOCK_MAX_COUNT_SB_128; ++codedLeafIndex) {
@@ -141,8 +148,8 @@ EbErrorType mode_decision_context_ctor(
         if (context_ptr->hbd_mode_decision) {
              for (int i = 0; i < 3; i++) {
                 size_t offset = (codedLeafIndex * 128 * 3 + i * 128) * sz;
-                context_ptr->md_cu_arr_nsq[codedLeafIndex].neigh_left_recon_16bit[i] = context_ptr->md_cu_arr_nsq[0].neigh_left_recon[0] + offset;
-                context_ptr->md_cu_arr_nsq[codedLeafIndex].neigh_top_recon_16bit[i] = context_ptr->md_cu_arr_nsq[0].neigh_top_recon[0] + offset;
+                context_ptr->md_cu_arr_nsq[codedLeafIndex].neigh_left_recon_16bit[i] = context_ptr->md_cu_arr_nsq[0].neigh_left_recon_16bit[0] + offset;
+                context_ptr->md_cu_arr_nsq[codedLeafIndex].neigh_top_recon_16bit[i] = context_ptr->md_cu_arr_nsq[0].neigh_top_recon_16bit[0] + offset;
             }
         } else {
              for (int i = 0; i < 3; i++) {
