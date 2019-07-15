@@ -23,7 +23,10 @@ static void mode_decision_context_dctor(EbPtr p)
 
     EB_DELETE_PTR_ARRAY(obj->candidate_buffer_ptr_array, (MAX_NFL + 1 + 1));
     EB_DELETE(obj->trans_quant_buffers_ptr);
-
+    if (obj->hbd_mode_decision)
+        EB_FREE_ALIGNED_ARRAY(obj->cfl_temp_luma_recon16bit);
+    else
+        EB_FREE_ALIGNED_ARRAY(obj->cfl_temp_luma_recon);
     EB_FREE(obj->transform_inner_array_ptr);
     if (obj->is_md_rate_estimation_ptr_owner)
         EB_FREE_ARRAY(obj->md_rate_estimation_ptr);
