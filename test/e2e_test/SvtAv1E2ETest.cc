@@ -179,7 +179,11 @@ static const std::vector<EncTestSetting> default_enc_settings = {
     {"IncompleteSbTest2",
      {{"RateControlMode", "2"}, {"TargetBitRate", "1000000"}, {"MixQpAllowed", "10"}},
      parkjoy}
+
+    // test by using a dummy source of color bar
+    {"DummySrcTest1", {{"EncoderMode", "8"}}, dummy_test_vectors},
 };
+
 /* clang-format on */
 INSTANTIATE_TEST_CASE_P(SvtAv1, ConformanceDeathTest,
                         ::testing::ValuesIn(default_enc_settings),
