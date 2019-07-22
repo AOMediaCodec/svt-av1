@@ -76,6 +76,10 @@ const std::vector<TestVideoVector> screen_test_vectors = {
 const std::vector<TestVideoVector> dummy_test_vectors = {
     std::make_tuple("colorbar_480p_8_420", DUMMY_SOURCE, IMG_FMT_420, 640, 480,
                     8, 0, 0, 100),
+    std::make_tuple("colorbar_4k_8_420", DUMMY_SOURCE, IMG_FMT_420, 4096, 2160,
+                    8, 0, 0, 60),
+    std::make_tuple("colorbar_64x64_8_420", DUMMY_SOURCE, IMG_FMT_420, 64, 64,
+                    8, 0, 0, 60),
 };
 
 using EncSetting = std::map<std::string, std::string>;

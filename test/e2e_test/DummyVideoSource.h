@@ -33,12 +33,10 @@ class DummyVideoSource : public VideoSource {
                      const bool use_compressed_2bit_plan_output)
         : VideoSource(format, width, height, bit_depth,
                       use_compressed_2bit_plan_output) {
-        if (width_ % 16 != 0) {
+        if (width_ % 16 != 0)
             width_with_padding_ = ((width_ >> 4) + 1) << 4;
-        }
-        if (height_ % 16 != 0) {
+        if (height_ % 16 != 0)
             height_with_padding_ = ((height_ >> 4) + 1) << 4;
-        }
     }
 
     virtual ~DummyVideoSource() {
@@ -51,12 +49,13 @@ class DummyVideoSource : public VideoSource {
             printf("Open dummy source error, support YUV420 8bit only\r\n");
             return EB_ErrorBadParameter;
         }
+
         init_pos_ = init_pos;
-        if (frame_count == 0) {
+        if (frame_count == 0)
             frame_count_ = FRAME_PER_LOOP;
-        } else {
+        else
             frame_count_ = frame_count;
-        }
+
         current_frame_index_ = -1;
         init_frame_buffer();
 
