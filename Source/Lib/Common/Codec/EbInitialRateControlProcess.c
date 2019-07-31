@@ -977,8 +977,8 @@ void GetHistogramQueueData(
     histogramQueueEntryIndex = (histogramQueueEntryIndex > HIGH_LEVEL_RATE_CONTROL_HISTOGRAM_QUEUE_MAX_DEPTH - 1) ?
         histogramQueueEntryIndex - HIGH_LEVEL_RATE_CONTROL_HISTOGRAM_QUEUE_MAX_DEPTH :
         (histogramQueueEntryIndex < 0) ?
-            histogramQueueEntryIndex + HIGH_LEVEL_RATE_CONTROL_HISTOGRAM_QUEUE_MAX_DEPTH :
-            histogramQueueEntryIndex;
+        histogramQueueEntryIndex + HIGH_LEVEL_RATE_CONTROL_HISTOGRAM_QUEUE_MAX_DEPTH :
+        histogramQueueEntryIndex;
     histogramQueueEntryPtr = encode_context_ptr->hl_rate_control_historgram_queue[histogramQueueEntryIndex];
 
     //histogramQueueEntryPtr->parent_pcs_wrapper_ptr  = inputResultsPtr->picture_control_set_wrapper_ptr;
@@ -1024,8 +1024,8 @@ void UpdateHistogramQueueEntry(
     histogramQueueEntryIndex = (histogramQueueEntryIndex > HIGH_LEVEL_RATE_CONTROL_HISTOGRAM_QUEUE_MAX_DEPTH - 1) ?
         histogramQueueEntryIndex - HIGH_LEVEL_RATE_CONTROL_HISTOGRAM_QUEUE_MAX_DEPTH :
         (histogramQueueEntryIndex < 0) ?
-            histogramQueueEntryIndex + HIGH_LEVEL_RATE_CONTROL_HISTOGRAM_QUEUE_MAX_DEPTH :
-            histogramQueueEntryIndex;
+        histogramQueueEntryIndex + HIGH_LEVEL_RATE_CONTROL_HISTOGRAM_QUEUE_MAX_DEPTH :
+        histogramQueueEntryIndex;
     histogramQueueEntryPtr = encode_context_ptr->hl_rate_control_historgram_queue[histogramQueueEntryIndex];
     histogramQueueEntryPtr->passed_to_hlrc = EB_TRUE;
     if (sequence_control_set_ptr->static_config.rate_control_mode == 3)
