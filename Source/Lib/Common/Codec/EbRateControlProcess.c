@@ -443,7 +443,7 @@ void high_level_rc_input_picture_vbr(
             queue_entry_index_head_temp = (queue_entry_index_head_temp > HIGH_LEVEL_RATE_CONTROL_HISTOGRAM_QUEUE_MAX_DEPTH - 1) ?
                 queue_entry_index_head_temp - HIGH_LEVEL_RATE_CONTROL_HISTOGRAM_QUEUE_MAX_DEPTH :
                 (queue_entry_index_head_temp < 0) ?
-                queue_entry_index_head_temp + HIGH_LEVEL_RATE_CONTROL_HISTOGRAM_QUEUE_MAX_DEPTH : 
+                queue_entry_index_head_temp + HIGH_LEVEL_RATE_CONTROL_HISTOGRAM_QUEUE_MAX_DEPTH :
                 queue_entry_index_head_temp;
 
             queue_entry_index_temp = (uint32_t) queue_entry_index_head_temp;
@@ -550,7 +550,7 @@ void high_level_rc_input_picture_vbr(
                 queue_entry_index_head_temp = (queue_entry_index_head_temp > HIGH_LEVEL_RATE_CONTROL_HISTOGRAM_QUEUE_MAX_DEPTH - 1) ?
                     queue_entry_index_head_temp - HIGH_LEVEL_RATE_CONTROL_HISTOGRAM_QUEUE_MAX_DEPTH :
                     (queue_entry_index_head_temp < 0) ?
-                    queue_entry_index_head_temp + HIGH_LEVEL_RATE_CONTROL_HISTOGRAM_QUEUE_MAX_DEPTH : 
+                    queue_entry_index_head_temp + HIGH_LEVEL_RATE_CONTROL_HISTOGRAM_QUEUE_MAX_DEPTH :
                     queue_entry_index_head_temp;
 
                 queue_entry_index_temp = (uint32_t) queue_entry_index_head_temp;
@@ -629,7 +629,7 @@ void high_level_rc_input_picture_vbr(
                 queue_entry_index_head_temp = (queue_entry_index_head_temp > HIGH_LEVEL_RATE_CONTROL_HISTOGRAM_QUEUE_MAX_DEPTH - 1) ?
                     queue_entry_index_head_temp - HIGH_LEVEL_RATE_CONTROL_HISTOGRAM_QUEUE_MAX_DEPTH :
                     (queue_entry_index_head_temp < 0) ?
-                    queue_entry_index_head_temp + HIGH_LEVEL_RATE_CONTROL_HISTOGRAM_QUEUE_MAX_DEPTH : 
+                    queue_entry_index_head_temp + HIGH_LEVEL_RATE_CONTROL_HISTOGRAM_QUEUE_MAX_DEPTH :
                     queue_entry_index_head_temp;
 
                 queue_entry_index_temp = (uint32_t) queue_entry_index_head_temp;
@@ -685,7 +685,7 @@ void high_level_rc_input_picture_vbr(
                 queue_entry_index_head_temp = (queue_entry_index_head_temp > HIGH_LEVEL_RATE_CONTROL_HISTOGRAM_QUEUE_MAX_DEPTH - 1) ?
                     queue_entry_index_head_temp - HIGH_LEVEL_RATE_CONTROL_HISTOGRAM_QUEUE_MAX_DEPTH :
                     (queue_entry_index_head_temp < 0) ?
-                    queue_entry_index_head_temp + HIGH_LEVEL_RATE_CONTROL_HISTOGRAM_QUEUE_MAX_DEPTH : 
+                    queue_entry_index_head_temp + HIGH_LEVEL_RATE_CONTROL_HISTOGRAM_QUEUE_MAX_DEPTH :
                     queue_entry_index_head_temp;
 
                 queue_entry_index_temp = (uint32_t) queue_entry_index_head_temp;
