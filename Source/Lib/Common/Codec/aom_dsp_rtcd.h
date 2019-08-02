@@ -129,10 +129,34 @@ extern "C" {
     uint32_t compute4x_m_sad_avx2_intrin(const uint8_t  *src, uint32_t  src_stride, const uint8_t  *ref, uint32_t  ref_stride, uint32_t  height, uint32_t  width);
     RTCD_EXTERN uint32_t(*compute4x4_SAD)(const uint8_t  *src, uint32_t  src_stride, const uint8_t  *ref, uint32_t  ref_stride, uint32_t  height, uint32_t  width);
 
+    void full_distortion_kernel32_bits_c(int32_t *coeff, uint32_t coeff_stride, int32_t *recon_coeff, uint32_t recon_coeff_stride, uint64_t distortion_result[DIST_CALC_TOTAL], uint32_t area_width, uint32_t area_height);
+    void full_distortion_kernel32_bits_avx2(int32_t *coeff, uint32_t coeff_stride, int32_t *recon_coeff, uint32_t recon_coeff_stride, uint64_t distortion_result[DIST_CALC_TOTAL], uint32_t area_width, uint32_t area_height);
+    RTCD_EXTERN void(*full_distortion_kernel32_bits)(int32_t *coeff, uint32_t coeff_stride, int32_t *recon_coeff, uint32_t recon_coeff_stride, uint64_t distortion_result[DIST_CALC_TOTAL], uint32_t area_width, uint32_t area_height);
+
+    void full_distortion_kernel_cbf_zero32_bits_c(int32_t *coeff,uint32_t coeff_stride,int32_t *recon_coeff,uint32_t recon_coeff_stride,uint64_t distortion_result[DIST_CALC_TOTAL],uint32_t area_width,uint32_t area_height);
+    void full_distortion_kernel_cbf_zero32_bits_avx2(int32_t *coeff, uint32_t coeff_stride, int32_t *recon_coeff, uint32_t recon_coeff_stride, uint64_t distortion_result[DIST_CALC_TOTAL], uint32_t area_width, uint32_t area_height);
+    RTCD_EXTERN void (*full_distortion_kernel_cbf_zero32_bits)(int32_t *coeff, uint32_t coeff_stride, int32_t *recon_coeff, uint32_t recon_coeff_stride, uint64_t distortion_result[DIST_CALC_TOTAL], uint32_t area_width, uint32_t area_height);
+      
+    uint64_t spatial_full_distortion_kernel_c(uint8_t *input,uint32_t input_offset,uint32_t input_stride,uint8_t *recon,uint32_t recon_offset,uint32_t recon_stride,uint32_t area_width,uint32_t area_height);
+#ifndef NON_AVX512_SUPPORT
+    uint64_t spatial_full_distortion_kernel_avx512(uint8_t *input, uint32_t input_offset, uint32_t input_stride, uint8_t *recon, uint32_t recon_offset, uint32_t recon_stride, uint32_t area_width, uint32_t area_height);
+#endif
+    uint64_t spatial_full_distortion_kernel_avx2(uint8_t *input, uint32_t input_offset, uint32_t input_stride, uint8_t *recon, uint32_t recon_offset, uint32_t recon_stride, uint32_t area_width, uint32_t area_height);
+    RTCD_EXTERN uint64_t(*spatial_full_distortion_kernel)(uint8_t *input, uint32_t input_offset, uint32_t input_stride, uint8_t *recon, uint32_t recon_offset, uint32_t recon_stride, uint32_t area_width, uint32_t area_height);
+
     void eb_av1_selfguided_restoration_c(const uint8_t *dgd8, int32_t width, int32_t height, int32_t dgd_stride, int32_t *flt0, int32_t *flt1, int32_t flt_stride, int32_t sgr_params_idx, int32_t bit_depth, int32_t highbd);
     void eb_av1_selfguided_restoration_avx2(const uint8_t *dgd8, int32_t width, int32_t height, int32_t dgd_stride, int32_t *flt0, int32_t *flt1, int32_t flt_stride, int32_t sgr_params_idx, int32_t bit_depth, int32_t highbd);
     RTCD_EXTERN void(*eb_av1_selfguided_restoration)(const uint8_t *dgd8, int32_t width, int32_t height, int32_t dgd_stride, int32_t *flt0, int32_t *flt1, int32_t flt_stride, int32_t sgr_params_idx, int32_t bit_depth, int32_t highbd);
 
+    uint32_t compute8x4_sad_kernel_c(uint8_t *src, uint32_t src_stride, uint8_t *ref, uint32_t ref_stride);
+    RTCD_EXTERN uint32_t (*compute8x4_sad_kernel)(uint8_t *src, uint32_t src_stride, uint8_t *ref, uint32_t ref_stride);
+
+    uint64_t compute8x8_satd_u8_sse4(uint8_t  *src, uint64_t *dc_value, uint32_t  src_stride);
+    RTCD_EXTERN uint64_t (*compute8x8_satd_u8)(uint8_t  *src, uint64_t *dc_value, uint32_t  src_stride);
+    
+    void picture_addition_kernel16bit_sse2_intrin(uint16_t  *pred_ptr,uint32_t  pred_stride,int16_t *residual_ptr,uint32_t  residual_stride,uint16_t  *recon_ptr,uint32_t  recon_stride,uint32_t  width,uint32_t  height);
+    RTCD_EXTERN void (*picture_addition_kernel16bit)(uint16_t  *pred_ptr, uint32_t  pred_stride, int16_t *residual_ptr, uint32_t  residual_stride, uint16_t  *recon_ptr, uint32_t  recon_stride, uint32_t  width, uint32_t  height);
+    
     int32_t eb_cdef_find_dir_c(const uint16_t *img, int32_t stride, int32_t *var, int32_t coeff_shift);
     int32_t eb_cdef_find_dir_avx2(const uint16_t *img, int32_t stride, int32_t *var, int32_t coeff_shift);
     RTCD_EXTERN int32_t(*eb_cdef_find_dir)(const uint16_t *img, int32_t stride, int32_t *var, int32_t coeff_shift);
@@ -2519,6 +2543,25 @@ extern "C" {
 
         compute4x4_SAD = compute4x4SAD_Kernel_c;
         if (flags & HAS_AVX2) compute4x4_SAD = compute4x_m_sad_avx2_intrin;
+
+        full_distortion_kernel32_bits = full_distortion_kernel32_bits_c;
+        if (flags & HAS_AVX2) full_distortion_kernel32_bits = full_distortion_kernel32_bits_avx2;
+
+        full_distortion_kernel_cbf_zero32_bits = full_distortion_kernel_cbf_zero32_bits_c;
+        if (flags & HAS_AVX2) full_distortion_kernel_cbf_zero32_bits = full_distortion_kernel_cbf_zero32_bits_avx2;
+
+        spatial_full_distortion_kernel = spatial_full_distortion_kernel_c;
+        if (flags & HAS_AVX2) spatial_full_distortion_kernel = spatial_full_distortion_kernel_avx2;
+#ifndef NON_AVX512_SUPPORT
+        spatial_full_distortion_kernel = spatial_full_distortion_kernel_avx512;
+#endif
+
+        compute8x4_sad_kernel = compute8x4_sad_kernel_c;
+        
+        compute8x8_satd_u8 = compute8x8_satd_u8_sse4;
+
+        picture_addition_kernel16bit = picture_addition_kernel16bit_sse2_intrin;
+
 
         eb_apply_selfguided_restoration = eb_apply_selfguided_restoration_c;
         if (flags & HAS_AVX2) eb_apply_selfguided_restoration = eb_apply_selfguided_restoration_avx2;

@@ -174,24 +174,6 @@ extern "C" {
         uint32_t  height,
         int32_t   bd);
 
-    void full_distortion_kernel_cbf_zero32_bits_avx2(
-        int32_t  *coeff,
-        uint32_t  coeff_stride,
-        int32_t  *recon_coeff,
-        uint32_t  recon_coeff_stride,
-        uint64_t  distortion_result[DIST_CALC_TOTAL],
-        uint32_t  area_width,
-        uint32_t  area_height);
-
-    void full_distortion_kernel32_bits_avx2(
-        int32_t  *coeff,
-        uint32_t  coeff_stride,
-        int32_t  *recon_coeff,
-        uint32_t  recon_coeff_stride,
-        uint64_t  distortion_result[DIST_CALC_TOTAL],
-        uint32_t  area_width,
-        uint32_t  area_height);
-
     static INLINE int32_t Hadd32_AVX2_INTRIN(const __m256i src) {
         const __m128i src_L = _mm256_extracti128_si256(src, 0);
         const __m128i src_H = _mm256_extracti128_si256(src, 1);
@@ -199,16 +181,6 @@ extern "C" {
 
         return Hadd32_SSE2_INTRIN(sum);
     }
-
-    uint64_t spatial_full_distortion_kernel_avx2(
-        uint8_t *input,
-        uint32_t input_offset,
-        uint32_t input_stride,
-        uint8_t *recon,
-        uint32_t recon_offset,
-        uint32_t recon_stride,
-        uint32_t area_width,
-        uint32_t area_height);
 
     uint64_t spatial_full_distortion_kernel4x_n_avx2_intrin(
         uint8_t   *input,

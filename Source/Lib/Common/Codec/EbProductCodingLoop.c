@@ -1560,7 +1560,7 @@ void perform_fast_loop(
             // Y
             if (use_ssd) {
                 EbSpatialFullDistType spatial_full_dist_type_fun = context_ptr->hbd_mode_decision ?
-                        full_distortion_kernel16_bits : spatial_full_distortion_kernel_func_ptr_array[asm_type];
+                        full_distortion_kernel16_bits : spatial_full_distortion_kernel;
 
                 candidateBuffer->candidate_ptr->luma_fast_distortion = (uint32_t)(lumaFastDistortion = spatial_full_dist_type_fun(
                     input_picture_ptr->buffer_y,
@@ -1596,7 +1596,7 @@ void perform_fast_loop(
             if (context_ptr->blk_geom->has_uv && context_ptr->chroma_level <= CHROMA_MODE_1) {
                 if (use_ssd) {
                     EbSpatialFullDistType spatial_full_dist_type_fun = context_ptr->hbd_mode_decision ?
-                        full_distortion_kernel16_bits : spatial_full_distortion_kernel_func_ptr_array[asm_type];
+                        full_distortion_kernel16_bits : spatial_full_distortion_kernel;
 
                     chromaFastDistortion = spatial_full_dist_type_fun(
                         input_picture_ptr->buffer_cb,
@@ -3302,7 +3302,7 @@ void perform_intra_tx_partitioning(
                         asm_type);
 
                 EbSpatialFullDistType spatial_full_dist_type_fun = context_ptr->hbd_mode_decision ?
-                        full_distortion_kernel16_bits : spatial_full_distortion_kernel_func_ptr_array[asm_type];
+                        full_distortion_kernel16_bits : spatial_full_distortion_kernel;
 
                 tuFullDistortion[0][DIST_CALC_PREDICTION] = spatial_full_dist_type_fun(
                     input_picture_ptr->buffer_y,
@@ -3445,7 +3445,7 @@ void perform_intra_tx_partitioning(
                     asm_type);
 
             EbSpatialFullDistType spatial_full_dist_type_fun = context_ptr->hbd_mode_decision ?
-                full_distortion_kernel16_bits : spatial_full_distortion_kernel_func_ptr_array[asm_type];
+                full_distortion_kernel16_bits : spatial_full_distortion_kernel;
 
             tuFullDistortion[0][DIST_CALC_PREDICTION] = spatial_full_dist_type_fun(
                 input_picture_ptr->buffer_y,
@@ -3708,7 +3708,7 @@ void perform_intra_tx_partitioning(
                     asm_type);
 
             EbSpatialFullDistType spatial_full_dist_type_fun = context_ptr->hbd_mode_decision ?
-                full_distortion_kernel16_bits : spatial_full_distortion_kernel_func_ptr_array[asm_type];
+                full_distortion_kernel16_bits : spatial_full_distortion_kernel;
 
             tuFullDistortion[0][DIST_CALC_PREDICTION] = spatial_full_dist_type_fun(
                 input_picture_ptr->buffer_y,

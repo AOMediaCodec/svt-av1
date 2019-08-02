@@ -190,24 +190,6 @@ extern "C" {
         uint32_t  size,
         int16_t   value);
 
-    void full_distortion_kernel_cbf_zero32_bits_c(
-        int32_t  *coeff,
-        uint32_t  coeff_stride,
-        int32_t  *recon_coeff,
-        uint32_t  recon_coeff_stride,
-        uint64_t  distortion_result[DIST_CALC_TOTAL],
-        uint32_t  area_width,
-        uint32_t  area_height);
-
-    void full_distortion_kernel32_bits_c(
-        int32_t  *coeff,
-        uint32_t  coeff_stride,
-        int32_t  *recon_coeff,
-        uint32_t  recon_coeff_stride,
-        uint64_t  distortion_result[DIST_CALC_TOTAL],
-        uint32_t  area_width,
-        uint32_t  area_height);
-
     uint64_t full_distortion_kernel16_bits(
         uint8_t  *input,
         uint32_t  input_offset,
@@ -235,20 +217,6 @@ extern "C" {
         uint64_t  distortion_result[DIST_CALC_TOTAL],
         uint32_t  area_width,
         uint32_t  area_height);
-
-    static EbFullDistortionKernelCbfZero32Bits FUNC_TABLE full_distortion_kernel_cbf_zero32_bits_func_ptr_array[ASM_TYPE_TOTAL] = {
-        // NON_AVX2
-        full_distortion_kernel_cbf_zero32_bits_c,
-        // AVX2
-        full_distortion_kernel_cbf_zero32_bits_avx2,
-    };
-
-    static EbFullDistortionKernel32Bits FUNC_TABLE full_distortion_kernel32_bits_func_ptr_array[ASM_TYPE_TOTAL] = {
-        // NON_AVX2
-        full_distortion_kernel32_bits_c,
-        // AVX2
-        full_distortion_kernel32_bits_avx2,
-    };
 
     /***************************************
     * Function Types
@@ -315,12 +283,6 @@ extern "C" {
         },
     };
 
-    static EbAddKernelType16Bit FUNC_TABLE addition_kernel_func_ptr_array16bit[ASM_TYPE_TOTAL] = {
-        // NON_AVX2
-        picture_addition_kernel16bit_sse2_intrin,
-        // AVX2
-        picture_addition_kernel16bit_sse2_intrin,
-    };
     typedef void(*EB_RESDKERNELSUBSAMPLED_TYPE)(
         uint8_t  *input,
         uint32_t  input_stride,
@@ -372,13 +334,6 @@ extern "C" {
         },
     };
 
-    static EbSatdU8Type FUNC_TABLE compute8x8_satd_u8_func_ptr_array[ASM_TYPE_TOTAL] = {
-        // NON_AVX2
-        compute8x8_satd_u8_sse4,
-        // ASM_AVX2
-        compute8x8_satd_u8_sse4
-    };
-
     typedef uint64_t(*EbSpatialFullDistType)(
         uint8_t   *input,
         uint32_t   input_offset,
@@ -388,18 +343,6 @@ extern "C" {
         uint32_t   recon_stride,
         uint32_t   area_width,
         uint32_t   area_height);
-
-    static EbSpatialFullDistType FUNC_TABLE spatial_full_distortion_kernel_func_ptr_array[ASM_TYPE_TOTAL] = {
-        // NON_AVX2
-        spatial_full_distortion_kernel_c,
-#ifndef NON_AVX512_SUPPORT
-        // ASM_AVX512
-        spatial_full_distortion_kernel_avx512
-#else
-        // ASM_AVX2
-        spatial_full_distortion_kernel_avx2
-#endif
-    };
 
     void picture_addition_kernel16_bit(
         uint16_t *pred_ptr,

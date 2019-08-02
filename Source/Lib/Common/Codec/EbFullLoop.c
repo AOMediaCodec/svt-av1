@@ -2144,7 +2144,7 @@ void product_full_loop(
 
             EbSpatialFullDistType spatial_full_dist_type_fun = picture_control_set_ptr->hbd_mode_decision ?
                 full_distortion_kernel16_bits :
-                spatial_full_distortion_kernel_func_ptr_array[asm_type];
+                spatial_full_distortion_kernel;
 
             tuFullDistortion[0][DIST_CALC_PREDICTION] = spatial_full_dist_type_fun(
                 input_picture_ptr->buffer_y,
@@ -2455,7 +2455,7 @@ void product_full_loop_tx_search(
                 uint32_t input_tu_origin_index = (context_ptr->sb_origin_x + txb_origin_x + input_picture_ptr->origin_x) + ((context_ptr->sb_origin_y + txb_origin_y + input_picture_ptr->origin_y) * input_picture_ptr->stride_y);
 
                 EbSpatialFullDistType spatial_full_dist_type_fun = picture_control_set_ptr->hbd_mode_decision ?
-                    full_distortion_kernel16_bits : spatial_full_distortion_kernel_func_ptr_array[asm_type];
+                    full_distortion_kernel16_bits : spatial_full_distortion_kernel;
 
                 tuFullDistortion[0][DIST_CALC_PREDICTION] = spatial_full_dist_type_fun(
                     input_picture_ptr->buffer_y,
@@ -3350,7 +3350,7 @@ void cu_full_distortion_fast_tu_mode_r(
                 uint32_t tu_uv_origin_index = (((txb_origin_x >> 3) << 3) + (((txb_origin_y >> 3) << 3) * candidateBuffer->residual_quant_coeff_ptr->stride_cb)) >> 1;
 
                 EbSpatialFullDistType spatial_full_dist_type_fun = picture_control_set_ptr->hbd_mode_decision ?
-                    full_distortion_kernel16_bits : spatial_full_distortion_kernel_func_ptr_array[asm_type];
+                    full_distortion_kernel16_bits : spatial_full_distortion_kernel;
 
                 tuFullDistortion[1][DIST_CALC_PREDICTION] = spatial_full_dist_type_fun(
                     input_picture_ptr->buffer_cb,
