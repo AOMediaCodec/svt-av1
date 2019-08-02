@@ -5118,7 +5118,7 @@ EbErrorType encode_transform(
 
         int32_t ttl_residual;
 
-        ttl_residual = sum_residual_func_ptr_array[asm_type](
+        ttl_residual = sum_residual(
             residual_buffer,
             transform_size,
             residual_stride);
@@ -8658,7 +8658,7 @@ EbErrorType encode_inv_transform(
         invTranformedDcCoef = (int16_t)CLIP3(MIN_NEG_16BIT_NUM, MAX_POS_16BIT_NUM, ((64 * dcCoef + offset1st) >> shift1st));
         invTranformedDcCoef = (int16_t)CLIP3(MIN_NEG_16BIT_NUM, MAX_POS_16BIT_NUM, ((64 * invTranformedDcCoef + offset2nd) >> shift2nd));
 
-        memset16bit_block_func_ptr_array[asm_type](
+        memset16bit_block(
             recon_buffer,
             recon_stride,
             transform_size,

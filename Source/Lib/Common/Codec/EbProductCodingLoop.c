@@ -5833,7 +5833,7 @@ EB_EXTERN EbErrorType mode_decision_sb(
 * Compute4x4SAD_Default
 *   Unoptimized 4x4 SAD
 *******************************************/
-uint32_t Compute4x4SAD_Kernel_c(
+uint32_t compute4x4SAD_Kernel_c(
     const uint8_t  *src,                       // input parameter, source samples Ptr
     uint32_t  src_stride,                      // input parameter, source stride
     const uint8_t  *ref,                       // input parameter, reference samples Ptr
@@ -5857,14 +5857,6 @@ uint32_t Compute4x4SAD_Kernel_c(
     (void)width;
     return sadBlock4x4;
 }
-
-static EbSadKernelNxMType FUNC_TABLE compute4x4SAD_funcPtrArray[ASM_TYPE_TOTAL] =// [C_DEFAULT/ASM]
-{
-    // C_DEFAULT
-    Compute4x4SAD_Kernel_c,
-    // SSE2
-    compute4x_m_sad_avx2_intrin,
-};
 
 static uint32_t tab4x4[256] = {
     0, 1, 4, 5, 16, 17, 20, 21, 64, 65, 68, 69, 80, 81, 84, 85,
@@ -6659,7 +6651,7 @@ static void in_loop_me_get_search_point_results_block(
                                             uint32_t block_4x4_addr_ref = ref_index + ((block_4x4_addr_y * ref_luma_stride) + block_4x4_addr_x);
 
                                             //4x4
-                                            dist_4x4[block_4x4_index] = compute4x4SAD_funcPtrArray[asm_type](
+                                            dist_4x4[block_4x4_index] = compute4x4_SAD(
                                                 src_ptr + block_4x4_addr_src,
                                                 src_stride,
                                                 ref_ptr + block_4x4_addr_ref,

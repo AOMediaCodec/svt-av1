@@ -11,6 +11,7 @@
 #include "EbPictureControlSet.h"
 #include "EbSequenceControlSet.h"
 #include "EbPictureBufferDesc.h"
+#include "aom_dsp_rtcd.h"
 
 #include "EbResourceCoordinationResults.h"
 #include "EbPictureAnalysisProcess.h"
@@ -1321,8 +1322,8 @@ uint8_t  getFilteredTypes(uint8_t  *ptr,
 void noise_extract_luma_strong_c(
     EbPictureBufferDesc       *input_picture_ptr,
     EbPictureBufferDesc       *denoised_picture_ptr,
-    uint32_t                       sb_origin_y
-    , uint32_t                       sb_origin_x
+    uint32_t                       sb_origin_y,
+    uint32_t                       sb_origin_x
 )
 {
     uint32_t  ii, jj;
@@ -1369,8 +1370,8 @@ void noise_extract_luma_strong_c(
 void noise_extract_chroma_strong_c(
     EbPictureBufferDesc       *input_picture_ptr,
     EbPictureBufferDesc       *denoised_picture_ptr,
-    uint32_t                       sb_origin_y
-    , uint32_t                       sb_origin_x
+    uint32_t                       sb_origin_y,
+    uint32_t                       sb_origin_x
 )
 {
     uint32_t  ii, jj;
@@ -1447,8 +1448,8 @@ void noise_extract_chroma_strong_c(
 void noise_extract_chroma_weak_c(
     EbPictureBufferDesc       *input_picture_ptr,
     EbPictureBufferDesc       *denoised_picture_ptr,
-    uint32_t                       sb_origin_y
-    , uint32_t                       sb_origin_x
+    uint32_t                       sb_origin_y,
+    uint32_t                       sb_origin_x
 )
 {
     uint32_t  ii, jj;
@@ -1528,8 +1529,8 @@ void noise_extract_luma_weak_c(
     EbPictureBufferDesc       *input_picture_ptr,
     EbPictureBufferDesc       *denoised_picture_ptr,
     EbPictureBufferDesc       *noise_picture_ptr,
-    uint32_t                       sb_origin_y
-    , uint32_t                         sb_origin_x
+    uint32_t                       sb_origin_y,
+    uint32_t                         sb_origin_x
 )
 {
     uint32_t  ii, jj;
@@ -1584,8 +1585,8 @@ void noise_extract_luma_weak_lcu_c(
     EbPictureBufferDesc       *input_picture_ptr,
     EbPictureBufferDesc       *denoised_picture_ptr,
     EbPictureBufferDesc       *noise_picture_ptr,
-    uint32_t                       sb_origin_y
-    , uint32_t                         sb_origin_x
+    uint32_t                       sb_origin_y,
+    uint32_t                         sb_origin_x
 )
 {
     uint32_t  ii, jj;
@@ -3037,7 +3038,7 @@ EbErrorType DenoiseInputPicture(
             sb_origin_y = (lcuCodingOrder / picture_width_in_sb) * sequence_control_set_ptr->sb_sz;
 
             if (sb_origin_x == 0)
-                strong_luma_filter_func_ptr_array[asm_type](
+                strong_luma_filter(
                     input_picture_ptr,
                     denoised_picture_ptr,
                     sb_origin_y,
@@ -3066,7 +3067,7 @@ EbErrorType DenoiseInputPicture(
             sb_origin_y = (lcuCodingOrder / picture_width_in_sb) * sequence_control_set_ptr->sb_sz;
 
             if (sb_origin_x == 0)
-                strong_chroma_filter_func_ptr_array[asm_type](
+                noise_extract_chroma_strong(
                     input_picture_ptr,
                     denoised_picture_ptr,
                     sb_origin_y >> subsampling_y,
@@ -3111,7 +3112,7 @@ EbErrorType DenoiseInputPicture(
             sb_origin_y = (lcuCodingOrder / picture_width_in_sb) * sequence_control_set_ptr->sb_sz;
 
             if (sb_origin_x == 0)
-                weak_chroma_filter_func_ptr_array[asm_type](
+                noise_extract_chroma_weak(
                     input_picture_ptr,
                     denoised_picture_ptr,
                     sb_origin_y >> subsampling_y,
@@ -3196,7 +3197,7 @@ EbErrorType DetectInputPictureNoise(
         uint32_t  noiseOriginIndex = noise_picture_ptr->origin_x + sb_origin_x + noise_picture_ptr->origin_y * noise_picture_ptr->stride_y;
 
         if (sb_origin_x == 0)
-            weak_luma_filter_func_ptr_array[asm_type](
+            noise_extract_luma_weak(
                 input_picture_ptr,
                 denoised_picture_ptr,
                 noise_picture_ptr,
@@ -3397,7 +3398,7 @@ EbErrorType SubSampleFilterNoise(
             sb_origin_y = (lcuCodingOrder / picture_width_in_sb) * sequence_control_set_ptr->sb_sz;
 
             if (sb_origin_x == 0)
-                weak_luma_filter_func_ptr_array[asm_type](
+                noise_extract_luma_weak(
                     input_picture_ptr,
                     denoised_picture_ptr,
                     noise_picture_ptr,
@@ -3428,7 +3429,7 @@ EbErrorType SubSampleFilterNoise(
             sb_origin_y = (lcuCodingOrder / picture_width_in_sb) * sequence_control_set_ptr->sb_sz;
 
             if (sb_origin_x == 0)
-                weak_chroma_filter_func_ptr_array[asm_type](
+                noise_extract_chroma_weak(
                     input_picture_ptr,
                     denoised_picture_ptr,
                     sb_origin_y >> subsampling_y,
@@ -3467,7 +3468,7 @@ EbErrorType SubSampleFilterNoise(
 
             if (sb_origin_x + 64 <= input_picture_ptr->width && sb_origin_y + 64 <= input_picture_ptr->height && picture_control_set_ptr->sb_flat_noise_array[lcuCodingOrder] == 1)
             {
-                weak_luma_filter_lcu_func_ptr_array[asm_type](
+                noise_extract_luma_weak_lcu(
                     input_picture_ptr,
                     denoised_picture_ptr,
                     noise_picture_ptr,
@@ -3576,7 +3577,7 @@ EbErrorType QuarterSampleDetectNoise(
             block64x64Y = vert64x64Index * 64;
 
             if (block64x64X == 0)
-                weak_luma_filter_func_ptr_array[asm_type](
+                noise_extract_luma_weak(
                     quarter_decimated_picture_ptr,
                     denoised_picture_ptr,
                     noise_picture_ptr,
@@ -3700,7 +3701,7 @@ EbErrorType SubSampleDetectNoise(
             block64x64Y = vert64x64Index * 64;
 
             if (block64x64X == 0)
-                weak_luma_filter_func_ptr_array[asm_type](
+                noise_extract_luma_weak(
                     sixteenth_decimated_picture_ptr,
                     denoised_picture_ptr,
                     noise_picture_ptr,

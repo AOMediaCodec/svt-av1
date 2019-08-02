@@ -32,6 +32,7 @@
 #include "EbMcp.h"
 #include "av1me.h"
 #include "EbTemporalFiltering_sse4.h"
+#include "aom_dsp_rtcd.h"
 
 #undef _MM_HINT_T2
 #define _MM_HINT_T2  1
@@ -78,36 +79,6 @@ typedef void(*TempFilteringType)(const uint8_t *y_src,
                                  uint32_t *v_accum,
                                  uint16_t *v_count);
 
-void apply_filtering_c(const uint8_t *y_src,
-                       int y_src_stride,
-                       const uint8_t *y_pre,
-                       int y_pre_stride,
-                       const uint8_t *u_src,
-                       const uint8_t *v_src,
-                       int uv_src_stride,
-                       const uint8_t *u_pre,
-                       const uint8_t *v_pre,
-                       int uv_pre_stride,
-                       unsigned int block_width,
-                       unsigned int block_height,
-                       int ss_x,
-                       int ss_y,
-                       int strength,
-                       const int *blk_fw,
-                       int use_whole_blk,
-                       uint32_t *y_accum,
-                       uint16_t *y_count,
-                       uint32_t *u_accum,
-                       uint16_t *u_count,
-                       uint32_t *v_accum,
-                       uint16_t *v_count);
-
-static TempFilteringType FUNC_TABLE apply_temp_filtering_32x32_func_ptr_array[ASM_TYPE_TOTAL] = {
-        // NON_SIMD
-        apply_filtering_c,
-        // SSE4
-        av1_apply_temporal_filter_sse4_1
-};
 #if DEBUG_TF
 // save YUV to file - auxiliary function for debug
 void save_YUV_to_file(char *filename, EbByte buffer_y, EbByte buffer_u, EbByte buffer_v,
@@ -468,7 +439,7 @@ static INLINE void calculate_squared_errors(const uint8_t *s,
 }
 
 // Main function that applies filtering to a block according to the weights
-void apply_filtering_c(const uint8_t *y_src,
+void apply_temp_filtering_32x32_c(const uint8_t *y_src,
                         int y_src_stride,
                         const uint8_t *y_pre,
                         int y_pre_stride,
@@ -672,10 +643,8 @@ void apply_filtering_block(int block_row,
     count_ptr[C_U] = count[C_U] + offset_block_buffer_U;
     count_ptr[C_V] = count[C_V] + offset_block_buffer_V;
 
-    TempFilteringType apply_32x32_temp_filter_fn = apply_temp_filtering_32x32_func_ptr_array[asm_type];
-
     // Apply the temporal filtering strategy
-    apply_32x32_temp_filter_fn(src_ptr[C_Y],
+    apply_temp_filtering_32x32(src_ptr[C_Y],
                                stride[C_Y],
                                pred_ptr[C_Y],
                                stride_pred[C_Y],
@@ -701,7 +670,7 @@ void apply_filtering_block(int block_row,
 }
 
 // Apply filtering to the central picture
-static void apply_filtering_central(EbByte *pred,
+static void apply_temp_filtering_32x32_central(EbByte *pred,
                                     uint32_t **accum,
                                     uint16_t **count,
                                     uint16_t blk_height,
@@ -1448,7 +1417,7 @@ static EbErrorType produce_temporally_filtered_pic(PictureParentControlSet **lis
 
                 // if frame to process is the center frame
                 if (frame_index == index_center) {
-                    apply_filtering_central(pred,
+                    apply_temp_filtering_32x32_central(pred,
                                             accum,
                                             count,
                                             BH,

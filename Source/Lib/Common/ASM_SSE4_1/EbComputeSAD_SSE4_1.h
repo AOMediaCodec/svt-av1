@@ -25,15 +25,6 @@ extern "C" {
         int16_t   search_area_width,
         int16_t   search_area_height);
 
-
-    void get_eight_horizontal_search_point_results_32x32_64x64_pu_sse41_intrin(
-        uint16_t *p_sad16x16,
-        uint32_t *p_best_sad32x32,
-        uint32_t *p_best_sad64x64,
-        uint32_t *p_best_mv32x32,
-        uint32_t *p_best_mv64x64,
-        uint32_t  mv);
-
     void ext_sad_calculation_8x8_16x16(
         uint8_t  *src,
         uint32_t  src_stride,

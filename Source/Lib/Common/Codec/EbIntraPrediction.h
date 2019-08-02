@@ -268,18 +268,6 @@ void highbd_filter_intra_predictor(uint16_t *dst, ptrdiff_t stride,
         uint8_t         *dst,              //output parameter, pointer to the prediction
         const uint32_t   prediction_buffer_stride,     //input parameter, denotes the stride for the prediction ptr
         const EbBool  skip);
-    extern void ebav1_smooth_v_predictor_c(
-        const uint32_t   size,                       //input parameter, denotes the size of the current PU
-        uint8_t         *ref_samples,                 //input parameter, pointer to the reference samples
-        uint8_t         *dst,              //output parameter, pointer to the prediction
-        const uint32_t   prediction_buffer_stride,     //input parameter, denotes the stride for the prediction ptr
-        const EbBool  skip);
-    extern void ebav1_smooth_h_predictor_c(
-        const uint32_t   size,                       //input parameter, denotes the size of the current PU
-        uint8_t         *ref_samples,                 //input parameter, pointer to the reference samples
-        uint8_t         *dst,              //output parameter, pointer to the prediction
-        const uint32_t   prediction_buffer_stride,     //input parameter, denotes the stride for the prediction ptr
-        const EbBool  skip);
 
     void intra_mode_angular_av1_z1_16bit(
         const uint32_t   size,                    //input parameter, denotes the size of the current PU
@@ -310,19 +298,6 @@ void highbd_filter_intra_predictor(uint16_t *dst, ptrdiff_t stride,
         uint16_t          dx,              //output parameter, pointer to the prediction
         uint16_t          dy,              //output parameter, pointer to the prediction
         uint16_t          bd);
-
-    static EB_INTRA_NOANG_TYPE FUNC_TABLE IntraSmoothH_Av1_funcPtrArray[ASM_TYPE_TOTAL] = {
-        // NON_AVX2
-        ebav1_smooth_h_predictor_c,
-        // AVX2
-        ebav1_smooth_h_predictor_c,
-    };
-    static EB_INTRA_NOANG_TYPE FUNC_TABLE IntraSmoothV_Av1_funcPtrArray[ASM_TYPE_TOTAL] = {
-        // NON_AVX2
-        ebav1_smooth_v_predictor_c,
-        // AVX2
-        ebav1_smooth_v_predictor_c,
-    };
 
     static EB_INTRA_ANG_Z1_Z2_Z3_16bit_TYPE FUNC_TABLE IntraModeAngular_AV1_Z1_16bit_funcPtrArray[9][ASM_TYPE_TOTAL] = {
         // 4x4

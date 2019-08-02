@@ -18,6 +18,8 @@
 extern "C" {
 #endif
 
+    uint32_t compute4x_m_sad_avx2_intrin(const uint8_t  *src, uint32_t  src_stride, const uint8_t  *ref, uint32_t  ref_stride, uint32_t  height, uint32_t  width);
+
     /***************************************
     * Function Ptr Types
     ***************************************/
@@ -184,33 +186,6 @@ extern "C" {
             /*7      */     (EbSadAvgKernelNxMType)nxm_sad_kernel_void_func,
             /*8 64xM */     combined_averaging64x_msad_avx2_intrin
         },
-    };
-
-
-    static EbGetEightSad32x32 FUNC_TABLE get_eight_horizontal_search_point_results_32x32_64x64_func_ptr_array[ASM_TYPE_TOTAL] =
-    {
-        // NON_AVX2
-        get_eight_horizontal_search_point_results_32x32_64x64_pu_sse41_intrin,
-        // AVX2
-        get_eight_horizontal_search_point_results_32x32_64x64_pu_avx2_intrin,
-    };
-
-    uint32_t combined_averaging_ssd_c(
-        uint8_t   *src,
-        ptrdiff_t  src_stride,
-        uint8_t   *ref1,
-        ptrdiff_t  ref1_stride,
-        uint8_t   *ref2,
-        ptrdiff_t  ref2_stride,
-        uint32_t   height,
-        uint32_t   width);
-
-    static CombinedAveragingSsd FUNC_TABLE combined_averaging_ssd_func_ptr_array[ASM_TYPE_TOTAL] =
-    {
-        // NON_AVX2
-        combined_averaging_ssd_c,
-        // AVX2
-        combined_averaging_ssd_avx2,
     };
 
 uint32_t sad_16b_kernel(
