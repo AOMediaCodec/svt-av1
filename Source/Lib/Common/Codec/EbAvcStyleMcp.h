@@ -266,25 +266,11 @@ extern "C" {
         },
     };
 
-    static const PictureAverage FUNC_TABLE picture_average_array[ASM_TYPE_TOTAL] = {
-        // NON_AVX2
-        picture_average_kernel_sse2_intrin,
-        // AVX2
-        picture_average_kernel_sse2_intrin,
-    };
-
     typedef void(*PictureAverage1Line)(
         EbByte                  src0,
         EbByte                  src1,
         EbByte                  dst,
         uint32_t                   area_width);
-
-    static const PictureAverage1Line FUNC_TABLE picture_average1_line_array[ASM_TYPE_TOTAL] = {
-        // NON_AVX2
-        picture_average_kernel1_line_sse2_intrin,
-        // AVX2
-        picture_average_kernel1_line_sse2_intrin,
-    };
 
 #ifdef __cplusplus
 }

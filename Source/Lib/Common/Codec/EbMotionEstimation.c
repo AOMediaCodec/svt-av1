@@ -24,6 +24,7 @@
 #include "EbIntraPrediction.h"
 #include "EbLambdaRateTables.h"
 #include "EbPictureOperators.h"
+#include "aom_dsp_rtcd.h"
 #define OIS_TH_COUNT 4
 
 int32_t OisPointTh[3][MAX_TEMPORAL_LAYERS][OIS_TH_COUNT] = {
@@ -3900,8 +3901,8 @@ static void GetEightHorizontalSearchPointResultsAll85PUs(
     //---- 16x16_0
     blockIndex = 0;
     searchPositionIndex = searchPositionTLIndex;
-    get_eight_horizontal_search_point_results_8x8_16x16_func_ptr_array
-        [asm_type](src_ptr + blockIndex,
+    get_eight_horizontal_search_point_results_8x8_16x16_pu_t(
+                   src_ptr + blockIndex,
                    context_ptr->sb_src_stride,
                    refPtr + searchPositionIndex,
                    reflumaStride,
@@ -3915,8 +3916,8 @@ static void GetEightHorizontalSearchPointResultsAll85PUs(
     //---- 16x16_1
     blockIndex = blockIndex + 16;
     searchPositionIndex = searchPositionTLIndex + 16;
-    get_eight_horizontal_search_point_results_8x8_16x16_func_ptr_array
-        [asm_type](src_ptr + blockIndex,
+    get_eight_horizontal_search_point_results_8x8_16x16_pu_t(
+                   src_ptr + blockIndex,
                    context_ptr->sb_src_stride,
                    refPtr + searchPositionIndex,
                    reflumaStride,
@@ -3930,8 +3931,8 @@ static void GetEightHorizontalSearchPointResultsAll85PUs(
     //---- 16x16_4
     blockIndex = blockIndex + 16;
     searchPositionIndex = searchPositionIndex + 16;
-    get_eight_horizontal_search_point_results_8x8_16x16_func_ptr_array
-        [asm_type](src_ptr + blockIndex,
+    get_eight_horizontal_search_point_results_8x8_16x16_pu_t(
+                   src_ptr + blockIndex,
                    context_ptr->sb_src_stride,
                    refPtr + searchPositionIndex,
                    reflumaStride,
@@ -3945,8 +3946,8 @@ static void GetEightHorizontalSearchPointResultsAll85PUs(
     //---- 16x16_5
     blockIndex = blockIndex + 16;
     searchPositionIndex = searchPositionIndex + 16;
-    get_eight_horizontal_search_point_results_8x8_16x16_func_ptr_array
-        [asm_type](src_ptr + blockIndex,
+    get_eight_horizontal_search_point_results_8x8_16x16_pu_t(
+                   src_ptr + blockIndex,
                    context_ptr->sb_src_stride,
                    refPtr + searchPositionIndex,
                    reflumaStride,
@@ -3961,8 +3962,8 @@ static void GetEightHorizontalSearchPointResultsAll85PUs(
     //---- 16x16_2
     blockIndex = srcNext16x16Offset;
     searchPositionIndex = searchPositionTLIndex + refNext16x16Offset;
-    get_eight_horizontal_search_point_results_8x8_16x16_func_ptr_array
-        [asm_type](src_ptr + blockIndex,
+    get_eight_horizontal_search_point_results_8x8_16x16_pu_t(
+                   src_ptr + blockIndex,
                    context_ptr->sb_src_stride,
                    refPtr + searchPositionIndex,
                    reflumaStride,
@@ -3976,8 +3977,8 @@ static void GetEightHorizontalSearchPointResultsAll85PUs(
     //---- 16x16_3
     blockIndex = blockIndex + 16;
     searchPositionIndex = searchPositionIndex + 16;
-    get_eight_horizontal_search_point_results_8x8_16x16_func_ptr_array
-        [asm_type](src_ptr + blockIndex,
+    get_eight_horizontal_search_point_results_8x8_16x16_pu_t(
+                   src_ptr + blockIndex,
                    context_ptr->sb_src_stride,
                    refPtr + searchPositionIndex,
                    reflumaStride,
@@ -3991,8 +3992,8 @@ static void GetEightHorizontalSearchPointResultsAll85PUs(
     //---- 16x16_6
     blockIndex = blockIndex + 16;
     searchPositionIndex = searchPositionIndex + 16;
-    get_eight_horizontal_search_point_results_8x8_16x16_func_ptr_array
-        [asm_type](src_ptr + blockIndex,
+    get_eight_horizontal_search_point_results_8x8_16x16_pu_t(
+                   src_ptr + blockIndex,
                    context_ptr->sb_src_stride,
                    refPtr + searchPositionIndex,
                    reflumaStride,
@@ -4006,8 +4007,8 @@ static void GetEightHorizontalSearchPointResultsAll85PUs(
     //---- 16x16_7
     blockIndex = blockIndex + 16;
     searchPositionIndex = searchPositionIndex + 16;
-    get_eight_horizontal_search_point_results_8x8_16x16_func_ptr_array
-        [asm_type](src_ptr + blockIndex,
+    get_eight_horizontal_search_point_results_8x8_16x16_pu_t(
+                   src_ptr + blockIndex,
                    context_ptr->sb_src_stride,
                    refPtr + searchPositionIndex,
                    reflumaStride,
@@ -4022,8 +4023,8 @@ static void GetEightHorizontalSearchPointResultsAll85PUs(
     //---- 16x16_8
     blockIndex = (srcNext16x16Offset << 1);
     searchPositionIndex = searchPositionTLIndex + (refNext16x16Offset << 1);
-    get_eight_horizontal_search_point_results_8x8_16x16_func_ptr_array
-        [asm_type](src_ptr + blockIndex,
+    get_eight_horizontal_search_point_results_8x8_16x16_pu_t(
+                   src_ptr + blockIndex,
                    context_ptr->sb_src_stride,
                    refPtr + searchPositionIndex,
                    reflumaStride,
@@ -4037,8 +4038,8 @@ static void GetEightHorizontalSearchPointResultsAll85PUs(
     //---- 16x16_9
     blockIndex = blockIndex + 16;
     searchPositionIndex = searchPositionIndex + 16;
-    get_eight_horizontal_search_point_results_8x8_16x16_func_ptr_array
-        [asm_type](src_ptr + blockIndex,
+    get_eight_horizontal_search_point_results_8x8_16x16_pu_t(
+                   src_ptr + blockIndex,
                    context_ptr->sb_src_stride,
                    refPtr + searchPositionIndex,
                    reflumaStride,
@@ -4052,8 +4053,8 @@ static void GetEightHorizontalSearchPointResultsAll85PUs(
     //---- 16x16_12
     blockIndex = blockIndex + 16;
     searchPositionIndex = searchPositionIndex + 16;
-    get_eight_horizontal_search_point_results_8x8_16x16_func_ptr_array
-        [asm_type](src_ptr + blockIndex,
+    get_eight_horizontal_search_point_results_8x8_16x16_pu_t(
+                   src_ptr + blockIndex,
                    context_ptr->sb_src_stride,
                    refPtr + searchPositionIndex,
                    reflumaStride,
@@ -4067,8 +4068,8 @@ static void GetEightHorizontalSearchPointResultsAll85PUs(
     //---- 16x1_13
     blockIndex = blockIndex + 16;
     searchPositionIndex = searchPositionIndex + 16;
-    get_eight_horizontal_search_point_results_8x8_16x16_func_ptr_array
-        [asm_type](src_ptr + blockIndex,
+    get_eight_horizontal_search_point_results_8x8_16x16_pu_t(
+                   src_ptr + blockIndex,
                    context_ptr->sb_src_stride,
                    refPtr + searchPositionIndex,
                    reflumaStride,
@@ -4083,8 +4084,8 @@ static void GetEightHorizontalSearchPointResultsAll85PUs(
     //---- 16x16_10
     blockIndex = (srcNext16x16Offset * 3);
     searchPositionIndex = searchPositionTLIndex + (refNext16x16Offset * 3);
-    get_eight_horizontal_search_point_results_8x8_16x16_func_ptr_array
-        [asm_type](src_ptr + blockIndex,
+    get_eight_horizontal_search_point_results_8x8_16x16_pu_t(
+                   src_ptr + blockIndex,
                    context_ptr->sb_src_stride,
                    refPtr + searchPositionIndex,
                    reflumaStride,
@@ -4098,8 +4099,8 @@ static void GetEightHorizontalSearchPointResultsAll85PUs(
     //---- 16x16_11
     blockIndex = blockIndex + 16;
     searchPositionIndex = searchPositionIndex + 16;
-    get_eight_horizontal_search_point_results_8x8_16x16_func_ptr_array
-        [asm_type](src_ptr + blockIndex,
+    get_eight_horizontal_search_point_results_8x8_16x16_pu_t(
+                   src_ptr + blockIndex,
                    context_ptr->sb_src_stride,
                    refPtr + searchPositionIndex,
                    reflumaStride,
@@ -4113,8 +4114,8 @@ static void GetEightHorizontalSearchPointResultsAll85PUs(
     //---- 16x16_14
     blockIndex = blockIndex + 16;
     searchPositionIndex = searchPositionIndex + 16;
-    get_eight_horizontal_search_point_results_8x8_16x16_func_ptr_array
-        [asm_type](src_ptr + blockIndex,
+    get_eight_horizontal_search_point_results_8x8_16x16_pu_t(
+                   src_ptr + blockIndex,
                    context_ptr->sb_src_stride,
                    refPtr + searchPositionIndex,
                    reflumaStride,
@@ -4128,8 +4129,8 @@ static void GetEightHorizontalSearchPointResultsAll85PUs(
     //---- 16x16_15
     blockIndex = blockIndex + 16;
     searchPositionIndex = searchPositionIndex + 16;
-    get_eight_horizontal_search_point_results_8x8_16x16_func_ptr_array
-        [asm_type](src_ptr + blockIndex,
+    get_eight_horizontal_search_point_results_8x8_16x16_pu_t(
+                   src_ptr + blockIndex,
                    context_ptr->sb_src_stride,
                    refPtr + searchPositionIndex,
                    reflumaStride,
@@ -10569,7 +10570,7 @@ void HmeOneQuadrantLevel0(
                         yTopLeftSearchRegion * sixteenthRefPicPtr->stride_y;
 
     if (context_ptr->hme_search_type == HME_SPARSE) {
-        nxm_sad_loop_kernel_sparse_func_ptr_array[asm_type](
+        nxm_sad_loop_kernel_sparse(
             &context_ptr->sixteenth_sb_buffer[0],
             context_ptr->sixteenth_sb_buffer_stride,
             &sixteenthRefPicPtr->buffer_y[searchRegionIndex],
@@ -10634,7 +10635,7 @@ void HmeOneQuadrantLevel0(
                 search_area_height);
         } else {
             // Put the first search location into level0 results
-            nxm_sad_loop_kernel_func_ptr_array[asm_type](
+            nxm_sad_loop_kernel(
                 &context_ptr->sixteenth_sb_buffer[0],
                 context_ptr->sixteenth_sb_buffer_stride,
                 &sixteenthRefPicPtr->buffer_y[searchRegionIndex],
@@ -10882,7 +10883,7 @@ void HmeLevel0(
                 search_area_height);
         } else {
             // Put the first search location into level0 results
-            nxm_sad_loop_kernel_func_ptr_array[asm_type](
+            nxm_sad_loop_kernel(
                 &context_ptr->sixteenth_sb_buffer[0],
                 context_ptr->sixteenth_sb_buffer_stride,
                 &sixteenthRefPicPtr->buffer_y[searchRegionIndex],
@@ -11059,7 +11060,7 @@ void HmeLevel1(
 
     if (((sb_width & 7) == 0) || (sb_width == 4)) {
         // Put the first search location into level0 results
-        nxm_sad_loop_kernel_func_ptr_array[asm_type](
+        nxm_sad_loop_kernel(
             &context_ptr->quarter_sb_buffer[0],
             (context_ptr->hme_search_method == FULL_SAD_SEARCH)
                 ? context_ptr->quarter_sb_buffer_stride
@@ -11246,7 +11247,7 @@ void HmeLevel2(
         xTopLeftSearchRegion + yTopLeftSearchRegion * refPicPtr->stride_y;
     if ((((sb_width & 7) == 0) && (sb_width != 40) && (sb_width != 56))) {
         // Put the first search location into level0 results
-        nxm_sad_loop_kernel_func_ptr_array[asm_type](
+        nxm_sad_loop_kernel(
             context_ptr->sb_src_ptr,
             (context_ptr->hme_search_method == FULL_SAD_SEARCH)
                 ? context_ptr->sb_src_stride
@@ -11446,7 +11447,7 @@ static void QuarterPelCompensation(
     buf1 = buf1 + puShiftXIndex + puShiftYIndex * refStride1;
     buf2 = buf2 + puShiftXIndex + puShiftYIndex * refStride2;
 
-    picture_average_array[asm_type](buf1,
+    picture_average(buf1,
                                     refStride1,
                                     buf2,
                                     refStride2,
@@ -11626,7 +11627,7 @@ static void quarter_pel_compensation(
     buf1 = buf1 + puShiftXIndex + puShiftYIndex * refStride1;
     buf2 = buf2 + puShiftXIndex + puShiftYIndex * refStride2;
 
-    picture_average_array[asm_type](buf1,
+    picture_average(buf1,
                                     refStride1,
                                     buf2,
                                     refStride2,
@@ -14991,7 +14992,7 @@ uint64_t SixteenthDecimatedSearch(MeContext *context_ptr, int16_t origin_x,
             search_area_height);
     } else {
         // Put the first search location into level0 results
-        nxm_sad_loop_kernel_func_ptr_array[asm_type](
+        nxm_sad_loop_kernel(
             &context_ptr->sixteenth_sb_buffer[0],
             context_ptr->sixteenth_sb_buffer_stride * 2,
             &sixteenthRefPicPtr->buffer_y[searchRegionIndex],

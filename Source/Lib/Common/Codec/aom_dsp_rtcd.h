@@ -48,6 +48,25 @@ extern "C" {
     struct ConvolveParams;
     struct InterpFilterParams;
 
+    void picture_average_kernel_sse2_intrin(EbByte   src0, uint32_t src0_stride, EbByte   src1, uint32_t src1_stride, EbByte   dst, uint32_t dst_stride, uint32_t area_width, uint32_t area_height);
+    RTCD_EXTERN void(*picture_average)(EbByte   src0, uint32_t src0_stride, EbByte   src1, uint32_t src1_stride, EbByte   dst, uint32_t dst_stride, uint32_t area_width, uint32_t area_height);
+    
+    void picture_average_kernel1_line_sse2_intrin(EbByte src0,EbByte src1,EbByte dst,uint32_t area_width);
+    RTCD_EXTERN void(*picture_average1_line)(EbByte src0,EbByte src1,EbByte dst,uint32_t area_width);
+
+    void sad_loop_kernel_sse4_1_intrin(uint8_t  *src, uint32_t  src_stride, uint8_t  *ref, uint32_t  ref_stride, uint32_t  height, uint32_t  width, uint64_t *best_sad, int16_t *x_search_center, int16_t *y_search_center, uint32_t  src_stride_raw, int16_t search_area_width, int16_t search_area_height);
+    void sad_loop_kernel_avx2_intrin(uint8_t  *src, uint32_t  src_stride, uint8_t  *ref, uint32_t  ref_stride, uint32_t  height, uint32_t  width, uint64_t *best_sad, int16_t *x_search_center, int16_t *y_search_center, uint32_t  src_stride_raw, int16_t search_area_width, int16_t search_area_height);
+    RTCD_EXTERN void(*nxm_sad_loop_kernel)(uint8_t  *src, uint32_t  src_stride, uint8_t  *ref, uint32_t  ref_stride, uint32_t  height, uint32_t  width, uint64_t *best_sad, int16_t *x_search_center, int16_t *y_search_center, uint32_t  src_stride_raw, int16_t search_area_width, int16_t search_area_height);
+
+    void sad_loop_kernel_sparse_sse4_1_intrin(uint8_t  *src, uint32_t  src_stride, uint8_t  *ref, uint32_t  ref_stride, uint32_t  height, uint32_t  width, uint64_t *best_sad, int16_t *x_search_center, int16_t *y_search_center, uint32_t  src_stride_raw, int16_t search_area_width, int16_t search_area_height);
+    void sad_loop_kernel_sparse_avx2_intrin(uint8_t  *src, uint32_t  src_stride, uint8_t  *ref, uint32_t  ref_stride, uint32_t  height, uint32_t  width, uint64_t *best_sad, int16_t *x_search_center, int16_t *y_search_center, uint32_t  src_stride_raw, int16_t search_area_width, int16_t search_area_height);
+    RTCD_EXTERN void(*nxm_sad_loop_kernel_sparse)(uint8_t  *src, uint32_t  src_stride, uint8_t  *ref, uint32_t  ref_stride, uint32_t  height, uint32_t  width, uint64_t *best_sad, int16_t *x_search_center, int16_t *y_search_center, uint32_t  src_stride_raw, int16_t search_area_width, int16_t search_area_height);
+
+    void get_eight_horizontal_search_point_results_8x8_16x16_pu_sse41_intrin(uint8_t *src, uint32_t src_stride, uint8_t *ref, uint32_t ref_stride, uint32_t  *p_best_sad8x8, uint32_t *p_best_mv8x8, uint32_t *p_best_sad16x16, uint32_t *p_best_mv16x16, uint32_t mv, uint16_t *p_sad16x16, EbBool sub_sad);
+    void get_eight_horizontal_search_point_results_8x8_16x16_pu_avx2_intrin(uint8_t *src, uint32_t src_stride, uint8_t *ref, uint32_t ref_stride, uint32_t  *p_best_sad8x8, uint32_t *p_best_mv8x8, uint32_t *p_best_sad16x16, uint32_t *p_best_mv16x16, uint32_t mv, uint16_t *p_sad16x16, EbBool sub_sad);
+    RTCD_EXTERN void(*get_eight_horizontal_search_point_results_8x8_16x16_pu_t)(uint8_t *src, uint32_t src_stride, uint8_t *ref, uint32_t ref_stride, uint32_t  *p_best_sad8x8, uint32_t *p_best_mv8x8, uint32_t *p_best_sad16x16, uint32_t *p_best_mv16x16, uint32_t mv, uint16_t *p_sad16x16, EbBool sub_sad);
+
+
     void eb_apply_selfguided_restoration_c(const uint8_t *dat, int32_t width, int32_t height, int32_t stride, int32_t eps, const int32_t *xqd, uint8_t *dst, int32_t dst_stride, int32_t *tmpbuf, int32_t bit_depth, int32_t highbd);
     void eb_apply_selfguided_restoration_avx2(const uint8_t *dat, int32_t width, int32_t height, int32_t stride, int32_t eps, const int32_t *xqd, uint8_t *dst, int32_t dst_stride, int32_t *tmpbuf, int32_t bit_depth, int32_t highbd);
     RTCD_EXTERN void(*eb_apply_selfguided_restoration)(const uint8_t *dat, int32_t width, int32_t height, int32_t stride, int32_t eps, const int32_t *xqd, uint8_t *dst, int32_t dst_stride, int32_t *tmpbuf, int32_t bit_depth, int32_t highbd);
@@ -2405,6 +2424,21 @@ extern "C" {
         //    flags = ~HAS_AVX2;
 
         //to use C: flags=0
+
+        picture_average = picture_average_kernel_sse2_intrin;
+        if (flags & HAS_SSE2) picture_average = picture_average_kernel_sse2_intrin;
+
+        picture_average1_line = picture_average_kernel1_line_sse2_intrin;
+        if (flags & HAS_SSE2) picture_average1_line = picture_average_kernel1_line_sse2_intrin;
+
+        nxm_sad_loop_kernel = sad_loop_kernel_sse4_1_intrin;
+        if (flags & HAS_AVX2) nxm_sad_loop_kernel = sad_loop_kernel_avx2_intrin;
+
+        nxm_sad_loop_kernel_sparse = sad_loop_kernel_sparse_sse4_1_intrin;
+        if (flags & HAS_AVX2) nxm_sad_loop_kernel_sparse = sad_loop_kernel_sparse_avx2_intrin;
+
+        get_eight_horizontal_search_point_results_8x8_16x16_pu_t = get_eight_horizontal_search_point_results_8x8_16x16_pu_sse41_intrin;
+        if (flags & HAS_AVX2)get_eight_horizontal_search_point_results_8x8_16x16_pu_t = get_eight_horizontal_search_point_results_8x8_16x16_pu_avx2_intrin;
 
         eb_apply_selfguided_restoration = eb_apply_selfguided_restoration_c;
         if (flags & HAS_AVX2) eb_apply_selfguided_restoration = eb_apply_selfguided_restoration_avx2;

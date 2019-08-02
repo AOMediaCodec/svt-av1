@@ -186,29 +186,6 @@ extern "C" {
         },
     };
 
-    static EbSadLoopKernelNxMType FUNC_TABLE nxm_sad_loop_kernel_sparse_func_ptr_array[ASM_TYPE_TOTAL] =
-    {
-        // NON_AVX2
-        sad_loop_kernel_sparse_sse4_1_intrin,
-        // AVX2
-        sad_loop_kernel_sparse_avx2_intrin,
-    };
-
-    static EbSadLoopKernelNxMType FUNC_TABLE nxm_sad_loop_kernel_func_ptr_array[ASM_TYPE_TOTAL] =
-    {
-        // NON_AVX2
-        sad_loop_kernel_sse4_1_intrin,
-        // AVX2
-        sad_loop_kernel_avx2_intrin,
-    };
-
-    static EbGetEightSad8x8 FUNC_TABLE get_eight_horizontal_search_point_results_8x8_16x16_func_ptr_array[ASM_TYPE_TOTAL] =
-    {
-        // NON_AVX2
-        get_eight_horizontal_search_point_results_8x8_16x16_pu_sse41_intrin,
-        // AVX2
-        get_eight_horizontal_search_point_results_8x8_16x16_pu_avx2_intrin,
-    };
 
     static EbGetEightSad32x32 FUNC_TABLE get_eight_horizontal_search_point_results_32x32_64x64_func_ptr_array[ASM_TYPE_TOTAL] =
     {
