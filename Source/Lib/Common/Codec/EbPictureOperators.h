@@ -315,25 +315,6 @@ extern "C" {
         uint32_t  area_width,
         uint32_t  area_height);
 
-    static EbZeroCoeffType FUNC_TABLE pic_zero_out_coef_func_ptr_array[ASM_TYPE_TOTAL][5] = {
-        // NON_AVX2
-        {
-            /*0 4x4   */     zero_out_coeff4x4_sse,
-            /*1 8x8   */     zero_out_coeff8x8_sse2,
-            /*2 16x16 */     zero_out_coeff16x16_sse2,
-            /*3       */     (EbZeroCoeffType)pic_zero_out_coef_void_func,
-            /*4 32x32 */     zero_out_coeff32x32_sse2
-        },
-        // AVX2
-        {
-            /*0 4x4   */     zero_out_coeff4x4_sse,
-            /*1 8x8   */     zero_out_coeff8x8_sse2,
-            /*2 16x16 */     zero_out_coeff16x16_sse2,
-            /*3       */     (EbZeroCoeffType)pic_zero_out_coef_void_func,
-            /*4 32x32 */     zero_out_coeff32x32_sse2
-        },
-    };
-
     typedef uint64_t(*EbSpatialFullDistType)(
         uint8_t   *input,
         uint32_t   input_offset,
