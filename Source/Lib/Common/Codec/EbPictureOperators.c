@@ -306,7 +306,7 @@ uint64_t compute_nx_m_satd_sad_lcu(
 *  Used in the Full Mode Decision Loop for the only case of a MVP-SKIP candidate
 *******************************************/
 
-void full_distortion_kernel32_bits(
+void full_distortion_kernel32_bits_c(
     int32_t  *coeff,
     uint32_t   coeff_stride,
     int32_t  *recon_coeff,
@@ -373,7 +373,7 @@ uint64_t full_distortion_kernel16_bits(
 /*******************************************
 * Picture Distortion Full Kernel CbfZero
 *******************************************/
-void full_distortion_kernel_cbf_zero32_bits(
+void full_distortion_kernel_cbf_zero32_bits_c(
     int32_t  *coeff,
     uint32_t   coeff_stride,
     int32_t  *recon_coeff,
@@ -713,7 +713,7 @@ void memcpy32bit(
         out_ptr[i] = in_ptr[i];
 }
 
-int32_t  sum_residual(int16_t * in_ptr,
+int32_t  sum_residual_c(int16_t * in_ptr,
     uint32_t   size,
     uint32_t   stride_in)
 {
@@ -727,7 +727,7 @@ int32_t  sum_residual(int16_t * in_ptr,
     return sumBlock;
 }
 
-void memset16bit_block(
+void memset16bit_block_c(
     int16_t * in_ptr,
     uint32_t   stride_in,
     uint32_t   size,

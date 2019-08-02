@@ -3373,7 +3373,7 @@ uint32_t compute8x_m_sad_avx2_intrin(
     return (uint32_t)_mm_cvtsi128_si32(xmm0);
 }
 
-uint32_t Compute4xMSadSub_AVX2_INTRIN(
+uint32_t Compute4xMSadSub_avx2_intrin(
     const uint8_t  *src,  // input parameter, source samples Ptr
     uint32_t  src_stride, // input parameter, source stride
     const uint8_t  *ref,  // input parameter, reference samples Ptr
@@ -4905,19 +4905,19 @@ void sad_loop_kernel_avx2_hme_l0_intrin(
 
 uint32_t eb_aom_sad4x4_avx2(const uint8_t *src_ptr, int src_stride,
     const uint8_t *ref_ptr, int ref_stride) {
-    return Compute4xMSadSub_AVX2_INTRIN(src_ptr, src_stride, ref_ptr,
+    return Compute4xMSadSub_avx2_intrin(src_ptr, src_stride, ref_ptr,
         ref_stride, 4, 4);
 }
 
 uint32_t eb_aom_sad4x8_avx2(const uint8_t *src_ptr, int src_stride,
     const uint8_t *ref_ptr, int ref_stride) {
-    return Compute4xMSadSub_AVX2_INTRIN(src_ptr, src_stride, ref_ptr,
+    return Compute4xMSadSub_avx2_intrin(src_ptr, src_stride, ref_ptr,
         ref_stride, 8, 4);
 }
 
 uint32_t eb_aom_sad4x16_avx2(const uint8_t *src_ptr, int src_stride,
     const uint8_t *ref_ptr, int ref_stride) {
-    return Compute4xMSadSub_AVX2_INTRIN(src_ptr, src_stride, ref_ptr,
+    return Compute4xMSadSub_avx2_intrin(src_ptr, src_stride, ref_ptr,
         ref_stride, 16, 4);
 }
 

@@ -5116,9 +5116,9 @@ EbErrorType encode_transform(
 
     else { // trans_coeff_shape == ONLY_DC_SHAPE
 
-        int32_t sum_residual;
+        int32_t ttl_residual;
 
-        sum_residual = sum_residual_func_ptr_array[asm_type](
+        ttl_residual = sum_residual_func_ptr_array[asm_type](
             residual_buffer,
             transform_size,
             residual_stride);
@@ -5131,7 +5131,7 @@ EbErrorType encode_transform(
 
         int16_t dcCoeff;
         int32_t dcCoeffTemp;
-        dcCoeffTemp = (int32_t)((64 * sum_residual + offset1st) >> shift1st);
+        dcCoeffTemp = (int32_t)((64 * ttl_residual + offset1st) >> shift1st);
         dcCoeff = (int16_t)((64 * dcCoeffTemp + offset2nd) >> shift2nd);
 
         coeff_buffer[0] = dcCoeff;

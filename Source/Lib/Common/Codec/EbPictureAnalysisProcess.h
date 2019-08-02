@@ -36,7 +36,7 @@ extern EbErrorType picture_analysis_context_ctor(
 
 extern void* picture_analysis_kernel(void *input_ptr);
 
-void noise_extract_luma_weak(
+void noise_extract_luma_weak_c(
     EbPictureBufferDesc *input_picture_ptr,
     EbPictureBufferDesc *denoised_picture_ptr,
     EbPictureBufferDesc *noise_picture_ptr,
@@ -59,12 +59,12 @@ typedef void(*EbWeakLumaFilterType)(
 static EbWeakLumaFilterType FUNC_TABLE weak_luma_filter_func_ptr_array[ASM_TYPE_TOTAL] =
 {
     // NON_AVX2
-    noise_extract_luma_weak,
+    noise_extract_luma_weak_c,
     // AVX2
     noise_extract_luma_weak_avx2_intrin,
 };
 
-void noise_extract_luma_weak_lcu(
+void noise_extract_luma_weak_lcu_c(
     EbPictureBufferDesc *input_picture_ptr,
     EbPictureBufferDesc *denoised_picture_ptr,
     EbPictureBufferDesc *noise_picture_ptr,
@@ -74,12 +74,12 @@ void noise_extract_luma_weak_lcu(
 static EbWeakLumaFilterType FUNC_TABLE weak_luma_filter_lcu_func_ptr_array[ASM_TYPE_TOTAL] =
 {
     // NON_AVX2
-    noise_extract_luma_weak_lcu,
+    noise_extract_luma_weak_lcu_c,
     // AVX2
     noise_extract_luma_weak_lcu_avx2_intrin,
 };
 
-void noise_extract_luma_strong(
+void noise_extract_luma_strong_c(
     EbPictureBufferDesc *input_picture_ptr,
     EbPictureBufferDesc *denoised_picture_ptr,
     uint32_t               sb_origin_y,
@@ -94,11 +94,11 @@ typedef void(*EbStrongLumaFilterType)(
 static EbStrongLumaFilterType FUNC_TABLE strong_luma_filter_func_ptr_array[ASM_TYPE_TOTAL] =
 {
     // NON_AVX2
-    noise_extract_luma_strong,
+    noise_extract_luma_strong_c,
     // AVX2
     noise_extract_luma_strong_avx2_intrin,
 };
-void noise_extract_chroma_strong(
+void noise_extract_chroma_strong_c(
     EbPictureBufferDesc *input_picture_ptr,
     EbPictureBufferDesc *denoised_picture_ptr,
     uint32_t               sb_origin_y,
@@ -113,12 +113,12 @@ typedef void(*EbStrongChromaFilterType)(
 static EbStrongChromaFilterType FUNC_TABLE strong_chroma_filter_func_ptr_array[ASM_TYPE_TOTAL] =
 {
     // NON_AVX2
-    noise_extract_chroma_strong,
+    noise_extract_chroma_strong_c,
     // AVX2
     noise_extract_chroma_strong_avx2_intrin,
 };
 
-void noise_extract_chroma_weak(
+void noise_extract_chroma_weak_c(
     EbPictureBufferDesc *input_picture_ptr,
     EbPictureBufferDesc *denoised_picture_ptr,
     uint32_t               sb_origin_y,
@@ -133,7 +133,7 @@ typedef void(*EbWeakChromaFilterType)(
 static EbWeakChromaFilterType FUNC_TABLE weak_chroma_filter_func_ptr_array[ASM_TYPE_TOTAL] =
 {
     // NON_AVX2
-    noise_extract_chroma_weak,
+    noise_extract_chroma_weak_c,
     // AVX2
     noise_extract_chroma_weak_avx2_intrin,
 };

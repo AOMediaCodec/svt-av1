@@ -85,7 +85,7 @@ void ext_eight_sad_calculation_32x32_64x64_c(
  * Compute8x4SAD_Default
  *   Unoptimized 8x4 SAD
  *******************************************/
-uint32_t compute8x4_sad_kernel(
+uint32_t compute8x4_sad_kernel_c(
     uint8_t *src,         // input parameter, source samples Ptr
     uint32_t src_stride,  // input parameter, source stride
     uint8_t *ref,         // input parameter, reference samples Ptr
@@ -143,9 +143,9 @@ static EbCompute8x4SadType FUNC_TABLE
     compute8x4SAD_funcPtrArray[ASM_TYPE_TOTAL] =  // [C_DEFAULT/ASM]
     {
         // C_DEFAULT
-        compute8x4_sad_kernel,
+        compute8x4_sad_kernel_c,
         // SSE2
-        compute8x4_sad_kernel,
+        compute8x4_sad_kernel_c,
 };
 /***************************************
  * Function Tables
@@ -583,22 +583,22 @@ void sad_calculation_8x8_16x16(uint8_t *src, uint32_t src_stride, uint8_t *ref,
     uint64_t sad16x16;
 
     if (sub_sad) {
-        sad8x8[0] = (compute8x4_sad_kernel(src + 0 * src_stride + 0,
+        sad8x8[0] = (compute8x4_sad_kernel_c(src + 0 * src_stride + 0,
                                            2 * src_stride,
                                            ref + 0 * ref_stride + 0,
                                            2 * ref_stride))
                     << 1;
-        sad8x8[1] = (compute8x4_sad_kernel(src + 0 * src_stride + 8,
+        sad8x8[1] = (compute8x4_sad_kernel_c(src + 0 * src_stride + 8,
                                            2 * src_stride,
                                            ref + 0 * ref_stride + 8,
                                            2 * ref_stride))
                     << 1;
-        sad8x8[2] = (compute8x4_sad_kernel(src + 8 * src_stride + 0,
+        sad8x8[2] = (compute8x4_sad_kernel_c(src + 8 * src_stride + 0,
                                            2 * src_stride,
                                            ref + 8 * ref_stride + 0,
                                            2 * ref_stride))
                     << 1;
-        sad8x8[3] = (compute8x4_sad_kernel(src + 8 * src_stride + 8,
+        sad8x8[3] = (compute8x4_sad_kernel_c(src + 8 * src_stride + 8,
                                            2 * src_stride,
                                            ref + 8 * ref_stride + 8,
                                            2 * ref_stride))

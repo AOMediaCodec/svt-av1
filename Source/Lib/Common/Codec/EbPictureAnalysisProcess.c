@@ -1318,7 +1318,7 @@ uint8_t  getFilteredTypes(uint8_t  *ptr,
 * noise_extract_luma_strong
 *  strong filter Luma.
 *******************************************/
-void noise_extract_luma_strong(
+void noise_extract_luma_strong_c(
     EbPictureBufferDesc       *input_picture_ptr,
     EbPictureBufferDesc       *denoised_picture_ptr,
     uint32_t                       sb_origin_y
@@ -1366,7 +1366,7 @@ void noise_extract_luma_strong(
 * noise_extract_chroma_strong
 *  strong filter chroma.
 *******************************************/
-void noise_extract_chroma_strong(
+void noise_extract_chroma_strong_c(
     EbPictureBufferDesc       *input_picture_ptr,
     EbPictureBufferDesc       *denoised_picture_ptr,
     uint32_t                       sb_origin_y
@@ -1444,7 +1444,7 @@ void noise_extract_chroma_strong(
 * noise_extract_chroma_weak
 *  weak filter chroma.
 *******************************************/
-void noise_extract_chroma_weak(
+void noise_extract_chroma_weak_c(
     EbPictureBufferDesc       *input_picture_ptr,
     EbPictureBufferDesc       *denoised_picture_ptr,
     uint32_t                       sb_origin_y
@@ -1524,7 +1524,7 @@ void noise_extract_chroma_weak(
 * noise_extract_luma_weak
 *  weak filter Luma and store noise.
 *******************************************/
-void noise_extract_luma_weak(
+void noise_extract_luma_weak_c(
     EbPictureBufferDesc       *input_picture_ptr,
     EbPictureBufferDesc       *denoised_picture_ptr,
     EbPictureBufferDesc       *noise_picture_ptr,
@@ -1580,7 +1580,7 @@ void noise_extract_luma_weak(
     }
 }
 
-void noise_extract_luma_weak_lcu(
+void noise_extract_luma_weak_lcu_c(
     EbPictureBufferDesc       *input_picture_ptr,
     EbPictureBufferDesc       *denoised_picture_ptr,
     EbPictureBufferDesc       *noise_picture_ptr,
@@ -3045,7 +3045,7 @@ EbErrorType DenoiseInputPicture(
 
             if (sb_origin_x + BLOCK_SIZE_64 > input_picture_ptr->width)
             {
-                noise_extract_luma_strong(
+                noise_extract_luma_strong_c(
                     input_picture_ptr,
                     denoised_picture_ptr,
                     sb_origin_y,
@@ -3074,7 +3074,7 @@ EbErrorType DenoiseInputPicture(
 
             if (sb_origin_x + BLOCK_SIZE_64 > input_picture_ptr->width)
             {
-                noise_extract_chroma_strong(
+                noise_extract_chroma_strong_c(
                     input_picture_ptr,
                     denoised_picture_ptr,
                     sb_origin_y >> subsampling_y,
@@ -3119,7 +3119,7 @@ EbErrorType DenoiseInputPicture(
 
             if (sb_origin_x + BLOCK_SIZE_64 > input_picture_ptr->width)
             {
-                noise_extract_chroma_weak(
+                noise_extract_chroma_weak_c(
                     input_picture_ptr,
                     denoised_picture_ptr,
                     sb_origin_y >> subsampling_y,
@@ -3205,7 +3205,7 @@ EbErrorType DetectInputPictureNoise(
 
         if (sb_origin_x + BLOCK_SIZE_64 > input_picture_ptr->width)
         {
-            noise_extract_luma_weak(
+            noise_extract_luma_weak_c(
                 input_picture_ptr,
                 denoised_picture_ptr,
                 noise_picture_ptr,
@@ -3406,7 +3406,7 @@ EbErrorType SubSampleFilterNoise(
 
             if (sb_origin_x + BLOCK_SIZE_64 > input_picture_ptr->width)
             {
-                noise_extract_luma_weak(
+                noise_extract_luma_weak_c(
                     input_picture_ptr,
                     denoised_picture_ptr,
                     noise_picture_ptr,
@@ -3436,7 +3436,7 @@ EbErrorType SubSampleFilterNoise(
 
             if (sb_origin_x + BLOCK_SIZE_64 > input_picture_ptr->width)
             {
-                noise_extract_chroma_weak(
+                noise_extract_chroma_weak_c(
                     input_picture_ptr,
                     denoised_picture_ptr,
                     sb_origin_y >> subsampling_y,
@@ -3476,7 +3476,7 @@ EbErrorType SubSampleFilterNoise(
 
                 if (sb_origin_x + BLOCK_SIZE_64 > input_picture_ptr->width)
                 {
-                    noise_extract_luma_weak_lcu(
+                    noise_extract_luma_weak_lcu_c(
                         input_picture_ptr,
                         denoised_picture_ptr,
                         noise_picture_ptr,
@@ -3585,7 +3585,7 @@ EbErrorType QuarterSampleDetectNoise(
 
             if (block64x64Y + BLOCK_SIZE_64 > quarter_decimated_picture_ptr->width)
             {
-                noise_extract_luma_weak(
+                noise_extract_luma_weak_c(
                     quarter_decimated_picture_ptr,
                     denoised_picture_ptr,
                     noise_picture_ptr,
@@ -3709,7 +3709,7 @@ EbErrorType SubSampleDetectNoise(
 
             if (block64x64Y + BLOCK_SIZE_64 > sixteenth_decimated_picture_ptr->width)
             {
-                noise_extract_luma_weak(
+                noise_extract_luma_weak_c(
                     sixteenth_decimated_picture_ptr,
                     denoised_picture_ptr,
                     noise_picture_ptr,

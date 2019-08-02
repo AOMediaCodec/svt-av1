@@ -5833,7 +5833,7 @@ EB_EXTERN EbErrorType mode_decision_sb(
 * Compute4x4SAD_Default
 *   Unoptimized 4x4 SAD
 *******************************************/
-uint32_t Compute4x4SAD_Kernel(
+uint32_t Compute4x4SAD_Kernel_c(
     const uint8_t  *src,                       // input parameter, source samples Ptr
     uint32_t  src_stride,                      // input parameter, source stride
     const uint8_t  *ref,                       // input parameter, reference samples Ptr
@@ -5861,7 +5861,7 @@ uint32_t Compute4x4SAD_Kernel(
 static EbSadKernelNxMType FUNC_TABLE compute4x4SAD_funcPtrArray[ASM_TYPE_TOTAL] =// [C_DEFAULT/ASM]
 {
     // C_DEFAULT
-    Compute4x4SAD_Kernel,
+    Compute4x4SAD_Kernel_c,
     // SSE2
     compute4x_m_sad_avx2_intrin,
 };

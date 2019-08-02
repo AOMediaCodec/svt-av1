@@ -118,7 +118,7 @@ extern "C" {
         },
         // AVX2
         {
-            /*0 4xM  */ Compute4xMSadSub_AVX2_INTRIN,
+            /*0 4xM  */ Compute4xMSadSub_avx2_intrin,
             /*1 8xM  */ compute8x_m_sad_avx2_intrin,
             /*2 16xM */ compute16x_m_sad_avx2_intrin,
             /*3 24xM */ fast_loop_nx_m_sad_kernel,
