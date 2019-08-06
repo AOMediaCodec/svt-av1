@@ -175,13 +175,16 @@ extern "C" {
     uint64_t compute_cdef_dist_avx2(const uint16_t *dst, int32_t dstride, const uint16_t *src, const cdef_list *dlist, int32_t cdef_count, BlockSize bsize, int32_t coeff_shift, int32_t pli);
     RTCD_EXTERN uint64_t(*eb_compute_cdef_dist)(const uint16_t *dst, int32_t dstride, const uint16_t *src, const cdef_list *dlist, int32_t cdef_count, BlockSize bsize, int32_t coeff_shift, int32_t pli);
 
-
     uint32_t nxm_sad_kernel_helper(const uint8_t  *src,uint32_t  src_stride,const uint8_t  *ref,uint32_t  ref_stride,uint32_t  height,uint32_t  width,uint8_t choice);
     uint32_t nxm_sad_kernel_sub_sampled_avx2_helper(const uint8_t  *src,uint32_t  src_stride,const uint8_t  *ref,uint32_t  ref_stride,uint32_t  height,uint32_t  width,uint8_t choice);
     RTCD_EXTERN uint32_t(*nxm_sad_kernel_sub_sampled)(const uint8_t  *src, uint32_t  src_stride, const uint8_t  *ref, uint32_t  ref_stride, uint32_t  height, uint32_t  width, uint8_t choice);
 
     uint32_t nxm_sad_kernel_avx2_helper(const uint8_t  *src, uint32_t  src_stride, const uint8_t  *ref, uint32_t  ref_stride, uint32_t  height, uint32_t  width, uint8_t choice);
     RTCD_EXTERN uint32_t(*nxm_sad_kernel)(const uint8_t  *src, uint32_t  src_stride, const uint8_t  *ref, uint32_t  ref_stride, uint32_t  height, uint32_t  width, uint8_t choice);
+
+    uint32_t nxm_sad_avg_kernel_helper(uint8_t  *src,uint32_t  src_stride,uint8_t  *ref1,uint32_t  ref1_stride,uint8_t  *ref2,uint32_t  ref2_stride,uint32_t  height,uint32_t  width,uint8_t   choice);
+    uint32_t nxm_sad_avg_kernel_avx2_helper(uint8_t  *src,uint32_t  src_stride,uint8_t  *ref1,uint32_t  ref1_stride,uint8_t  *ref2,uint32_t  ref2_stride,uint32_t  height,uint32_t  width,uint8_t   choice);
+    RTCD_EXTERN uint32_t(*nxm_sad_avg_kernel)(uint8_t  *src, uint32_t  src_stride, uint8_t  *ref1, uint32_t  ref1_stride, uint8_t  *ref2, uint32_t  ref2_stride, uint32_t  height, uint32_t  width, uint8_t   choice);
 
     void eb_copy_rect8_8bit_to_16bit_c(uint16_t *dst, int32_t dstride, const uint8_t *src, int32_t sstride, int32_t v, int32_t h);
     void eb_copy_rect8_8bit_to_16bit_avx2(uint16_t *dst, int32_t dstride, const uint8_t *src, int32_t sstride, int32_t v, int32_t h);
@@ -2595,6 +2598,9 @@ extern "C" {
 
         nxm_sad_kernel = nxm_sad_kernel_helper;
         if (flags & HAS_AVX2) nxm_sad_kernel = nxm_sad_kernel_avx2_helper;
+
+        nxm_sad_avg_kernel = nxm_sad_avg_kernel_helper;
+        if (flags & HAS_AVX2) nxm_sad_avg_kernel = nxm_sad_avg_kernel_avx2_helper;
 
         eb_apply_selfguided_restoration = eb_apply_selfguided_restoration_c;
         if (flags & HAS_AVX2) eb_apply_selfguided_restoration = eb_apply_selfguided_restoration_avx2;

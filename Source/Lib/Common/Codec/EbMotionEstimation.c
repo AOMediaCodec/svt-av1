@@ -7084,8 +7084,7 @@ static void PU_QuarterPelRefinementOnTheFly(
                           pu_height,
                           pu_width)
                     : (context_ptr->fractional_search_method == SUB_SAD_SEARCH)
-                          ? (nxm_sad_averaging_kernel_func_ptr_array
-                                 [asm_type][pu_width >> 3](
+                          ? (nxm_sad_avg_kernel(
                                      &(context_ptr
                                            ->sb_buffer[puLcuBufferIndex]),
                                      BLOCK_SIZE_64 << 1,
@@ -7094,10 +7093,10 @@ static void PU_QuarterPelRefinementOnTheFly(
                                      buf2[0] + searchRegionIndex2,
                                      buf2Stride[0] << 1,
                                      pu_height >> 1,
-                                     pu_width))
+                                     pu_width,
+                                     pu_width >> 3))
                                 << 1
-                          : nxm_sad_averaging_kernel_func_ptr_array
-                                [asm_type][pu_width >> 3](
+                          : nxm_sad_avg_kernel(
                                     &(context_ptr->sb_buffer[puLcuBufferIndex]),
                                     BLOCK_SIZE_64,
                                     buf1[0] + searchRegionIndex1,
@@ -7105,12 +7104,12 @@ static void PU_QuarterPelRefinementOnTheFly(
                                     buf2[0] + searchRegionIndex2,
                                     buf2Stride[0],
                                     pu_height,
-                                    pu_width);
+                                    pu_width,
+                                    pu_width >> 3);
             if (context_ptr->fractional_search_method == SSD_SEARCH) {
                 if (dist < *pBestSsd) {
                     *pBestSad =
-                        (uint32_t)nxm_sad_averaging_kernel_func_ptr_array
-                            [asm_type][pu_width >> 3](
+                        nxm_sad_avg_kernel(
                                 &(context_ptr->sb_buffer[puLcuBufferIndex]),
                                 BLOCK_SIZE_64,
                                 buf1[0] + searchRegionIndex1,
@@ -7118,7 +7117,8 @@ static void PU_QuarterPelRefinementOnTheFly(
                                 buf2[0] + searchRegionIndex2,
                                 buf2Stride[0],
                                 pu_height,
-                                pu_width);
+                                pu_width,
+                                pu_width >> 3);
                     *pBestMV = ((uint16_t)yMvQuarter[0] << 16) |
                                ((uint16_t)xMvQuarter[0]);
                     *pBestSsd = (uint32_t)dist;
@@ -7150,8 +7150,7 @@ static void PU_QuarterPelRefinementOnTheFly(
                           pu_height,
                           pu_width)
                     : (context_ptr->fractional_search_method == SUB_SAD_SEARCH)
-                          ? (nxm_sad_averaging_kernel_func_ptr_array
-                                 [asm_type][pu_width >> 3](
+                          ? (nxm_sad_avg_kernel(
                                      &(context_ptr
                                            ->sb_buffer[puLcuBufferIndex]),
                                      BLOCK_SIZE_64 << 1,
@@ -7160,10 +7159,10 @@ static void PU_QuarterPelRefinementOnTheFly(
                                      buf2[1] + searchRegionIndex2,
                                      buf2Stride[1] << 1,
                                      pu_height >> 1,
-                                     pu_width))
+                                     pu_width,
+                                     pu_width >> 3))
                                 << 1
-                          : nxm_sad_averaging_kernel_func_ptr_array
-                                [asm_type][pu_width >> 3](
+                          : nxm_sad_avg_kernel(
                                     &(context_ptr->sb_buffer[puLcuBufferIndex]),
                                     BLOCK_SIZE_64,
                                     buf1[1] + searchRegionIndex1,
@@ -7171,12 +7170,12 @@ static void PU_QuarterPelRefinementOnTheFly(
                                     buf2[1] + searchRegionIndex2,
                                     buf2Stride[1],
                                     pu_height,
-                                    pu_width);
+                                    pu_width,
+                                    pu_width >> 3);
             if (context_ptr->fractional_search_method == SSD_SEARCH) {
                 if (dist < *pBestSsd) {
                     *pBestSad =
-                        (uint32_t)nxm_sad_averaging_kernel_func_ptr_array
-                            [asm_type][pu_width >> 3](
+                        nxm_sad_avg_kernel(
                                 &(context_ptr->sb_buffer[puLcuBufferIndex]),
                                 BLOCK_SIZE_64,
                                 buf1[1] + searchRegionIndex1,
@@ -7184,7 +7183,8 @@ static void PU_QuarterPelRefinementOnTheFly(
                                 buf2[1] + searchRegionIndex2,
                                 buf2Stride[1],
                                 pu_height,
-                                pu_width);
+                                pu_width,
+                                pu_width >> 3);
                     *pBestMV = ((uint16_t)yMvQuarter[1] << 16) |
                                ((uint16_t)xMvQuarter[1]);
                     *pBestSsd = (uint32_t)dist;
@@ -7216,8 +7216,7 @@ static void PU_QuarterPelRefinementOnTheFly(
                           pu_height,
                           pu_width)
                     : (context_ptr->fractional_search_method == SUB_SAD_SEARCH)
-                          ? (nxm_sad_averaging_kernel_func_ptr_array
-                                 [asm_type][pu_width >> 3](
+                          ? (nxm_sad_avg_kernel(
                                      &(context_ptr
                                            ->sb_buffer[puLcuBufferIndex]),
                                      BLOCK_SIZE_64 << 1,
@@ -7226,10 +7225,10 @@ static void PU_QuarterPelRefinementOnTheFly(
                                      buf2[2] + searchRegionIndex2,
                                      buf2Stride[2] << 1,
                                      pu_height >> 1,
-                                     pu_width))
+                                     pu_width,
+                                     pu_width >> 3))
                                 << 1
-                          : nxm_sad_averaging_kernel_func_ptr_array
-                                [asm_type][pu_width >> 3](
+                          : nxm_sad_avg_kernel(
                                     &(context_ptr->sb_buffer[puLcuBufferIndex]),
                                     BLOCK_SIZE_64,
                                     buf1[2] + searchRegionIndex1,
@@ -7237,12 +7236,12 @@ static void PU_QuarterPelRefinementOnTheFly(
                                     buf2[2] + searchRegionIndex2,
                                     buf2Stride[2],
                                     pu_height,
-                                    pu_width);
+                                    pu_width,
+                                    pu_width >> 3);
             if (context_ptr->fractional_search_method == SSD_SEARCH) {
                 if (dist < *pBestSsd) {
                     *pBestSad =
-                        (uint32_t)nxm_sad_averaging_kernel_func_ptr_array
-                            [asm_type][pu_width >> 3](
+                        nxm_sad_avg_kernel(
                                 &(context_ptr->sb_buffer[puLcuBufferIndex]),
                                 BLOCK_SIZE_64,
                                 buf1[2] + searchRegionIndex1,
@@ -7250,7 +7249,8 @@ static void PU_QuarterPelRefinementOnTheFly(
                                 buf2[2] + searchRegionIndex2,
                                 buf2Stride[2],
                                 pu_height,
-                                pu_width);
+                                pu_width,
+                                pu_width >> 3);
                     *pBestMV = ((uint16_t)yMvQuarter[2] << 16) |
                                ((uint16_t)xMvQuarter[2]);
                     *pBestSsd = (uint32_t)dist;
@@ -7282,8 +7282,7 @@ static void PU_QuarterPelRefinementOnTheFly(
                           pu_height,
                           pu_width)
                     : (context_ptr->fractional_search_method == SUB_SAD_SEARCH)
-                          ? (nxm_sad_averaging_kernel_func_ptr_array
-                                 [asm_type][pu_width >> 3](
+                          ? (nxm_sad_avg_kernel(
                                      &(context_ptr
                                            ->sb_buffer[puLcuBufferIndex]),
                                      BLOCK_SIZE_64 << 1,
@@ -7292,10 +7291,10 @@ static void PU_QuarterPelRefinementOnTheFly(
                                      buf2[3] + searchRegionIndex2,
                                      buf2Stride[3] << 1,
                                      pu_height >> 1,
-                                     pu_width))
+                                     pu_width,
+                                     pu_width >> 3))
                                 << 1
-                          : nxm_sad_averaging_kernel_func_ptr_array
-                                [asm_type][pu_width >> 3](
+                          : nxm_sad_avg_kernel(
                                     &(context_ptr->sb_buffer[puLcuBufferIndex]),
                                     BLOCK_SIZE_64,
                                     buf1[3] + searchRegionIndex1,
@@ -7303,12 +7302,12 @@ static void PU_QuarterPelRefinementOnTheFly(
                                     buf2[3] + searchRegionIndex2,
                                     buf2Stride[3],
                                     pu_height,
-                                    pu_width);
+                                    pu_width,
+                                    pu_width >> 3);
             if (context_ptr->fractional_search_method == SSD_SEARCH) {
                 if (dist < *pBestSsd) {
                     *pBestSad =
-                        (uint32_t)nxm_sad_averaging_kernel_func_ptr_array
-                            [asm_type][pu_width >> 3](
+                        nxm_sad_avg_kernel(
                                 &(context_ptr->sb_buffer[puLcuBufferIndex]),
                                 BLOCK_SIZE_64,
                                 buf1[3] + searchRegionIndex1,
@@ -7316,7 +7315,8 @@ static void PU_QuarterPelRefinementOnTheFly(
                                 buf2[3] + searchRegionIndex2,
                                 buf2Stride[3],
                                 pu_height,
-                                pu_width);
+                                pu_width,
+                                pu_width >> 3);
                     *pBestMV = ((uint16_t)yMvQuarter[3] << 16) |
                                ((uint16_t)xMvQuarter[3]);
                     *pBestSsd = (uint32_t)dist;
@@ -7348,8 +7348,7 @@ static void PU_QuarterPelRefinementOnTheFly(
                           pu_height,
                           pu_width)
                     : (context_ptr->fractional_search_method == SUB_SAD_SEARCH)
-                          ? (nxm_sad_averaging_kernel_func_ptr_array
-                                 [asm_type][pu_width >> 3](
+                          ? (nxm_sad_avg_kernel(
                                      &(context_ptr
                                            ->sb_buffer[puLcuBufferIndex]),
                                      BLOCK_SIZE_64 << 1,
@@ -7358,10 +7357,10 @@ static void PU_QuarterPelRefinementOnTheFly(
                                      buf2[4] + searchRegionIndex2,
                                      buf2Stride[4] << 1,
                                      pu_height >> 1,
-                                     pu_width))
+                                     pu_width,
+                                     pu_width >> 3))
                                 << 1
-                          : nxm_sad_averaging_kernel_func_ptr_array
-                                [asm_type][pu_width >> 3](
+                          : nxm_sad_avg_kernel(
                                     &(context_ptr->sb_buffer[puLcuBufferIndex]),
                                     BLOCK_SIZE_64,
                                     buf1[4] + searchRegionIndex1,
@@ -7369,12 +7368,12 @@ static void PU_QuarterPelRefinementOnTheFly(
                                     buf2[4] + searchRegionIndex2,
                                     buf2Stride[4],
                                     pu_height,
-                                    pu_width);
+                                    pu_width,
+                                    pu_width >> 3);
             if (context_ptr->fractional_search_method == SSD_SEARCH) {
                 if (dist < *pBestSsd) {
                     *pBestSad =
-                        (uint32_t)nxm_sad_averaging_kernel_func_ptr_array
-                            [asm_type][pu_width >> 3](
+                        nxm_sad_avg_kernel(
                                 &(context_ptr->sb_buffer[puLcuBufferIndex]),
                                 BLOCK_SIZE_64,
                                 buf1[4] + searchRegionIndex1,
@@ -7382,7 +7381,8 @@ static void PU_QuarterPelRefinementOnTheFly(
                                 buf2[4] + searchRegionIndex2,
                                 buf2Stride[4],
                                 pu_height,
-                                pu_width);
+                                pu_width,
+                                pu_width >> 3);
                     *pBestMV = ((uint16_t)yMvQuarter[4] << 16) |
                                ((uint16_t)xMvQuarter[4]);
                     *pBestSsd = (uint32_t)dist;
@@ -7414,8 +7414,7 @@ static void PU_QuarterPelRefinementOnTheFly(
                           pu_height,
                           pu_width)
                     : (context_ptr->fractional_search_method == SUB_SAD_SEARCH)
-                          ? (nxm_sad_averaging_kernel_func_ptr_array
-                                 [asm_type][pu_width >> 3](
+                          ? (nxm_sad_avg_kernel(
                                      &(context_ptr
                                            ->sb_buffer[puLcuBufferIndex]),
                                      BLOCK_SIZE_64 << 1,
@@ -7424,10 +7423,10 @@ static void PU_QuarterPelRefinementOnTheFly(
                                      buf2[5] + searchRegionIndex2,
                                      buf2Stride[5] << 1,
                                      pu_height >> 1,
-                                     pu_width))
+                                     pu_width,
+                                     pu_width >> 3))
                                 << 1
-                          : nxm_sad_averaging_kernel_func_ptr_array
-                                [asm_type][pu_width >> 3](
+                          : nxm_sad_avg_kernel(
                                     &(context_ptr->sb_buffer[puLcuBufferIndex]),
                                     BLOCK_SIZE_64,
                                     buf1[5] + searchRegionIndex1,
@@ -7435,12 +7434,12 @@ static void PU_QuarterPelRefinementOnTheFly(
                                     buf2[5] + searchRegionIndex2,
                                     buf2Stride[5],
                                     pu_height,
-                                    pu_width);
+                                    pu_width,
+                                    pu_width >> 3);
             if (context_ptr->fractional_search_method == SSD_SEARCH) {
                 if (dist < *pBestSsd) {
                     *pBestSad =
-                        (uint32_t)nxm_sad_averaging_kernel_func_ptr_array
-                            [asm_type][pu_width >> 3](
+                        nxm_sad_avg_kernel(
                                 &(context_ptr->sb_buffer[puLcuBufferIndex]),
                                 BLOCK_SIZE_64,
                                 buf1[5] + searchRegionIndex1,
@@ -7448,7 +7447,8 @@ static void PU_QuarterPelRefinementOnTheFly(
                                 buf2[5] + searchRegionIndex2,
                                 buf2Stride[5],
                                 pu_height,
-                                pu_width);
+                                pu_width,
+                                pu_width >> 3);
                     *pBestMV = ((uint16_t)yMvQuarter[5] << 16) |
                                ((uint16_t)xMvQuarter[5]);
                     *pBestSsd = (uint32_t)dist;
@@ -7480,8 +7480,7 @@ static void PU_QuarterPelRefinementOnTheFly(
                           pu_height,
                           pu_width)
                     : (context_ptr->fractional_search_method == SUB_SAD_SEARCH)
-                          ? (nxm_sad_averaging_kernel_func_ptr_array
-                                 [asm_type][pu_width >> 3](
+                          ? (nxm_sad_avg_kernel(
                                      &(context_ptr
                                            ->sb_buffer[puLcuBufferIndex]),
                                      BLOCK_SIZE_64 << 1,
@@ -7490,10 +7489,10 @@ static void PU_QuarterPelRefinementOnTheFly(
                                      buf2[6] + searchRegionIndex2,
                                      buf2Stride[6] << 1,
                                      pu_height >> 1,
-                                     pu_width))
+                                     pu_width,
+                                     pu_width >> 3))
                                 << 1
-                          : nxm_sad_averaging_kernel_func_ptr_array
-                                [asm_type][pu_width >> 3](
+                          : nxm_sad_avg_kernel(
                                     &(context_ptr->sb_buffer[puLcuBufferIndex]),
                                     BLOCK_SIZE_64,
                                     buf1[6] + searchRegionIndex1,
@@ -7501,12 +7500,12 @@ static void PU_QuarterPelRefinementOnTheFly(
                                     buf2[6] + searchRegionIndex2,
                                     buf2Stride[6],
                                     pu_height,
-                                    pu_width);
+                                    pu_width,
+                                    pu_width >> 3);
             if (context_ptr->fractional_search_method == SSD_SEARCH) {
                 if (dist < *pBestSsd) {
                     *pBestSad =
-                        (uint32_t)nxm_sad_averaging_kernel_func_ptr_array
-                            [asm_type][pu_width >> 3](
+                        nxm_sad_avg_kernel(
                                 &(context_ptr->sb_buffer[puLcuBufferIndex]),
                                 BLOCK_SIZE_64,
                                 buf1[6] + searchRegionIndex1,
@@ -7514,7 +7513,8 @@ static void PU_QuarterPelRefinementOnTheFly(
                                 buf2[6] + searchRegionIndex2,
                                 buf2Stride[6],
                                 pu_height,
-                                pu_width);
+                                pu_width,
+                                pu_width >> 3);
                     *pBestMV = ((uint16_t)yMvQuarter[6] << 16) |
                                ((uint16_t)xMvQuarter[6]);
                     *pBestSsd = (uint32_t)dist;
@@ -7546,8 +7546,7 @@ static void PU_QuarterPelRefinementOnTheFly(
                           pu_height,
                           pu_width)
                     : (context_ptr->fractional_search_method == SUB_SAD_SEARCH)
-                          ? (nxm_sad_averaging_kernel_func_ptr_array
-                                 [asm_type][pu_width >> 3](
+                          ? (nxm_sad_avg_kernel(
                                      &(context_ptr
                                            ->sb_buffer[puLcuBufferIndex]),
                                      BLOCK_SIZE_64 << 1,
@@ -7556,10 +7555,10 @@ static void PU_QuarterPelRefinementOnTheFly(
                                      buf2[7] + searchRegionIndex2,
                                      buf2Stride[7] << 1,
                                      pu_height >> 1,
-                                     pu_width))
+                                     pu_width,
+                                     pu_width >> 3))
                                 << 1
-                          : nxm_sad_averaging_kernel_func_ptr_array
-                                [asm_type][pu_width >> 3](
+                          : nxm_sad_avg_kernel(
                                     &(context_ptr->sb_buffer[puLcuBufferIndex]),
                                     BLOCK_SIZE_64,
                                     buf1[7] + searchRegionIndex1,
@@ -7567,12 +7566,12 @@ static void PU_QuarterPelRefinementOnTheFly(
                                     buf2[7] + searchRegionIndex2,
                                     buf2Stride[7],
                                     pu_height,
-                                    pu_width);
+                                    pu_width,
+                                    pu_width >> 3);
             if (context_ptr->fractional_search_method == SSD_SEARCH) {
                 if (dist < *pBestSsd) {
                     *pBestSad =
-                        (uint32_t)nxm_sad_averaging_kernel_func_ptr_array
-                            [asm_type][pu_width >> 3](
+                        nxm_sad_avg_kernel(
                                 &(context_ptr->sb_buffer[puLcuBufferIndex]),
                                 BLOCK_SIZE_64,
                                 buf1[7] + searchRegionIndex1,
@@ -7580,7 +7579,8 @@ static void PU_QuarterPelRefinementOnTheFly(
                                 buf2[7] + searchRegionIndex2,
                                 buf2Stride[7],
                                 pu_height,
-                                pu_width);
+                                pu_width,
+                                pu_width >> 3);
                     *pBestMV = ((uint16_t)yMvQuarter[7] << 16) |
                                ((uint16_t)xMvQuarter[7]);
                     *pBestSsd = (uint32_t)dist;
@@ -8756,8 +8756,7 @@ static void quarter_pel_refinemnet_block(
                      pu_height,
                      pu_width)
                : (context_ptr->fractional_search_method == SUB_SAD_SEARCH)
-                     ? (nxm_sad_averaging_kernel_func_ptr_array
-                            [asm_type][pu_width >> 3](
+                     ? (nxm_sad_avg_kernel(
                                 &(context_ptr->sb_buffer[src_block_index]),
                                 BLOCK_SIZE_64 << 1,
                                 buf1[0] + search_region_Index1,
@@ -8765,10 +8764,10 @@ static void quarter_pel_refinemnet_block(
                                 buf2[0] + search_region_Index2,
                                 buf2_stride[0] << 1,
                                 pu_height >> 1,
-                                pu_width))
+                                pu_width,
+                                pu_width >> 3))
                            << 1
-                     : nxm_sad_averaging_kernel_func_ptr_array
-                           [asm_type][pu_width >> 3](
+                     : nxm_sad_avg_kernel(
                                &(context_ptr->sb_buffer[src_block_index]),
                                BLOCK_SIZE_64,
                                buf1[0] + search_region_Index1,
@@ -8776,12 +8775,12 @@ static void quarter_pel_refinemnet_block(
                                buf2[0] + search_region_Index2,
                                buf2_stride[0],
                                pu_height,
-                               pu_width);
+                               pu_width,
+                               pu_width >> 3);
     if (context_ptr->fractional_search_method == SSD_SEARCH) {
         if (dist < *p_best_ssd) {
             *p_best_sad = (uint32_t)
-                nxm_sad_averaging_kernel_func_ptr_array[asm_type][pu_width >>
-                                                                  3](
+                nxm_sad_avg_kernel(
                     &(context_ptr->sb_buffer[src_block_index]),
                     BLOCK_SIZE_64,
                     buf1[0] + search_region_Index1,
@@ -8789,7 +8788,8 @@ static void quarter_pel_refinemnet_block(
                     buf2[0] + search_region_Index2,
                     buf2_stride[0],
                     pu_height,
-                    pu_width);
+                    pu_width,
+                    pu_width >> 3);
             *p_best_mv =
                 ((uint16_t)quarter_mv_y[0] << 16) | ((uint16_t)quarter_mv_x[0]);
             *p_best_ssd = (uint32_t)dist;
@@ -8817,8 +8817,7 @@ static void quarter_pel_refinemnet_block(
                      pu_height,
                      pu_width)
                : (context_ptr->fractional_search_method == SUB_SAD_SEARCH)
-                     ? (nxm_sad_averaging_kernel_func_ptr_array
-                            [asm_type][pu_width >> 3](
+                     ? (nxm_sad_avg_kernel(
                                 &(context_ptr->sb_buffer[src_block_index]),
                                 BLOCK_SIZE_64 << 1,
                                 buf1[1] + search_region_Index1,
@@ -8826,10 +8825,10 @@ static void quarter_pel_refinemnet_block(
                                 buf2[1] + search_region_Index2,
                                 buf2_stride[1] << 1,
                                 pu_height >> 1,
-                                pu_width))
+                                pu_width,
+                                pu_width >> 3))
                            << 1
-                     : nxm_sad_averaging_kernel_func_ptr_array
-                           [asm_type][pu_width >> 3](
+                     : nxm_sad_avg_kernel(
                                &(context_ptr->sb_buffer[src_block_index]),
                                BLOCK_SIZE_64,
                                buf1[1] + search_region_Index1,
@@ -8837,12 +8836,12 @@ static void quarter_pel_refinemnet_block(
                                buf2[1] + search_region_Index2,
                                buf2_stride[1],
                                pu_height,
-                               pu_width);
+                               pu_width,
+                               pu_width >> 3);
     if (context_ptr->fractional_search_method == SSD_SEARCH) {
         if (dist < *p_best_ssd) {
             *p_best_sad = (uint32_t)
-                nxm_sad_averaging_kernel_func_ptr_array[asm_type][pu_width >>
-                                                                  3](
+                nxm_sad_avg_kernel(
                     &(context_ptr->sb_buffer[src_block_index]),
                     BLOCK_SIZE_64,
                     buf1[1] + search_region_Index1,
@@ -8850,7 +8849,8 @@ static void quarter_pel_refinemnet_block(
                     buf2[1] + search_region_Index2,
                     buf2_stride[1],
                     pu_height,
-                    pu_width);
+                    pu_width,
+                    pu_width >> 3);
             *p_best_mv =
                 ((uint16_t)quarter_mv_y[1] << 16) | ((uint16_t)quarter_mv_x[1]);
             *p_best_ssd = (uint32_t)dist;
@@ -8878,8 +8878,7 @@ static void quarter_pel_refinemnet_block(
                      pu_height,
                      pu_width)
                : (context_ptr->fractional_search_method == SUB_SAD_SEARCH)
-                     ? (nxm_sad_averaging_kernel_func_ptr_array
-                            [asm_type][pu_width >> 3](
+                     ? (nxm_sad_avg_kernel(
                                 &(context_ptr->sb_buffer[src_block_index]),
                                 BLOCK_SIZE_64 << 1,
                                 buf1[2] + search_region_Index1,
@@ -8887,10 +8886,10 @@ static void quarter_pel_refinemnet_block(
                                 buf2[2] + search_region_Index2,
                                 buf2_stride[2] << 1,
                                 pu_height >> 1,
-                                pu_width))
+                                pu_width,
+                                pu_width >> 3))
                            << 1
-                     : nxm_sad_averaging_kernel_func_ptr_array
-                           [asm_type][pu_width >> 3](
+                     : nxm_sad_avg_kernel(
                                &(context_ptr->sb_buffer[src_block_index]),
                                BLOCK_SIZE_64,
                                buf1[2] + search_region_Index1,
@@ -8898,12 +8897,12 @@ static void quarter_pel_refinemnet_block(
                                buf2[2] + search_region_Index2,
                                buf2_stride[2],
                                pu_height,
-                               pu_width);
+                               pu_width,
+                               pu_width >> 3);
     if (context_ptr->fractional_search_method == SSD_SEARCH) {
         if (dist < *p_best_ssd) {
             *p_best_sad = (uint32_t)
-                nxm_sad_averaging_kernel_func_ptr_array[asm_type][pu_width >>
-                                                                  3](
+                nxm_sad_avg_kernel(
                     &(context_ptr->sb_buffer[src_block_index]),
                     BLOCK_SIZE_64,
                     buf1[2] + search_region_Index1,
@@ -8911,7 +8910,8 @@ static void quarter_pel_refinemnet_block(
                     buf2[2] + search_region_Index2,
                     buf2_stride[2],
                     pu_height,
-                    pu_width);
+                    pu_width,
+                    pu_width >> 3);
             *p_best_mv =
                 ((uint16_t)quarter_mv_y[2] << 16) | ((uint16_t)quarter_mv_x[2]);
             *p_best_ssd = (uint32_t)dist;
@@ -8939,8 +8939,7 @@ static void quarter_pel_refinemnet_block(
                      pu_height,
                      pu_width)
                : (context_ptr->fractional_search_method == SUB_SAD_SEARCH)
-                     ? (nxm_sad_averaging_kernel_func_ptr_array
-                            [asm_type][pu_width >> 3](
+                     ? (nxm_sad_avg_kernel(
                                 &(context_ptr->sb_buffer[src_block_index]),
                                 BLOCK_SIZE_64 << 1,
                                 buf1[3] + search_region_Index1,
@@ -8948,10 +8947,10 @@ static void quarter_pel_refinemnet_block(
                                 buf2[3] + search_region_Index2,
                                 buf2_stride[3] << 1,
                                 pu_height >> 1,
-                                pu_width))
+                                pu_width,
+                                pu_width >> 3))
                            << 1
-                     : nxm_sad_averaging_kernel_func_ptr_array
-                           [asm_type][pu_width >> 3](
+                     : nxm_sad_avg_kernel(
                                &(context_ptr->sb_buffer[src_block_index]),
                                BLOCK_SIZE_64,
                                buf1[3] + search_region_Index1,
@@ -8959,12 +8958,12 @@ static void quarter_pel_refinemnet_block(
                                buf2[3] + search_region_Index2,
                                buf2_stride[3],
                                pu_height,
-                               pu_width);
+                               pu_width,
+                               pu_width >> 3);
     if (context_ptr->fractional_search_method == SSD_SEARCH) {
         if (dist < *p_best_ssd) {
             *p_best_sad = (uint32_t)
-                nxm_sad_averaging_kernel_func_ptr_array[asm_type][pu_width >>
-                                                                  3](
+                nxm_sad_avg_kernel(
                     &(context_ptr->sb_buffer[src_block_index]),
                     BLOCK_SIZE_64,
                     buf1[3] + search_region_Index1,
@@ -8972,7 +8971,8 @@ static void quarter_pel_refinemnet_block(
                     buf2[3] + search_region_Index2,
                     buf2_stride[3],
                     pu_height,
-                    pu_width);
+                    pu_width,
+                    pu_width >> 3);
             *p_best_mv =
                 ((uint16_t)quarter_mv_y[3] << 16) | ((uint16_t)quarter_mv_x[3]);
             *p_best_ssd = (uint32_t)dist;
@@ -9005,8 +9005,7 @@ static void quarter_pel_refinemnet_block(
                          pu_height,
                          pu_width)
                    : (context_ptr->fractional_search_method == SUB_SAD_SEARCH)
-                         ? (nxm_sad_averaging_kernel_func_ptr_array
-                                [asm_type][pu_width >> 3](
+                         ? (nxm_sad_avg_kernel(
                                     &(context_ptr->sb_buffer[src_block_index]),
                                     BLOCK_SIZE_64 << 1,
                                     buf1[4] + search_region_Index1,
@@ -9014,10 +9013,10 @@ static void quarter_pel_refinemnet_block(
                                     buf2[4] + search_region_Index2,
                                     buf2_stride[4] << 1,
                                     pu_height >> 1,
-                                    pu_width))
+                                    pu_width,
+                                    pu_width >> 3))
                                << 1
-                         : nxm_sad_averaging_kernel_func_ptr_array
-                               [asm_type][pu_width >> 3](
+                         : nxm_sad_avg_kernel(
                                    &(context_ptr->sb_buffer[src_block_index]),
                                    BLOCK_SIZE_64,
                                    buf1[4] + search_region_Index1,
@@ -9025,11 +9024,11 @@ static void quarter_pel_refinemnet_block(
                                    buf2[4] + search_region_Index2,
                                    buf2_stride[4],
                                    pu_height,
-                                   pu_width);
+                                   pu_width,
+                                   pu_width >> 3);
         if (context_ptr->fractional_search_method == SSD_SEARCH) {
             if (dist < *p_best_ssd) {
-                *p_best_sad = (uint32_t)nxm_sad_averaging_kernel_func_ptr_array
-                    [asm_type][pu_width >> 3](
+                *p_best_sad = (uint32_t)nxm_sad_avg_kernel(
                         &(context_ptr->sb_buffer[src_block_index]),
                         BLOCK_SIZE_64,
                         buf1[4] + search_region_Index1,
@@ -9037,7 +9036,8 @@ static void quarter_pel_refinemnet_block(
                         buf2[4] + search_region_Index2,
                         buf2_stride[4],
                         pu_height,
-                        pu_width);
+                        pu_width,
+                        pu_width >> 3);
                 *p_best_mv = ((uint16_t)quarter_mv_y[4] << 16) |
                              ((uint16_t)quarter_mv_x[4]);
                 *p_best_ssd = (uint32_t)dist;
@@ -9067,8 +9067,7 @@ static void quarter_pel_refinemnet_block(
                          pu_height,
                          pu_width)
                    : (context_ptr->fractional_search_method == SUB_SAD_SEARCH)
-                         ? (nxm_sad_averaging_kernel_func_ptr_array
-                                [asm_type][pu_width >> 3](
+                         ? (nxm_sad_avg_kernel(
                                     &(context_ptr->sb_buffer[src_block_index]),
                                     BLOCK_SIZE_64 << 1,
                                     buf1[5] + search_region_Index1,
@@ -9076,10 +9075,10 @@ static void quarter_pel_refinemnet_block(
                                     buf2[5] + search_region_Index2,
                                     buf2_stride[5] << 1,
                                     pu_height >> 1,
-                                    pu_width))
+                                    pu_width,
+                                    pu_width >> 3))
                                << 1
-                         : nxm_sad_averaging_kernel_func_ptr_array
-                               [asm_type][pu_width >> 3](
+                         : nxm_sad_avg_kernel(
                                    &(context_ptr->sb_buffer[src_block_index]),
                                    BLOCK_SIZE_64,
                                    buf1[5] + search_region_Index1,
@@ -9087,11 +9086,11 @@ static void quarter_pel_refinemnet_block(
                                    buf2[5] + search_region_Index2,
                                    buf2_stride[5],
                                    pu_height,
-                                   pu_width);
+                                   pu_width,
+                                   pu_width >> 3);
         if (context_ptr->fractional_search_method == SSD_SEARCH) {
             if (dist < *p_best_ssd) {
-                *p_best_sad = (uint32_t)nxm_sad_averaging_kernel_func_ptr_array
-                    [asm_type][pu_width >> 3](
+                *p_best_sad = nxm_sad_avg_kernel(
                         &(context_ptr->sb_buffer[src_block_index]),
                         BLOCK_SIZE_64,
                         buf1[5] + search_region_Index1,
@@ -9099,7 +9098,8 @@ static void quarter_pel_refinemnet_block(
                         buf2[5] + search_region_Index2,
                         buf2_stride[5],
                         pu_height,
-                        pu_width);
+                        pu_width,
+                        pu_width >> 3);
                 *p_best_mv = ((uint16_t)quarter_mv_y[5] << 16) |
                              ((uint16_t)quarter_mv_x[5]);
                 *p_best_ssd = (uint32_t)dist;
@@ -9129,8 +9129,7 @@ static void quarter_pel_refinemnet_block(
                          pu_height,
                          pu_width)
                    : (context_ptr->fractional_search_method == SUB_SAD_SEARCH)
-                         ? (nxm_sad_averaging_kernel_func_ptr_array
-                                [asm_type][pu_width >> 3](
+                         ? (nxm_sad_avg_kernel(
                                     &(context_ptr->sb_buffer[src_block_index]),
                                     BLOCK_SIZE_64 << 1,
                                     buf1[6] + search_region_Index1,
@@ -9138,10 +9137,10 @@ static void quarter_pel_refinemnet_block(
                                     buf2[6] + search_region_Index2,
                                     buf2_stride[6] << 1,
                                     pu_height >> 1,
-                                    pu_width))
+                                    pu_width,
+                                    pu_width >> 3))
                                << 1
-                         : nxm_sad_averaging_kernel_func_ptr_array
-                               [asm_type][pu_width >> 3](
+                         : nxm_sad_avg_kernel(
                                    &(context_ptr->sb_buffer[src_block_index]),
                                    BLOCK_SIZE_64,
                                    buf1[6] + search_region_Index1,
@@ -9149,11 +9148,11 @@ static void quarter_pel_refinemnet_block(
                                    buf2[6] + search_region_Index2,
                                    buf2_stride[6],
                                    pu_height,
-                                   pu_width);
+                                   pu_width,
+                                   pu_width >> 3);
         if (context_ptr->fractional_search_method == SSD_SEARCH) {
             if (dist < *p_best_ssd) {
-                *p_best_sad = (uint32_t)nxm_sad_averaging_kernel_func_ptr_array
-                    [asm_type][pu_width >> 3](
+                *p_best_sad = nxm_sad_avg_kernel(
                         &(context_ptr->sb_buffer[src_block_index]),
                         BLOCK_SIZE_64,
                         buf1[6] + search_region_Index1,
@@ -9161,7 +9160,8 @@ static void quarter_pel_refinemnet_block(
                         buf2[6] + search_region_Index2,
                         buf2_stride[6],
                         pu_height,
-                        pu_width);
+                        pu_width,
+                        pu_width >> 3);
                 *p_best_mv = ((uint16_t)quarter_mv_y[6] << 16) |
                              ((uint16_t)quarter_mv_x[6]);
                 *p_best_ssd = (uint32_t)dist;
@@ -9191,8 +9191,7 @@ static void quarter_pel_refinemnet_block(
                          pu_height,
                          pu_width)
                    : (context_ptr->fractional_search_method == SUB_SAD_SEARCH)
-                         ? (nxm_sad_averaging_kernel_func_ptr_array
-                                [asm_type][pu_width >> 3](
+                         ? (nxm_sad_avg_kernel(
                                     &(context_ptr->sb_buffer[src_block_index]),
                                     BLOCK_SIZE_64 << 1,
                                     buf1[7] + search_region_Index1,
@@ -9200,10 +9199,10 @@ static void quarter_pel_refinemnet_block(
                                     buf2[7] + search_region_Index2,
                                     buf2_stride[7] << 1,
                                     pu_height >> 1,
-                                    pu_width))
-                               << 1
-                         : nxm_sad_averaging_kernel_func_ptr_array
-                               [asm_type][pu_width >> 3](
+                                    pu_width,
+                                    pu_width >> 3)
+                               << 1)
+                         : nxm_sad_avg_kernel(
                                    &(context_ptr->sb_buffer[src_block_index]),
                                    BLOCK_SIZE_64,
                                    buf1[7] + search_region_Index1,
@@ -9211,11 +9210,11 @@ static void quarter_pel_refinemnet_block(
                                    buf2[7] + search_region_Index2,
                                    buf2_stride[7],
                                    pu_height,
-                                   pu_width);
+                                   pu_width,
+                                   pu_width >> 3);
         if (context_ptr->fractional_search_method == SSD_SEARCH) {
             if (dist < *p_best_ssd) {
-                *p_best_sad = (uint32_t)nxm_sad_averaging_kernel_func_ptr_array
-                    [asm_type][pu_width >> 3](
+                *p_best_sad = nxm_sad_avg_kernel(
                         &(context_ptr->sb_buffer[src_block_index]),
                         BLOCK_SIZE_64,
                         buf1[7] + search_region_Index1,
@@ -9223,7 +9222,8 @@ static void quarter_pel_refinemnet_block(
                         buf2[7] + search_region_Index2,
                         buf2_stride[7],
                         pu_height,
-                        pu_width);
+                        pu_width,
+                        pu_width >> 3);
                 *p_best_mv = ((uint16_t)quarter_mv_y[7] << 16) |
                              ((uint16_t)quarter_mv_x[7]);
                 *p_best_ssd = (uint32_t)dist;
@@ -11841,7 +11841,7 @@ uint32_t BiPredAverging(
     // bi-pred luma
     me_candidate->distortion =
         (context_ptr->fractional_search_method == SUB_SAD_SEARCH)
-            ? nxm_sad_averaging_kernel_func_ptr_array[asm_type][pu_width >> 3](
+            ? nxm_sad_avg_kernel(
                   sourcePic,
                   lumaStride << 1,
                   ptrList0,
@@ -11849,9 +11849,10 @@ uint32_t BiPredAverging(
                   ptrList1,
                   ptrList1Stride << 1,
                   pu_height >> 1,
-                  pu_width)
+                  pu_width,
+                  pu_width >> 3)
                   << 1
-            : nxm_sad_averaging_kernel_func_ptr_array[asm_type][pu_width >> 3](
+            : nxm_sad_avg_kernel(
                   sourcePic,
                   lumaStride,
                   ptrList0,
@@ -11859,7 +11860,8 @@ uint32_t BiPredAverging(
                   ptrList1,
                   ptrList1Stride,
                   pu_height,
-                  pu_width);
+                  pu_width,
+                  pu_width >> 3);
 
     return me_candidate->distortion;
 }
@@ -15427,34 +15429,10 @@ uint32_t nxm_sad_kernel_helper(
     uint32_t nxm_sad;
 
     switch (choice) {
-    case 0:
-        nxm_sad = fast_loop_nx_m_sad_kernel(src, src_stride, ref, ref_stride, height, width);
-        break;
-    case 1:
-        nxm_sad = fast_loop_nx_m_sad_kernel(src, src_stride, ref, ref_stride, height, width);
-        break;
-    case 2:
-        nxm_sad = fast_loop_nx_m_sad_kernel(src, src_stride, ref, ref_stride, height, width);
-        break;
-    case 3:
-        nxm_sad = fast_loop_nx_m_sad_kernel(src, src_stride, ref, ref_stride, height, width);
-        break;
-    case 4:
-        nxm_sad = fast_loop_nx_m_sad_kernel(src, src_stride, ref, ref_stride, height, width);
-        break;
-    case 6:
-        nxm_sad = fast_loop_nx_m_sad_kernel(src, src_stride, ref, ref_stride, height, width);
-        break;
-    case 8:
-        nxm_sad = fast_loop_nx_m_sad_kernel(src, src_stride, ref, ref_stride, height, width);
-        break;
-    case 16:
-        nxm_sad = fast_loop_nx_m_sad_kernel(src, src_stride, ref, ref_stride, height, width);
-        break;
+    case ( 0 || 1 || 2 || 3 || 4 || 6 || 8 || 16 ):
+        nxm_sad = fast_loop_nx_m_sad_kernel(src, src_stride, ref, ref_stride, height, width); break;
     default:
         assert(0);
-        break;
-
     }
 
     return nxm_sad;
@@ -15473,33 +15451,23 @@ uint32_t nxm_sad_kernel_sub_sampled_avx2_helper(
 
     switch (choice) {
     case 0:
-        nxm_sad = Compute4xMSadSub_avx2_intrin(src, src_stride, ref, ref_stride, height, width);
-        break;
+        nxm_sad = Compute4xMSadSub_avx2_intrin(src, src_stride, ref, ref_stride, height, width); break;
     case 1:
-        nxm_sad = compute8x_m_sad_avx2_intrin(src, src_stride, ref, ref_stride, height, width);
-        break;
+        nxm_sad = compute8x_m_sad_avx2_intrin(src, src_stride, ref, ref_stride, height, width); break;
     case 2:
-        nxm_sad = compute16x_m_sad_avx2_intrin(src, src_stride, ref, ref_stride, height, width);
-        break;
+        nxm_sad = compute16x_m_sad_avx2_intrin(src, src_stride, ref, ref_stride, height, width); break;
     case 3:
-        nxm_sad = fast_loop_nx_m_sad_kernel(src, src_stride, ref, ref_stride, height, width);
-        break;
+        nxm_sad = fast_loop_nx_m_sad_kernel(src, src_stride, ref, ref_stride, height, width); break;
     case 4:
-        nxm_sad = compute32x_m_sad_avx2_intrin(src, src_stride, ref, ref_stride, height, width);
-        break;
+        nxm_sad = compute32x_m_sad_avx2_intrin(src, src_stride, ref, ref_stride, height, width); break;
     case 6:
-        nxm_sad = fast_loop_nx_m_sad_kernel(src, src_stride, ref, ref_stride, height, width);
-        break;
+        nxm_sad = fast_loop_nx_m_sad_kernel(src, src_stride, ref, ref_stride, height, width); break;
     case 8:
-        nxm_sad = compute64x_m_sad_avx2_intrin(src, src_stride, ref, ref_stride, height, width);
-        break;
+        nxm_sad = compute64x_m_sad_avx2_intrin(src, src_stride, ref, ref_stride, height, width); break;
     case 16:
-        nxm_sad = fast_loop_nx_m_sad_kernel(src, src_stride, ref, ref_stride, height, width);
-        break;
+        nxm_sad = fast_loop_nx_m_sad_kernel(src, src_stride, ref, ref_stride, height, width); break;
     default:
         assert(0);
-        break;
-
     }
 
     return nxm_sad;
@@ -15507,39 +15475,96 @@ uint32_t nxm_sad_kernel_sub_sampled_avx2_helper(
  };
 
 
-uint32_t nxm_sad_kernel_avx2_helper(const uint8_t  *src, uint32_t  src_stride, const uint8_t  *ref, uint32_t  ref_stride, uint32_t  height, uint32_t  width, uint8_t choice){
+uint32_t nxm_sad_kernel_avx2_helper(
+    const uint8_t  *src,
+    uint32_t  src_stride,
+    const uint8_t  *ref,
+    uint32_t  ref_stride,
+    uint32_t  height,
+    uint32_t  width,
+    uint8_t choice){
+
     uint32_t nxm_sad;
 
     switch (choice) {
     case 0:
-        nxm_sad = compute4x_m_sad_avx2_intrin(src, src_stride, ref, ref_stride, height, width);
-        break;
+        nxm_sad = compute4x_m_sad_avx2_intrin(src, src_stride, ref, ref_stride, height, width); break;
     case 1:
-        nxm_sad = compute8x_m_sad_avx2_intrin(src, src_stride, ref, ref_stride, height, width);
-        break;
+        nxm_sad = compute8x_m_sad_avx2_intrin(src, src_stride, ref, ref_stride, height, width); break;
     case 2:
-        nxm_sad = compute16x_m_sad_avx2_intrin(src, src_stride, ref, ref_stride, height, width);
-        break;
+        nxm_sad = compute16x_m_sad_avx2_intrin(src, src_stride, ref, ref_stride, height, width); break;
     case 3:
-        nxm_sad = compute24x_m_sad_avx2_intrin(src, src_stride, ref, ref_stride, height, width);
-        break;
+        nxm_sad = compute24x_m_sad_avx2_intrin(src, src_stride, ref, ref_stride, height, width); break;
     case 4:
-        nxm_sad = compute32x_m_sad_avx2_intrin(src, src_stride, ref, ref_stride, height, width);
-        break;
+        nxm_sad = compute32x_m_sad_avx2_intrin(src, src_stride, ref, ref_stride, height, width); break;
     case 6:
-        nxm_sad = compute48x_m_sad_avx2_intrin(src, src_stride, ref, ref_stride, height, width);
-        break;
+        nxm_sad = compute48x_m_sad_avx2_intrin(src, src_stride, ref, ref_stride, height, width); break;
     case 8:
-        nxm_sad = compute64x_m_sad_avx2_intrin(src, src_stride, ref, ref_stride, height, width);
-        break;
+        nxm_sad = compute64x_m_sad_avx2_intrin(src, src_stride, ref, ref_stride, height, width); break;
     case 16:
-        nxm_sad = compute64x_m_sad_avx2_intrin(src, src_stride, ref, ref_stride, height, width);
-        break;
+        nxm_sad = compute64x_m_sad_avx2_intrin(src, src_stride, ref, ref_stride, height, width); break;
     default:
         assert(0);
-        break;
-
     }
 
     return nxm_sad;
+}
+
+uint32_t nxm_sad_avg_kernel_helper(
+    uint8_t  *src,
+    uint32_t  src_stride,
+    uint8_t  *ref1,
+    uint32_t  ref1_stride,
+    uint8_t  *ref2,
+    uint32_t  ref2_stride,
+    uint32_t  height,
+    uint32_t  width,
+    uint8_t   choice){
+
+    uint32_t nxm_sad_avg;
+
+    switch (choice) {
+    case (0 || 1 || 2 || 3 || 4 || 6 || 8):
+        nxm_sad_avg = combined_averaging_sad(src, src_stride, ref1, ref1_stride, ref2, ref2_stride, height, width); break;
+    default:
+        assert(0);
+    }
+
+    return nxm_sad_avg;
+
+}
+
+uint32_t nxm_sad_avg_kernel_avx2_helper(
+    uint8_t  *src,
+    uint32_t  src_stride,
+    uint8_t  *ref1,
+    uint32_t  ref1_stride,
+    uint8_t  *ref2,
+    uint32_t  ref2_stride,
+    uint32_t  height,
+    uint32_t  width,
+    uint8_t   choice) {
+
+    uint32_t nxm_sad_avg;
+
+    switch (choice) {
+    case 0:
+        nxm_sad_avg = combined_averaging4x_msad_sse2_intrin(src, src_stride, ref1, ref1_stride, ref2, ref2_stride, height, width); break;
+    case 1:
+        nxm_sad_avg = combined_averaging8x_msad_avx2_intrin(src, src_stride, ref1, ref1_stride, ref2, ref2_stride, height, width); break;
+    case 2:
+        nxm_sad_avg = combined_averaging16x_msad_avx2_intrin(src, src_stride, ref1, ref1_stride, ref2, ref2_stride, height, width); break;
+    case 3:
+        nxm_sad_avg = combined_averaging24x_msad_avx2_intrin(src, src_stride, ref1, ref1_stride, ref2, ref2_stride, height, width); break;
+    case 4:
+        nxm_sad_avg = combined_averaging32x_msad_avx2_intrin(src, src_stride, ref1, ref1_stride, ref2, ref2_stride, height, width); break;
+    case 6:
+        nxm_sad_avg = combined_averaging48x_msad_avx2_intrin(src, src_stride, ref1, ref1_stride, ref2, ref2_stride, height, width); break;
+    case 8:
+        nxm_sad_avg = combined_averaging64x_msad_avx2_intrin(src, src_stride, ref1, ref1_stride, ref2, ref2_stride, height, width); break;
+    default:
+        assert(0);
+    }
+
+    return nxm_sad_avg;
 }
