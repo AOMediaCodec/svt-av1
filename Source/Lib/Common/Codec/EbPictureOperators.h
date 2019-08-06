@@ -176,20 +176,6 @@ extern "C" {
             in_ptr[i] = value;
     }
 
-    static void picture_addition_void_func() {}
-    static void pic_zero_out_coef_void_func() {}
-
-    typedef int32_t(*EbSumRes)(
-        int16_t  *in_ptr,
-        uint32_t  size,
-        uint32_t  stride_in);
-
-    typedef void(*EbMemset16BitBlk)(
-        int16_t  *in_ptr,
-        uint32_t  stride_in,
-        uint32_t  size,
-        int16_t   value);
-
     uint64_t full_distortion_kernel16_bits(
         uint8_t  *input,
         uint32_t  input_offset,
@@ -199,76 +185,6 @@ extern "C" {
         uint32_t  pred_stride,
         uint32_t  area_width,
         uint32_t  area_height);
-
-    typedef void(*EbFullDistortionKernelCbfZero32Bits)(
-        int32_t  *coeff,
-        uint32_t  coeff_stride,
-        int32_t  *recon_coeff,
-        uint32_t  recon_coeff_stride,
-        uint64_t  distortion_result[DIST_CALC_TOTAL],
-        uint32_t  area_width,
-        uint32_t  area_height);
-
-    typedef void(*EbFullDistortionKernel32Bits)(
-        int32_t  *coeff,
-        uint32_t  coeff_stride,
-        int32_t  *recon_coeff,
-        uint32_t  recon_coeff_stride,
-        uint64_t  distortion_result[DIST_CALC_TOTAL],
-        uint32_t  area_width,
-        uint32_t  area_height);
-
-    /***************************************
-    * Function Types
-    ***************************************/
-    typedef void(*EbAddKernelType16Bit)(
-        uint16_t *pred_ptr,
-        uint32_t  pred_stride,
-        int16_t  *residual_ptr,
-        uint32_t  residual_stride,
-        uint16_t *recon_ptr,
-        uint32_t  recon_stride,
-        uint32_t  width,
-        uint32_t  height);
-
-    typedef void(*EbZeroCoeffType)(
-        int16_t *coeff_buffer,
-        uint32_t coeff_stride,
-        uint32_t coeff_origin_index,
-        uint32_t area_width,
-        uint32_t area_height);
-
-    typedef uint64_t(*EbSatdU8Type)(
-        uint8_t  *diff,
-        uint64_t *dc_value,
-        uint32_t  src_stride);
-
-    /***************************************
-    * Function Tables
-    ***************************************/
-
-    typedef void(*EbAddKernelType)(
-        uint8_t  *pred_ptr,
-        uint32_t  pred_stride,
-        int16_t  *residual_ptr,
-        uint32_t  residual_stride,
-        uint8_t  *recon_ptr,
-        uint32_t  recon_stride,
-        uint32_t  width,
-        uint32_t  height,
-        uint8_t   choice);
-
-    typedef void(*EB_RESDKERNELSUBSAMPLED_TYPE)(
-        uint8_t  *input,
-        uint32_t  input_stride,
-        uint8_t  *pred,
-        uint32_t  pred_stride,
-        int16_t  *residual,
-        uint32_t  residual_stride,
-        uint32_t  area_width,
-        uint32_t  area_height,
-        uint8_t   last_line
-        );
 
     void residual_kernel16bit(
         uint16_t *input,

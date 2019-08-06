@@ -21,6 +21,11 @@
 #define ChromaMinusOffset1 MinusOffset1
 #endif
 
+void uni_pred_luma_if(EbByte ref_pic, uint32_t src_stride, EbByte dst, uint32_t dst_stride, uint32_t pu_width, uint32_t pu_height, int16_t *first_pass_if_dst, uint8_t choice);
+void bi_pred_luma_if(EbByte ref_pic, uint32_t src_stride, int16_t *dst, uint32_t pu_width, uint32_t pu_height, int16_t *first_pass_if_dst, uint8_t choice);
+void uni_pred_chroma_if(EbByte ref_pic, uint32_t src_stride, EbByte dst, uint32_t dst_stride, uint32_t pu_width, uint32_t pu_height, int16_t *first_pass_if_dst, uint32_t frac_pos_x, uint32_t frac_pos_y, uint8_t choice);
+void bi_pred_chroma_if(EbByte ref_pic, uint32_t src_stride, int16_t *dst, uint32_t pu_width, uint32_t pu_height, int16_t *first_pass_if_dst, uint32_t frac_pos_x, uint32_t frac_pos_y, uint8_t choice);
+
 void encode_uni_pred_interpolation(
     EbPictureBufferDesc *ref_pic,                  //input parameter, please refer to the detailed explanation above.
     uint32_t                 pos_x,                    //input parameter, please refer to the detailed explanation above.
@@ -50,14 +55,15 @@ void encode_uni_pred_interpolation(
     frac_pos_x = pos_x & 0x03;
     frac_pos_y = pos_y & 0x03;
 
-    uni_pred_luma_if_function_ptr_array_new[asm_type][frac_pos_x + (frac_pos_y << 2)](
+    uni_pred_luma_if(
         ref_pic->buffer_y + integPosx + integPosy * ref_pic->stride_y,
         ref_pic->stride_y,
         dst->buffer_y + dst_luma_index,
         dst->stride_y,
         pu_width,
         pu_height,
-        tempBuf0);
+        tempBuf0,
+        frac_pos_x + (frac_pos_y << 2));
 
     //chroma
     //compute the chroma fractional position
@@ -66,7 +72,7 @@ void encode_uni_pred_interpolation(
     frac_pos_x = pos_x & 0x07;
     frac_pos_y = pos_y & 0x07;
 
-    uni_pred_chroma_if_function_ptr_array_new[asm_type][frac_pos_x + (frac_pos_y << 3)](
+    uni_pred_chroma_if(
         ref_pic->buffer_cb + integPosx + integPosy * ref_pic->stride_cb,
         ref_pic->stride_cb,
         dst->buffer_cb + dst_chroma_index,
@@ -75,10 +81,11 @@ void encode_uni_pred_interpolation(
         chromaPuHeight,
         tempBuf0,
         frac_pos_x,
-        frac_pos_y);
+        frac_pos_y,
+        frac_pos_x + (frac_pos_y << 3));
 
     //doing the chroma Cr interpolation
-    uni_pred_chroma_if_function_ptr_array_new[asm_type][frac_pos_x + (frac_pos_y << 3)](
+    uni_pred_chroma_if(
         ref_pic->buffer_cr + integPosx + integPosy * ref_pic->stride_cr,
         ref_pic->stride_cr,
         dst->buffer_cr + dst_chroma_index,
@@ -87,7 +94,8 @@ void encode_uni_pred_interpolation(
         chromaPuHeight,
         tempBuf0,
         frac_pos_x,
-        frac_pos_y);
+        frac_pos_y,
+        frac_pos_x + (frac_pos_y << 3));
 }
 
 /** generate_padding()

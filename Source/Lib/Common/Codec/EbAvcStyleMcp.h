@@ -189,46 +189,6 @@ extern "C" {
         EbBool                subSamplePredFlagChroma,
         EbAsm                 asm_type);
 
-    typedef void(*AvcStyleChromaInterpolationFilterNew)(
-        EbByte               ref_pic,
-        uint32_t                src_stride,
-        EbByte               dst,
-        uint32_t                dst_stride,
-        uint32_t                pu_width,
-        uint32_t                pu_height,
-        EbByte               temp_buf,
-        EbBool               skip,
-        uint32_t                frac_pos_x,
-        uint32_t                frac_pos_y);
-
-    typedef void(*PictureAverage)(
-        EbByte                  src0,
-        uint32_t                   src0_stride,
-        EbByte                  src1,
-        uint32_t                   src1_stride,
-        EbByte                  dst,
-        uint32_t                   dst_stride,
-        uint32_t                   area_width,
-        uint32_t                   area_height);
-
-    typedef void(*AvcStyleInterpolationFilterNew)(
-        EbByte               ref_pic,
-        uint32_t                src_stride,
-        EbByte               dst,
-        uint32_t                dst_stride,
-        uint32_t                pu_width,
-        uint32_t                pu_height,
-        EbByte               temp_buf,
-        EbBool               skip,
-        uint32_t                frac_pos,
-        uint8_t             choice);
-
-    typedef void(*PictureAverage1Line)(
-        EbByte                  src0,
-        EbByte                  src1,
-        EbByte                  dst,
-        uint32_t                   area_width);
-
 #ifdef __cplusplus
 }
 #endif

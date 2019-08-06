@@ -49,6 +49,99 @@ extern "C" {
     struct ConvolveParams;
     struct InterpFilterParams;
 
+    void sad_calculation_8x8_16x16_sse2_intrin(uint8_t  *src,uint32_t  src_stride,uint8_t  *ref,uint32_t  ref_stride,uint32_t *p_best_sad8x8,uint32_t *p_best_sad16x16,uint32_t *p_best_mv8x8,uint32_t *p_best_mv16x16,uint32_t  mv,uint32_t *p_sad16x16,EbBool    sub_sad);
+    RTCD_EXTERN void(*sad_calculation_8x8_16x16)(uint8_t  *src, uint32_t  src_stride, uint8_t  *ref, uint32_t  ref_stride, uint32_t *p_best_sad8x8, uint32_t *p_best_sad16x16, uint32_t *p_best_mv8x8, uint32_t *p_best_mv16x16, uint32_t  mv, uint32_t *p_sad16x16, EbBool    sub_sad);
+
+    void sad_calculation_32x32_64x64_sse2_intrin(uint32_t *p_sad16x16,uint32_t *p_best_sad32x32,uint32_t *p_best_sad64x64,uint32_t *p_best_mv32x32,uint32_t *p_best_mv64x64,uint32_t  mv);
+    RTCD_EXTERN void(*sad_calculation_32x32_64x64)(uint32_t *p_sad16x16, uint32_t *p_best_sad32x32, uint32_t *p_best_sad64x64, uint32_t *p_best_mv32x32, uint32_t *p_best_mv64x64, uint32_t  mv);
+
+    void ext_all_sad_calculation_8x8_16x16_c(uint8_t *src, uint32_t src_stride, uint8_t *ref, uint32_t ref_stride,uint32_t mv, uint32_t *p_best_sad8x8, uint32_t *p_best_sad16x16,uint32_t *p_best_mv8x8, uint32_t *p_best_mv16x16,uint32_t p_eight_sad16x16[16][8], uint32_t p_eight_sad8x8[64][8]);
+    void ext_all_sad_calculation_8x8_16x16_avx2(uint8_t   *src,uint32_t   src_stride,uint8_t   *ref,uint32_t   ref_stride,uint32_t   mv,uint32_t  *p_best_sad8x8,uint32_t  *p_best_sad16x16,uint32_t  *p_best_mv8x8,uint32_t  *p_best_mv16x16,uint32_t   p_eight_sad16x16[16][8],uint32_t   p_eight_sad8x8[64][8]);
+    RTCD_EXTERN void(*ext_all_sad_calculation_8x8_16x16)(uint8_t   *src, uint32_t   src_stride, uint8_t   *ref, uint32_t   ref_stride, uint32_t   mv, uint32_t  *p_best_sad8x8, uint32_t  *p_best_sad16x16, uint32_t  *p_best_mv8x8, uint32_t  *p_best_mv16x16, uint32_t   p_eight_sad16x16[16][8], uint32_t   p_eight_sad8x8[64][8]);
+
+    void ExtSadCalculation_c(uint32_t *p_sad8x8, uint32_t *p_sad16x16,uint32_t *p_sad32x32, uint32_t *p_best_sad64x32,uint32_t *p_best_mv64x32, uint32_t *p_best_sad32x16,uint32_t *p_best_mv32x16, uint32_t *p_best_sad16x8,uint32_t *p_best_mv16x8, uint32_t *p_best_sad32x64,uint32_t *p_best_mv32x64, uint32_t *p_best_sad16x32,uint32_t *p_best_mv16x32, uint32_t *p_best_sad8x16,uint32_t *p_best_mv8x16, uint32_t *p_best_sad32x8,uint32_t *p_best_mv32x8, uint32_t *p_best_sad8x32,uint32_t *p_best_mv8x32, uint32_t *p_best_sad64x16,uint32_t *p_best_mv64x16, uint32_t *p_best_sad16x64,uint32_t *p_best_mv16x64, uint32_t mv);
+    RTCD_EXTERN void (*ext_sad_calculation) (uint32_t *p_sad8x8, uint32_t *p_sad16x16, uint32_t *p_sad32x32, uint32_t *p_best_sad64x32, uint32_t *p_best_mv64x32, uint32_t *p_best_sad32x16, uint32_t *p_best_mv32x16, uint32_t *p_best_sad16x8, uint32_t *p_best_mv16x8, uint32_t *p_best_sad32x64, uint32_t *p_best_mv32x64, uint32_t *p_best_sad16x32, uint32_t *p_best_mv16x32, uint32_t *p_best_sad8x16, uint32_t *p_best_mv8x16, uint32_t *p_best_sad32x8, uint32_t *p_best_mv32x8, uint32_t *p_best_sad8x32, uint32_t *p_best_mv8x32, uint32_t *p_best_sad64x16, uint32_t *p_best_mv64x16, uint32_t *p_best_sad16x64, uint32_t *p_best_mv16x64, uint32_t mv);
+
+    void ext_eigth_sad_calculation_nsq_c(uint32_t p_sad8x8[64][8], uint32_t p_sad16x16[16][8],uint32_t p_sad32x32[4][8], uint32_t *p_best_sad64x32,uint32_t *p_best_mv64x32, uint32_t *p_best_sad32x16,uint32_t *p_best_mv32x16, uint32_t *p_best_sad16x8, uint32_t *p_best_mv16x8,uint32_t *p_best_sad32x64, uint32_t *p_best_mv32x64,uint32_t *p_best_sad16x32, uint32_t *p_best_mv16x32,uint32_t *p_best_sad8x16, uint32_t *p_best_mv8x16, uint32_t *p_best_sad32x8,uint32_t *p_best_mv32x8, uint32_t *p_best_sad8x32, uint32_t *p_best_mv8x32,uint32_t *p_best_sad64x16, uint32_t *p_best_mv64x16,uint32_t *p_best_sad16x64, uint32_t *p_best_mv16x64, uint32_t mv);
+    void ext_eigth_sad_calculation_nsq_avx2(uint32_t   p_sad8x8[64][8],uint32_t   p_sad16x16[16][8],uint32_t   p_sad32x32[4][8],uint32_t  *p_best_sad64x32,uint32_t  *p_best_mv64x32,uint32_t  *p_best_sad32x16,uint32_t  *p_best_mv32x16,uint32_t  *p_best_sad16x8,uint32_t  *p_best_mv16x8,uint32_t  *p_best_sad32x64,uint32_t  *p_best_mv32x64,uint32_t  *p_best_sad16x32,uint32_t  *p_best_mv16x32,uint32_t  *p_best_sad8x16,uint32_t  *p_best_mv8x16,uint32_t  *p_best_sad32x8,uint32_t  *p_best_mv32x8,uint32_t  *p_best_sad8x32,uint32_t  *p_best_mv8x32,uint32_t  *p_best_sad64x16,uint32_t  *p_best_mv64x16,uint32_t  *p_best_sad16x64,uint32_t  *p_best_mv16x64,uint32_t   mv);
+    RTCD_EXTERN void(*ext_eigth_sad_calculation)(uint32_t   p_sad8x8[64][8], uint32_t   p_sad16x16[16][8], uint32_t   p_sad32x32[4][8], uint32_t  *p_best_sad64x32, uint32_t  *p_best_mv64x32, uint32_t  *p_best_sad32x16, uint32_t  *p_best_mv32x16, uint32_t  *p_best_sad16x8, uint32_t  *p_best_mv16x8, uint32_t  *p_best_sad32x64, uint32_t  *p_best_mv32x64, uint32_t  *p_best_sad16x32, uint32_t  *p_best_mv16x32, uint32_t  *p_best_sad8x16, uint32_t  *p_best_mv8x16, uint32_t  *p_best_sad32x8, uint32_t  *p_best_mv32x8, uint32_t  *p_best_sad8x32, uint32_t  *p_best_mv8x32, uint32_t  *p_best_sad64x16, uint32_t  *p_best_mv64x16, uint32_t  *p_best_sad16x64, uint32_t  *p_best_mv16x64, uint32_t   mv);
+
+    void uni_pred_luma_if_helper(EbByte ref_pic,uint32_t src_stride,EbByte dst,uint32_t dst_stride,uint32_t pu_width,uint32_t pu_height,int16_t *first_pass_if_dst,uint8_t choice);
+    RTCD_EXTERN void(*uni_pred_luma_if)(EbByte ref_pic, uint32_t src_stride, EbByte dst, uint32_t dst_stride, uint32_t pu_width, uint32_t pu_height, int16_t *first_pass_if_dst, uint8_t choice);
+
+    void bi_pred_luma_if_helper(EbByte ref_pic,uint32_t src_stride,int16_t *dst,uint32_t pu_width,uint32_t pu_height,int16_t *first_pass_if_dst,uint8_t choice);
+    RTCD_EXTERN void(*bi_pred_luma_if)(EbByte ref_pic, uint32_t src_stride, int16_t *dst, uint32_t pu_width, uint32_t pu_height, int16_t *first_pass_if_dst, uint8_t choice);
+
+    void uni_pred_chroma_if_helper(EbByte ref_pic,uint32_t src_stride,EbByte dst,uint32_t dst_stride,uint32_t pu_width,uint32_t pu_height,int16_t *first_pass_if_dst,uint32_t frac_pos_x,uint32_t frac_pos_y,uint8_t choice);
+    RTCD_EXTERN void(*uni_pred_chroma_if)(EbByte ref_pic, uint32_t src_stride, EbByte dst, uint32_t dst_stride, uint32_t pu_width, uint32_t pu_height, int16_t *first_pass_if_dst, uint32_t frac_pos_x, uint32_t frac_pos_y, uint8_t choice);
+
+    void bi_pred_chroma_if_helper(EbByte ref_pic,uint32_t src_stride,int16_t *dst,uint32_t pu_width,uint32_t pu_height,int16_t *first_pass_if_dst,uint32_t frac_pos_x,uint32_t frac_pos_y,uint8_t choice);
+    RTCD_EXTERN void(*bi_pred_chroma_if)(EbByte ref_pic, uint32_t src_stride, int16_t *dst, uint32_t pu_width, uint32_t pu_height, int16_t *first_pass_if_dst, uint32_t frac_pos_x, uint32_t frac_pos_y, uint8_t choice);
+
+    void inv_transform_encode_helper(int16_t *src,uint32_t src_stride,int16_t *dst,uint32_t dst_stride,int16_t *intermediate,uint32_t addshift,uint8_t choice);
+    RTCD_EXTERN void(*inv_transform_encode)(int16_t *src, uint32_t src_stride, int16_t *dst, uint32_t dst_stride, int16_t *intermediate, uint32_t addshift, uint8_t choice);
+
+    void transform_encode_helper(int16_t *src,const uint32_t src_stride,int16_t *dst,const uint32_t dst_stride,int16_t *intermediate,uint32_t addshift,uint8_t choice);
+    RTCD_EXTERN void(*transform_encode)(int16_t *src, const uint32_t src_stride, int16_t *dst, const uint32_t dst_stride, int16_t *intermediate, uint32_t addshift, uint8_t choice);
+
+    void pfreq_n4_transform_helper(int16_t *src,const uint32_t src_stride,int16_t *dst,const uint32_t dst_stride,int16_t *intermediate,uint32_t addshift,uint8_t choice);
+    void pfreq_n4_transform_avx2_helper(int16_t *src,const uint32_t src_stride,int16_t *dst,const uint32_t dst_stride,int16_t *intermediate,uint32_t addshift,uint8_t choice);
+    RTCD_EXTERN void(*pfreq_n4_transform)(int16_t *src, const uint32_t src_stride, int16_t *dst, const uint32_t dst_stride, int16_t *intermediate, uint32_t addshift, uint8_t choice);
+
+    void pfreq_n2_transform_avx2_helper(int16_t *src,const uint32_t src_stride,int16_t *dst,const uint32_t dst_stride,int16_t *intermediate,uint32_t addshift,uint8_t choice);
+    void pfreq_n2_transform_helper(int16_t *src,const uint32_t src_stride,int16_t *dst,const uint32_t dst_stride,int16_t *intermediate,uint32_t addshift,uint8_t choice);
+    RTCD_EXTERN void(*pfreq_n2_transform)(int16_t *src, const uint32_t src_stride, int16_t *dst, const uint32_t dst_stride, int16_t *intermediate, uint32_t addshift, uint8_t choice);
+
+    void ext_eight_sad_calculation_32x32_64x64_c(uint32_t p_sad16x16[16][8], uint32_t *p_best_sad32x32,uint32_t *p_best_sad64x64, uint32_t *p_best_mv32x32,uint32_t *p_best_mv64x64, uint32_t mv, uint32_t p_sad32x32[4][8]);
+    void ext_eight_sad_calculation_32x32_64x64_avx2(uint32_t  p_sad16x16[16][8],uint32_t *p_best_sad32x32,uint32_t *p_best_sad64x64,uint32_t *p_best_mv32x32,uint32_t *p_best_mv64x64,uint32_t  mv,uint32_t  p_sad32x32[4][8]);
+    RTCD_EXTERN void(*ext_eight_sad_calculation_32x32_64x64)(uint32_t  p_sad16x16[16][8], uint32_t *p_best_sad32x32, uint32_t *p_best_sad64x64, uint32_t *p_best_mv32x32, uint32_t *p_best_mv64x64, uint32_t  mv, uint32_t  p_sad32x32[4][8]);
+
+    uint64_t compute_mean_helper(uint8_t *input_samples,uint32_t input_stride,uint32_t input_area_width,uint32_t input_area_height,uint8_t  choice);
+    uint64_t compute_mean_avx2_helper(uint8_t *input_samples,uint32_t input_stride,uint32_t input_area_width,uint32_t input_area_height,uint8_t  choice);
+    RTCD_EXTERN uint64_t(*compute_mean)(uint8_t *input_samples, uint32_t input_stride, uint32_t input_area_width, uint32_t input_area_height, uint8_t  choice);
+
+    void ext_sad_calculation_8x8_16x16_c(uint8_t  *src,uint32_t  src_stride,uint8_t  *ref,uint32_t  ref_stride,uint32_t *p_best_sad8x8,uint32_t *p_best_sad16x16,uint32_t *p_best_mv8x8,uint32_t *p_best_mv16x16,uint32_t  mv,uint32_t *p_sad16x16,uint32_t *p_sad8x8,EbBool    sub_sad);
+    void ext_sad_calculation_8x8_16x16_avx2_intrin(uint8_t  *src,uint32_t  src_stride,uint8_t  *ref,uint32_t  ref_stride,uint32_t *p_best_sad8x8,uint32_t *p_best_sad16x16,uint32_t *p_best_mv8x8,uint32_t *p_best_mv16x16,uint32_t  mv,uint32_t *p_sad16x16,uint32_t *p_sad8x8,EbBool    sub_sad);
+    RTCD_EXTERN void (*ext_sad_calculation_8x8_16x16)(uint8_t  *src, uint32_t  src_stride, uint8_t  *ref, uint32_t  ref_stride, uint32_t *p_best_sad8x8, uint32_t *p_best_sad16x16, uint32_t *p_best_mv8x8, uint32_t *p_best_mv16x16, uint32_t  mv, uint32_t *p_sad16x16, uint32_t *p_sad8x8, EbBool    sub_sad);
+
+    void ext_sad_calculation_32x32_64x64_c(uint32_t *p_sad16x16,uint32_t *p_best_sad32x32,uint32_t *p_best_sad64x64,uint32_t *p_best_mv32x32,uint32_t *p_best_mv64x64,uint32_t  mv,uint32_t *p_sad32x32);
+    void ext_sad_calculation_32x32_64x64_sse4_intrin(uint32_t *p_sad16x16,uint32_t *p_best_sad32x32,uint32_t *p_best_sad64x64,uint32_t *p_best_mv32x32,uint32_t *p_best_mv64x64,uint32_t  mv,uint32_t *p_sad32x32);
+    RTCD_EXTERN void (*ext_sad_calculation_32x32_64x64)(uint32_t *p_sad16x16, uint32_t *p_best_sad32x32, uint32_t *p_best_sad64x64, uint32_t *p_best_mv32x32, uint32_t *p_best_mv64x64, uint32_t  mv, uint32_t *p_sad32x32);
+
+    void initialize_buffer_32bits_sse2_intrin(uint32_t *pointer, uint32_t  count128, uint32_t  count32, uint32_t  value);
+    RTCD_EXTERN void(*initialize_buffer_32bits)(uint32_t *pointer, uint32_t  count128, uint32_t  count32, uint32_t  value);
+
+    void compressed_packmsb_c(uint8_t  *in8_bit_buffer, uint32_t  in8_stride, uint8_t  *inn_bit_buffer, uint16_t *out16_bit_buffer, uint32_t  inn_stride, uint32_t  out_stride, uint32_t  width, uint32_t  height);
+    void compressed_packmsb_avx2_intrin(uint8_t  *in8_bit_buffer,uint32_t  in8_stride,uint8_t  *inn_bit_buffer,uint16_t *out16_bit_buffer,uint32_t  inn_stride,uint32_t  out_stride,uint32_t  width,uint32_t  height);
+    RTCD_EXTERN void(*compressed_packmsb)(uint8_t  *in8_bit_buffer, uint32_t  in8_stride, uint8_t  *inn_bit_buffer, uint16_t *out16_bit_buffer, uint32_t  inn_stride, uint32_t  out_stride, uint32_t  width, uint32_t  height);
+
+    void c_pack_c(const uint8_t *inn_bit_buffer,uint32_t       inn_stride,uint8_t       *in_compn_bit_buffer,uint32_t       out_stride,uint8_t       *local_cache,uint32_t       width,uint32_t       height);
+    void c_pack_avx2_intrin(const uint8_t *inn_bit_buffer, uint32_t       inn_stride, uint8_t       *in_compn_bit_buffer, uint32_t       out_stride, uint8_t       *local_cache, uint32_t       width, uint32_t       height);
+    RTCD_EXTERN void(*c_pack)(const uint8_t *inn_bit_buffer, uint32_t       inn_stride, uint8_t       *in_compn_bit_buffer, uint32_t       out_stride, uint8_t       *local_cache, uint32_t       width, uint32_t       height);
+
+    void unpack_avg_c(uint16_t *ref16_l0,uint32_t  ref_l0_stride,uint16_t *ref16_l1,uint32_t  ref_l1_stride,uint8_t  *dst_ptr,uint32_t  dst_stride,uint32_t  width,uint32_t  height);
+    void unpack_avg_avx2_intrin(uint16_t *ref16_l0, uint32_t  ref_l0_stride, uint16_t *ref16_l1, uint32_t  ref_l1_stride, uint8_t  *dst_ptr, uint32_t  dst_stride, uint32_t  width, uint32_t  height);
+    RTCD_EXTERN void(*unpack_avg)(uint16_t *ref16_l0, uint32_t  ref_l0_stride, uint16_t *ref16_l1, uint32_t  ref_l1_stride, uint8_t  *dst_ptr, uint32_t  dst_stride, uint32_t  width, uint32_t  height);
+
+    void unpack_avg_safe_sub_c(uint16_t *ref16_l0,uint32_t  ref_l0_stride,uint16_t *ref16_l1,uint32_t  ref_l1_stride,uint8_t  *dst_ptr,uint32_t  dst_stride,EbBool    sub_pred,uint32_t  width,uint32_t  height);
+    void unpack_avg_safe_sub_avx2_intrin(uint16_t *ref16_l0, uint32_t  ref_l0_stride, uint16_t *ref16_l1, uint32_t  ref_l1_stride, uint8_t  *dst_ptr, uint32_t  dst_stride, EbBool    sub_pred, uint32_t  width, uint32_t  height);
+    RTCD_EXTERN void(*unpack_avg_safe_sub)(uint16_t *ref16_l0, uint32_t  ref_l0_stride, uint16_t *ref16_l1, uint32_t  ref_l1_stride, uint8_t  *dst_ptr, uint32_t  dst_stride, EbBool    sub_pred, uint32_t  width, uint32_t  height);
+
+    void un_pack8_bit_data_c(uint16_t *in16_bit_buffer,uint32_t  in_stride,uint8_t  *out8_bit_buffer,uint32_t  out8_stride,uint32_t  width,uint32_t  height);
+    void eb_enc_un_pack8_bit_data_avx2_intrin(uint16_t *in16_bit_buffer, uint32_t  in_stride, uint8_t  *out8_bit_buffer, uint32_t  out8_stride, uint32_t  width, uint32_t  height);
+    RTCD_EXTERN void(*unpack_8bit_safe_sub)(uint16_t *in16_bit_buffer, uint32_t  in_stride, uint8_t  *out8_bit_buffer, uint32_t  out8_stride, uint32_t  width, uint32_t  height);
+
+    void unpack_8bit_helper_c(uint16_t *in16_bit_buffer,uint32_t  in_stride,uint8_t  *out8_bit_buffer,uint32_t  out8_stride,uint32_t  width,uint32_t  height,uint8_t   choice);
+    void unpack_8bit_helper_avx2(uint16_t *in16_bit_buffer,uint32_t  in_stride,uint8_t  *out8_bit_buffer,uint32_t  out8_stride,uint32_t  width,uint32_t  height,uint8_t   choice);
+    RTCD_EXTERN void(*unpack_8bit)(uint16_t *in16_bit_buffer, uint32_t  in_stride, uint8_t  *out8_bit_buffer, uint32_t  out8_stride, uint32_t  width, uint32_t  height, uint8_t   choice);
+
+    void pack2d_16_bit_src_helper(uint8_t     *in8_bit_buffer,uint32_t     in8_stride,uint8_t     *inn_bit_buffer,uint16_t    *out16_bit_buffer,uint32_t     inn_stride,uint32_t     out_stride,uint32_t     width,uint32_t     height,uint8_t     choice);
+    void pack2d_16_bit_src_avx2_helper(uint8_t     *in8_bit_buffer,uint32_t     in8_stride,uint8_t     *inn_bit_buffer,uint16_t    *out16_bit_buffer,uint32_t     inn_stride,uint32_t     out_stride,uint32_t     width,uint32_t     height,uint8_t     choice);
+    RTCD_EXTERN void(*pack2d_16_bit_src)(uint8_t     *in8_bit_buffer, uint32_t     in8_stride, uint8_t     *inn_bit_buffer, uint16_t    *out16_bit_buffer, uint32_t     inn_stride, uint32_t     out_stride, uint32_t     width, uint32_t     height, uint8_t     choice);
+
+    void unpack2d_array_16bit_helper(uint16_t *in16_bit_buffer,uint32_t  in_stride,uint8_t  *out8_bit_buffer,uint8_t  *outn_bit_buffer,uint32_t  out8_stride,uint32_t  outn_stride,uint32_t  width,uint32_t  height,uint8_t   choice);
+    RTCD_EXTERN void(*unpack2d_array_16bit)(uint16_t *in16_bit_buffer, uint32_t  in_stride, uint8_t  *out8_bit_buffer, uint8_t  *outn_bit_buffer, uint32_t  out8_stride, uint32_t  outn_stride, uint32_t  width, uint32_t  height, uint8_t   choice);
+
     void picture_average_kernel_sse2_intrin(EbByte   src0, uint32_t src0_stride, EbByte   src1, uint32_t src1_stride, EbByte   dst, uint32_t dst_stride, uint32_t area_width, uint32_t area_height);
     RTCD_EXTERN void(*picture_average)(EbByte   src0, uint32_t src0_stride, EbByte   src1, uint32_t src1_stride, EbByte   dst, uint32_t dst_stride, uint32_t area_width, uint32_t area_height);
 
@@ -2519,6 +2612,68 @@ extern "C" {
         //    flags = ~HAS_AVX2;
 
         //to use C: flags=0
+
+        sad_calculation_8x8_16x16 = sad_calculation_8x8_16x16_sse2_intrin;
+        sad_calculation_32x32_64x64 = sad_calculation_32x32_64x64_sse2_intrin;
+
+        ext_all_sad_calculation_8x8_16x16 = ext_all_sad_calculation_8x8_16x16_c;
+        if (flags & HAS_AVX2) ext_all_sad_calculation_8x8_16x16 = ext_all_sad_calculation_8x8_16x16_avx2;
+
+        ext_sad_calculation = ExtSadCalculation_c;
+
+        ext_eigth_sad_calculation = ext_eigth_sad_calculation_nsq_c;
+        if (flags & HAS_AVX2) ext_eigth_sad_calculation = ext_eigth_sad_calculation_nsq_avx2;
+
+        uni_pred_luma_if = uni_pred_luma_if_helper;
+        bi_pred_luma_if = bi_pred_luma_if_helper;
+        uni_pred_chroma_if = uni_pred_chroma_if_helper;
+        bi_pred_chroma_if = bi_pred_chroma_if_helper;
+
+        inv_transform_encode = inv_transform_encode_helper;
+        transform_encode = transform_encode_helper;
+
+        pfreq_n4_transform = pfreq_n4_transform_helper;
+        if (flags & HAS_AVX2) pfreq_n4_transform = pfreq_n4_transform_avx2_helper;
+
+        pfreq_n2_transform = pfreq_n2_transform_helper;
+        if (flags & HAS_AVX2) pfreq_n2_transform = pfreq_n2_transform_avx2_helper;
+
+        ext_eight_sad_calculation_32x32_64x64 = ext_eight_sad_calculation_32x32_64x64_c;
+        if (flags & HAS_AVX2) ext_eight_sad_calculation_32x32_64x64 = ext_eight_sad_calculation_32x32_64x64_avx2;
+
+        compute_mean = compute_mean_helper;
+        if (flags & HAS_AVX2) compute_mean = compute_mean_avx2_helper;
+
+        ext_sad_calculation_8x8_16x16 = ext_sad_calculation_8x8_16x16_c;
+        if (flags & HAS_AVX2) ext_sad_calculation_8x8_16x16 = ext_sad_calculation_8x8_16x16_avx2_intrin;
+
+        ext_sad_calculation_32x32_64x64 = ext_sad_calculation_32x32_64x64_c;
+        if (flags & HAS_AVX2) ext_sad_calculation_32x32_64x64 = ext_sad_calculation_32x32_64x64_sse4_intrin;
+
+        initialize_buffer_32bits = initialize_buffer_32bits_sse2_intrin;
+
+        compressed_packmsb = compressed_packmsb_c;
+        if (flags & HAS_AVX2) compressed_packmsb = compressed_packmsb_avx2_intrin;
+
+        c_pack = c_pack_c;
+        if (flags & HAS_AVX2) c_pack = c_pack_avx2_intrin;
+
+        unpack_avg = unpack_avg_c;
+        if (flags & HAS_AVX2) unpack_avg = unpack_avg_avx2_intrin;
+
+        unpack_avg_safe_sub = unpack_avg_safe_sub_c;
+        if (flags & HAS_AVX2) unpack_avg_safe_sub = unpack_avg_safe_sub_avx2_intrin;
+
+        unpack_8bit_safe_sub = un_pack8_bit_data_c;
+        if (flags & HAS_AVX2) unpack_8bit_safe_sub = eb_enc_un_pack8_bit_data_avx2_intrin;
+
+        unpack_8bit = unpack_8bit_helper_c;
+        if (flags & HAS_AVX2) unpack_8bit = unpack_8bit_helper_avx2;
+
+        pack2d_16_bit_src = pack2d_16_bit_src_helper;
+        if (flags & HAS_AVX2) pack2d_16_bit_src = pack2d_16_bit_src_avx2_helper;
+
+        unpack2d_array_16bit = unpack2d_array_16bit_helper;
 
         picture_average = picture_average_kernel_sse2_intrin;
         if (flags & HAS_SSE2) picture_average = picture_average_kernel_sse2_intrin;

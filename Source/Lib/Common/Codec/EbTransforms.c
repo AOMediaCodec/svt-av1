@@ -5083,35 +5083,39 @@ EbErrorType encode_transform(
     uint32_t transformSizeFlag = Log2f(TRANSFORM_MAX_SIZE) - Log2f(transform_size);
 
     if (trans_coeff_shape == DEFAULT_SHAPE) {
-        (*transform_function_table_encode[/*asm_type*/(bit_increment & 2) ? ASM_NON_AVX2 : asm_type][transformSizeFlag + dst_transform_flag])(
+        (*transform_encode)(
             residual_buffer,
             residual_stride,
             coeff_buffer,
             coeff_stride,
             transform_inner_array_ptr,
-            bit_increment
+            bit_increment,
+            transformSizeFlag + dst_transform_flag
             );
     }
 
     else if (trans_coeff_shape == N2_SHAPE) {
-        (*pfreq_n2_transform_table[/*asm_type*/(bit_increment & 2) ? ASM_NON_AVX2 : asm_type][transformSizeFlag + dst_transform_flag])(
+        (*pfreq_n2_transform)(
             residual_buffer,
             residual_stride,
             coeff_buffer,
             coeff_stride,
             transform_inner_array_ptr,
-            bit_increment
+            bit_increment,
+            transformSizeFlag + dst_transform_flag
             );
     }
 
     else if (trans_coeff_shape == N4_SHAPE) {
-        (*pfreq_n4_transform_table[/*asm_type*/(bit_increment & 2) ? ASM_NON_AVX2 : asm_type][transformSizeFlag + dst_transform_flag])(
+        (*pfreq_n4_transform)(
             residual_buffer,
             residual_stride,
             coeff_buffer,
             coeff_stride,
             transform_inner_array_ptr,
-            bit_increment);
+            bit_increment,
+            transformSizeFlag + dst_transform_flag
+            );
     }
 
     else { // trans_coeff_shape == ONLY_DC_SHAPE
@@ -8670,13 +8674,14 @@ EbErrorType encode_inv_transform(
         // The input of this function is the quantized_inversequantized transformed residual
         //   but in order to avoid extra copying, it is overwritten in place. The
         //   input(residual_buffer) is the SB residual buffer
-        (*inv_transform_function_table_encode[asm_type][transformSizeFlag + dst_transform_flag])(
+        (*inv_transform_encode)(
             coeff_buffer,
             coeff_stride,
             recon_buffer,
             recon_stride,
             transform_inner_array_ptr,
-            bit_increment);
+            bit_increment,
+            transformSizeFlag + dst_transform_flag);
     }
     return return_error;
 }
@@ -8757,5 +8762,138 @@ void construct_pm_trans_coeff_shaping(
             for (tuSizeIndex = 0; tuSizeIndex < 4; tuSizeIndex++)
                 sequence_control_set_ptr->trans_coeff_shape_array[resolutionIndex][levelIndex][tuSizeIndex] = ConstructPmTransCoeffShapingKnob(masking_matrix[resolutionIndex][levelIndex][tuSizeIndex], arrayLength[tuSizeIndex]);
         }
+    }
+}
+
+void inv_transform_encode_helper(
+    int16_t *src,
+    uint32_t src_stride,
+    int16_t *dst,
+    uint32_t dst_stride,
+    int16_t *intermediate,
+    uint32_t addshift,
+    uint8_t choice) {
+    switch (choice) {
+    case 0:
+        p_finv_transform32x32_ssse3(src, src_stride, dst, dst_stride, intermediate, addshift);break;
+    case 1:
+        p_finv_transform16x16_ssse3(src, src_stride, dst, dst_stride, intermediate, addshift);break;
+    case 2:
+        inv_transform8x8_sse2_intrin(src, src_stride, dst, dst_stride, intermediate, addshift);break;
+    case 3:
+        inv_transform4x4_sse2_intrin(src, src_stride, dst, dst_stride, intermediate, addshift);break;
+    case 4:
+        inv_dst_transform4x4_sse2_intrin(src, src_stride, dst, dst_stride, intermediate, addshift);break;
+    }
+
+};
+
+void transform_encode_helper(
+    int16_t *src,
+    const uint32_t src_stride,
+    int16_t *dst,
+    const uint32_t dst_stride,
+    int16_t *intermediate,
+    uint32_t addshift,
+    uint8_t choice) {
+    switch (choice) {
+    case 0:
+        transform32x32_sse2(src, src_stride, dst, dst_stride, intermediate, addshift);break;
+    case 1:
+        transform16x16_sse2(src, src_stride, dst, dst_stride, intermediate, addshift);break;
+    case 2:
+        transform8x8_sse2_intrin(src, src_stride, dst, dst_stride, intermediate, addshift);break;
+    case 3:
+        transform4x4_sse2_intrin(src, src_stride, dst, dst_stride, intermediate, addshift);break;
+    case 4:
+        dst_transform4x4_sse2_intrin(src, src_stride, dst, dst_stride, intermediate, addshift);break;
+    }
+}
+
+void pfreq_n4_transform_helper(
+    int16_t *src,
+    const uint32_t src_stride,
+    int16_t *dst,
+    const uint32_t dst_stride,
+    int16_t *intermediate,
+    uint32_t addshift,
+    uint8_t choice){
+    switch(choice){
+    case 0:
+        pfreq_n4_transform32x32_sse2(src,src_stride,dst,dst_stride,intermediate,addshift);break;
+    case 1:
+        pfreq_n4_transform16x16_sse2(src, src_stride, dst, dst_stride, intermediate, addshift);break;
+    case 2:
+        pfreq_n4_transform8x8_sse2_intrin(src, src_stride, dst, dst_stride, intermediate, addshift);break;
+    case 3:
+        transform4x4_sse2_intrin(src, src_stride, dst, dst_stride, intermediate, addshift);break;
+    case 4:
+        dst_transform4x4_sse2_intrin(src, src_stride, dst, dst_stride, intermediate, addshift);break;
+    }
+}
+
+void pfreq_n4_transform_avx2_helper(
+    int16_t *src,
+    const uint32_t src_stride,
+    int16_t *dst,
+    const uint32_t dst_stride,
+    int16_t *intermediate,
+    uint32_t addshift,
+    uint8_t choice) {
+    switch (choice) {
+    case 0:
+        pfreq_n4_transform32x32_avx2_intrin(src, src_stride, dst, dst_stride, intermediate, addshift);break;
+    case 1:
+        pfreq_n4_transform16x16_sse2(src, src_stride, dst, dst_stride, intermediate, addshift);break;
+    case 2:
+        pfreq_n4_transform8x8_sse4_1_intrin(src, src_stride, dst, dst_stride, intermediate, addshift);break;
+    case 3:
+        transform4x4_sse2_intrin(src, src_stride, dst, dst_stride, intermediate, addshift);break;
+    case 4:
+        dst_transform4x4_sse2_intrin(src, src_stride, dst, dst_stride, intermediate, addshift);break;
+    }
+}
+
+void pfreq_n2_transform_avx2_helper(
+    int16_t *src,
+    const uint32_t src_stride,
+    int16_t *dst,
+    const uint32_t dst_stride,
+    int16_t *intermediate,
+    uint32_t addshift,
+    uint8_t choice) {
+    switch (choice) {
+    case 0:
+        pfreq_transform32x32_avx2_intrin(src, src_stride, dst, dst_stride, intermediate, addshift);break;
+    case 1:
+        pfreq_transform16x16_sse2(src, src_stride, dst, dst_stride, intermediate, addshift);break;
+    case 2:
+        pfreq_transform8x8_sse4_1_intrin(src, src_stride, dst, dst_stride, intermediate, addshift);break;
+    case 3:
+        transform4x4_sse2_intrin(src, src_stride, dst, dst_stride, intermediate, addshift);break;
+    case 4:
+        dst_transform4x4_sse2_intrin(src, src_stride, dst, dst_stride, intermediate, addshift);break;
+    }
+}
+
+void pfreq_n2_transform_helper(
+    int16_t *src,
+    const uint32_t src_stride,
+    int16_t *dst,
+    const uint32_t dst_stride,
+    int16_t *intermediate,
+    uint32_t addshift,
+    uint8_t choice) {
+    switch (choice) {
+    case 0:
+        pfreq_transform32x32_sse2(src, src_stride, dst, dst_stride, intermediate, addshift);break;
+    case 1:
+        pfreq_transform16x16_sse2(src, src_stride, dst, dst_stride, intermediate, addshift);break;
+    case 2:
+        pfreq_transform8x8_sse2_intrin(src, src_stride, dst, dst_stride, intermediate, addshift);break;
+    case 3:
+        transform4x4_sse2_intrin(src, src_stride, dst, dst_stride, intermediate, addshift);break;
+    case 4:
+        dst_transform4x4_sse2_intrin(src, src_stride, dst, dst_stride, intermediate, addshift);break;
     }
 }

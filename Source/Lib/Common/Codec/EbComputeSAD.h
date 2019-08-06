@@ -19,7 +19,7 @@ extern "C" {
 #endif
 
 uint32_t compute4x_m_sad_avx2_intrin(const uint8_t  *src, uint32_t  src_stride, const uint8_t  *ref, uint32_t  ref_stride, uint32_t  height, uint32_t  width);
-    
+
 uint32_t sad_16b_kernel(
     uint16_t  *src,                           // input parameter, source samples Ptr
     uint32_t  src_stride,                     // input parameter, source stride
