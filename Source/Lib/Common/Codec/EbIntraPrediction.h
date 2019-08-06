@@ -297,7 +297,7 @@ void highbd_filter_intra_predictor(uint16_t *dst, ptrdiff_t stride,
         const EbBool  skip,
         uint16_t          dx,              //output parameter, pointer to the prediction
         uint16_t          dy,              //output parameter, pointer to the prediction
-        uint16_t          bd); 
+        uint16_t          bd);
 
 typedef struct CflCtx {
         // Q3 reconstructed luma pixels (only Q2 is required, but Q3 is used to avoid

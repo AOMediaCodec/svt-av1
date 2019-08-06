@@ -37,7 +37,7 @@ extern EbErrorType picture_analysis_context_ctor(
 
 extern void* picture_analysis_kernel(void *input_ptr);
 
- 
+
 
 void DownsampleFilteringInputPicture(
     PictureParentControlSet       *picture_control_set_ptr,

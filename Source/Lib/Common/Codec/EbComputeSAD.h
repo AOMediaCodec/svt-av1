@@ -23,13 +23,6 @@ extern "C" {
     /***************************************
     * Function Ptr Types
     ***************************************/
-    typedef uint32_t(*EbSadKernelNxMType)(
-        const uint8_t  *src,
-        uint32_t  src_stride,
-        const uint8_t  *ref,
-        uint32_t  ref_stride,
-        uint32_t  height,
-        uint32_t  width);
 
     static void nxm_sad_kernel_void_func() {}
 
@@ -99,66 +92,6 @@ extern "C" {
         uint32_t   height,
         uint32_t   width
         );
-
-    /***************************************
-    * Function Tables
-    ***************************************/
-    static EbSadKernelNxMType FUNC_TABLE nxm_sad_kernel_sub_sampled_func_ptr_array[ASM_TYPE_TOTAL][17] =   // [asm_type][SAD - block height]
-    {
-        // NON_AVX2
-        {
-            /*0 4xM  */ fast_loop_nx_m_sad_kernel,
-            /*1 8xM  */ fast_loop_nx_m_sad_kernel,
-            /*2 16xM */ fast_loop_nx_m_sad_kernel,
-            /*3 24xM */ fast_loop_nx_m_sad_kernel,
-            /*4 32xM */ fast_loop_nx_m_sad_kernel,
-            /*5      */ 0,
-            /*6 48xM */ fast_loop_nx_m_sad_kernel,
-            /*7      */ 0,
-            /*8 64xM */ fast_loop_nx_m_sad_kernel,
-            0,0,0,0,0,0,0,fast_loop_nx_m_sad_kernel
-        },
-        // AVX2
-        {
-            /*0 4xM  */ Compute4xMSadSub_avx2_intrin,
-            /*1 8xM  */ compute8x_m_sad_avx2_intrin,
-            /*2 16xM */ compute16x_m_sad_avx2_intrin,
-            /*3 24xM */ fast_loop_nx_m_sad_kernel,
-            /*4 32xM */ compute32x_m_sad_avx2_intrin,
-            /*5      */ 0,
-            /*6 48xM */ fast_loop_nx_m_sad_kernel,
-            /*7      */ 0,
-            /*8 64xM */ compute64x_m_sad_avx2_intrin,
-            0,0,0,0,0,0,0,fast_loop_nx_m_sad_kernel
-        },
-    };
-    static EbSadKernelNxMType FUNC_TABLE nxm_sad_kernel_func_ptr_array[ASM_TYPE_TOTAL][9] =   // [asm_type][SAD - block height]
-    {
-        // NON_AVX2
-        {
-            /*0 4xM  */ fast_loop_nx_m_sad_kernel,
-            /*1 8xM  */ fast_loop_nx_m_sad_kernel,
-            /*2 16xM */ fast_loop_nx_m_sad_kernel,
-            /*3 24xM */ fast_loop_nx_m_sad_kernel,
-            /*4 32xM */ fast_loop_nx_m_sad_kernel,
-            /*5      */ fast_loop_nx_m_sad_kernel,  // size not supported in asm
-            /*6 48xM */ fast_loop_nx_m_sad_kernel,
-            /*7      */ fast_loop_nx_m_sad_kernel,  // size not supported in asm
-            /*8 64xM */ fast_loop_nx_m_sad_kernel
-        },
-        // AVX2
-        {
-            /*0 4xM  */ compute4x_m_sad_avx2_intrin,
-            /*1 8xM  */ compute8x_m_sad_avx2_intrin,
-            /*2 16xM */ compute16x_m_sad_avx2_intrin,//compute16x_m_sad_avx2_intrin is slower than the SSE2 version
-            /*3 24xM */ compute24x_m_sad_avx2_intrin,
-            /*4 32xM */ compute32x_m_sad_avx2_intrin,
-            /*5      */ (EbSadKernelNxMType)nxm_sad_kernel_void_func,
-            /*6 48xM */ compute48x_m_sad_avx2_intrin,
-            /*7      */ (EbSadKernelNxMType)nxm_sad_kernel_void_func,
-            /*8 64xM */ compute64x_m_sad_avx2_intrin,
-        },
-    };
 
     static EbSadAvgKernelNxMType FUNC_TABLE nxm_sad_averaging_kernel_func_ptr_array[ASM_TYPE_TOTAL][9] =   // [asm_type][SAD - block height]
     {

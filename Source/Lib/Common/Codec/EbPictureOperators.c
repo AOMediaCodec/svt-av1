@@ -974,7 +974,7 @@ void picture_addition_kernel_helper(uint8_t  *pred_ptr,
     uint32_t  width,
     uint32_t  height,
     uint8_t  choice){
-    
+
     switch(choice){
     case 0:
         picture_addition_kernel4x4_sse_intrin(pred_ptr, pred_stride, residual_ptr,residual_stride, recon_ptr, recon_stride, width, height);break;
@@ -985,7 +985,7 @@ void picture_addition_kernel_helper(uint8_t  *pred_ptr,
     case 4:
         picture_addition_kernel32x32_sse2_intrin(pred_ptr, pred_stride, residual_ptr, residual_stride, recon_ptr, recon_stride, width, height);break;
     case 8:
-        picture_addition_kernel64x64_sse2_intrin(pred_ptr, pred_stride, residual_ptr, residual_stride, recon_ptr, recon_stride, width, height);break;     
+        picture_addition_kernel64x64_sse2_intrin(pred_ptr, pred_stride, residual_ptr, residual_stride, recon_ptr, recon_stride, width, height);break;
     default:
         break;
     }

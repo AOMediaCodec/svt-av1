@@ -51,7 +51,7 @@ extern "C" {
 
     void picture_average_kernel_sse2_intrin(EbByte   src0, uint32_t src0_stride, EbByte   src1, uint32_t src1_stride, EbByte   dst, uint32_t dst_stride, uint32_t area_width, uint32_t area_height);
     RTCD_EXTERN void(*picture_average)(EbByte   src0, uint32_t src0_stride, EbByte   src1, uint32_t src1_stride, EbByte   dst, uint32_t dst_stride, uint32_t area_width, uint32_t area_height);
-    
+
     void picture_average_kernel1_line_sse2_intrin(EbByte src0,EbByte src1,EbByte dst,uint32_t area_width);
     RTCD_EXTERN void(*picture_average1_line)(EbByte src0,EbByte src1,EbByte dst,uint32_t area_width);
 
@@ -74,7 +74,7 @@ extern "C" {
     uint32_t combined_averaging_ssd_c(uint8_t *src, ptrdiff_t src_stride, uint8_t *ref1, ptrdiff_t ref1_stride, uint8_t *ref2, ptrdiff_t ref2_stride, uint32_t height, uint32_t width);
     uint32_t combined_averaging_ssd_avx2(uint8_t *src, ptrdiff_t src_stride, uint8_t *ref1, ptrdiff_t ref1_stride, uint8_t *ref2, ptrdiff_t ref2_stride, uint32_t height, uint32_t width);
     RTCD_EXTERN uint32_t(*combined_averaging_ssd)(uint8_t *src, ptrdiff_t src_stride,uint8_t *ref1, ptrdiff_t ref1_stride,uint8_t *ref2, ptrdiff_t ref2_stride,uint32_t height, uint32_t width);
-    
+
     void ebav1_smooth_h_predictor_c(const uint32_t size, uint8_t *ref_samples, uint8_t *dst, const uint32_t prediction_buffer_stride, const EbBool skip);
     RTCD_EXTERN void(*ebav1_smooth_h_predictor)(const uint32_t size, uint8_t *ref_samples, uint8_t *dst, const uint32_t prediction_buffer_stride, const EbBool skip);
 
@@ -136,7 +136,7 @@ extern "C" {
     void full_distortion_kernel_cbf_zero32_bits_c(int32_t *coeff,uint32_t coeff_stride,int32_t *recon_coeff,uint32_t recon_coeff_stride,uint64_t distortion_result[DIST_CALC_TOTAL],uint32_t area_width,uint32_t area_height);
     void full_distortion_kernel_cbf_zero32_bits_avx2(int32_t *coeff, uint32_t coeff_stride, int32_t *recon_coeff, uint32_t recon_coeff_stride, uint64_t distortion_result[DIST_CALC_TOTAL], uint32_t area_width, uint32_t area_height);
     RTCD_EXTERN void (*full_distortion_kernel_cbf_zero32_bits)(int32_t *coeff, uint32_t coeff_stride, int32_t *recon_coeff, uint32_t recon_coeff_stride, uint64_t distortion_result[DIST_CALC_TOTAL], uint32_t area_width, uint32_t area_height);
-      
+
     uint64_t spatial_full_distortion_kernel_c(uint8_t *input,uint32_t input_offset,uint32_t input_stride,uint8_t *recon,uint32_t recon_offset,uint32_t recon_stride,uint32_t area_width,uint32_t area_height);
 #ifndef NON_AVX512_SUPPORT
     uint64_t spatial_full_distortion_kernel_avx512(uint8_t *input, uint32_t input_offset, uint32_t input_stride, uint8_t *recon, uint32_t recon_offset, uint32_t recon_stride, uint32_t area_width, uint32_t area_height);
@@ -153,10 +153,10 @@ extern "C" {
 
     uint64_t compute8x8_satd_u8_sse4(uint8_t  *src, uint64_t *dc_value, uint32_t  src_stride);
     RTCD_EXTERN uint64_t (*compute8x8_satd_u8)(uint8_t  *src, uint64_t *dc_value, uint32_t  src_stride);
-    
+
     void picture_addition_kernel16bit_sse2_intrin(uint16_t  *pred_ptr,uint32_t  pred_stride,int16_t *residual_ptr,uint32_t  residual_stride,uint16_t  *recon_ptr,uint32_t  recon_stride,uint32_t  width,uint32_t  height);
     RTCD_EXTERN void (*picture_addition_kernel16bit)(uint16_t  *pred_ptr, uint32_t  pred_stride, int16_t *residual_ptr, uint32_t  residual_stride, uint16_t  *recon_ptr, uint32_t  recon_stride, uint32_t  width, uint32_t  height);
-    
+
     void avc_style_luma_interpolation_filter_ssse3_helper(EbByte ref_pic,uint32_t src_stride,EbByte dst,uint32_t dst_stride,uint32_t pu_width,uint32_t pu_height,EbByte temp_buf,EbBool skip,uint32_t frac_pos,uint8_t choice);
     RTCD_EXTERN void (*avc_style_luma_interpolation_filter)(EbByte ref_pic, uint32_t src_stride, EbByte dst, uint32_t dst_stride, uint32_t pu_width, uint32_t pu_height, EbByte temp_buf, EbBool skip, uint32_t frac_pos, uint8_t choice);
 
@@ -174,6 +174,15 @@ extern "C" {
     uint64_t compute_cdef_dist_c(const uint16_t *dst, int32_t dstride, const uint16_t *src, const cdef_list *dlist, int32_t cdef_count, BlockSize bsize, int32_t coeff_shift, int32_t pli);
     uint64_t compute_cdef_dist_avx2(const uint16_t *dst, int32_t dstride, const uint16_t *src, const cdef_list *dlist, int32_t cdef_count, BlockSize bsize, int32_t coeff_shift, int32_t pli);
     RTCD_EXTERN uint64_t(*eb_compute_cdef_dist)(const uint16_t *dst, int32_t dstride, const uint16_t *src, const cdef_list *dlist, int32_t cdef_count, BlockSize bsize, int32_t coeff_shift, int32_t pli);
+
+
+    uint32_t nxm_sad_kernel_helper(const uint8_t  *src,uint32_t  src_stride,const uint8_t  *ref,uint32_t  ref_stride,uint32_t  height,uint32_t  width,uint8_t choice);
+    uint32_t nxm_sad_kernel_sub_sampled_avx2_helper(const uint8_t  *src,uint32_t  src_stride,const uint8_t  *ref,uint32_t  ref_stride,uint32_t  height,uint32_t  width,uint8_t choice);
+    RTCD_EXTERN uint32_t(*nxm_sad_kernel_sub_sampled)(const uint8_t  *src, uint32_t  src_stride, const uint8_t  *ref, uint32_t  ref_stride, uint32_t  height, uint32_t  width, uint8_t choice);
+
+    uint32_t nxm_sad_kernel_avx2_helper(const uint8_t  *src, uint32_t  src_stride, const uint8_t  *ref, uint32_t  ref_stride, uint32_t  height, uint32_t  width, uint8_t choice);
+    RTCD_EXTERN uint32_t(*nxm_sad_kernel)(const uint8_t  *src, uint32_t  src_stride, const uint8_t  *ref, uint32_t  ref_stride, uint32_t  height, uint32_t  width, uint8_t choice);
+
     void eb_copy_rect8_8bit_to_16bit_c(uint16_t *dst, int32_t dstride, const uint8_t *src, int32_t sstride, int32_t v, int32_t h);
     void eb_copy_rect8_8bit_to_16bit_avx2(uint16_t *dst, int32_t dstride, const uint8_t *src, int32_t sstride, int32_t v, int32_t h);
     RTCD_EXTERN void(*eb_copy_rect8_8bit_to_16bit)(uint16_t *dst, int32_t dstride, const uint8_t *src, int32_t sstride, int32_t v, int32_t h);
@@ -2572,7 +2581,7 @@ extern "C" {
 #endif
 
         compute8x4_sad_kernel = compute8x4_sad_kernel_c;
-        
+
         compute8x8_satd_u8 = compute8x8_satd_u8_sse4;
 
         picture_addition_kernel16bit = picture_addition_kernel16bit_sse2_intrin;
@@ -2580,6 +2589,12 @@ extern "C" {
         avc_style_luma_interpolation_filter = avc_style_luma_interpolation_filter_ssse3_helper;
 
         picture_addition_kernel_t = picture_addition_kernel_helper;
+
+        nxm_sad_kernel_sub_sampled = nxm_sad_kernel_helper;
+        if (flags & HAS_AVX2) nxm_sad_kernel_sub_sampled = nxm_sad_kernel_sub_sampled_avx2_helper;
+
+        nxm_sad_kernel = nxm_sad_kernel_helper;
+        if (flags & HAS_AVX2) nxm_sad_kernel = nxm_sad_kernel_avx2_helper;
 
         eb_apply_selfguided_restoration = eb_apply_selfguided_restoration_c;
         if (flags & HAS_AVX2) eb_apply_selfguided_restoration = eb_apply_selfguided_restoration_avx2;

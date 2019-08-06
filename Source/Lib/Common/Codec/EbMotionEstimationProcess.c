@@ -16,6 +16,7 @@
 #include "EbIntraPrediction.h"
 #include "EbLambdaRateTables.h"
 #include "EbComputeSAD.h"
+#include "aom_dsp_rtcd.h"
 
 #include "emmintrin.h"
 
@@ -510,12 +511,13 @@ EbErrorType ComputeDecimatedZzSad(
 
                 if (asm_type >= ASM_NON_AVX2 && asm_type < ASM_TYPE_TOTAL)
                     // ZZ SAD between 1/16 current & 1/16 collocated
-                    decimatedLcuCollocatedSad = nxm_sad_kernel_func_ptr_array[asm_type][2](
+                    decimatedLcuCollocatedSad = nxm_sad_kernel(
                         &(sixteenth_decimated_picture_ptr->buffer_y[blkDisplacementDecimated]),
                         sixteenth_decimated_picture_ptr->stride_y,
                         context_ptr->me_context_ptr->sixteenth_sb_buffer,
                         context_ptr->me_context_ptr->sixteenth_sb_buffer_stride,
-                        16, 16);
+                        16, 16,
+                        2);
             }
             else {
                 decimatedLcuCollocatedSad = (uint32_t)~0;
