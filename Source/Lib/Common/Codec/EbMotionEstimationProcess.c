@@ -52,8 +52,7 @@ EbErrorType CheckZeroZeroCenter(
     uint32_t                       sb_width,
     uint32_t                       sb_height,
     int16_t                       *x_search_center,
-    int16_t                       *y_search_center,
-    EbAsm                       asm_type);
+    int16_t                       *y_search_center);
 
 /************************************************
  * Set ME/HME Params from Config
@@ -589,7 +588,6 @@ void* motion_estimation_kernel(void *input_ptr)
 
     uint32_t                      intra_sad_interval_index;
 
-    EbAsm                      asm_type;
 #if !ENABLE_CDF_UPDATE
     MdRateEstimationContext   *md_rate_estimation_array;
 #endif
@@ -616,7 +614,6 @@ void* motion_estimation_kernel(void *input_ptr)
 
         input_picture_ptr = picture_control_set_ptr->enhanced_picture_ptr;
 
-        asm_type = sequence_control_set_ptr->encode_context_ptr->asm_type;
 #if !ENABLE_CDF_UPDATE
         // Increment the MD Rate Estimation array pointer to point to the right address based on the QP and slice type
         md_rate_estimation_array = (MdRateEstimationContext*)sequence_control_set_ptr->encode_context_ptr->md_rate_estimation_array;
@@ -754,8 +751,7 @@ void* motion_estimation_kernel(void *input_ptr)
                             picture_control_set_ptr,
                             sb_index,
                             context_ptr,
-                            input_picture_ptr,
-                            asm_type);
+                            input_picture_ptr);
                     }
                 }
             }

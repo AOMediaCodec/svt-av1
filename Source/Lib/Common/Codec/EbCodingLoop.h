@@ -103,8 +103,7 @@ void pack2d_src(
     uint16_t    *out16_bit_buffer,
     uint32_t     out_stride,
     uint32_t     width,
-    uint32_t     height,
-    EbAsm     asm_type);
+    uint32_t     height);
 
 void Store16bitInputSrc(
     EbPictureBufferDesc     *input_sample16bit_buffer,

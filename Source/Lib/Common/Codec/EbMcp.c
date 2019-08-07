@@ -36,8 +36,8 @@ void encode_uni_pred_interpolation(
     uint32_t                 dst_luma_index,            //input parameter, please refer to the detailed explanation above.
     uint32_t                 dst_chroma_index,          //input parameter, please refer to the detailed explanation above.
     int16_t                *tempBuf0,                //input parameter, please refer to the detailed explanation above.
-    int16_t                *tempBuf1,                //input parameter, please refer to the detailed explanation above.
-    EbAsm                 asm_type)
+    int16_t                *tempBuf1                 //input parameter, please refer to the detailed explanation above.
+    )
 {
     uint32_t   integPosx;
     uint32_t   integPosy;

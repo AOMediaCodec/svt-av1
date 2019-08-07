@@ -131,9 +131,9 @@ extern "C" {
     void eb_enc_un_pack8_bit_data_avx2_intrin(uint16_t *in16_bit_buffer, uint32_t  in_stride, uint8_t  *out8_bit_buffer, uint32_t  out8_stride, uint32_t  width, uint32_t  height);
     RTCD_EXTERN void(*unpack_8bit_safe_sub)(uint16_t *in16_bit_buffer, uint32_t  in_stride, uint8_t  *out8_bit_buffer, uint32_t  out8_stride, uint32_t  width, uint32_t  height);
 
-    void unpack_8bit_helper_c(uint16_t *in16_bit_buffer,uint32_t  in_stride,uint8_t  *out8_bit_buffer,uint32_t  out8_stride,uint32_t  width,uint32_t  height,uint8_t   choice);
-    void unpack_8bit_helper_avx2(uint16_t *in16_bit_buffer,uint32_t  in_stride,uint8_t  *out8_bit_buffer,uint32_t  out8_stride,uint32_t  width,uint32_t  height,uint8_t   choice);
-    RTCD_EXTERN void(*unpack_8bit)(uint16_t *in16_bit_buffer, uint32_t  in_stride, uint8_t  *out8_bit_buffer, uint32_t  out8_stride, uint32_t  width, uint32_t  height, uint8_t   choice);
+    void unpack_8bit_helper_c(uint16_t *in16_bit_buffer,uint32_t  in_stride,uint8_t  *out8_bit_buffer,uint32_t  out8_stride,uint32_t  width,uint32_t  height, uint8_t     choice);
+    void unpack_8bit_helper_avx2(uint16_t *in16_bit_buffer,uint32_t  in_stride,uint8_t  *out8_bit_buffer,uint32_t  out8_stride,uint32_t  width,uint32_t  height, uint8_t     choice);
+    RTCD_EXTERN void(*unpack_8bit)(uint16_t *in16_bit_buffer, uint32_t  in_stride, uint8_t  *out8_bit_buffer, uint32_t  out8_stride, uint32_t  width, uint32_t  height, uint8_t     choice);
 
     void pack2d_16_bit_src_helper(uint8_t     *in8_bit_buffer,uint32_t     in8_stride,uint8_t     *inn_bit_buffer,uint16_t    *out16_bit_buffer,uint32_t     inn_stride,uint32_t     out_stride,uint32_t     width,uint32_t     height,uint8_t     choice);
     void pack2d_16_bit_src_avx2_helper(uint8_t     *in8_bit_buffer,uint32_t     in8_stride,uint8_t     *inn_bit_buffer,uint16_t    *out16_bit_buffer,uint32_t     inn_stride,uint32_t     out_stride,uint32_t     width,uint32_t     height,uint8_t     choice);

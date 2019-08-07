@@ -3999,8 +3999,7 @@ extern "C" {
         int16_t             *transform_inner_array_ptr,
         uint32_t             bit_increment,
         EbBool               dst_transform_flag,
-        EB_TRANS_COEFF_SHAPE trans_coeff_shape,
-        EbAsm                asm_type);
+        EB_TRANS_COEFF_SHAPE trans_coeff_shape);
 
     extern EbErrorType av1_estimate_transform(
         int16_t             *residual_buffer,
@@ -4081,8 +4080,7 @@ extern "C" {
         uint32_t  transform_size,
         int16_t  *transform_inner_array_ptr,
         uint32_t  bit_increment,
-        EbBool    dst_transform_flag,
-        EbAsm     asm_type);
+        EbBool    dst_transform_flag);
 
     extern uint8_t map_chroma_qp(
         uint8_t qp

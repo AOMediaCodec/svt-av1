@@ -27,8 +27,7 @@ extern "C" {
         uint8_t  *recon_ptr,
         uint32_t  recon_stride,
         uint32_t  width,
-        uint32_t  height,
-        EbAsm     asm_type);
+        uint32_t  height);
 
     extern EbErrorType picture_full_distortion32_bits(
         EbPictureBufferDesc  *coeff,
@@ -47,15 +46,14 @@ extern "C" {
         uint32_t                y_count_non_zero_coeffs,
         uint32_t                cb_count_non_zero_coeffs,
         uint32_t                cr_count_non_zero_coeffs,
-        COMPONENT_TYPE          component_type,
-        EbAsm                   asm_type);
+        COMPONENT_TYPE          component_type);
 
     extern uint64_t compute_nx_m_satd_sad_lcu(
         uint8_t  *src,        // input parameter, source samples Ptr
         uint32_t  src_stride,  // input parameter, source stride
         uint32_t  width,      // input parameter, block width (N)
-        uint32_t  height,     // input parameter, block height (M)
-        EbAsm     asm_type);
+        uint32_t  height      // input parameter, block height (M)
+        );
 
     //Residual Data
 
@@ -67,8 +65,7 @@ extern "C" {
         uint16_t *out16_bit_buffer,
         uint32_t  out_stride,
         uint32_t  width,
-        uint32_t  height,
-        EbAsm     asm_type);
+        uint32_t  height);
 
     void conv2b_to_c_pack_lcu(
         const uint8_t *inn_bit_buffer,
@@ -77,8 +74,7 @@ extern "C" {
         uint32_t       out_stride,
         uint8_t       *local_cache,
         uint32_t       width,
-        uint32_t       height,
-        EbAsm          asm_type);
+        uint32_t       height);
 
     void pack2d_src(
         uint8_t  *in8_bit_buffer,
@@ -88,8 +84,7 @@ extern "C" {
         uint16_t *out16_bit_buffer,
         uint32_t  out_stride,
         uint32_t  width,
-        uint32_t  height,
-        EbAsm     asm_type);
+        uint32_t  height);
 
     void un_pack2d(
         uint16_t *in16_bit_buffer,
@@ -99,8 +94,7 @@ extern "C" {
         uint8_t  *outn_bit_buffer,
         uint32_t  outn_stride,
         uint32_t  width,
-        uint32_t  height,
-        EbAsm     asm_type);
+        uint32_t  height);
 
     void extract_8bit_data(
         uint16_t *in16_bit_buffer,
@@ -108,8 +102,7 @@ extern "C" {
         uint8_t  *out8_bit_buffer,
         uint32_t  out8_stride,
         uint32_t  width,
-        uint32_t  height,
-        EbAsm     asm_type);
+        uint32_t  height);
 
     void unpack_l0l1_avg(
         uint16_t *ref16_l0,
@@ -119,8 +112,7 @@ extern "C" {
         uint8_t  *dst_ptr,
         uint32_t  dst_stride,
         uint32_t  width,
-        uint32_t  height,
-        EbAsm     asm_type);
+        uint32_t  height);
 
     void extract8_bitdata_safe_sub(
         uint16_t   *in16_bit_buffer,
@@ -129,8 +121,7 @@ extern "C" {
         uint32_t    out8_stride,
         uint32_t    width,
         uint32_t    height,
-        EbBool      sub_pred,
-        EbAsm       asm_type);
+        EbBool      sub_pred);
 
     void unpack_l0l1_avg_safe_sub(
         uint16_t *ref16_l0,
@@ -141,8 +132,7 @@ extern "C" {
         uint32_t  dst_stride,
         uint32_t  width,
         uint32_t  height,
-        EbBool    sub_pred,
-        EbAsm     asm_type);
+        EbBool    sub_pred);
 
     void memcpy16bit(
         uint16_t *out_ptr,

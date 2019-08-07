@@ -602,8 +602,7 @@ void apply_filtering_block(int block_row,
                            int ss_x, // chroma sub-sampling in x
                            int ss_y, // chroma sub-sampling in y
                            int altref_strength,
-                           const int *blk_fw,
-                           EbAsm asm_type) {
+                           const int *blk_fw) {
     int offset_src_buffer_Y = block_row * (BH>>1) * stride[C_Y] + block_col * (BW>>1);
     int offset_src_buffer_U = block_row * (BH>>2) * stride[C_U] + block_col * (BW>>2);
     int offset_src_buffer_V = block_row * (BH>>2) * stride[C_V] + block_col * (BW>>2);
@@ -1111,8 +1110,8 @@ void uni_motion_compensation(MeContext* context_ptr,
                                          interpolated_full_stride_ch,
                                          search_area_width_ch,
                                          search_area_height_ch,
-                                         8, // bit depth
-                                         0);
+                                         8 // bit depth
+                                         );
 
     // ----- Loop over all sub-blocks -----
 
@@ -1440,8 +1439,7 @@ static EbErrorType produce_temporally_filtered_pic(PictureParentControlSet **lis
                                                   1, // chroma sub-sampling in x
                                                   1, // chroma sub-sampling in y
                                                   altref_strength,
-                                                  blk_fw,
-                                                  asm_type);
+                                                  blk_fw);
                         }
                     }
                 }

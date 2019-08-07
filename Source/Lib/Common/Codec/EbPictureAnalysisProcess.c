@@ -246,8 +246,7 @@ void CalculateHistogram(
 uint64_t ComputeVariance32x32(
     EbPictureBufferDesc       *input_padded_picture_ptr,         // input parameter, Input Padded Picture
     uint32_t                       inputLumaOriginIndex,          // input parameter, SB index, used to point to source/reference samples
-    uint64_t                        *variance8x8,
-    EbAsm                         asm_type)
+    uint64_t                        *variance8x8)
 {
     uint32_t blockIndex;
 
@@ -382,8 +381,7 @@ uint64_t ComputeVariance32x32(
 uint64_t ComputeVariance16x16(
     EbPictureBufferDesc       *input_padded_picture_ptr,         // input parameter, Input Padded Picture
     uint32_t                       inputLumaOriginIndex,          // input parameter, SB index, used to point to source/reference samples
-    uint64_t                        *variance8x8,
-    EbAsm                         asm_type)
+    uint64_t                        *variance8x8)
 {
     uint32_t blockIndex;
 
@@ -3103,8 +3101,7 @@ EbErrorType DenoiseInputPicture(
     uint32_t                       sb_total_count,
     EbPictureBufferDesc       *input_picture_ptr,
     EbPictureBufferDesc       *denoised_picture_ptr,
-    uint32_t                         picture_width_in_sb,
-    EbAsm                         asm_type)
+    uint32_t                         picture_width_in_sb)
 {
     EbErrorType return_error = EB_ErrorNone;
 
@@ -3379,19 +3376,17 @@ EbErrorType DetectInputPictureNoise(
 
 static int32_t apply_denoise_2d(SequenceControlSet        *scs_ptr,
     PictureParentControlSet   *pcs_ptr,
-    EbPictureBufferDesc *inputPicturePointer,
-    EbAsm asm_type) {
+    EbPictureBufferDesc *inputPicturePointer) {
     if (eb_aom_denoise_and_model_run(pcs_ptr->denoise_and_model, inputPicturePointer,
         &pcs_ptr->frm_hdr.film_grain_params,
-        scs_ptr->static_config.encoder_bit_depth > EB_8BIT, asm_type)) {
+        scs_ptr->static_config.encoder_bit_depth > EB_8BIT)) {
     }
     return 0;
 }
 
 EbErrorType denoise_estimate_film_grain(
     SequenceControlSet        *sequence_control_set_ptr,
-    PictureParentControlSet   *picture_control_set_ptr,
-    EbAsm asm_type)
+    PictureParentControlSet   *picture_control_set_ptr)
 {
     EbErrorType return_error = EB_ErrorNone;
 
@@ -3401,7 +3396,7 @@ EbErrorType denoise_estimate_film_grain(
     frm_hdr->film_grain_params.apply_grain = 0;
 
     if (sequence_control_set_ptr->film_grain_denoise_strength) {
-        if (apply_denoise_2d(sequence_control_set_ptr, picture_control_set_ptr, input_picture_ptr, asm_type) < 0)
+        if (apply_denoise_2d(sequence_control_set_ptr, picture_control_set_ptr, input_picture_ptr) < 0)
             return 1;
     }
 
@@ -3450,8 +3445,7 @@ EbErrorType FullSampleDenoise(
             sb_total_count,
             input_picture_ptr,
             denoised_picture_ptr,
-            picture_width_in_sb,
-            asm_type);
+            picture_width_in_sb);
     }
 
     return return_error;
@@ -3637,8 +3631,7 @@ EbErrorType QuarterSampleDetectNoise(
     EbPictureBufferDesc       *quarter_decimated_picture_ptr,
     EbPictureBufferDesc       *noise_picture_ptr,
     EbPictureBufferDesc       *denoised_picture_ptr,
-    uint32_t                         picture_width_in_sb,
-    EbAsm                         asm_type)
+    uint32_t                         picture_width_in_sb)
 {
     EbErrorType return_error = EB_ErrorNone;
 
@@ -3704,8 +3697,7 @@ EbErrorType QuarterSampleDetectNoise(
                         uint64_t noiseBlkVar = ComputeVariance32x32(
                             noise_picture_ptr,
                             noiseOriginIndex,
-                            noiseBlkVar8x8,
-                            asm_type);
+                            noiseBlkVar8x8);
 
                         picNoiseVariance += (noiseBlkVar >> 16);
 
@@ -3714,8 +3706,7 @@ EbErrorType QuarterSampleDetectNoise(
                         uint64_t denBlkVar = ComputeVariance32x32(
                             denoised_picture_ptr,
                             blockIndex,
-                            denoiseBlkVar8x8,
-                            asm_type) >> 16;
+                            denoiseBlkVar8x8) >> 16;
 
                         uint64_t denBlkVarDecTh;
                         denBlkVarDecTh = NOISE_MIN_LEVEL_DECIM_M6_M7;
@@ -3761,8 +3752,7 @@ EbErrorType SubSampleDetectNoise(
     EbPictureBufferDesc       *sixteenth_decimated_picture_ptr,
     EbPictureBufferDesc       *noise_picture_ptr,
     EbPictureBufferDesc       *denoised_picture_ptr,
-    uint32_t                         picture_width_in_sb,
-    EbAsm                         asm_type)
+    uint32_t                         picture_width_in_sb)
 {
     EbErrorType return_error = EB_ErrorNone;
 
@@ -3828,8 +3818,7 @@ EbErrorType SubSampleDetectNoise(
                         uint64_t noiseBlkVar = ComputeVariance16x16(
                             noise_picture_ptr,
                             noiseOriginIndex,
-                            noiseBlkVar8x8,
-                            asm_type);
+                            noiseBlkVar8x8);
 
                         picNoiseVariance += (noiseBlkVar >> 16);
 
@@ -3838,8 +3827,7 @@ EbErrorType SubSampleDetectNoise(
                         uint64_t denBlkVar = ComputeVariance16x16(
                             denoised_picture_ptr,
                             blockIndex,
-                            denoiseBlkVar8x8,
-                            asm_type) >> 16;
+                            denoiseBlkVar8x8) >> 16;
 
                         uint64_t  noiseBlkVarDecTh;
                         uint64_t denBlkVarDecTh = FLAT_MAX_VAR_DECIM;
@@ -3917,8 +3905,7 @@ EbErrorType QuarterSampleDenoise(
         quarter_decimated_picture_ptr,
         noise_picture_ptr,
         denoised_picture_ptr,
-        picture_width_in_sb,
-        asm_type);
+        picture_width_in_sb);
 
     if (denoise_flag == EB_TRUE) {
         // Turn OFF the de-noiser for Class 2 at QP=29 and lower (for Fixed_QP) and at the target rate of 14Mbps and higher (for RC=ON)
@@ -3977,8 +3964,7 @@ EbErrorType SubSampleDenoise(
         sixteenth_decimated_picture_ptr,
         noise_picture_ptr,
         denoised_picture_ptr,
-        picture_width_in_sb,
-        asm_type);
+        picture_width_in_sb);
 
     if (denoise_flag == EB_TRUE) {
         // Turn OFF the de-noiser for Class 2 at QP=29 and lower (for Fixed_QP) and at the target rate of 14Mbps and higher (for RC=ON)
@@ -4024,13 +4010,11 @@ void SetPictureParametersForStatisticsGathering(
 void PicturePreProcessingOperations(
     PictureParentControlSet       *picture_control_set_ptr,
     SequenceControlSet            *sequence_control_set_ptr,
-    uint32_t                       sb_total_count,
-    EbAsm                          asm_type) {
+    uint32_t                       sb_total_count) {
     if (sequence_control_set_ptr->film_grain_denoise_strength) {
         denoise_estimate_film_grain(
             sequence_control_set_ptr,
-            picture_control_set_ptr,
-            asm_type);
+            picture_control_set_ptr);
     }
     else {
         //Reset the flat noise flag array to False for both RealTime/HighComplexity Modes
@@ -4049,8 +4033,7 @@ void SubSampleLumaGeneratePixelIntensityHistogramBins(
     SequenceControlSet            *sequence_control_set_ptr,
     PictureParentControlSet       *picture_control_set_ptr,
     EbPictureBufferDesc           *input_picture_ptr,
-    uint64_t                          *sumAverageIntensityTotalRegionsLuma,
-    EbAsm                           asm_type) {
+    uint64_t                          *sumAverageIntensityTotalRegionsLuma) {
     uint32_t                          regionWidth;
     uint32_t                          regionHeight;
     uint32_t                          regionWidthOffset;
@@ -4105,8 +4088,7 @@ void SubSampleChromaGeneratePixelIntensityHistogramBins(
     PictureParentControlSet       *picture_control_set_ptr,
     EbPictureBufferDesc           *input_picture_ptr,
     uint64_t                          *sumAverageIntensityTotalRegionsCb,
-    uint64_t                          *sumAverageIntensityTotalRegionsCr,
-    EbAsm                           asm_type) {
+    uint64_t                          *sumAverageIntensityTotalRegionsCr) {
     uint64_t                          sum;
     uint32_t                          regionWidth;
     uint32_t                          regionHeight;
@@ -4561,8 +4543,7 @@ void GatheringPictureStatistics(
         sequence_control_set_ptr,
         picture_control_set_ptr,
         sixteenth_decimated_picture_ptr,
-        &sumAverageIntensityTotalRegionsLuma,
-        asm_type);
+        &sumAverageIntensityTotalRegionsLuma);
 
     // Use 1/4 Chroma for Histogram generation
     // 1/4 input not ready => perform operation on the fly
@@ -4571,8 +4552,7 @@ void GatheringPictureStatistics(
         picture_control_set_ptr,
         input_picture_ptr,
         &sumAverageIntensityTotalRegionsCb,
-        &sumAverageIntensityTotalRegionsCr,
-        asm_type);
+        &sumAverageIntensityTotalRegionsCr);
     //
     // Calculate the LUMA average intensity
     CalculateInputAverageIntensity(
@@ -4958,8 +4938,7 @@ void* picture_analysis_kernel(void *input_ptr)
             PicturePreProcessingOperations(
                 picture_control_set_ptr,
                 sequence_control_set_ptr,
-                sb_total_count,
-                asm_type);
+                sb_total_count);
             if (input_picture_ptr->color_format >= EB_YUV422) {
                 // Jing: Do the conversion of 422/444=>420 here since it's multi-threaded kernel
                 //       Reuse the Y, only add cb/cr in the newly created buffer desc

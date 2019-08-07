@@ -38,8 +38,7 @@ void picture_addition(
     uint8_t  *recon_ptr,
     uint32_t  recon_stride,
     uint32_t  width,
-    uint32_t  height,
-    EbAsm  asm_type)
+    uint32_t  height)
 {
     picture_addition_kernel_t(
         pred_ptr,
@@ -230,7 +229,6 @@ uint64_t ComputeNxMSatd8x8Units_U8(
     uint32_t  src_stride, //uint32_t  diffStride, // input parameter, source stride
     uint32_t  width,      // input parameter, block width (N)
     uint32_t  height,     // input parameter, block height (M)
-    EbAsm  asm_type,
     uint64_t *dc_value)
 {
     uint64_t satd = 0;
@@ -270,8 +268,8 @@ uint64_t compute_nx_m_satd_sad_lcu(
     uint8_t  *src,        // input parameter, source samples Ptr
     uint32_t  src_stride,  // input parameter, source stride
     uint32_t  width,      // input parameter, block width (N)
-    uint32_t  height,     // input parameter, block height (M)
-    EbAsm  asm_type)
+    uint32_t  height     // input parameter, block height (M)
+    )
 {
     uint64_t satd = 0;
     uint64_t  dc_value = 0;
@@ -283,7 +281,6 @@ uint64_t compute_nx_m_satd_sad_lcu(
             src_stride,
             width,
             height,
-            asm_type,
             &dc_value);
     }
     else {
@@ -420,8 +417,7 @@ EbErrorType picture_full_distortion32_bits(
     uint32_t                   y_count_non_zero_coeffs,
     uint32_t                   cb_count_non_zero_coeffs,
     uint32_t                   cr_count_non_zero_coeffs,
-    COMPONENT_TYPE            component_type,
-    EbAsm                   asm_type)
+    COMPONENT_TYPE            component_type)
 {
     EbErrorType return_error = EB_ErrorNone;
 
@@ -517,8 +513,7 @@ void extract_8bit_data(
     uint8_t       *out8_bit_buffer,
     uint32_t       out8_stride,
     uint32_t       width,
-    uint32_t       height,
-    EbAsm          asm_type){
+    uint32_t       height){
 
     unpack_8bit(
         in16_bit_buffer,
@@ -537,8 +532,7 @@ void unpack_l0l1_avg(
     uint8_t  *dst_ptr,
     uint32_t  dst_stride,
     uint32_t  width,
-    uint32_t  height,
-    EbAsm  asm_type)
+    uint32_t  height)
 {
     unpack_avg(
         ref16_l0,
@@ -557,8 +551,7 @@ void extract8_bitdata_safe_sub(
     uint32_t       out8_stride,
     uint32_t       width,
     uint32_t       height,
-    EbBool      sub_pred,
-    EbAsm       asm_type
+    EbBool      sub_pred
 )
 {
     /* sub_pred not implemented */
@@ -582,8 +575,7 @@ void unpack_l0l1_avg_safe_sub(
     uint32_t  dst_stride,
     uint32_t  width,
     uint32_t  height,
-    EbBool      sub_pred,
-    EbAsm  asm_type)
+    EbBool sub_pred)
 {
     //fix C
 
@@ -606,8 +598,7 @@ void un_pack2d(
     uint8_t       *outn_bit_buffer,
     uint32_t       outn_stride,
     uint32_t       width,
-    uint32_t       height,
-    EbAsm       asm_type
+    uint32_t       height
 )
 {
     unpack2d_array_16bit(
@@ -630,8 +621,7 @@ void pack2d_src(
     uint16_t    *out16_bit_buffer,
     uint32_t     out_stride,
     uint32_t     width,
-    uint32_t     height,
-    EbAsm     asm_type
+    uint32_t     height
 )
 {
     pack2d_16_bit_src(
@@ -654,8 +644,7 @@ void compressed_pack_lcu(
     uint16_t    *out16_bit_buffer,
     uint32_t     out_stride,
     uint32_t     width,
-    uint32_t     height,
-    EbAsm     asm_type
+    uint32_t     height
 )
 {
     compressed_packmsb(
@@ -676,8 +665,7 @@ void conv2b_to_c_pack_lcu(
     uint32_t     out_stride,
     uint8_t    *local_cache,
     uint32_t     width,
-    uint32_t     height,
-    EbAsm     asm_type)
+    uint32_t     height)
 {
     c_pack(
         inn_bit_buffer,
@@ -1005,8 +993,12 @@ void unpack_8bit_helper_c(
     uint32_t  height,
     uint8_t   choice){
 
-    un_pack8_bit_data_c(in16_bit_buffer, in_stride, out8_bit_buffer, out8_stride, width, height);
-
+    if (choice == 1) {
+        un_pack8_bit_data_c(in16_bit_buffer, in_stride, out8_bit_buffer, out8_stride, width, height);
+    }
+    else {
+        un_pack8_bit_data_c(in16_bit_buffer, in_stride, out8_bit_buffer, out8_stride, width, height);
+    }
 }
 
 void unpack_8bit_helper_avx2(
@@ -1018,7 +1010,7 @@ void unpack_8bit_helper_avx2(
     uint32_t  height,
     uint8_t   choice){
 
-    if (choice) {
+    if (choice == 1) {
         un_pack8_bit_data_c(in16_bit_buffer,in_stride, out8_bit_buffer, out8_stride, width, height);
     }
     else {

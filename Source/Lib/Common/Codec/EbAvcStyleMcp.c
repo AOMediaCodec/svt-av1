@@ -38,8 +38,7 @@ void estimate_uni_pred_interpolation_unpacked_avc_style(
     uint32_t                 dst_chroma_index,          //input parameter, please refer to the detailed explanation above.
     uint32_t                 component_mask,
     EbByte                  temp_buf,
-    EbBool                   sub_sample_pred_flag,
-    EbAsm                   asm_type)
+    EbBool                   sub_sample_pred_flag)
 {
     uint8_t    frac_posx, mapped_frac_posx;
     uint8_t    frac_posy, mapped_frac_posy;
@@ -93,8 +92,7 @@ void estimate_bi_pred_interpolation_unpacked_avc_style(
     EbByte                  ref_list0_temp_dst,
     EbByte                  ref_list1_temp_dst,
     EbByte                  first_pass_if_temp_dst,
-    EbBool                   sub_sample_pred_flag,
-    EbAsm                    asm_type)
+    EbBool                   sub_sample_pred_flag)
 {
     uint32_t   integ_pos_x;
     uint32_t   integ_pos_y;
@@ -171,8 +169,7 @@ void estimate_uni_pred_interpolation_avc_luma(
     uint32_t                 dst_chroma_index,          //input parameter, please refer to the detailed explanation above.
     uint32_t                 component_mask,
     EbByte                  temp_buf,
-    EbBool                   sub_sample_pred_flag,
-    EbAsm                    asm_type)
+    EbBool                   sub_sample_pred_flag)
 {
     uint32_t   integ_pos_x;
     uint32_t   integ_pos_y;
@@ -287,8 +284,7 @@ void estimate_bi_pred_interpolation_avc_luma(
     EbByte                  ref_list0_temp_dst,
     EbByte                  ref_list1_temp_dst,
     EbByte                  first_pass_if_temp_dst,
-    EbBool                   sub_sample_pred_flag,
-    EbAsm                    asm_type)
+    EbBool                   sub_sample_pred_flag)
 {
     uint32_t   integ_pos_x;
     uint32_t   integ_pos_y;
@@ -514,8 +510,7 @@ void estimate_uni_pred_interpolation_avc_lumaRef10Bit(
     uint32_t                 component_mask,
     EbByte                  temp_buf,
     EbBool                   sub_pred,
-    EbBool                   sub_pred_chroma,
-    EbAsm                    asm_type)
+    EbBool                   sub_pred_chroma)
 {
     uint32_t   chroma_pu_width = pu_width >> 1;
     uint32_t   chroma_pu_height = pu_height >> 1;
@@ -535,8 +530,7 @@ void estimate_uni_pred_interpolation_avc_lumaRef10Bit(
             dst->stride_y << sub_pred,
             pu_width,
             pu_height >> sub_pred,
-            sub_pred,
-            asm_type
+            sub_pred
         );
     }
     //chroma
@@ -553,8 +547,7 @@ void estimate_uni_pred_interpolation_avc_lumaRef10Bit(
                 dst->buffer_cb + dst_chroma_index,
                 dst->stride_cb << sub_pred,
                 chroma_pu_width,
-                chroma_pu_height >> sub_pred,
-                asm_type
+                chroma_pu_height >> sub_pred
             );
 
             ptr16 = (uint16_t *)ref_frame_pic_list0->buffer_cr + in_pos_x + in_pos_y * ref_frame_pic_list0->stride_cr;
@@ -565,8 +558,7 @@ void estimate_uni_pred_interpolation_avc_lumaRef10Bit(
                 dst->buffer_cr + dst_chroma_index,
                 dst->stride_cr << sub_pred,
                 chroma_pu_width,
-                chroma_pu_height >> sub_pred,
-                asm_type
+                chroma_pu_height >> sub_pred
             );
         }
     }
@@ -583,8 +575,7 @@ void estimate_uni_pred_interpolation_avc_chroma_ref10_bit(
     uint32_t                 dst_chroma_index,          //input parameter, please refer to the detailed explanation above.
     uint32_t                 component_mask,
     EbByte                  temp_buf,
-    EbBool                   sub_pred,
-    EbAsm                    asm_type)
+    EbBool                   sub_pred)
 {
     uint32_t   chroma_pu_width = pu_width >> 1;
     uint32_t   chroma_pu_height = pu_height >> 1;
@@ -602,8 +593,7 @@ void estimate_uni_pred_interpolation_avc_chroma_ref10_bit(
         dst->buffer_cb + dst_chroma_index,
         dst->stride_cb << sub_pred,
         chroma_pu_width,
-        chroma_pu_height >> sub_pred,
-        asm_type
+        chroma_pu_height >> sub_pred
     );
 
     ptr16 = (uint16_t *)ref_frame_pic_list0->buffer_cr + in_pos_x + in_pos_y * ref_frame_pic_list0->stride_cr;
@@ -614,8 +604,7 @@ void estimate_uni_pred_interpolation_avc_chroma_ref10_bit(
         dst->buffer_cr + dst_chroma_index,
         dst->stride_cr << sub_pred,
         chroma_pu_width,
-        chroma_pu_height >> sub_pred,
-        asm_type
+        chroma_pu_height >> sub_pred
     );
 }
 void estimate_bi_pred_interpolation_avc_chroma_ref10_bit(
@@ -634,8 +623,7 @@ void estimate_bi_pred_interpolation_avc_chroma_ref10_bit(
     EbByte                  ref_list0_temp_dst,
     EbByte                  ref_list1_temp_dst,
     EbByte                  first_pass_if_temp_dst,
-    EbBool                   sub_pred,
-    EbAsm                    asm_type)
+    EbBool                   sub_pred)
 {
     uint32_t   chroma_pu_width = pu_width >> 1;
     uint32_t   chroma_pu_height = pu_height >> 1;
@@ -653,8 +641,7 @@ void estimate_bi_pred_interpolation_avc_chroma_ref10_bit(
         bi_dst->buffer_cb + dst_chroma_index,
         bi_dst->stride_cb << sub_pred,
         chroma_pu_width,
-        chroma_pu_height >> sub_pred,
-        asm_type
+        chroma_pu_height >> sub_pred
     );
 
     unpack_l0l1_avg(
@@ -665,8 +652,7 @@ void estimate_bi_pred_interpolation_avc_chroma_ref10_bit(
         bi_dst->buffer_cr + dst_chroma_index,
         bi_dst->stride_cr << sub_pred,
         chroma_pu_width,
-        chroma_pu_height >> sub_pred,
-        asm_type
+        chroma_pu_height >> sub_pred
     );
 }
 
@@ -687,8 +673,7 @@ void estimate_bi_pred_interpolation_avc_luma_ref10_bit(
     EbByte                  ref_list1_temp_dst,
     EbByte                  first_pass_if_temp_dst,
     EbBool                   sub_pred,
-    EbBool                   sub_pred_chroma,
-    EbAsm                    asm_type)
+    EbBool                   sub_pred_chroma)
 {
     uint32_t   chroma_pu_width = pu_width >> 1;
     uint32_t   chroma_pu_height = pu_height >> 1;
@@ -707,8 +692,7 @@ void estimate_bi_pred_interpolation_avc_luma_ref10_bit(
             bi_dst->stride_y << sub_pred,
             pu_width,
             pu_height >> sub_pred,
-            sub_pred,
-            asm_type
+            sub_pred
         );
     }
 
@@ -723,8 +707,7 @@ void estimate_bi_pred_interpolation_avc_luma_ref10_bit(
             bi_dst->buffer_cb + dst_chroma_index,
             bi_dst->stride_cb << sub_pred,
             chroma_pu_width,
-            chroma_pu_height >> sub_pred,
-            asm_type);
+            chroma_pu_height >> sub_pred);
 
         unpack_l0l1_avg(
             (uint16_t *)ref_frame_pic_list0->buffer_cr + (ref_list0_pos_x >> 3) + (ref_list0_pos_y >> 3)*ref_frame_pic_list0->stride_cr,
@@ -734,8 +717,7 @@ void estimate_bi_pred_interpolation_avc_luma_ref10_bit(
             bi_dst->buffer_cr + dst_chroma_index,
             bi_dst->stride_cr << sub_pred,
             chroma_pu_width,
-            chroma_pu_height >> sub_pred,
-            asm_type);
+            chroma_pu_height >> sub_pred);
     }
 }
 
@@ -751,8 +733,7 @@ void uni_pred_i_free_ref8_bit(
     uint32_t                 component_mask,
     EbByte                  temp_buf,
     EbBool                   sub_sample_pred_flag,
-    EbBool                   sub_sample_pred_flag_chroma,
-    EbAsm                    asm_type)
+    EbBool                   sub_sample_pred_flag_chroma)
 {
     uint32_t   integ_pos_x;
     uint32_t   integ_pos_y;
@@ -857,8 +838,8 @@ void bi_pred_i_free_ref8_bit(
     EbByte                  ref_list1_temp_dst,
     EbByte                  first_pass_if_temp_dst,
     EbBool                   sub_sample_pred_flag,
-    EbBool                   sub_sample_pred_flag_chroma,//needs to be connected
-    EbAsm                    asm_type)
+    EbBool                   sub_sample_pred_flag_chroma//needs to be connected
+    )
 {
     uint32_t   integ_pos_x;
     uint32_t   integ_pos_y;
