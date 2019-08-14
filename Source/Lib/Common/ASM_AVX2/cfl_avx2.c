@@ -14,22 +14,38 @@
 #include "aom_dsp_rtcd.h"
 
 static INLINE __m256i predict_unclipped(const __m256i *input, __m256i alpha_q12,
-                                        __m256i alpha_sign, __m256i dc_q0) {
-  __m256i ac_q3 = _mm256_loadu_si256(input);
-  __m256i ac_sign = _mm256_sign_epi16(alpha_sign, ac_q3);
-  __m256i scaled_luma_q0 =
-      _mm256_mulhrs_epi16(_mm256_abs_epi16(ac_q3), alpha_q12);
-  scaled_luma_q0 = _mm256_sign_epi16(scaled_luma_q0, ac_sign);
-  return _mm256_add_epi16(scaled_luma_q0, dc_q0);
+    __m256i alpha_sign, __m256i dc_q0) {
+    __m256i ac_q3 = _mm256_loadu_si256(input);
+    __m256i ac_sign = _mm256_sign_epi16(alpha_sign, ac_q3);
+    __m256i scaled_luma_q0 =
+        _mm256_mulhrs_epi16(_mm256_abs_epi16(ac_q3), alpha_q12);
+    scaled_luma_q0 = _mm256_sign_epi16(scaled_luma_q0, ac_sign);
+    return _mm256_add_epi16(scaled_luma_q0, dc_q0);
 }
 
-static INLINE __m128i predict_unclipped_ssse3(const __m128i *input, __m128i alpha_q12,
-    __m128i alpha_sign, __m128i dc_q0) {
-    __m128i ac_q3 = _mm_loadu_si128(input);
-    __m128i ac_sign = _mm_sign_epi16(alpha_sign, ac_q3);
-    __m128i scaled_luma_q0 = _mm_mulhrs_epi16(_mm_abs_epi16(ac_q3), alpha_q12);
-    scaled_luma_q0 = _mm_sign_epi16(scaled_luma_q0, ac_sign);
-    return _mm_add_epi16(scaled_luma_q0, dc_q0);
+static INLINE __m128i predict_unclipped_ssse3(const __m128i *input,
+    const uint8_t *pred,
+    __m128i alpha_q12,
+    __m128i alpha_sign) {
+    const __m128i ac_q3 = _mm_loadu_si128(input);
+    const __m128i ac_sign = _mm_sign_epi16(alpha_sign, ac_q3);
+    const __m128i scaled_q0 = _mm_mulhrs_epi16(_mm_abs_epi16(ac_q3), alpha_q12);
+    const __m128i scaled = _mm_sign_epi16(scaled_q0, ac_sign);
+    const __m128i pred_8 = _mm_loadl_epi64((__m128i *)pred);
+    const __m128i dc_q0 = _mm_unpacklo_epi8(pred_8, _mm_setzero_si128());
+    return _mm_add_epi16(scaled, dc_q0);
+}
+
+static INLINE __m128i highbd_predict_unclipped_ssse3(const __m128i *input,
+    const uint16_t *pred,
+    __m128i alpha_q12,
+    __m128i alpha_sign) {
+    const __m128i ac_q3 = _mm_loadu_si128(input);
+    const __m128i ac_sign = _mm_sign_epi16(alpha_sign, ac_q3);
+    const __m128i scaled_q0 = _mm_mulhrs_epi16(_mm_abs_epi16(ac_q3), alpha_q12);
+    const __m128i scaled = _mm_sign_epi16(scaled_q0, ac_sign);
+    const __m128i dc_q0 = _mm_loadu_si128((__m128i *)pred);
+    return _mm_add_epi16(scaled, dc_q0);
 }
 
 // Store 32-bit integer from the first element of a into memory.
@@ -37,25 +53,19 @@ static INLINE void _mm_storeh_epi32(__m128i const *mem_addr, __m128i a) {
     *((int32_t *)mem_addr) = _mm_cvtsi128_si32(a);
 }
 
-void eb_cfl_predict_lbd_avx2(const int16_t *pred_buf_q3,
-        uint8_t *pred,
-        int32_t pred_stride,
-        uint8_t *dst,
-        int32_t dst_stride,
-        int32_t alpha_q3,
-        int32_t bit_depth,
-        int32_t width,
-        int32_t height) {
-    (void) bit_depth;
-    if (width <= 16)
-    {
+void eb_cfl_predict_lbd_avx2(const int16_t *pred_buf_q3, uint8_t *pred,
+    int32_t pred_stride, uint8_t *dst,
+    int32_t dst_stride, int32_t alpha_q3,
+    int32_t bit_depth, int32_t width, int32_t height) {
+    (void)bit_depth;
+    if (width <= 16) {
         const __m128i alpha_sign = _mm_set1_epi16(alpha_q3);
         const __m128i alpha_q12 = _mm_slli_epi16(_mm_abs_epi16(alpha_sign), 9);
-        const __m128i dc_q0 = _mm_set1_epi16(*pred);
         __m128i *row = (__m128i *)pred_buf_q3;
         const __m128i *row_end = row + height * CFL_BUF_LINE_I128;
         do {
-            __m128i res = predict_unclipped_ssse3(row, alpha_q12, alpha_sign, dc_q0);
+            __m128i res =
+                predict_unclipped_ssse3(row, pred, alpha_q12, alpha_sign);
             if (width < 16) {
                 res = _mm_packus_epi16(res, res);
                 if (width == 4)
@@ -64,25 +74,33 @@ void eb_cfl_predict_lbd_avx2(const int16_t *pred_buf_q3,
                     _mm_storel_epi64((__m128i *)dst, res);
             }
             else {
-                __m128i next = predict_unclipped_ssse3(row + 1, alpha_q12, alpha_sign, dc_q0);
+                const __m128i next = predict_unclipped_ssse3(
+                    row + 1, pred + 8, alpha_q12, alpha_sign);
                 res = _mm_packus_epi16(res, next);
                 _mm_storeu_si128((__m128i *)dst, res);
             }
             dst += dst_stride;
+            pred += pred_stride;
         } while ((row += CFL_BUF_LINE_I128) < row_end);
     }
-    else
-    {
+    else {
         const __m256i alpha_sign = _mm256_set1_epi16(alpha_q3);
-        const __m256i alpha_q12 = _mm256_slli_epi16(_mm256_abs_epi16(alpha_sign), 9);
-        const __m256i dc_q0 = _mm256_set1_epi16(*pred);
+        const __m256i alpha_abs = _mm256_abs_epi16(alpha_sign);
+        const __m256i alpha_q12 = _mm256_slli_epi16(alpha_abs, 9);
         __m256i *row = (__m256i *)pred_buf_q3;
         const __m256i *row_end = row + height * CFL_BUF_LINE_I256;
 
         do {
-            __m256i res = predict_unclipped(row, alpha_q12, alpha_sign, dc_q0);
-            __m256i next = predict_unclipped(row + 1, alpha_q12, alpha_sign, dc_q0);
-            res = _mm256_packus_epi16(res, next);
+            const __m256i pred_8 = _mm256_loadu_si256((__m256i *)pred);
+            const __m128i pred_8_lo = _mm256_castsi256_si128(pred_8);
+            const __m128i pred_8_hi = _mm256_extracti128_si256(pred_8, 1);
+            const __m256i dc_q0_lo = _mm256_cvtepu8_epi16(pred_8_lo);
+            const __m256i dc_q0_hi = _mm256_cvtepu8_epi16(pred_8_hi);
+            const __m256i res0 =
+                predict_unclipped(row, alpha_q12, alpha_sign, dc_q0_lo);
+            const __m256i res1 =
+                predict_unclipped(row + 1, alpha_q12, alpha_sign, dc_q0_hi);
+            __m256i res = _mm256_packus_epi16(res0, res1);
             res = _mm256_permute4x64_epi64(res, _MM_SHUFFLE(3, 1, 2, 0));
             _mm256_storeu_si256((__m256i *)dst, res);
             dst += dst_stride;
@@ -111,53 +129,53 @@ static INLINE __m128i highbd_clamp_epi16_ssse3(__m128i u, __m128i zero, __m128i 
     return _mm_max_epi16(_mm_min_epi16(u, max), zero);
 }
 
-void eb_cfl_predict_hbd_avx2(
-    const int16_t *pred_buf_q3,
-    uint16_t *pred,// AMIR ADDED
+void eb_cfl_predict_hbd_avx2(const int16_t *pred_buf_q3,
+    uint16_t *pred,  // AMIR ADDED
     int32_t pred_stride,
-    uint16_t *dst,// AMIR changed to 8 bit
-    int32_t dst_stride,
-    int32_t alpha_q3,
-    int32_t bit_depth,
-    int32_t width,
-    int32_t height) {
-  // Use SSSE3 version for smaller widths
-    if (width < 16)
-    {
+    uint16_t *dst,  // AMIR changed to 8 bit
+    int32_t dst_stride, int32_t alpha_q3,
+    int32_t bit_depth, int32_t width, int32_t height) {
+    // Use SSSE3 version for smaller widths
+    if (width < 16) {
         const __m128i alpha_sign = _mm_set1_epi16(alpha_q3);
         const __m128i alpha_q12 = _mm_slli_epi16(_mm_abs_epi16(alpha_sign), 9);
-        const __m128i dc_q0 = _mm_set1_epi16(*pred);
         const __m128i max = highbd_max_epi16_ssse3(bit_depth);
         const __m128i zeros = _mm_setzero_si128();
         __m128i *row = (__m128i *)pred_buf_q3;
         const __m128i *row_end = row + height * CFL_BUF_LINE_I128;
         do {
-            __m128i res = predict_unclipped_ssse3(row, alpha_q12, alpha_sign, dc_q0);
+            __m128i res = highbd_predict_unclipped_ssse3(
+                row, pred, alpha_q12, alpha_sign);
             res = highbd_clamp_epi16_ssse3(res, zeros, max);
             if (width == 4)
                 _mm_storel_epi64((__m128i *)dst, res);
             else
                 _mm_storeu_si128((__m128i *)dst, res);
             dst += dst_stride;
+            pred += pred_stride;
         } while ((row += CFL_BUF_LINE_I128) < row_end);
     }
-    else
-    {
+    else {
         assert(width == 16 || width == 32);
         const __m256i alpha_sign = _mm256_set1_epi16(alpha_q3);
-        const __m256i alpha_q12 = _mm256_slli_epi16(_mm256_abs_epi16(alpha_sign), 9);
-        const __m256i dc_q0 = _mm256_loadu_si256((__m256i *)pred);
+        const __m256i alpha_abs = _mm256_abs_epi16(alpha_sign);
+        const __m256i alpha_q12 = _mm256_slli_epi16(alpha_abs, 9);
         const __m256i max = highbd_max_epi16(bit_depth);
 
         __m256i *row = (__m256i *)pred_buf_q3;
         const __m256i *row_end = row + height * CFL_BUF_LINE_I256;
         do {
-            const __m256i res = predict_unclipped(row, alpha_q12, alpha_sign, dc_q0);
-            _mm256_storeu_si256((__m256i *)dst,
+            const __m256i dc_q0_lo = _mm256_loadu_si256((__m256i *)pred);
+            const __m256i res =
+                predict_unclipped(row, alpha_q12, alpha_sign, dc_q0_lo);
+            _mm256_storeu_si256(
+                (__m256i *)dst,
                 highbd_clamp_epi16(res, _mm256_setzero_si256(), max));
             if (width == 32) {
+                const __m256i dc_q0_hi =
+                    _mm256_loadu_si256((__m256i *)(pred + 16));
                 const __m256i res_1 =
-                    predict_unclipped(row + 1, alpha_q12, alpha_sign, dc_q0);
+                    predict_unclipped(row + 1, alpha_q12, alpha_sign, dc_q0_hi);
                 _mm256_storeu_si256(
                     (__m256i *)(dst + 16),
                     highbd_clamp_epi16(res_1, _mm256_setzero_si256(), max));
