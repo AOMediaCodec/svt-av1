@@ -110,8 +110,8 @@ typedef struct logicalProcessorGroup {
     uint32_t num;
     uint32_t group[1024];
 }processorGroup;
-#define MAX_PROCESSOR_GROUP 16
-processorGroup                   lp_group[MAX_PROCESSOR_GROUP];
+#define INITIAL_PROCESSOR_GROUP 16
+processorGroup                  *lp_group = NULL;
 #endif
 
 /**************************************
@@ -217,11 +217,12 @@ EbErrorType InitThreadManagmentParams() {
     const char* PHYSICALID = "physical id";
     int processor_id_len = EB_STRLEN(PROCESSORID, 128);
     int physical_id_len = EB_STRLEN(PHYSICALID, 128);
+    int maxSize = INITIAL_PROCESSOR_GROUP;
     if (processor_id_len < 0 || processor_id_len >= 128)
         return EB_ErrorInsufficientResources;
     if (physical_id_len < 0 || physical_id_len >= 128)
         return EB_ErrorInsufficientResources;
-    memset(lp_group, 0, sizeof(lp_group));
+    memset(lp_group, 0, INITIAL_PROCESSOR_GROUP * sizeof(processorGroup));
 
     FILE *fin = fopen("/proc/cpuinfo", "r");
     if (fin) {
@@ -237,12 +238,18 @@ EbErrorType InitThreadManagmentParams() {
                 char* p = line + physical_id_len;
                 while(*p < '0' || *p > '9') p++;
                 socket_id = strtol(p, NULL, 0);
-                if (socket_id < 0 || socket_id > 15) {
+                if (socket_id < 0) {
                     fclose(fin);
                     return EB_ErrorInsufficientResources;
                 }
                 if (socket_id + 1 > num_groups)
                     num_groups = socket_id + 1;
+                if (socket_id >= maxSize) {
+                    maxSize = maxSize * 2;
+                    lp_group = realloc(lp_group, maxSize * sizeof(processorGroup));
+                    if (lp_group == (processorGroup*) NULL) 
+                        return EB_ErrorInsufficientResources; 
+                }
                 lp_group[socket_id].group[lp_group[socket_id].num++] = processor_id;
             }
         }
@@ -1845,6 +1852,12 @@ EB_API EbErrorType eb_init_handle(
     if(p_handle == NULL)
          return EB_ErrorBadParameter;
 
+    #if defined(__linux__)
+        lp_group = (processorGroup*) malloc(INITIAL_PROCESSOR_GROUP * sizeof(processorGroup));
+        if (lp_group == (processorGroup*) NULL)
+            return EB_ErrorInsufficientResources;
+    #endif
+
     *p_handle = (EbComponentType*)malloc(sizeof(EbComponentType));
     if (*p_handle == (EbComponentType*)NULL) {
         SVT_LOG("Error: Component Struct Malloc Failed\n");
@@ -1904,6 +1917,10 @@ EB_API EbErrorType eb_deinit_handle(
     }
     else
         return_error = EB_ErrorInvalidComponent;
+
+    #if  defined(__linux__)
+        free(lp_group);
+    #endif
     return return_error;
 }
 
