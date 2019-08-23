@@ -247,8 +247,8 @@ EbErrorType InitThreadManagmentParams() {
                 if (socket_id >= maxSize) {
                     maxSize = maxSize * 2;
                     lp_group = realloc(lp_group, maxSize * sizeof(processorGroup));
-                    if (lp_group == (processorGroup*) NULL) 
-                        return EB_ErrorInsufficientResources; 
+                    if (lp_group == (processorGroup*) NULL)
+                        return EB_ErrorInsufficientResources;
                 }
                 lp_group[socket_id].group[lp_group[socket_id].num++] = processor_id;
             }
