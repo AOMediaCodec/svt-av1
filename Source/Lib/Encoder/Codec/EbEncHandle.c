@@ -1853,9 +1853,11 @@ EB_API EbErrorType eb_init_handle(
          return EB_ErrorBadParameter;
 
     #if defined(__linux__)
-        lp_group = (processorGroup*) malloc(INITIAL_PROCESSOR_GROUP * sizeof(processorGroup));
-        if (lp_group == (processorGroup*) NULL)
-            return EB_ErrorInsufficientResources;
+        if(lp_group == NULL) {
+            lp_group = (processorGroup*) malloc(INITIAL_PROCESSOR_GROUP * sizeof(processorGroup));
+            if (lp_group == (processorGroup*) NULL)
+                return EB_ErrorInsufficientResources;
+        }
     #endif
 
     *p_handle = (EbComponentType*)malloc(sizeof(EbComponentType));
@@ -1919,7 +1921,10 @@ EB_API EbErrorType eb_deinit_handle(
         return_error = EB_ErrorInvalidComponent;
 
     #if  defined(__linux__)
-        free(lp_group);
+        if(lp_group != NULL) {
+            free(lp_group);
+            lp_group = NULL;
+        }
     #endif
     return return_error;
 }
