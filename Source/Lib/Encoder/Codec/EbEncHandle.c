@@ -247,7 +247,7 @@ EbErrorType InitThreadManagmentParams() {
                 if (socket_id >= maxSize) {
                     maxSize = maxSize * 2;
                     lp_group = realloc(lp_group, maxSize * sizeof(processorGroup));
-                    if (lp_group == (processorGroup*) NULL)
+                    if (lp_group == NULL)
                         return EB_ErrorInsufficientResources;
                 }
                 lp_group[socket_id].group[lp_group[socket_id].num++] = processor_id;
@@ -1854,8 +1854,8 @@ EB_API EbErrorType eb_init_handle(
 
     #if defined(__linux__)
         if(lp_group == NULL) {
-            lp_group = (processorGroup*) malloc(INITIAL_PROCESSOR_GROUP * sizeof(processorGroup));
-            if (lp_group == (processorGroup*) NULL)
+            EB_MALLOC(lp_group, INITIAL_PROCESSOR_GROUP * sizeof(processorGroup));
+            if (lp_group == NULL)
                 return EB_ErrorInsufficientResources;
         }
     #endif
@@ -1922,7 +1922,7 @@ EB_API EbErrorType eb_deinit_handle(
 
     #if  defined(__linux__)
         if(lp_group != NULL) {
-            free(lp_group);
+            EB_FREE(lp_group);
             lp_group = NULL;
         }
     #endif
