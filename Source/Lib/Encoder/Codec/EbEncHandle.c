@@ -1923,7 +1923,6 @@ EB_API EbErrorType eb_deinit_handle(
     #if  defined(__linux__)
         if(lp_group != NULL) {
             EB_FREE(lp_group);
-            lp_group = NULL;
         }
     #endif
     return return_error;
