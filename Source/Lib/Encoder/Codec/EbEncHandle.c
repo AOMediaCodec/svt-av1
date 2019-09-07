@@ -1855,8 +1855,6 @@ EB_API EbErrorType eb_init_handle(
     #if defined(__linux__)
         if(lp_group == NULL) {
             EB_MALLOC(lp_group, INITIAL_PROCESSOR_GROUP * sizeof(processorGroup));
-            if (lp_group == NULL)
-                return EB_ErrorInsufficientResources;
         }
     #endif
 
