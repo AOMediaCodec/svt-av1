@@ -45,11 +45,7 @@ before_install:
 install:
   - pip install --user cpp-coveralls
   - export PATH=/Users/travis/Library/Python/2.7/bin:${PATH}
-  - |
-    if [ "$TRAVIS_OS_NAME" != "osx" ]; then
-      export CFLAGS="-Werror"
-      if [ "$CC" = "clang" ]; then export CFLAGS+=" -Wno-error=array-bounds"; fi
-    fi
+  - export CFLAGS="-Werror"
   #- if [ $TRAVIS_OS_NAME = osx ]; then brew install --HEAD valgrind; fi
 base_script: &base_script |
   cd $TRAVIS_BUILD_DIR/Build/linux/${build_type:-Release}
