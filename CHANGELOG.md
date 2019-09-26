@@ -1,6 +1,6 @@
 # Changelog
 
-## [0.7.0] - 2019-09-19
+## [0.7.0] - 2019-09-26
 
 Encoder
 - Enhanced MRP Reference Frames
@@ -22,11 +22,15 @@ Decoder
 - Inter support
 - Screen Content Tools support
 - Post Processing Filters support
+- Compound Mode (InterInter & InterIntra) Tool support
+- Decoder Film Grain support
 
 Build and Testing
 - Improve CI
 - Improve build scripts
+- Improve cmake lists
 - Improve Unit Test Coverage
+- API update
 - Bug fixes
 
 ## [0.6.0] - 2019-06-28
