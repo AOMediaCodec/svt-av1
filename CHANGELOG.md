@@ -13,8 +13,6 @@ Encoder
 - Thread safe resource allocation
 - Added AVX512 Optimizations
 - Added AVX2 Optimizations
-- Decoder Compound Mode (InterInter & InterIntra) Tool support
-- Decoder Film Grain support
 
 Decoder
 - Screen Content Tools
