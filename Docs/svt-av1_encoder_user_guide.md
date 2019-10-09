@@ -128,7 +128,7 @@ The encoder parameters present in the `Sample.cfg` file are listed in this table
 | **IntraPeriod** | -intra-period | [-2 - 255] | -2 | Distance Between Intra Frame inserted. -1 denotes no intra update. -2 denotes auto. |
 | **IntraRefreshType** | -irefresh-type | [1 – 2] | 1 | 1: CRA (Open GOP)2: IDR (Closed GOP) |
 | **QP** | -q | [0 - 63] | 50 | Quantization parameter used when RateControl is set to 0 |
-| **RateControlMode** | -rc | [0 - 3] | 0 | 0 = CQP , 1 = ABR , 2 = ABR , 3 = CVBR |
+| **RateControlMode** | -rc | [0 - 3] | 0 | 0 = CQP , 1 = ABR , 2 = CBR , 3 = CVBR |
 | **AdaptiveQuantization** | -adaptive-quantization | [0 - 2] | 0 | 0 = OFF , 1 = variance base using segments , 2 = Deltaq pred efficiency (default) |
 | **UseDefaultMeHme** | -use-default-me-hme | [0 - 1] | 1 | 0 : Overwrite Default ME HME parameters1 : Use default ME HME parameters, dependent on width and height |
 | **HME** | -hme | [0 - 1] | 1 | Enable HME, 0 = OFF, 1 = ON |
