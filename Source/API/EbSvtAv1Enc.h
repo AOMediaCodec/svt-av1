@@ -29,6 +29,11 @@ extern "C" {
 #define EB_BUFFERFLAG_HAS_TD        0x00000004  // signals that the packet contains a TD
 #define EB_BUFFERFLAG_IS_ALT_REF    0x00000008  // signals that the packet contains an ALT_REF frame
 #define EB_BUFFERFLAG_ERROR_MASK    0xFFFFFFF0  // mask for signalling error assuming top flags fit in 4 bits. To be changed, if more flags are added.
+
+#if 1 //TWO_PASS
+#define STAT_BUFFER_UNIT 11680
+#endif
+
 // Will contain the EbEncApi which will live in the EncHandle class
 // Only modifiable during config-time.
 typedef struct EbSvtAv1EncConfiguration
@@ -205,6 +210,13 @@ typedef struct EbSvtAv1EncConfiguration
 *
 * Default is 0.*/
     EbBool                   use_output_stat_file;
+
+    /* The enc mode for the second pass */
+    int8_t                   secondary_enc_mode;
+
+    /* Stat data generated in the 1st pass and used in the 2nd */
+    uint8_t                  *stat_buffer;
+
 #endif
     /* Enable picture QP scaling between hierarchical levels
     *

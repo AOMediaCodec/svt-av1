@@ -183,6 +183,8 @@ EbErrorType CopyConfigurationParameters(
     callback_data->eb_enc_parameters.output_stat_file = config->output_stat_file;
     callback_data->eb_enc_parameters.use_input_stat_file = (EbBool)config->use_input_stat_file;
     callback_data->eb_enc_parameters.use_output_stat_file = (EbBool)config->use_output_stat_file;
+    callback_data->eb_enc_parameters.secondary_enc_mode = config->secondary_enc_mode;
+    callback_data->eb_enc_parameters.stat_buffer = config->stat_buffer;
 #endif
     callback_data->eb_enc_parameters.disable_dlf_flag = (EbBool)config->disable_dlf_flag;
     callback_data->eb_enc_parameters.enable_warped_motion = (EbBool)config->enable_warped_motion;

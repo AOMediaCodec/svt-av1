@@ -17,6 +17,7 @@
  * Includes
  ***************************************/
 #include <stdio.h>
+#include <string.h>
 #include <stdlib.h>
 #include <signal.h>
 #include <stdint.h>
@@ -146,6 +147,46 @@ int32_t main(int32_t argc, char* argv[])
             if (configs[0]->target_socket != -1)
                 AssignAppThreadGroup(configs[0]->target_socket);
 
+ #if 1 //TWO_PASS
+            EbBool combined_stat_test = EB_FALSE;
+            FILE *saved_recon_file = NULL;
+            FILE *saved_bitstream_file = NULL;
+
+            if (configs[0]->secondary_enc_mode >= 0)
+                combined_stat_test = EB_TRUE;
+
+            for (uint64_t pass=0; pass<=combined_stat_test; ++pass) {
+                if (combined_stat_test) {
+                    if (pass == 0) {
+                        configs[0]->use_output_stat_file = EB_TRUE;
+                        configs[0]->use_input_stat_file = EB_FALSE;
+                        configs[0]->enc_mode2p = configs[0]->secondary_enc_mode;
+                        configs[0]->stat_buffer = malloc(configs[0]->frames_to_be_encoded * STAT_BUFFER_UNIT);
+                        saved_recon_file = configs[0]->recon_file;
+                        saved_bitstream_file = configs[0]->bitstream_file;
+                        configs[0]->recon_file = NULL;
+                        configs[0]->bitstream_file = NULL;
+                        printf("\n[1st Pass]:\n\n");
+                    } else {
+                        exitCondition = APP_ExitConditionNone;
+                        configs[0]->use_output_stat_file = EB_FALSE;
+                        configs[0]->use_input_stat_file = EB_TRUE;
+                        fseek(configs[0]->input_file, 0, SEEK_SET);
+                        configs[0]->recon_file = saved_recon_file;
+                        configs[0]->bitstream_file = saved_bitstream_file;
+                        configs[0]->enc_mode = configs[0]->secondary_enc_mode;
+                        configs[0]->processed_frame_count = 0;
+                        configs[0]->processed_byte_count = 0;
+                        configs[0]->frames_encoded = 0;
+                        configs[0]->stop_encoder = EB_FALSE;
+                        configs[0]->byte_count_since_ivf = 0;
+                        configs[0]->ivf_count = 0;
+                        memset(&configs[0]->performance_context, 0, sizeof(configs[0]->performance_context));
+                        return_errors[0] = EB_ErrorNone;
+                        printf("\n[2nd Pass]:\n\n");
+                    }
+                }
+ #endif
             // Init the Encoder
             for (instanceCount = 0; instanceCount < num_channels; ++instanceCount) {
                 if (return_errors[instanceCount] == EB_ErrorNone) {
@@ -292,6 +333,12 @@ int32_t main(int32_t argc, char* argv[])
                 if (return_errors[instanceCount - 1] == EB_ErrorNone)
                     return_errors[instanceCount - 1] = de_init_encoder(appCallbacks[instanceCount - 1], instanceCount - 1);
             }
+#endif
+
+#if 1 //TWO_PASS
+                if (combined_stat_test && !pass)
+                    return_errors[0] = de_init_encoder(appCallbacks[0], 0);
+             }
 #endif
         }
         else {

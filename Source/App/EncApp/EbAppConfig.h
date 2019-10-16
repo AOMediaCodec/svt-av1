@@ -177,6 +177,8 @@ typedef struct EbConfig
     FILE                    *output_stat_file;
     EbBool                  use_input_stat_file;
     EbBool                  use_output_stat_file;
+    int8_t                  secondary_enc_mode;
+    uint8_t                 *stat_buffer;
 #endif
 
     EbBool                  y4m_input;

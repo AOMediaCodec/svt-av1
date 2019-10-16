@@ -1141,11 +1141,15 @@ AppExitConditionType ProcessOutputStreamBuffer(
     uint32_t               *max_latency       = &config->performance_context.max_latency;
 
     // System performance variables
-    static int32_t         frame_count                = 0;
+    static int32_t         frame_count;
 
     // Local variables
     uint64_t                finishsTime     = 0;
     uint64_t                finishuTime     = 0;
+
+    if (config->performance_context.frame_count == 0)
+        frame_count = 0;
+
 #if ALT_REF_OVERLAY_APP
     uint8_t is_alt_ref = 1;
     while (is_alt_ref) {

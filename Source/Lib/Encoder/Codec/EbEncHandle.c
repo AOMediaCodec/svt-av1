@@ -2429,6 +2429,8 @@ void CopyApiFromApp(
     sequence_control_set_ptr->static_config.output_stat_file = ((EbSvtAv1EncConfiguration*)pComponentParameterStructure)->output_stat_file;
     sequence_control_set_ptr->static_config.use_input_stat_file = ((EbSvtAv1EncConfiguration*)pComponentParameterStructure)->use_input_stat_file;
     sequence_control_set_ptr->static_config.use_output_stat_file = ((EbSvtAv1EncConfiguration*)pComponentParameterStructure)->use_output_stat_file;
+    sequence_control_set_ptr->static_config.secondary_enc_mode = ((EbSvtAv1EncConfiguration*)pComponentParameterStructure)->secondary_enc_mode;
+    sequence_control_set_ptr->static_config.stat_buffer= ((EbSvtAv1EncConfiguration*)pComponentParameterStructure)->stat_buffer;
 #endif
 #if SHUT_FILTERING
     sequence_control_set_ptr->static_config.disable_dlf_flag = 1;//
@@ -2946,6 +2948,10 @@ EbErrorType eb_svt_enc_init_parameter(
 #if TWO_PASS
     config_ptr->use_input_stat_file = EB_FALSE;
     config_ptr->use_output_stat_file = EB_FALSE;
+    config_ptr->input_stat_file = NULL;
+    config_ptr->output_stat_file = NULL;
+    config_ptr->secondary_enc_mode = -1;
+    config_ptr->stat_buffer = NULL;
 #endif
     config_ptr->scene_change_detection = 0;
     config_ptr->rate_control_mode = 0;

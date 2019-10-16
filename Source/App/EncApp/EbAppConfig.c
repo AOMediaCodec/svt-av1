@@ -33,6 +33,7 @@
 #define OUTPUT_STAT_FILE_TOKEN          "-output-stat-file"
 #define USE_INPUT_STAT_FILE_TOKEN       "-use-input-stat-file"
 #define USE_OUTPUT_STAT_FILE_TOKEN      "-use-output-stat-file"
+#define SECONDARY_ENCMODE_TOKEN         "-secondary-enc-mode"
 #endif
 #define WIDTH_TOKEN                     "-w"
 #define HEIGHT_TOKEN                    "-h"
@@ -207,6 +208,9 @@ static void SetEncoderColorFormat               (const char *value, EbConfig *cf
 static void SetcompressedTenBitFormat           (const char *value, EbConfig *cfg) {cfg->compressed_ten_bit_format = strtoul(value, NULL, 0);}
 static void SetBaseLayerSwitchMode              (const char *value, EbConfig *cfg) {cfg->base_layer_switch_mode = (EbBool) strtoul(value, NULL, 0);};
 static void SetencMode                          (const char *value, EbConfig *cfg) {cfg->enc_mode = (uint8_t)strtoul(value, NULL, 0);};
+#if 1 //TWO_PASS
+static void SetSecondaryEncMode                 (const char *value, EbConfig *cfg) {cfg->secondary_enc_mode = (uint8_t)strtoul(value, NULL, 0);};
+#endif
 static void SetCfgIntraPeriod                   (const char *value, EbConfig *cfg) {cfg->intra_period = strtol(value,  NULL, 0);};
 static void SetCfgIntraRefreshType              (const char *value, EbConfig *cfg) {cfg->intra_refresh_type = strtol(value,  NULL, 0);};
 static void SetHierarchicalLevels               (const char *value, EbConfig *cfg) { cfg->hierarchical_levels = strtol(value, NULL, 0); };
@@ -318,6 +322,9 @@ config_entry_t config_entry[] = {
     { SINGLE_INPUT, BUFFERED_INPUT_TOKEN, "BufferedInput", SetBufferedInput },
     { SINGLE_INPUT, BASE_LAYER_SWITCH_MODE_TOKEN, "BaseLayerSwitchMode", SetBaseLayerSwitchMode },
     { SINGLE_INPUT, ENCMODE_TOKEN, "EncoderMode", SetencMode},
+#if 1 //TWO_PASS
+    { SINGLE_INPUT, SECONDARY_ENCMODE_TOKEN, "SecondaryEncoderMode", SetSecondaryEncMode},
+#endif
 #if TWO_PASS_USE_2NDP_ME_IN_1STP
     { SINGLE_INPUT, ENCMODE2P_TOKEN, "EncoderMode2p", SetencMode2p},
 #endif
@@ -419,8 +426,9 @@ void eb_config_ctor(EbConfig *config_ptr)
     config_ptr->output_stat_file                      = NULL;
     config_ptr->use_input_stat_file                   = 0;
     config_ptr->use_output_stat_file                  = 0;
+    config_ptr->secondary_enc_mode                    = -1;
+    config_ptr->stat_buffer                           = NULL;
 #endif
-
     config_ptr->frame_rate                            = 30 << 16;
     config_ptr->frame_rate_numerator                   = 0;
     config_ptr->frame_rate_denominator                 = 0;
@@ -604,6 +612,10 @@ void eb_config_dtor(EbConfig *config_ptr)
     if (config_ptr->output_stat_file) {
         fclose(config_ptr->output_stat_file);
         config_ptr->output_stat_file = (FILE *)NULL;
+    }
+    if (config_ptr->stat_buffer) {
+        free(config_ptr->stat_buffer);
+        config_ptr->stat_buffer = NULL;
     }
 #endif
 
@@ -847,13 +859,28 @@ static EbErrorType VerifySettings(EbConfig *config, uint32_t channelNumber)
     }
 
 #if 1 //TWO_PASS
-    if (config->use_input_stat_file == EB_TRUE && config->input_stat_file == NULL) {
-        fprintf(config->error_log_file, "Error instance %u: Could not find input stat file, use_input_stat_file is set to 1\n", channelNumber + 1);
+    if ((config->secondary_enc_mode >= 0) && (config->secondary_enc_mode <= MAX_ENC_PRESET)) {
+        if (config->use_input_stat_file == EB_TRUE || config->input_stat_file) {
+            fprintf(config->error_log_file, "Error instance %u: Input stat file shall not be set in combined test mode\n", channelNumber + 1);
+            return_error = EB_ErrorBadParameter;
+        }
+
+        if (config->use_output_stat_file == EB_TRUE || config->output_stat_file) {
+            fprintf(config->error_log_file, "Error instance %u: Output stat file shall not be set in combined test mode\n", channelNumber + 1);
+            return_error = EB_ErrorBadParameter;
+        }
+    } else if (config->secondary_enc_mode != -1) {
+        fprintf(config->error_log_file, "Error instance %u: Invalid secondary enc mode\n", channelNumber + 1);
         return_error = EB_ErrorBadParameter;
-    }
-    if (config->use_output_stat_file == EB_TRUE && config->output_stat_file == NULL) {
-        fprintf(config->error_log_file, "Error instance %u: Could not find output stat file, use_output_stat_file is set to 1\n", channelNumber + 1);
-        return_error = EB_ErrorBadParameter;
+    } else {
+        if (config->use_input_stat_file == EB_TRUE && config->input_stat_file == NULL) {
+            fprintf(config->error_log_file, "Error instance %u: Could not find input stat file, use_input_stat_file is set to 1\n", channelNumber + 1);
+            return_error = EB_ErrorBadParameter;
+        }
+        if (config->use_output_stat_file == EB_TRUE && config->output_stat_file == NULL) {
+            fprintf(config->error_log_file, "Error instance %u: Could not find output stat file, use_output_stat_file is set to 1\n", channelNumber + 1);
+            return_error = EB_ErrorBadParameter;
+        }
     }
 #endif
 
@@ -982,13 +1009,27 @@ uint32_t get_number_of_channels(
 {
     char config_string[COMMAND_LINE_MAX_SIZE];
     uint32_t channelNumber;
+#if 1 //TWO_PASS
+    int8_t secondaryEncMode = -1;
+#endif
+
     if (FindToken(argc, argv, CHANNEL_NUMBER_TOKEN, config_string) == 0) {
         // Set the input file
         channelNumber = strtol(config_string,  NULL, 0);
+
         if ((channelNumber > (uint32_t) MAX_CHANNEL_NUMBER) || channelNumber == 0){
             printf("Error: The number of channels has to be within the range [1,%u]\n",(uint32_t) MAX_CHANNEL_NUMBER);
             return 0;
-        }else{
+        } else {
+#if 1 //TWO_PASS
+            if ((channelNumber > 1) && (FindToken(argc, argv, SECONDARY_ENCMODE_TOKEN, config_string) == 0)) {
+                secondaryEncMode = strtol(config_string,  NULL, 0);
+                if ((secondaryEncMode >= 0) && (secondaryEncMode <= MAX_ENC_PRESET)){
+                    printf("Warning: single channel is forced for combined stat test\n");
+                    channelNumber = 1;
+                }
+            }
+#endif
             return channelNumber;
         }
     }
