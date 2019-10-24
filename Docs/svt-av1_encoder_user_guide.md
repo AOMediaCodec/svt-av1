@@ -6,7 +6,7 @@
 2. [Sample Application Guide](#sample-application-guide)
     - [Input Video Format](#input-video-format)
     - [Compressed 10-bit format](#compressed-10-bit-format)
-    - [Running the encoder](#running-the-encoder)
+    - [Running the encodhdhdhder](#running-the-encoder)
 3. [Legal Disclaimer](#legal-disclaimer)
 
 ## Introduction
