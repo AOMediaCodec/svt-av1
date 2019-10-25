@@ -111,6 +111,21 @@ extern "C" {
 #define AOM_INTERP_EXTEND                               4
 #define OPTIMISED_EX_SUBPEL                             1
 
+/*****M1 Features*****/
+#define M1_high_precision                   0
+#define M1_wm                               0
+#define M1_mdc                              0
+#define M1_nsq                              0
+/*******MR Features*****/
+#define MR_ATB                              0
+#define MR_INTERPOLATION                    0
+#define MR_CHROMA                           0
+#define MR_NSQ                              0 //(including MDC)
+#define MR_CDEF                             0 
+#define MR_SKIP_ATB                         0 // ask hsan
+#define UPDATE_CDEF                         0 // Update bit cost estimation for CDEF
+#define MR_TX_WEIGHT                        0
+
 #define AOM_LEFT_TOP_MARGIN_PX(subsampling) \
   ((AOM_BORDER_IN_PIXELS >> subsampling) - AOM_INTERP_EXTEND)
 #define AOM_LEFT_TOP_MARGIN_SCALED(subsampling) \
