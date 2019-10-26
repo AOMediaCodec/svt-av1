@@ -15178,12 +15178,8 @@ EbErrorType motion_estimate_lcu(
                             enableHalfPel16x16,
                             enableHalfPel8x8,
                             enableQuarterPel,
-#if TEST5_DISABLE_NSQ_ME
-                            EB_FALSE);
-#else
                             picture_control_set_ptr->pic_depth_mode <=
                                 PIC_ALL_C_DEPTH_MODE);
-#endif
                     }
                 }
                 if (is_nsq_table_used && ref_pic_index == 0) {
@@ -15727,9 +15723,10 @@ EbErrorType open_loop_intra_search_sb(
     uint32_t cu_origin_x;
     uint32_t cu_origin_y;
     uint32_t pa_blk_index = 0;
+#if !PAETH_HBD
     uint8_t is_16_bit =
         (sequence_control_set_ptr->static_config.encoder_bit_depth > EB_8BIT);
-
+#endif
     SbParams *sb_params = &sequence_control_set_ptr->sb_params_array[sb_index];
     OisSbResults *ois_sb_results_ptr =
         picture_control_set_ptr->ois_sb_results[sb_index];
@@ -15769,7 +15766,11 @@ EbErrorType open_loop_intra_search_sb(
             uint8_t best_intra_ois_index = 0;
             uint32_t best_intra_ois_distortion = 64 * 64 * 255;
             uint8_t intra_mode_start = DC_PRED;
+#if PAETH_HBD
+            uint8_t intra_mode_end = PAETH_PRED;
+#else
             uint8_t intra_mode_end = is_16_bit ? SMOOTH_H_PRED : PAETH_PRED;
+#endif
             uint8_t angle_delta_counter = 0;
             uint8_t angle_delta_shift = 1;
             EbBool use_angle_delta = (bsize >= 8);
@@ -15801,12 +15802,20 @@ EbErrorType open_loop_intra_search_sb(
                 angle_delta_shift = 1;
             } else {
                 if (picture_control_set_ptr->slice_type == I_SLICE) {
+#if PAETH_HBD
+                    intra_mode_end = /*is_16_bit ? SMOOTH_H_PRED :*/ PAETH_PRED;
+#else
                     intra_mode_end = is_16_bit ? SMOOTH_H_PRED : PAETH_PRED;
+#endif
                     angle_delta_candidate_count = use_angle_delta ? 5 : 1;
                     disable_angular_prediction = 0;
                     angle_delta_shift = 1;
                 } else if (picture_control_set_ptr->temporal_layer_index == 0) {
+#if PAETH_HBD
+                    intra_mode_end = /*is_16_bit ? SMOOTH_H_PRED :*/ PAETH_PRED;
+#else
                     intra_mode_end = is_16_bit ? SMOOTH_H_PRED : PAETH_PRED;
+#endif
                     angle_delta_candidate_count =
                         (bsize > 16) ? 1 : use_angle_delta ? 2 : 1;
                     disable_angular_prediction = 0;

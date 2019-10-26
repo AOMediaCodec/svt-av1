@@ -1126,6 +1126,9 @@ void PadRefAndSetFlags(
 
     // set up the Slice Type
     referenceObject->slice_type = picture_control_set_ptr->parent_pcs_ptr->slice_type;
+#if TWO_PASS
+    referenceObject->referenced_area_avg = picture_control_set_ptr->parent_pcs_ptr->referenced_area_avg;
+#endif
 }
 
 void CopyStatisticsToRefObject(
@@ -1497,7 +1500,7 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
     if (MR_MODE)
         context_ptr->md_exit_th = 0;
     else
-        context_ptr->md_exit_th = 10;
+        context_ptr->md_exit_th = (picture_control_set_ptr->parent_pcs_ptr->sc_content_detected) ? 10 : 18;
 
     // Derive distortion-based md_stage_0_count proning
     if (MR_MODE)

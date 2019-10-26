@@ -47,10 +47,15 @@ extern "C" {
 #define OBMC_FLAG            1 // OBMC motion mode flag
 #define OBMC_CONVOLVE        1 // to track convolve kernels changes
 
-#define INJECT_NEW_NEAR_NEAR_NEW   1   // Inject NEW_NEAR / NEAR_NEW inter prediction 
+#define INJECT_NEW_NEAR_NEAR_NEW   1   // Inject NEW_NEAR / NEAR_NEW inter prediction
+#define FILTER_INTRA_FLAG    1 // Filter intra prediction
 
 
-#define II_COMP_FLAG 1
+#define II_COMP_FLAG                 1 // InterIntra compound
+#define PAETH_HBD                    1 // Enbale Intra PAETH for 10bit
+#define INTER_INTER_HBD              1 // Upgrade InterInter compound 10bit
+#define INTER_INTRA_HBD              1 // Upgrade InterIntra compound 10bit
+
 #define PRED_CHANGE                  1 // Change the MRP in 4L Pictures 3, 5 , 7 and 9 use 1 as the reference
 #define PRED_CHANGE_5L               1 // Change the MRP in 5L Pictures 3, 5 , 7 and 9 use 1 as the reference, 11, 13, 15 and 17 use 9 as the reference
 #define PRED_CHANGE_MOD              1 // Reorder the references for MRP
@@ -70,11 +75,16 @@ extern "C" {
 #define ENHANCE_ATB                       1
 
 #define RDOQ_CHROMA                       1
+
+
+#define TWO_PASS                          1 // Two pass encoding. For now, the encoder is called two times and data transfered using file.
+                                            // Actions in the second pass: Frame and SB QP assignment and temporal filtering strenght change
+#define TWO_PASS_USE_2NDP_ME_IN_1STP      1 // Add a config parameter to the first pass to use the ME settings of the second pass
+
 //FOR DEBUGGING - Do not remove
 #define NO_ENCDEC                         0 // bypass encDec to test cmpliance of MD. complained achieved when skip_flag is OFF. Port sample code from VCI-SW_AV1_Candidate1 branch
 
 #define ADP_STATS_PER_LAYER                             0
-#define NSQ_TAB_SIZE                                    6
 #define AOM_INTERP_EXTEND                               4
 #define OPTIMISED_EX_SUBPEL                             1
 
@@ -145,6 +155,23 @@ enum {
 
 #define PAD_VALUE                                (128+32)
 
+/* Use open-loop data to predict the NSQ partitions. */
+#define PREDICT_NSQ_SHAPE                               1
+#if PREDICT_NSQ_SHAPE
+#define NUMBER_OF_DEPTH                                 6
+#define NUMBER_OF_SHAPES                                10
+#define ADD_SAD_FOR_128X128                             1
+#define ADJUST_NSQ_RANK_BASED_ON_NEIGH                  1
+#define COMBINE_MDC_NSQ_TABLE                           1
+#define ADD_SUPPORT_TO_SKIP_PART_N                      1
+#define ADD_MDC_REFINEMENT_LOOP                         1
+#define ADD_MDC_FULL_COST                               1
+#define NSQ_TAB_SIZE                                    8
+#define MAX_MDC_LEVEL                                   8
+#else
+#define NSQ_TAB_SIZE                                    6
+#endif
+
 //  Delta QP support
 #define ADD_DELTA_QP_SUPPORT                      1  // Add delta QP support
 #define BLOCK_MAX_COUNT_SB_128                    4421  // TODO: reduce alloction for 64x64
@@ -152,7 +179,11 @@ enum {
 #define MAX_TXB_COUNT                             4 // Maximum number of transform blocks.
 #if II_COMP_FLAG
 #if OBMC_FLAG
+#if FILTER_INTRA_FLAG
+#define MAX_NFL                                 110 // Maximum number of candidates MD can support
+#else
 #define MAX_NFL                                 105 // Maximum number of candidates MD can support
+#endif
 #else
 #define MAX_NFL                                  80
 #endif
@@ -490,6 +521,9 @@ typedef enum CAND_CLASS {
 #if OBMC_FLAG
     CAND_CLASS_5,
 #endif
+#if FILTER_INTRA_FLAG
+    CAND_CLASS_6,
+#endif
     CAND_CLASS_TOTAL
 } CAND_CLASS;
 
@@ -573,6 +607,9 @@ typedef enum NsqSearchLevel
     NSQ_SEARCH_LEVEL4,
     NSQ_SEARCH_LEVEL5,
     NSQ_SEARCH_LEVEL6,
+#if PREDICT_NSQ_SHAPE
+    NSQ_SEARCH_LEVEL7,
+#endif
     NSQ_SEARCH_FULL
 } NsqSearchLevel;
 
@@ -1158,6 +1195,11 @@ typedef enum ATTRIBUTE_PACKED
     FILTER_INTRA_MODES,
 } FilterIntraMode;
 
+#if FILTER_INTRA_FLAG
+static const PredictionMode fimode_to_intramode[FILTER_INTRA_MODES] = {
+  DC_PRED, V_PRED, H_PRED, D157_PRED, PAETH_PRED
+};
+#endif
 #define DIRECTIONAL_MODES 8
 #define MAX_ANGLE_DELTA 3
 #define ANGLE_STEP 3
@@ -3258,6 +3300,12 @@ static const uint32_t MD_SCAN_TO_OIS_32x32_SCAN[CU_MAX_COUNT] =
     /*84 */3,
 };
 
+#if TWO_PASS
+typedef struct stat_struct_t
+{
+    uint32_t                        referenced_area[MAX_NUMBER_OF_TREEBLOCKS_PER_PICTURE];
+} stat_struct_t;
+#endif
 #define SC_MAX_LEVEL 2 // 2 sets of HME/ME settings are used depending on the scene content mode
 
 /******************************************************************************

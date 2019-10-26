@@ -41,6 +41,12 @@
 #undef _MM_HINT_T2
 #define _MM_HINT_T2  1
 
+static EB_AV1_INTER_PREDICTION_FUNC_PTR   av1_inter_prediction_function_table[2] =
+{
+    av1_inter_prediction,
+    av1_inter_prediction_hbd
+};
+
 static unsigned int index_mult[14] = {
         0, 0, 0, 0, 49152, 39322, 32768, 28087, 24576, 21846, 19661, 17874, 0, 15124
 };
@@ -1488,64 +1494,41 @@ static void tf_inter_prediction(PictureParentControlSet *picture_control_set_ptr
                         mv_unit.mv->x = mv_x + i;
                         mv_unit.mv->y = mv_y + j;
 
-                        if(!is_highbd){
-                            av1_inter_prediction(
-                                    NULL,  //picture_control_set_ptr,
-                                    (uint32_t)interp_filters,
-                                    &cu_ptr,
-                                    0,//ref_frame_type,
-                                    &mv_unit,
-                                    0,//use_intrabc,
+                        av1_inter_prediction_function_table[is_highbd](
+                            NULL,  //picture_control_set_ptr,
+                            (uint32_t)interp_filters,
+                            &cu_ptr,
+                            0,//ref_frame_type,
+                            &mv_unit,
+                            0,//use_intrabc,
 #if OBMC_FLAG
-                                    SIMPLE_TRANSLATION,
-                                    0,
-                                    0,
+                            SIMPLE_TRANSLATION,
+                            0,
+                            0,
 #endif
-                                    1,//compound_idx not used
-                                    NULL,// interinter_comp not used
+                            1,//compound_idx not used
+                            NULL,// interinter_comp not used
 #if II_COMP_FLAG
-                                    NULL,
-                                    NULL,
-                                    NULL,
-                                    NULL,
-                                    0,
-                                    0,
-                                    0,
-                                    0,
+                            NULL,
+                            NULL,
+                            NULL,
+                            NULL,
+                            0,
+                            0,
+                            0,
+                            0,
 #endif
-                                    pu_origin_x,
-                                    pu_origin_y,
-                                    bsize,
-                                    bsize,
-                                    pic_ptr_ref,
-                                    NULL,//ref_pic_list1,
-                                    &prediction_ptr,
-                                    local_origin_x,
-                                    local_origin_y,
-                                    1,//perform_chroma,
-                                    asm_type);
-                        }else{
-                            cu_ptr.interp_filters = interp_filters;
-                            av1_inter_prediction_hbd(NULL, //picture_control_set_ptr,
-                                                     0, //ref_frame_type,
-                                                     &cu_ptr,
-                                                     &mv_unit,
-                                                     0, //use_intrabc,
-#if OBMC_FLAG
-                                                     SIMPLE_TRANSLATION,
-#endif
-                                                     pu_origin_x,
-                                                     pu_origin_y,
-                                                     bsize,
-                                                     bsize,
-                                                     &reference_ptr,
-                                                     NULL, //ref_pic_list1,
-                                                     &prediction_ptr,
-                                                     local_origin_x,
-                                                     local_origin_y,
-                                                     (uint8_t)encoder_bit_depth, //bit depth
-                                                     asm_type);
-                        }
+                            pu_origin_x,
+                            pu_origin_y,
+                            bsize,
+                            bsize,
+                            !is_highbd ? pic_ptr_ref : &reference_ptr,
+                            NULL,//ref_pic_list1,
+                            &prediction_ptr,
+                            local_origin_x,
+                            local_origin_y,
+                            1,//perform_chroma,
+                            (uint8_t)encoder_bit_depth);
 
                         uint64_t distortion;
                         if(!is_highbd){
@@ -1577,64 +1560,42 @@ static void tf_inter_prediction(PictureParentControlSet *picture_control_set_ptr
                 mv_unit.mv->x = best_mv_x;
                 mv_unit.mv->y = best_mv_y;
 
-                if(!is_highbd){
-                    av1_inter_prediction(
-                            NULL,  //picture_control_set_ptr,
-                            (uint32_t)interp_filters,
-                            &cu_ptr,
-                            0,//ref_frame_type,
-                            &mv_unit,
-                            0,//use_intrabc,
+                av1_inter_prediction_function_table[is_highbd](
+                    NULL,  //picture_control_set_ptr,
+                    (uint32_t)interp_filters,
+                    &cu_ptr,
+                    0,//ref_frame_type,
+                    &mv_unit,
+                    0,//use_intrabc,
 #if OBMC_FLAG
-                            SIMPLE_TRANSLATION,
-                            0,
-                            0,
+                    SIMPLE_TRANSLATION,
+                    0,
+                    0,
 #endif
-                            1,//compound_idx not used
-                            NULL,// interinter_comp not used
+                    1,//compound_idx not used
+                    NULL,// interinter_comp not used
 #if II_COMP_FLAG
-                            NULL,
-                            NULL,
-                            NULL,
-                            NULL,
-                            0,
-                            0,
-                            0,
-                            0,
+                    NULL,
+                    NULL,
+                    NULL,
+                    NULL,
+                    0,
+                    0,
+                    0,
+                    0,
 #endif
-                            pu_origin_x,
-                            pu_origin_y,
-                            bsize,
-                            bsize,
-                            pic_ptr_ref,
-                            NULL,//ref_pic_list1,
-                            &prediction_ptr,
-                            local_origin_x,
-                            local_origin_y,
-                            1,//perform_chroma,
-                            asm_type);
-                }else{
-                    cu_ptr.interp_filters = interp_filters;
-                    av1_inter_prediction_hbd(NULL, //picture_control_set_ptr,
-                                             0, //ref_frame_type,
-                                             &cu_ptr,
-                                             &mv_unit,
-                                             0, //use_intrabc,
-#if OBMC_FLAG
-                                             SIMPLE_TRANSLATION,
-#endif
-                                             pu_origin_x,
-                                             pu_origin_y,
-                                             bsize,
-                                             bsize,
-                                             &reference_ptr,
-                                             NULL, //ref_pic_list1,
-                                             &prediction_ptr,
-                                             local_origin_x,
-                                             local_origin_y,
-                                             (uint8_t)encoder_bit_depth, //bit depth
-                                             asm_type);
-                }
+                    pu_origin_x,
+                    pu_origin_y,
+                    bsize,
+                    bsize,
+                    !is_highbd ? pic_ptr_ref : &reference_ptr,
+                    NULL,//ref_pic_list1,
+                    &prediction_ptr,
+                    local_origin_x,
+                    local_origin_y,
+                    1,//perform_chroma,
+                    (uint8_t)encoder_bit_depth);
+
             }
         }
     }
@@ -2085,7 +2046,11 @@ static double estimate_noise_highbd(const uint16_t *src,
 }
 
 // Adjust filtering parameters: strength and nframes
-static void adjust_filter_strength(double noise_level,
+static void adjust_filter_strength(
+#if TWO_PASS
+                                   PictureParentControlSet *picture_control_set_ptr_central,
+#endif
+                                   double noise_level,
                                    uint8_t *altref_strength,
                                    EbBool is_highbd,
                                    uint32_t encoder_bit_depth) {
@@ -2107,6 +2072,19 @@ static void adjust_filter_strength(double noise_level,
             noiselevel_adj = 0;
         else
             noiselevel_adj = 1;
+#if TWO_PASS
+        if (picture_control_set_ptr_central->sequence_control_set_ptr->use_input_stat_file &&
+            picture_control_set_ptr_central->temporal_layer_index == 0 && picture_control_set_ptr_central->sc_content_detected == 0) {
+            if (noiselevel_adj < 0) {
+                if ((picture_control_set_ptr_central->referenced_area_avg < 20 && picture_control_set_ptr_central->slice_type == 2) ||
+                    (picture_control_set_ptr_central->referenced_area_avg < 30 && picture_control_set_ptr_central->slice_type != 2)) {
+                    noiselevel_adj = CLIP3(-2, 0, noiselevel_adj - 1);
+                }
+                else
+                    noiselevel_adj = 0;
+            }
+        }
+#endif
         adj_strength += noiselevel_adj;
     }
 
@@ -2184,9 +2162,9 @@ static EbErrorType save_src_pic_buffers(PictureParentControlSet *picture_control
     // copy buffers
     // Y
     uint32_t height_y = (uint32_t)(picture_control_set_ptr_central->enhanced_picture_ptr->height +
-                                  picture_control_set_ptr_central->enhanced_picture_ptr->origin_y * 2);
+                                  picture_control_set_ptr_central->enhanced_picture_ptr->origin_y + picture_control_set_ptr_central->enhanced_picture_ptr->origin_bot_y);
     uint32_t height_uv = (uint32_t)((picture_control_set_ptr_central->enhanced_picture_ptr->height +
-                                   picture_control_set_ptr_central->enhanced_picture_ptr->origin_y * 2) >> ss_y);
+                                   picture_control_set_ptr_central->enhanced_picture_ptr->origin_y + picture_control_set_ptr_central->enhanced_picture_ptr->origin_bot_y) >> ss_y);
 
     assert(height_y * picture_control_set_ptr_central->enhanced_picture_ptr->stride_y == picture_control_set_ptr_central->enhanced_picture_ptr->luma_size);
     assert(height_uv * picture_control_set_ptr_central->enhanced_picture_ptr->stride_cb == picture_control_set_ptr_central->enhanced_picture_ptr->chroma_size);
@@ -2303,7 +2281,15 @@ EbErrorType svt_av1_init_temporal_filtering(PictureParentControlSet **list_pictu
         }
 
         // adjust filter parameter based on the estimated noise of the picture
+#if TWO_PASS
+        adjust_filter_strength( picture_control_set_ptr_central,
+                                noise_level,
+                                altref_strength_ptr,
+                                is_highbd,
+                                encoder_bit_depth);
+#else
         adjust_filter_strength(noise_level, altref_strength_ptr, is_highbd, encoder_bit_depth);
+#endif
 
         // Pad chroma reference samples - once only per picture
         for (int i = 0; i < (picture_control_set_ptr_central->past_altref_nframes + picture_control_set_ptr_central->future_altref_nframes + 1); i++) {
