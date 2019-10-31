@@ -8116,6 +8116,57 @@ void md_encode_block(
     }
 }
 
+#if LESS_RECTANGULAR_CHECK_LEVEL
+#define PER_ERROR 0
+/*
+ * cumulatively updates rd-cost of each enumerated 
+ * partitioning to decide if nsq should be skipped 
+ * for the next partition
+ */
+void decide_next_nsq_and_update_cost(
+    ModeDecisionContext *context_ptr,
+    uint64_t *sq_cost, uint64_t *h_cost,
+    uint64_t *v_cost, int *skip_next_nsq) {
+
+    switch (context_ptr->blk_geom->d1i)
+    {
+    case 0:
+        *sq_cost = context_ptr->md_local_cu_unit[context_ptr->cu_ptr->mds_idx].cost;
+        *h_cost = 0;
+        *v_cost = 0;
+        break;
+    case 1:
+        *h_cost = context_ptr->md_local_cu_unit[context_ptr->cu_ptr->mds_idx].cost;
+        break;
+    case 2:
+        *h_cost += context_ptr->md_local_cu_unit[context_ptr->cu_ptr->mds_idx].cost;
+        break;
+    case 3:
+        *v_cost = context_ptr->md_local_cu_unit[context_ptr->cu_ptr->mds_idx].cost;
+        break;
+    case 4:
+        *v_cost += context_ptr->md_local_cu_unit[context_ptr->cu_ptr->mds_idx].cost;
+        *skip_next_nsq = (*h_cost > *sq_cost) ? 1 : *skip_next_nsq;
+        break;
+    case 5:
+    case 6:
+    case 7:
+    case 8:
+    case 9:
+        *skip_next_nsq = (*h_cost > ((*sq_cost * (100 + PER_ERROR)) / 100)) ? 1 : *skip_next_nsq;
+        break;
+    case 10:
+    case 11:
+    case 12:
+    case 13:
+    case 14:
+    case 15:
+        *skip_next_nsq = (*v_cost > ((*sq_cost * (100 + PER_ERROR)) / 100)) ? 1 : *skip_next_nsq;
+        break;
+    }
+}
+#endif
+
 EB_EXTERN EbErrorType mode_decision_sb(
     SequenceControlSet                *sequence_control_set_ptr,
     PictureControlSet                 *picture_control_set_ptr,
@@ -8233,6 +8284,12 @@ EB_EXTERN EbErrorType mode_decision_sb(
 
     //CU Loop
     cuIdx = 0;  //index over mdc array
+
+#if LESS_RECTANGULAR_CHECK_LEVEL
+    uint64_t sq_cost = 0;
+    uint64_t h_cost;
+    uint64_t v_cost;
+#endif
 
     uint32_t blk_idx_mds = 0;
     uint32_t  d1_blocks_accumlated = 0;
@@ -8477,6 +8534,11 @@ EB_EXTERN EbErrorType mode_decision_sb(
 #endif
                 skip_next_nsq = 1;
         }
+
+#if LESS_RECTANGULAR_CHECK_LEVEL
+        if (blk_geom->bsize > BLOCK_8X8)
+            decide_next_nsq_and_update_cost(context_ptr, &sq_cost, &h_cost, &v_cost, &skip_next_nsq);
+#endif
 
         if (blk_geom->shape != PART_N) {
             if (blk_geom->nsi + 1 < blk_geom->totns)
