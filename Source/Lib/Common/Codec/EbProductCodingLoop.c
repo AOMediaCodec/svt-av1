@@ -7538,7 +7538,7 @@ void md_encode_block(
         picture_control_set_ptr->parent_pcs_ptr->pic_depth_mode <= PIC_ALL_C_DEPTH_MODE &&
         picture_control_set_ptr->parent_pcs_ptr->nsq_search_level >= NSQ_SEARCH_LEVEL1 &&
         picture_control_set_ptr->parent_pcs_ptr->nsq_search_level < NSQ_SEARCH_FULL) ? EB_TRUE : EB_FALSE;
-		
+
     is_nsq_table_used = picture_control_set_ptr->parent_pcs_ptr->sc_content_detected || picture_control_set_ptr->enc_mode == ENC_M0 ? EB_FALSE : is_nsq_table_used;
 #if ADJUST_NSQ_RANK_BASED_ON_NEIGH
     if (is_nsq_table_used) {
@@ -7568,7 +7568,7 @@ void md_encode_block(
         picture_control_set_ptr->parent_pcs_ptr->nsq_search_level >= NSQ_SEARCH_LEVEL1 &&
         picture_control_set_ptr->parent_pcs_ptr->nsq_search_level < NSQ_SEARCH_FULL) ? EB_TRUE : EB_FALSE;
 
-	is_nsq_table_used = picture_control_set_ptr->enc_mode == ENC_M0 ?  EB_FALSE : is_nsq_table_used;
+    is_nsq_table_used = picture_control_set_ptr->enc_mode == ENC_M0 ?  EB_FALSE : is_nsq_table_used;
     if (is_nsq_table_used) {
         if (context_ptr->blk_geom->shape == PART_N) {
             order_nsq_table(
@@ -8146,7 +8146,7 @@ void update_skip_next_nsq_for_a_b_shapes(
         break;
     case 4:
         *v_cost += context_ptr->md_local_cu_unit[context_ptr->cu_ptr->mds_idx].cost;
-        *skip_next_nsq = (*h_cost > ((*sq_cost * context_ptr->sq_to_h_v_weight_to_skip_a_b) / 100)) ? 1 : *skip_next_nsq;
+        *skip_next_nsq = (*h_cost > ((*sq_cost * context_ptr->sq_weight) / 100)) ? 1 : *skip_next_nsq;
         break;
 
     // HA
@@ -8157,7 +8157,7 @@ void update_skip_next_nsq_for_a_b_shapes(
     // HB
     case 8:
     case 9:
-        *skip_next_nsq = (*h_cost > ((*sq_cost * context_ptr->sq_to_h_v_weight_to_skip_a_b) / 100)) ? 1 : *skip_next_nsq;
+        *skip_next_nsq = (*h_cost > ((*sq_cost * context_ptr->sq_weight) / 100)) ? 1 : *skip_next_nsq;
         break;
     case 10:
 
@@ -8169,7 +8169,7 @@ void update_skip_next_nsq_for_a_b_shapes(
     // VB
     case 14:
     case 15:
-        *skip_next_nsq = (*v_cost > ((*sq_cost * context_ptr->sq_to_h_v_weight_to_skip_a_b) / 100)) ? 1 : *skip_next_nsq;
+        *skip_next_nsq = (*v_cost > ((*sq_cost * context_ptr->sq_weight) / 100)) ? 1 : *skip_next_nsq;
         break;
     }
 }
@@ -8544,7 +8544,7 @@ EB_EXTERN EbErrorType mode_decision_sb(
         }
 
 #if LESS_RECTANGULAR_CHECK_LEVEL
-        if (context_ptr->sq_to_h_v_weight_to_skip_a_b != (uint32_t)~0 && blk_geom->bsize > BLOCK_8X8)
+        if (context_ptr->sq_weight != (uint32_t)~0 && blk_geom->bsize > BLOCK_8X8)
             update_skip_next_nsq_for_a_b_shapes(context_ptr, &sq_cost, &h_cost, &v_cost, &skip_next_nsq);
 #endif
 

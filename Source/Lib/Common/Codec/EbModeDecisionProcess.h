@@ -337,7 +337,8 @@ extern "C" {
 #endif
 
 #if LESS_RECTANGULAR_CHECK_LEVEL
-    uint32_t sq_to_h_v_weight_to_skip_a_b;
+    // square cost weighting for deciding if a/b shapes could be skipped
+    uint32_t sq_weight;
 #endif
     } ModeDecisionContext;
 
