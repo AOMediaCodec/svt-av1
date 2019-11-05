@@ -524,32 +524,21 @@ static EbBool UpdateEntropyCodingRows(
 /******************************************************
  * Write Stat to File
  ******************************************************/
-void write_stat_to_file(
+void write_stat(
     SequenceControlSet    *sequence_control_set_ptr,
     stat_struct_t          stat_struct,
     uint64_t               ref_poc)
 {
-    eb_block_on_mutex(sequence_control_set_ptr->encode_context_ptr->stat_file_mutex);
+    eb_block_on_mutex(sequence_control_set_ptr->encode_context_ptr->stat_mutex);
 
-    if (sequence_control_set_ptr->static_config.passes == 2) {
-        if (sequence_control_set_ptr->static_config.stat_buffer) {
-            memcpy(sequence_control_set_ptr->static_config.stat_buffer + (long)(ref_poc * STAT_BUFFER_UNIT),
-                   &stat_struct,
-                   sizeof(stat_struct_t));
-        } else {
-            printf("Invalid stat buffer\n");
-        }
-    } else {
-        int32_t fseek_return_value = fseek(sequence_control_set_ptr->static_config.fpf, (long)ref_poc * sizeof(stat_struct_t), SEEK_SET);
-        if (fseek_return_value != 0)
-            printf("Error in fseek  returnVal %i\n", fseek_return_value);
-        fwrite(&stat_struct,
-            sizeof(stat_struct_t),
-            (size_t)1,
-            sequence_control_set_ptr->static_config.fpf);
-    }
+    if (sequence_control_set_ptr->static_config.stat_buffer)
+        memcpy(sequence_control_set_ptr->static_config.stat_buffer + (long)(ref_poc * STAT_BUFFER_UNIT),
+               &stat_struct,
+               sizeof(stat_struct_t));
+    else
+        printf("Invalid stat buffer\n");
 
-    eb_release_mutex(sequence_control_set_ptr->encode_context_ptr->stat_file_mutex);
+    eb_release_mutex(sequence_control_set_ptr->encode_context_ptr->stat_mutex);
 }
 #endif
 /******************************************************
@@ -708,7 +697,7 @@ void* entropy_coding_kernel(void *input_ptr)
                         // for Non Reference frames, write zero
                         if ((sequence_control_set_ptr->static_config.pass == 1) &&
                             !picture_control_set_ptr->parent_pcs_ptr->is_used_as_reference_flag)
-                            write_stat_to_file(
+                            write_stat(
                                 sequence_control_set_ptr,
                                 *picture_control_set_ptr->parent_pcs_ptr->stat_struct_first_pass_ptr,
                                 picture_control_set_ptr->parent_pcs_ptr->picture_number);
@@ -718,7 +707,7 @@ void* entropy_coding_kernel(void *input_ptr)
 #if TWO_PASS
                         if ((sequence_control_set_ptr->static_config.pass == 1) &&
                                 picture_control_set_ptr->ref_pic_ptr_array[0][ref_idx] != EB_NULL && picture_control_set_ptr->ref_pic_ptr_array[0][ref_idx]->live_count == 1)
-                                write_stat_to_file(
+                                write_stat(
                                     sequence_control_set_ptr,
                                     ((EbReferenceObject*)picture_control_set_ptr->ref_pic_ptr_array[0][ref_idx]->object_ptr)->stat_struct,
                                     ((EbReferenceObject*)picture_control_set_ptr->ref_pic_ptr_array[0][ref_idx]->object_ptr)->ref_poc);
@@ -741,7 +730,7 @@ void* entropy_coding_kernel(void *input_ptr)
 #if TWO_PASS
                         if ((sequence_control_set_ptr->static_config.pass == 1) &&
                                 picture_control_set_ptr->ref_pic_ptr_array[1][ref_idx] != EB_NULL && picture_control_set_ptr->ref_pic_ptr_array[1][ref_idx]->live_count == 1)
-                                write_stat_to_file(
+                                write_stat(
                                     sequence_control_set_ptr,
                                     ((EbReferenceObject*)picture_control_set_ptr->ref_pic_ptr_array[1][ref_idx]->object_ptr)->stat_struct,
                                     ((EbReferenceObject*)picture_control_set_ptr->ref_pic_ptr_array[1][ref_idx]->object_ptr)->ref_poc);

@@ -178,7 +178,6 @@ EbErrorType CopyConfigurationParameters(
 #if 1 //TWO_PASS
     callback_data->eb_enc_parameters.passes = config->passes;
     callback_data->eb_enc_parameters.pass = config->pass;
-    callback_data->eb_enc_parameters.fpf = config->fpf;
 #if TWO_PASS_USE_2NDP_ME_IN_1STP
     callback_data->eb_enc_parameters.enc_mode2p = (EbBool)config->enc_mode2p;
 #endif

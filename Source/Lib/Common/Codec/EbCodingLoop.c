@@ -3459,7 +3459,7 @@ EB_EXTERN void av1_encode_pass(
         UNUSED(blk_geom);
 
 #if TWO_PASS_PART
-        if (sequence_control_set_ptr->static_config.use_output_stat_file) {
+        if (sequence_control_set_ptr->static_config.pass == 1) {
             picture_control_set_ptr->parent_pcs_ptr->stat_struct_first_pass_ptr->first_pass_pic_num = picture_control_set_ptr->picture_number;
             picture_control_set_ptr->parent_pcs_ptr->stat_struct_first_pass_ptr->first_pass_sb_size = sequence_control_set_ptr->seq_header.sb_size;
             context_ptr->first_pass_split_flag[tbAddr][blk_it] = 1;
@@ -3479,7 +3479,7 @@ EB_EXTERN void av1_encode_pass(
                 const BlockGeom * blk_geom = context_ptr->blk_geom = get_blk_geom_mds(d1_itr);
 
 #if TWO_PASS_PART
-                if (sequence_control_set_ptr->static_config.use_output_stat_file) {
+                if (sequence_control_set_ptr->static_config.pass == 1) {
                     int32_t sq_index, tot_d1_blocks,block_1d_idx;
                     sq_index = blk_geom->sqi_mds;
                     tot_d1_blocks =

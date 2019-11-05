@@ -214,7 +214,7 @@ EbErrorType encode_context_ctor(
 #endif
 
 #if TWO_PASS
-    EB_CREATEMUTEX(EbHandle, encode_context_ptr->stat_file_mutex, sizeof(EbHandle), EB_MUTEX);
+    EB_CREATEMUTEX(EbHandle, encode_context_ptr->stat_mutex, sizeof(EbHandle), EB_MUTEX);
 #endif
     return EB_ErrorNone;
 }

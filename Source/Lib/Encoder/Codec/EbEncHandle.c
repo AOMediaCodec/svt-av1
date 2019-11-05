@@ -2424,7 +2424,6 @@ void CopyApiFromApp(
 #if TWO_PASS
     sequence_control_set_ptr->static_config.passes = ((EbSvtAv1EncConfiguration*)pComponentParameterStructure)->passes;
     sequence_control_set_ptr->static_config.pass = ((EbSvtAv1EncConfiguration*)pComponentParameterStructure)->pass;
-    sequence_control_set_ptr->static_config.fpf = ((EbSvtAv1EncConfiguration*)pComponentParameterStructure)->fpf;
 #if TWO_PASS_USE_2NDP_ME_IN_1STP
     sequence_control_set_ptr->static_config.enc_mode2p = ((EbSvtAv1EncConfiguration*)pComponentParameterStructure)->enc_mode2p;
 #endif
@@ -2946,7 +2945,6 @@ EbErrorType eb_svt_enc_init_parameter(
 #if TWO_PASS
     config_ptr->passes = 1;
     config_ptr->pass = 0;
-    config_ptr->fpf = NULL;
 #if TWO_PASS_USE_2NDP_ME_IN_1STP
     config_ptr->enc_mode2p = MAX_ENC_PRESET;
 #endif

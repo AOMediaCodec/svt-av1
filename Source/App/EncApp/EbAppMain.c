@@ -149,11 +149,14 @@ int32_t main(int32_t argc, char* argv[])
 
  #if 1 //TWO_PASS
             EbBool combined_stat_test = EB_FALSE;
+            EbBool separated_first_pass = EB_FALSE;
             FILE *saved_recon_file = NULL;
             FILE *saved_bitstream_file = NULL;
 
             if (configs[0]->passes == 2)
                 combined_stat_test = EB_TRUE;
+            if ((configs[0]->passes == 1) && (configs[0]->pass == 1))
+                separated_first_pass = EB_TRUE;
 
             for (uint64_t pass=0; pass<=combined_stat_test; ++pass) {
                 if (combined_stat_test) {
@@ -169,8 +172,6 @@ int32_t main(int32_t argc, char* argv[])
                             configs[0]->enc_mode = 7;
                         else
                             configs[0]->enc_mode = 8;
-
-                        configs[0]->stat_buffer = malloc(configs[0]->frames_to_be_encoded * STAT_BUFFER_UNIT);
 
                         saved_recon_file = configs[0]->recon_file;
                         saved_bitstream_file = configs[0]->bitstream_file;
@@ -352,6 +353,16 @@ int32_t main(int32_t argc, char* argv[])
 #if 1 //TWO_PASS
                 if (combined_stat_test && !pass)
                     return_errors[0] = de_init_encoder(appCallbacks[0], 0);
+
+                if (separated_first_pass) {
+                    if (configs[0]->fpf == NULL) {
+                        printf("Invalid first pass file to write\n");
+                    } else {
+                        size_t size = fwrite(configs[0]->stat_buffer, STAT_BUFFER_UNIT, configs[0]->frames_to_be_encoded, configs[0]->fpf);
+                        if (size != configs[0]->frames_to_be_encoded)
+                            printf("Fail to write to first pass file\n");
+                    }
+                }
              }
 #endif
         }

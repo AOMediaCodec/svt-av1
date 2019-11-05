@@ -3954,7 +3954,7 @@ void* enc_dec_kernel(void *input_ptr)
                         ((EbReferenceObject*)picture_control_set_ptr->parent_pcs_ptr->reference_picture_wrapper_ptr->object_ptr)->intra_coded_area_sb[sb_index] = (uint8_t)((100 * context_ptr->intra_coded_area_sb[sb_index]) / (64 * 64));
 #if TWO_PASS_PART
                     // Store the split flag of the square blocks from the first pass
-                    if (sequence_control_set_ptr->static_config.use_output_stat_file) {
+                    if (sequence_control_set_ptr->static_config.pass == 1) {
                         eb_block_on_mutex(picture_control_set_ptr->first_pass_split_mutex);
                         uint32_t sq_idx = 0;
                         EbBool split_flag;

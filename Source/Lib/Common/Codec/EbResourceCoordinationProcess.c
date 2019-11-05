@@ -573,32 +573,20 @@ static void CopyInputBuffer(
 /******************************************************
  * Read Stat from File
  ******************************************************/
-static void read_stat_from_file(
+static void read_stat(
     PictureParentControlSet  *picture_control_set_ptr,
     SequenceControlSet       *sequence_control_set_ptr)
 {
-    eb_block_on_mutex(sequence_control_set_ptr->encode_context_ptr->stat_file_mutex);
+    eb_block_on_mutex(sequence_control_set_ptr->encode_context_ptr->stat_mutex);
 
-    if (sequence_control_set_ptr->static_config.passes == 2) {
-        if (sequence_control_set_ptr->static_config.stat_buffer) {
-            if (picture_control_set_ptr->picture_number < sequence_control_set_ptr->static_config.frames_to_be_encoded) {
-                memcpy(&picture_control_set_ptr->stat_struct,
-                       sequence_control_set_ptr->static_config.stat_buffer + (picture_control_set_ptr->picture_number * STAT_BUFFER_UNIT),
-                       sizeof(stat_struct_t));
-            }
-        } else {
-            printf("Invalid stat buffer\n");
+    if (sequence_control_set_ptr->static_config.stat_buffer) {
+        if (picture_control_set_ptr->picture_number < sequence_control_set_ptr->static_config.frames_to_be_encoded) {
+            memcpy(&picture_control_set_ptr->stat_struct,
+                   sequence_control_set_ptr->static_config.stat_buffer + (picture_control_set_ptr->picture_number * STAT_BUFFER_UNIT),
+                   sizeof(stat_struct_t));
         }
     } else {
-        int32_t fseek_return_value = fseek(sequence_control_set_ptr->static_config.fpf,(long) picture_control_set_ptr->picture_number* sizeof(stat_struct_t), SEEK_SET);
-
-        if (fseek_return_value != 0) {
-            printf("Error in fseek  returnVal %i\n", fseek_return_value);
-        }
-        fread(&picture_control_set_ptr->stat_struct,
-            sizeof(stat_struct_t),
-            (size_t) 1,
-            sequence_control_set_ptr->static_config.fpf);
+        printf("Invalid stat buffer\n");
     }
 
     uint64_t referenced_area_avg = 0;
@@ -612,7 +600,7 @@ static void read_stat_from_file(
     referenced_area_avg /= sequence_control_set_ptr->sb_total_count;
 #endif
     picture_control_set_ptr->referenced_area_avg = referenced_area_avg;
-    eb_release_mutex(sequence_control_set_ptr->encode_context_ptr->stat_file_mutex);
+    eb_release_mutex(sequence_control_set_ptr->encode_context_ptr->stat_mutex);
 }
 #endif
 
@@ -966,7 +954,7 @@ void* resource_coordination_kernel(void *input_ptr)
             ResetPcsAv1(picture_control_set_ptr);
 #if TWO_PASS
             if (sequence_control_set_ptr->static_config.pass == 2)
-                read_stat_from_file(
+                read_stat(
                     picture_control_set_ptr,
                     sequence_control_set_ptr);
             else {

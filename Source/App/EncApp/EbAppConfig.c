@@ -886,6 +886,19 @@ static EbErrorType VerifySettings(EbConfig *config, uint32_t channelNumber)
             config->passes = 1;
         }
     }
+
+    if ((config->pass >= 1) || (config->passes == 2)) {
+        config->stat_buffer = malloc(config->frames_to_be_encoded * STAT_BUFFER_UNIT);
+
+        if ((config->pass == 2) && (config->passes == 1)) {
+            size_t size = fread(config->stat_buffer, STAT_BUFFER_UNIT, config->frames_to_be_encoded, config->fpf);
+            if (size != config->frames_to_be_encoded) {
+                fprintf(config->error_log_file, "Error instance %u: Fail to read from first pass file\n", channelNumber + 1);
+                return_error = EB_ErrorBadParameter;
+            }
+        }
+    }
+
 #endif
 
     if (config->separate_fields > 1) {
@@ -1023,10 +1036,16 @@ uint32_t get_number_of_channels(
             return 0;
         } else {
 #if 1 //TWO_PASS
-            if ((channelNumber > 1) && (FindToken(argc, argv, PASSES_TOKEN, config_string) == 0)) {
-                uint8_t passes = strtol(config_string,  NULL, 0);
-                if (passes == 2){
-                    printf("Warning: single channel is forced in combined test mode\n");
+            if (channelNumber > 1) {
+                uint8_t passes = 1, pass = 0;
+                if (FindToken(argc, argv, PASSES_TOKEN, config_string) == 0)
+                    passes = strtol(config_string,  NULL, 0);
+
+                if (FindToken(argc, argv, PASS_TOKEN, config_string) == 0)
+                    pass = strtol(config_string,  NULL, 0);
+
+                if ((passes == 2) || (pass >= 1)) {
+                    printf("Warning: single channel is forced for two pass\n");
                     channelNumber = 1;
                 }
             }
