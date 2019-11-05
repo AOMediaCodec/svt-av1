@@ -47,15 +47,6 @@ typedef struct EbSvtAv1EncConfiguration
      * Default is defined as MAX_ENC_PRESET. */
     uint8_t                  enc_mode;
 
-#if TWO_PASS_USE_2NDP_ME_IN_1STP
-     /* A preset defining the quality vs density tradeoff point that the second pass
-     * encoding is to be performed at. 0 is the highest quality mode, 3 is the highest
-     * density mode.
-     *
-     * Default is defined as MAX_ENC_PRESET. */
-    uint8_t                  enc_mode2p;
-#endif
-
     // GOP Structure
 
     /* The intra period defines the interval of frames after which you insert an
@@ -198,26 +189,28 @@ typedef struct EbSvtAv1EncConfiguration
     EbBool                   use_qp_file;
 
 #if 1 //TWO_PASS
-    /* Input stats file */
-    FILE                    *input_stat_file;
-    /* output stats file */
-    FILE                    *output_stat_file;
-    /* Get stats from the input_stat_file
-*
-* Default is 0.*/
-    EbBool                   use_input_stat_file;
-    /* Write stats to the input_stat_file
-*
-* Default is 0.*/
-    EbBool                   use_output_stat_file;
+    /* The two passes switch */
+    uint8_t                  passes;
 
-    /* The enc mode for the second pass */
-    int8_t                   secondary_enc_mode;
+    /* Specify which pass */
+    uint8_t                  pass;
+
+    /* First pass file */
+    FILE                     *fpf;
+
+#if TWO_PASS_USE_2NDP_ME_IN_1STP
+     /* A preset defining the quality vs density tradeoff point that the second pass
+     * encoding is to be performed at. 0 is the highest quality mode, 3 is the highest
+     * density mode.
+     *
+     * Default is defined as MAX_ENC_PRESET. */
+    uint8_t                  enc_mode2p;
+#endif
 
     /* Stat data generated in the 1st pass and used in the 2nd */
     uint8_t                  *stat_buffer;
-
 #endif
+
     /* Enable picture QP scaling between hierarchical levels
     *
     * Default is null.*/

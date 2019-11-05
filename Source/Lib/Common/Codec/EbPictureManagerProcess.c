@@ -1233,7 +1233,7 @@ void* picture_manager_kernel(void *input_ptr)
                 {
                     // Release the nominal live_count value
 #if TWO_PASS
-                    if (sequence_control_set_ptr->static_config.use_output_stat_file &&
+                    if ((sequence_control_set_ptr->static_config.pass == 1) &&
                         referenceEntryPtr->reference_object_ptr->live_count == 1)
                         write_stat_to_file(
                             sequence_control_set_ptr,

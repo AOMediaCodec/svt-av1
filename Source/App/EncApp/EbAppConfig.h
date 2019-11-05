@@ -173,11 +173,13 @@ typedef struct EbConfig
     FILE                    *qp_file;
 
 #if 1 //TWO_PASS
-    FILE                    *input_stat_file;
-    FILE                    *output_stat_file;
-    EbBool                  use_input_stat_file;
-    EbBool                  use_output_stat_file;
-    int8_t                  secondary_enc_mode;
+    uint8_t                 passes;
+    uint8_t                 pass;
+    char                    fpf_name[128];
+    FILE                    *fpf;
+#if TWO_PASS_USE_2NDP_ME_IN_1STP
+    uint8_t                 enc_mode2p;
+#endif
     uint8_t                 *stat_buffer;
 #endif
 
@@ -219,9 +221,6 @@ typedef struct EbConfig
      *****************************************/
     uint32_t                 base_layer_switch_mode;
     uint8_t                  enc_mode;
-#if TWO_PASS_USE_2NDP_ME_IN_1STP
-    uint8_t                  enc_mode2p;
-#endif
     int32_t                  intra_period;
     uint32_t                 intra_refresh_type;
     uint32_t                 hierarchical_levels;

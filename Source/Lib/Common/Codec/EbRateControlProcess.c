@@ -3504,7 +3504,7 @@ static int adaptive_qindex_calc(
 #if TWO_PASSES_MATCH
     if (0) {
 #else
-    if (sequence_control_set_ptr->static_config.use_input_stat_file) {
+    if (sequence_control_set_ptr->static_config.pass == 2) {
 #endif
         rc->arf_q = MAX(rc->arf_q, ((picture_control_set_ptr->ref_pic_qp_array[0][0] << 2) + 2));
         if (picture_control_set_ptr->slice_type == B_SLICE)
@@ -3531,7 +3531,7 @@ static int adaptive_qindex_calc(
 #if TWO_PASSES_MATCH
     if (0) {
 #else
-    if (sequence_control_set_ptr->static_config.use_input_stat_file) {
+    if (sequence_control_set_ptr->static_config.pass == 2) {
 #endif
 #if TWO_PASS_128x128
         for (int sb_addr = 0; sb_addr < sequence_control_set_ptr->sb_tot_cnt; ++sb_addr)
@@ -3602,7 +3602,7 @@ static int adaptive_qindex_calc(
 #if TWO_PASSES_MATCH
         if (0) {
 #else
-        if (sequence_control_set_ptr->static_config.use_input_stat_file && !picture_control_set_ptr->parent_pcs_ptr->sc_content_detected && referenced_area_has_non_zero) {
+        if ((sequence_control_set_ptr->static_config.pass == 2) && !picture_control_set_ptr->parent_pcs_ptr->sc_content_detected && referenced_area_has_non_zero) {
 #endif
 
 #if QPS_TOWARD_LUMA
@@ -3661,7 +3661,7 @@ static int adaptive_qindex_calc(
 #if TWO_PASSES_MATCH
         if (0) {
 #else
-        if (sequence_control_set_ptr->static_config.use_input_stat_file && !picture_control_set_ptr->parent_pcs_ptr->sc_content_detected && referenced_area_has_non_zero) {
+        if ((sequence_control_set_ptr->static_config.pass == 2) && !picture_control_set_ptr->parent_pcs_ptr->sc_content_detected && referenced_area_has_non_zero) {
 #endif
 #if QPS_TOWARD_LUMA
             referenced_area_max = sequence_control_set_ptr->input_resolution < 2 ? 30 :
@@ -3697,7 +3697,7 @@ static int adaptive_qindex_calc(
 #if TWO_PASSES_MATCH
                 if (0) {
 #else
-                if (sequence_control_set_ptr->static_config.use_input_stat_file && !picture_control_set_ptr->parent_pcs_ptr->sc_content_detected) {
+                if ((sequence_control_set_ptr->static_config.pass == 2) && !picture_control_set_ptr->parent_pcs_ptr->sc_content_detected) {
 #endif
                     if (picture_control_set_ptr->parent_pcs_ptr->sad_me / picture_control_set_ptr->sb_total_count / 256 < 15)
                         active_best_quality = active_best_quality * 130 / 100;
@@ -3748,18 +3748,18 @@ static void sb_qp_derivation(
     picture_control_set_ptr->parent_pcs_ptr->average_qp = 0;
 #if TWO_PASS && !DISABLE_1PASS_QPS
 #if DISABLE_1PASS_QPS
-    if (((sequence_control_set_ptr->static_config.use_input_stat_file && picture_control_set_ptr->temporal_layer_index <= 0) || picture_control_set_ptr->slice_type == 2) &&
+    if ((((sequence_control_set_ptr->static_config.pass == 2) && picture_control_set_ptr->temporal_layer_index <= 0) || picture_control_set_ptr->slice_type == 2) &&
          picture_control_set_ptr->parent_pcs_ptr->frames_in_sw >= QPS_SW_THRESH &&
-        !picture_control_set_ptr->parent_pcs_ptr->sc_content_detected /*&& !sequence_control_set_ptr->static_config.use_output_stat_file*/)
+        !picture_control_set_ptr->parent_pcs_ptr->sc_content_detected /*&& !(sequence_control_set_ptr->static_config.pass == 1) */)
 #else
 #if TWO_PASSES_MATCH
     if (((0 && picture_control_set_ptr->temporal_layer_index <= 0) || picture_control_set_ptr->slice_type == 2) &&
         picture_control_set_ptr->parent_pcs_ptr->frames_in_sw >= QPS_SW_THRESH &&
         !picture_control_set_ptr->parent_pcs_ptr->sc_content_detected && !0)
 #else
-    if (((sequence_control_set_ptr->static_config.use_input_stat_file && picture_control_set_ptr->temporal_layer_index <= 0) || picture_control_set_ptr->slice_type == 2) &&
+    if ((((sequence_control_set_ptr->static_config.pass == 2) && picture_control_set_ptr->temporal_layer_index <= 0) || picture_control_set_ptr->slice_type == 2) &&
         picture_control_set_ptr->parent_pcs_ptr->frames_in_sw >= QPS_SW_THRESH &&
-        !picture_control_set_ptr->parent_pcs_ptr->sc_content_detected && !sequence_control_set_ptr->static_config.use_output_stat_file)
+        !picture_control_set_ptr->parent_pcs_ptr->sc_content_detected && !(sequence_control_set_ptr->static_config.pass == 1))
 #endif
 
 #endif
@@ -3802,7 +3802,7 @@ static void sb_qp_derivation(
 #if TWO_PASSES_MATCH
         if (0) {
 #else
-        if (sequence_control_set_ptr->static_config.use_input_stat_file) {
+        if (sequence_control_set_ptr->static_config.pass == 2) {
 #endif
 #if TWO_PASS_128x128
             for (int sb_addr = 0; sb_addr < sequence_control_set_ptr->sb_tot_cnt; ++sb_addr)
@@ -3899,7 +3899,7 @@ static void sb_qp_derivation(
 #if TWO_PASSES_MATCH
             if (0) {
 #else
-            if (sequence_control_set_ptr->static_config.use_input_stat_file && referenced_area_has_non_zero) {
+            if ((sequence_control_set_ptr->static_config.pass == 2) && referenced_area_has_non_zero) {
 #endif
                 delta_qp = 0;
                 if (picture_control_set_ptr->slice_type == 2 ) {
@@ -4111,7 +4111,7 @@ void* rate_control_kernel(void *input_ptr)
 #if TWO_PASSES_MATCH
                     if (!0 && picture_control_set_ptr->parent_pcs_ptr->frames_in_sw >= QPS_SW_THRESH) {
 #else
-                    if (!sequence_control_set_ptr->static_config.use_output_stat_file && picture_control_set_ptr->parent_pcs_ptr->frames_in_sw >= QPS_SW_THRESH){
+                    if (!(sequence_control_set_ptr->static_config.pass == 1) && picture_control_set_ptr->parent_pcs_ptr->frames_in_sw >= QPS_SW_THRESH){
 #endif
 #else
                     if (picture_control_set_ptr->parent_pcs_ptr->frames_in_sw >= QPS_SW_THRESH) {

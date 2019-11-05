@@ -1374,7 +1374,7 @@ void init_considered_block(
         uint8_t is_blk_allowed = picture_control_set_ptr->slice_type != I_SLICE ? 1 : (blk_geom->sq_size < 128) ? 1 : 0;
 
 #if TWO_PASS_PART
-        if (sequence_control_set_ptr->static_config.use_input_stat_file) {
+        if (sequence_control_set_ptr->static_config.pass == 2) {
             if (picture_control_set_ptr->parent_pcs_ptr->picture_number == picture_control_set_ptr->parent_pcs_ptr->stat_struct.first_pass_pic_num) {
 
 #if TWO_PASS_PART_OPT
@@ -1511,7 +1511,7 @@ void init_considered_block(
                             const BlockGeom * blk_geom_1d = get_blk_geom_mds(blk_index + block_1d_idx);
                             // NADER - FORCE SAHPE
 #if DISABLE_NSQ_FROM_MDC
-                            if (1){//sequence_control_set_ptr->static_config.use_input_stat_file) {
+                            if (1){//(sequence_control_set_ptr->static_config.pass == 2) {
                                 if (blk_geom_1d->shape == PART_N) {
                                     resultsPtr->leaf_data_array[blk_index + block_1d_idx].consider_block = 1;
                                     resultsPtr->leaf_data_array[blk_index + block_1d_idx].consider_block = 1;

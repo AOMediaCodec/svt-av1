@@ -101,7 +101,7 @@ void* set_me_hme_params_oq(
 {
     UNUSED(sequence_control_set_ptr);
 #if TWO_PASS_USE_2NDP_ME_IN_1STP
-    uint8_t  hmeMeLevel = sequence_control_set_ptr->static_config.use_output_stat_file ? picture_control_set_ptr->enc_mode2p : picture_control_set_ptr->enc_mode;
+    uint8_t  hmeMeLevel = (sequence_control_set_ptr->static_config.pass == 1) ? picture_control_set_ptr->enc_mode2p : picture_control_set_ptr->enc_mode;
 #else
     uint8_t  hmeMeLevel =  picture_control_set_ptr->enc_mode; // OMK to be revised after new presets
 #endif
@@ -176,7 +176,7 @@ EbErrorType signal_derivation_me_kernel_oq(
     MotionEstimationContext_t   *context_ptr) {
     EbErrorType return_error = EB_ErrorNone;
 #if TWO_PASS_USE_2NDP_ME_IN_1STP
-    uint8_t  enc_mode = sequence_control_set_ptr->static_config.use_output_stat_file ? picture_control_set_ptr->enc_mode2p : picture_control_set_ptr->enc_mode;
+    uint8_t  enc_mode = (sequence_control_set_ptr->static_config.pass == 1) ? picture_control_set_ptr->enc_mode2p : picture_control_set_ptr->enc_mode;
 #else
     uint8_t  enc_mode = picture_control_set_ptr->enc_mode;
 #endif
@@ -351,7 +351,7 @@ void* tf_set_me_hme_params_oq(
 {
     UNUSED(sequence_control_set_ptr);
 #if TWO_PASS_USE_2NDP_ME_IN_1STP
-    uint8_t  hmeMeLevel = sequence_control_set_ptr->static_config.use_output_stat_file ? picture_control_set_ptr->enc_mode2p : picture_control_set_ptr->enc_mode;
+    uint8_t  hmeMeLevel = (sequence_control_set_ptr->static_config.pass == 1) ? picture_control_set_ptr->enc_mode2p : picture_control_set_ptr->enc_mode;
 #else
     uint8_t  hmeMeLevel = picture_control_set_ptr->enc_mode; // OMK to be revised after new presets
 #endif
@@ -421,7 +421,7 @@ EbErrorType tf_signal_derivation_me_kernel_oq(
     MotionEstimationContext_t *context_ptr) {
     EbErrorType return_error = EB_ErrorNone;
 #if TWO_PASS_USE_2NDP_ME_IN_1STP
-    uint8_t  enc_mode = sequence_control_set_ptr->static_config.use_output_stat_file ? picture_control_set_ptr->enc_mode2p : picture_control_set_ptr->enc_mode;
+    uint8_t  enc_mode = (sequence_control_set_ptr->static_config.pass == 1) ? picture_control_set_ptr->enc_mode2p : picture_control_set_ptr->enc_mode;
 #else
     uint8_t  enc_mode = picture_control_set_ptr->enc_mode;
 #endif

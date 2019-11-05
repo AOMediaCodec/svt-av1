@@ -531,7 +531,7 @@ void write_stat_to_file(
 {
     eb_block_on_mutex(sequence_control_set_ptr->encode_context_ptr->stat_file_mutex);
 
-    if (sequence_control_set_ptr->static_config.secondary_enc_mode >= 0) {
+    if (sequence_control_set_ptr->static_config.passes == 2) {
         if (sequence_control_set_ptr->static_config.stat_buffer) {
             memcpy(sequence_control_set_ptr->static_config.stat_buffer + (long)(ref_poc * STAT_BUFFER_UNIT),
                    &stat_struct,
@@ -540,13 +540,13 @@ void write_stat_to_file(
             printf("Invalid stat buffer\n");
         }
     } else {
-        int32_t fseek_return_value = fseek(sequence_control_set_ptr->static_config.output_stat_file, (long)ref_poc * sizeof(stat_struct_t), SEEK_SET);
+        int32_t fseek_return_value = fseek(sequence_control_set_ptr->static_config.fpf, (long)ref_poc * sizeof(stat_struct_t), SEEK_SET);
         if (fseek_return_value != 0)
             printf("Error in fseek  returnVal %i\n", fseek_return_value);
         fwrite(&stat_struct,
             sizeof(stat_struct_t),
             (size_t)1,
-            sequence_control_set_ptr->static_config.output_stat_file);
+            sequence_control_set_ptr->static_config.fpf);
     }
 
     eb_release_mutex(sequence_control_set_ptr->encode_context_ptr->stat_file_mutex);
@@ -706,7 +706,7 @@ void* entropy_coding_kernel(void *input_ptr)
                         encode_slice_finish(picture_control_set_ptr->entropy_coder_ptr);
 #if TWO_PASS
                         // for Non Reference frames, write zero
-                        if (sequence_control_set_ptr->static_config.use_output_stat_file &&
+                        if ((sequence_control_set_ptr->static_config.pass == 1) &&
                             !picture_control_set_ptr->parent_pcs_ptr->is_used_as_reference_flag)
                             write_stat_to_file(
                                 sequence_control_set_ptr,
@@ -716,7 +716,7 @@ void* entropy_coding_kernel(void *input_ptr)
                         // Release the List 0 Reference Pictures
                         for (ref_idx = 0; ref_idx < picture_control_set_ptr->parent_pcs_ptr->ref_list0_count; ++ref_idx) {
 #if TWO_PASS
-                        if (sequence_control_set_ptr->static_config.use_output_stat_file &&
+                        if ((sequence_control_set_ptr->static_config.pass == 1) &&
                                 picture_control_set_ptr->ref_pic_ptr_array[0][ref_idx] != EB_NULL && picture_control_set_ptr->ref_pic_ptr_array[0][ref_idx]->live_count == 1)
                                 write_stat_to_file(
                                     sequence_control_set_ptr,
@@ -739,7 +739,7 @@ void* entropy_coding_kernel(void *input_ptr)
                         // Release the List 1 Reference Pictures
                         for (ref_idx = 0; ref_idx < picture_control_set_ptr->parent_pcs_ptr->ref_list1_count; ++ref_idx) {
 #if TWO_PASS
-                        if (sequence_control_set_ptr->static_config.use_output_stat_file &&
+                        if ((sequence_control_set_ptr->static_config.pass == 1) &&
                                 picture_control_set_ptr->ref_pic_ptr_array[1][ref_idx] != EB_NULL && picture_control_set_ptr->ref_pic_ptr_array[1][ref_idx]->live_count == 1)
                                 write_stat_to_file(
                                     sequence_control_set_ptr,

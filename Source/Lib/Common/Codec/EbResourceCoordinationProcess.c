@@ -93,7 +93,7 @@ EbErrorType signal_derivation_pre_analysis_oq(
     uint8_t input_resolution = sequence_control_set_ptr->input_resolution;
 #if TWO_PASS_USE_2NDP_ME_IN_1STP
 #if DECOUPLE_ALTREF_ME
-    uint8_t  hme_me_level = sequence_control_set_ptr->static_config.use_output_stat_file ? picture_control_set_ptr->enc_mode2p : picture_control_set_ptr->enc_mode;
+    uint8_t  hme_me_level = (sequence_control_set_ptr->static_config.pass == 1) ? picture_control_set_ptr->enc_mode2p : picture_control_set_ptr->enc_mode;
 #endif
 #else
 #if DECOUPLE_ALTREF_ME
@@ -579,7 +579,7 @@ static void read_stat_from_file(
 {
     eb_block_on_mutex(sequence_control_set_ptr->encode_context_ptr->stat_file_mutex);
 
-    if (sequence_control_set_ptr->static_config.secondary_enc_mode >= 0) {
+    if (sequence_control_set_ptr->static_config.passes == 2) {
         if (sequence_control_set_ptr->static_config.stat_buffer) {
             if (picture_control_set_ptr->picture_number < sequence_control_set_ptr->static_config.frames_to_be_encoded) {
                 memcpy(&picture_control_set_ptr->stat_struct,
@@ -590,7 +590,7 @@ static void read_stat_from_file(
             printf("Invalid stat buffer\n");
         }
     } else {
-        int32_t fseek_return_value = fseek(sequence_control_set_ptr->static_config.input_stat_file,(long) picture_control_set_ptr->picture_number* sizeof(stat_struct_t), SEEK_SET);
+        int32_t fseek_return_value = fseek(sequence_control_set_ptr->static_config.fpf,(long) picture_control_set_ptr->picture_number* sizeof(stat_struct_t), SEEK_SET);
 
         if (fseek_return_value != 0) {
             printf("Error in fseek  returnVal %i\n", fseek_return_value);
@@ -598,7 +598,7 @@ static void read_stat_from_file(
         fread(&picture_control_set_ptr->stat_struct,
             sizeof(stat_struct_t),
             (size_t) 1,
-            sequence_control_set_ptr->static_config.input_stat_file);
+            sequence_control_set_ptr->static_config.fpf);
     }
 
     uint64_t referenced_area_avg = 0;
@@ -911,7 +911,7 @@ void* resource_coordination_kernel(void *input_ptr)
             else
                 picture_control_set_ptr->enc_mode = (EbEncMode)sequence_control_set_ptr->static_config.enc_mode;
 #if TWO_PASS_USE_2NDP_ME_IN_1STP
-            picture_control_set_ptr->enc_mode2p = sequence_control_set_ptr->static_config.use_output_stat_file ? (EbEncMode)sequence_control_set_ptr->static_config.enc_mode2p : picture_control_set_ptr->enc_mode;
+            picture_control_set_ptr->enc_mode2p = (sequence_control_set_ptr->static_config.pass == 1) ? (EbEncMode)sequence_control_set_ptr->static_config.enc_mode2p : picture_control_set_ptr->enc_mode;
 #endif
             aspectRatio = (sequence_control_set_ptr->seq_header.max_frame_width * 10) / sequence_control_set_ptr->seq_header.max_frame_height;
             aspectRatio = (aspectRatio <= ASPECT_RATIO_4_3) ? ASPECT_RATIO_CLASS_0 : (aspectRatio <= ASPECT_RATIO_16_9) ? ASPECT_RATIO_CLASS_1 : ASPECT_RATIO_CLASS_2;
@@ -965,7 +965,7 @@ void* resource_coordination_kernel(void *input_ptr)
 #endif
             ResetPcsAv1(picture_control_set_ptr);
 #if TWO_PASS
-            if (sequence_control_set_ptr->static_config.use_input_stat_file)
+            if (sequence_control_set_ptr->static_config.pass == 2)
                 read_stat_from_file(
                     picture_control_set_ptr,
                     sequence_control_set_ptr);

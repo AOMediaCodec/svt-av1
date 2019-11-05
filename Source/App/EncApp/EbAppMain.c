@@ -152,29 +152,41 @@ int32_t main(int32_t argc, char* argv[])
             FILE *saved_recon_file = NULL;
             FILE *saved_bitstream_file = NULL;
 
-            if (configs[0]->secondary_enc_mode >= 0)
+            if (configs[0]->passes == 2)
                 combined_stat_test = EB_TRUE;
 
             for (uint64_t pass=0; pass<=combined_stat_test; ++pass) {
                 if (combined_stat_test) {
                     if (pass == 0) {
-                        configs[0]->use_output_stat_file = EB_TRUE;
-                        configs[0]->use_input_stat_file = EB_FALSE;
-                        configs[0]->enc_mode2p = configs[0]->secondary_enc_mode;
+                        configs[0]->pass = 1;
+
+                        configs[0]->enc_mode2p = configs[0]->enc_mode;
+                        if (configs[0]->enc_mode <= 1)
+                            configs[0]->enc_mode = 5;
+                        else if (configs[0]->enc_mode == 2)
+                            configs[0]->enc_mode = 6;
+                        else if (configs[0]->enc_mode == 3)
+                            configs[0]->enc_mode = 7;
+                        else
+                            configs[0]->enc_mode = 8;
+
                         configs[0]->stat_buffer = malloc(configs[0]->frames_to_be_encoded * STAT_BUFFER_UNIT);
+
                         saved_recon_file = configs[0]->recon_file;
                         saved_bitstream_file = configs[0]->bitstream_file;
                         configs[0]->recon_file = NULL;
                         configs[0]->bitstream_file = NULL;
+
                         printf("\n[1st Pass]:\n\n");
                     } else {
-                        exitCondition = APP_ExitConditionNone;
-                        configs[0]->use_output_stat_file = EB_FALSE;
-                        configs[0]->use_input_stat_file = EB_TRUE;
+                        configs[0]->pass = 2;
+
+                        configs[0]->enc_mode = configs[0]->enc_mode2p;
+
                         fseek(configs[0]->input_file, 0, SEEK_SET);
                         configs[0]->recon_file = saved_recon_file;
                         configs[0]->bitstream_file = saved_bitstream_file;
-                        configs[0]->enc_mode = configs[0]->secondary_enc_mode;
+
                         configs[0]->processed_frame_count = 0;
                         configs[0]->processed_byte_count = 0;
                         configs[0]->frames_encoded = 0;
@@ -183,6 +195,8 @@ int32_t main(int32_t argc, char* argv[])
                         configs[0]->ivf_count = 0;
                         memset(&configs[0]->performance_context, 0, sizeof(configs[0]->performance_context));
                         return_errors[0] = EB_ErrorNone;
+                        exitCondition = APP_ExitConditionNone;
+
                         printf("\n[2nd Pass]:\n\n");
                     }
                 }

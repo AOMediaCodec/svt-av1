@@ -29,11 +29,12 @@
 #define ERROR_FILE_TOKEN                "-errlog"
 #define QP_FILE_TOKEN                   "-qp-file"
 #if 1 //TWO_PASS
-#define INPUT_STAT_FILE_TOKEN           "-input-stat-file"
-#define OUTPUT_STAT_FILE_TOKEN          "-output-stat-file"
-#define USE_INPUT_STAT_FILE_TOKEN       "-use-input-stat-file"
-#define USE_OUTPUT_STAT_FILE_TOKEN      "-use-output-stat-file"
-#define SECONDARY_ENCMODE_TOKEN         "-secondary-enc-mode"
+#define PASSES_TOKEN                    "-passes"
+#define PASS_TOKEN                      "-pass"
+#define FPF_TOKEN                       "-fpf"
+#if TWO_PASS_USE_2NDP_ME_IN_1STP
+#define ENCMODE2P_TOKEN                 "-enc-mode-2p"
+#endif
 #endif
 #define WIDTH_TOKEN                     "-w"
 #define HEIGHT_TOKEN                    "-h"
@@ -49,9 +50,6 @@
 #define ENCODER_COLOR_FORMAT            "-color-format"
 #define INPUT_COMPRESSED_TEN_BIT_FORMAT "-compressed-ten-bit-format"
 #define ENCMODE_TOKEN                   "-enc-mode"
-#if TWO_PASS_USE_2NDP_ME_IN_1STP
-#define ENCMODE2P_TOKEN                 "-enc-mode-2p"
-#endif
 #define HIERARCHICAL_LEVELS_TOKEN       "-hierarchical-levels" // no Eval
 #define PRED_STRUCT_TOKEN               "-pred-struct"
 #define INTRA_PERIOD_TOKEN              "-intra-period"
@@ -167,22 +165,12 @@ static void SetCfgQpFile                        (const char *value, EbConfig *cf
     FOPEN(cfg->qp_file,value, "r");
 };
 #if 1 //TWO_PASS
-static void set_input_stat_file(const char *value, EbConfig *cfg)
+static void SetPasses                           (const char *value, EbConfig *cfg) {cfg->passes = (uint8_t)strtoul(value, NULL, 0);};
+static void SetPass                             (const char *value, EbConfig *cfg) {cfg->pass = (uint8_t)strtoul(value, NULL, 0);};
+static void SetFpf                              (const char *value, EbConfig *cfg)
 {
-    if (cfg->use_input_stat_file) {
-        if (cfg->input_stat_file) { fclose(cfg->input_stat_file); }
-        FOPEN(cfg->input_stat_file, value, "rb");
-    }
+    EB_STRNCPY(cfg->fpf_name, sizeof(cfg->fpf_name), value, sizeof(cfg->fpf_name));
 };
-static void set_output_stat_file(const char *value, EbConfig *cfg)
-{
-    if (cfg->use_output_stat_file) {
-        if (cfg->output_stat_file) { fclose(cfg->output_stat_file); }
-        FOPEN(cfg->output_stat_file, value, "wb");
-    }
-};
-static void set_use_input_stat_file(const char *value, EbConfig *cfg) { cfg->use_input_stat_file = (EbBool)strtol(value, NULL, 0); };
-static void set_use_output_stat_file(const char *value, EbConfig *cfg) { cfg->use_output_stat_file = (EbBool)strtol(value, NULL, 0); };
 #if TWO_PASS_USE_2NDP_ME_IN_1STP
 static void SetencMode2p                        (const char *value, EbConfig *cfg) {cfg->enc_mode2p = (uint8_t)strtoul(value, NULL, 0);};
 #endif
@@ -208,9 +196,6 @@ static void SetEncoderColorFormat               (const char *value, EbConfig *cf
 static void SetcompressedTenBitFormat           (const char *value, EbConfig *cfg) {cfg->compressed_ten_bit_format = strtoul(value, NULL, 0);}
 static void SetBaseLayerSwitchMode              (const char *value, EbConfig *cfg) {cfg->base_layer_switch_mode = (EbBool) strtoul(value, NULL, 0);};
 static void SetencMode                          (const char *value, EbConfig *cfg) {cfg->enc_mode = (uint8_t)strtoul(value, NULL, 0);};
-#if 1 //TWO_PASS
-static void SetSecondaryEncMode                 (const char *value, EbConfig *cfg) {cfg->secondary_enc_mode = (uint8_t)strtoul(value, NULL, 0);};
-#endif
 static void SetCfgIntraPeriod                   (const char *value, EbConfig *cfg) {cfg->intra_period = strtol(value,  NULL, 0);};
 static void SetCfgIntraRefreshType              (const char *value, EbConfig *cfg) {cfg->intra_refresh_type = strtol(value,  NULL, 0);};
 static void SetHierarchicalLevels               (const char *value, EbConfig *cfg) { cfg->hierarchical_levels = strtol(value, NULL, 0); };
@@ -306,10 +291,12 @@ config_entry_t config_entry[] = {
     { SINGLE_INPUT, OUTPUT_RECON_TOKEN, "ReconFile", SetCfgReconFile },
     { SINGLE_INPUT, QP_FILE_TOKEN, "QpFile", SetCfgQpFile },
 #if 1 //TWO_PASS
-    { SINGLE_INPUT, USE_INPUT_STAT_FILE_TOKEN, "use_input_stat_file", set_use_input_stat_file },
-    { SINGLE_INPUT, INPUT_STAT_FILE_TOKEN, "input_stat_file", set_input_stat_file },
-    { SINGLE_INPUT, USE_OUTPUT_STAT_FILE_TOKEN, "use_output_stat_file", set_use_output_stat_file },
-    { SINGLE_INPUT, OUTPUT_STAT_FILE_TOKEN, "output_stat_file", set_output_stat_file },
+    { SINGLE_INPUT, PASSES_TOKEN , "Passes", SetPasses },
+    { SINGLE_INPUT, PASS_TOKEN, "Pass", SetPass },
+    { SINGLE_INPUT, FPF_TOKEN, "FirstPassFile", SetFpf },
+#if TWO_PASS_USE_2NDP_ME_IN_1STP
+    { SINGLE_INPUT, ENCMODE2P_TOKEN, "EncoderMode2p", SetencMode2p },
+#endif
 #endif
     // Interlaced Video
     { SINGLE_INPUT, INTERLACED_VIDEO_TOKEN , "InterlacedVideo" , SetInterlacedVideo },
@@ -322,12 +309,6 @@ config_entry_t config_entry[] = {
     { SINGLE_INPUT, BUFFERED_INPUT_TOKEN, "BufferedInput", SetBufferedInput },
     { SINGLE_INPUT, BASE_LAYER_SWITCH_MODE_TOKEN, "BaseLayerSwitchMode", SetBaseLayerSwitchMode },
     { SINGLE_INPUT, ENCMODE_TOKEN, "EncoderMode", SetencMode},
-#if 1 //TWO_PASS
-    { SINGLE_INPUT, SECONDARY_ENCMODE_TOKEN, "SecondaryEncoderMode", SetSecondaryEncMode},
-#endif
-#if TWO_PASS_USE_2NDP_ME_IN_1STP
-    { SINGLE_INPUT, ENCMODE2P_TOKEN, "EncoderMode2p", SetencMode2p},
-#endif
     { SINGLE_INPUT, INTRA_PERIOD_TOKEN, "IntraPeriod", SetCfgIntraPeriod },
     { SINGLE_INPUT, INTRA_REFRESH_TYPE_TOKEN, "IntraRefreshType", SetCfgIntraRefreshType },
     { SINGLE_INPUT, FRAME_RATE_TOKEN, "FrameRate", SetFrameRate },
@@ -422,11 +403,13 @@ void eb_config_ctor(EbConfig *config_ptr)
     config_ptr->error_log_file                         = stderr;
     config_ptr->qp_file                               = NULL;
 #if 1 //TWO_PASS
-    config_ptr->input_stat_file                       = NULL;
-    config_ptr->output_stat_file                      = NULL;
-    config_ptr->use_input_stat_file                   = 0;
-    config_ptr->use_output_stat_file                  = 0;
-    config_ptr->secondary_enc_mode                    = -1;
+    config_ptr->passes                                = 1;
+    config_ptr->pass                                  = 0;
+    memset(config_ptr->fpf_name, 0, sizeof(config_ptr->fpf_name));
+    config_ptr->fpf                                   = NULL;
+#if TWO_PASS_USE_2NDP_ME_IN_1STP
+    config_ptr->enc_mode2p                            = MAX_ENC_PRESET;
+#endif
     config_ptr->stat_buffer                           = NULL;
 #endif
     config_ptr->frame_rate                            = 30 << 16;
@@ -462,9 +445,6 @@ void eb_config_ctor(EbConfig *config_ptr)
 #endif
     config_ptr->base_layer_switch_mode               = 0;
     config_ptr->enc_mode                              = MAX_ENC_PRESET;
-#if TWO_PASS_USE_2NDP_ME_IN_1STP
-    config_ptr->enc_mode2p                            = MAX_ENC_PRESET;
-#endif
     config_ptr->intra_period                          = -2;
     config_ptr->intra_refresh_type                     = 1;
     config_ptr->hierarchical_levels                   = 4;
@@ -604,15 +584,14 @@ void eb_config_dtor(EbConfig *config_ptr)
         fclose(config_ptr->qp_file);
         config_ptr->qp_file = (FILE *)NULL;
     }
+
 #if 1 //TWO_PASS
-    if (config_ptr->input_stat_file) {
-        fclose(config_ptr->input_stat_file);
-        config_ptr->input_stat_file = (FILE *)NULL;
+    if (config_ptr->fpf) {
+        fclose(config_ptr->fpf);
+        config_ptr->fpf = (FILE *)NULL;
+        memset(config_ptr->fpf_name, 0, sizeof(config_ptr->fpf_name));
     }
-    if (config_ptr->output_stat_file) {
-        fclose(config_ptr->output_stat_file);
-        config_ptr->output_stat_file = (FILE *)NULL;
-    }
+
     if (config_ptr->stat_buffer) {
         free(config_ptr->stat_buffer);
         config_ptr->stat_buffer = NULL;
@@ -859,27 +838,52 @@ static EbErrorType VerifySettings(EbConfig *config, uint32_t channelNumber)
     }
 
 #if 1 //TWO_PASS
-    if ((config->secondary_enc_mode >= 0) && (config->secondary_enc_mode <= MAX_ENC_PRESET)) {
-        if (config->use_input_stat_file == EB_TRUE || config->input_stat_file) {
-            fprintf(config->error_log_file, "Error instance %u: Input stat file shall not be set in combined test mode\n", channelNumber + 1);
-            return_error = EB_ErrorBadParameter;
-        }
-
-        if (config->use_output_stat_file == EB_TRUE || config->output_stat_file) {
-            fprintf(config->error_log_file, "Error instance %u: Output stat file shall not be set in combined test mode\n", channelNumber + 1);
-            return_error = EB_ErrorBadParameter;
-        }
-    } else if (config->secondary_enc_mode != -1) {
-        fprintf(config->error_log_file, "Error instance %u: Invalid secondary enc mode\n", channelNumber + 1);
+    if ((config->passes < 1) && (config->passes > 2)) {
+        fprintf(config->error_log_file, "Error instance %u: Invalid passes value, which shall be 1 or 2\n", channelNumber + 1);
         return_error = EB_ErrorBadParameter;
-    } else {
-        if (config->use_input_stat_file == EB_TRUE && config->input_stat_file == NULL) {
-            fprintf(config->error_log_file, "Error instance %u: Could not find input stat file, use_input_stat_file is set to 1\n", channelNumber + 1);
+    }
+
+    if (config->passes == 1) {
+        if (config->pass > 2) {
+            fprintf(config->error_log_file, "Error instance %u: Invalid pass value, which shall be 0, 1 or 2\n", channelNumber + 1);
             return_error = EB_ErrorBadParameter;
         }
-        if (config->use_output_stat_file == EB_TRUE && config->output_stat_file == NULL) {
-            fprintf(config->error_log_file, "Error instance %u: Could not find output stat file, use_output_stat_file is set to 1\n", channelNumber + 1);
+        else if (config->pass == 0) {
+            if (strlen(config->fpf_name) != 0) {
+                fprintf(config->error_log_file, "Warning instance %u: The fpf setting is ignored for single pass\n", channelNumber + 1);
+                memset(config->fpf_name, 0, sizeof(config->fpf_name));
+            }
+        }
+        else if (config->pass >= 1) {
+            char mode[] = "wb";
+            if (config->pass == 2)
+               mode[0] = 'r';
+
+            if (config->fpf) {
+                fclose(config->fpf);
+                config->fpf = NULL;
+            }
+
+            FOPEN(config->fpf, config->fpf_name, mode);
+            if (config->fpf == NULL) {
+                fprintf(config->error_log_file, "Error instance %u: Invalid first pass file, which is required in separated test mode\n", channelNumber + 1);
+                return_error = EB_ErrorBadParameter;
+            }
+        }
+    }
+
+    if (config->passes == 2) {
+        if (config->pass != 0) {
+            fprintf(config->error_log_file, "Error instance %u: Not allowed to specify pass for combined test mode\n", channelNumber + 1);
             return_error = EB_ErrorBadParameter;
+        }
+        if (strlen(config->fpf_name) != 0) {
+            fprintf(config->error_log_file, "Warning instance %u: The fpf setting is ignored in combined test mode\n", channelNumber + 1);
+            memset(config->fpf_name, 0, sizeof(config->fpf_name));
+        }
+        if (config->enc_mode >= 4) {
+            fprintf(config->error_log_file, "Warning instance %u: The enc mode %u is too large. Run as single pass\n", channelNumber + 1, config->enc_mode);
+            config->passes = 1;
         }
     }
 #endif
@@ -1009,9 +1013,6 @@ uint32_t get_number_of_channels(
 {
     char config_string[COMMAND_LINE_MAX_SIZE];
     uint32_t channelNumber;
-#if 1 //TWO_PASS
-    int8_t secondaryEncMode = -1;
-#endif
 
     if (FindToken(argc, argv, CHANNEL_NUMBER_TOKEN, config_string) == 0) {
         // Set the input file
@@ -1022,10 +1023,10 @@ uint32_t get_number_of_channels(
             return 0;
         } else {
 #if 1 //TWO_PASS
-            if ((channelNumber > 1) && (FindToken(argc, argv, SECONDARY_ENCMODE_TOKEN, config_string) == 0)) {
-                secondaryEncMode = strtol(config_string,  NULL, 0);
-                if ((secondaryEncMode >= 0) && (secondaryEncMode <= MAX_ENC_PRESET)){
-                    printf("Warning: single channel is forced for combined stat test\n");
+            if ((channelNumber > 1) && (FindToken(argc, argv, PASSES_TOKEN, config_string) == 0)) {
+                uint8_t passes = strtol(config_string,  NULL, 0);
+                if (passes == 2){
+                    printf("Warning: single channel is forced in combined test mode\n");
                     channelNumber = 1;
                 }
             }

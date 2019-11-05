@@ -1807,7 +1807,7 @@ static void adjust_filter_params(EbPictureBufferDesc *input_picture_ptr,
             noiselevel_adj = 1;
 
 #if TWO_PASS && !TWO_PASSES_MATCH
-        if (picture_control_set_ptr_central->sequence_control_set_ptr->static_config.use_input_stat_file &&
+        if (picture_control_set_ptr_central->sequence_control_set_ptr->static_config.pass == 2 &&
             picture_control_set_ptr_central->temporal_layer_index == 0 &&  picture_control_set_ptr_central->sc_content_detected == 0){
             if (noiselevel_adj < 0) {
                 if ((picture_control_set_ptr_central->referenced_area_avg < 20 && picture_control_set_ptr_central->slice_type == 2) ||

@@ -2149,7 +2149,7 @@ uint64_t av1_inter_fast_cost(
 #if TWO_PASSES_MATCH
         if(0){
 #else
-        if (picture_control_set_ptr->parent_pcs_ptr->sequence_control_set_ptr->static_config.use_output_stat_file) {
+        if (picture_control_set_ptr->parent_pcs_ptr->sequence_control_set_ptr->static_config.pass == 1) {
 #endif
             MvReferenceFrame ref_type[2];
             av1_set_ref_frame(ref_type, candidate_ptr->ref_frame_type);
@@ -2180,7 +2180,7 @@ uint64_t av1_inter_fast_cost(
 #if TWO_PASSES_MATCH
         if (0) {
 #else
-        if (picture_control_set_ptr->parent_pcs_ptr->sequence_control_set_ptr->static_config.use_output_stat_file) {
+        if (picture_control_set_ptr->parent_pcs_ptr->sequence_control_set_ptr->static_config.pass == 1) {
 #endif
             MvReferenceFrame ref_type[2];
             av1_set_ref_frame(ref_type, candidate_ptr->ref_frame_type);
@@ -2608,7 +2608,7 @@ EbErrorType Av1FullCost(
 #if TWO_PASSES_MATCH
     if(0){
 #else
-    if (picture_control_set_ptr->parent_pcs_ptr->sequence_control_set_ptr->static_config.use_output_stat_file && candidate_buffer_ptr->candidate_ptr->type != INTRA_MODE) {
+    if (picture_control_set_ptr->parent_pcs_ptr->sequence_control_set_ptr->static_config.pass == 1 && candidate_buffer_ptr->candidate_ptr->type != INTRA_MODE) {
 #endif
         MvReferenceFrame ref_type[2];
         av1_set_ref_frame(ref_type, candidate_buffer_ptr->candidate_ptr->ref_frame_type);
@@ -2875,7 +2875,7 @@ EbErrorType  Av1MergeSkipFullCost(
 #if TWO_PASSES_MATCH
     if (0) {
 #else
-    if (picture_control_set_ptr->parent_pcs_ptr->sequence_control_set_ptr->static_config.use_output_stat_file) {
+    if (picture_control_set_ptr->parent_pcs_ptr->sequence_control_set_ptr->static_config.pass == 1) {
 #endif
         MvReferenceFrame ref_type[2];
         av1_set_ref_frame(ref_type, candidate_buffer_ptr->candidate_ptr->ref_frame_type);

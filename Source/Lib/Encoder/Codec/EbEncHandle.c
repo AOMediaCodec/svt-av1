@@ -2269,7 +2269,7 @@ void SetParamBasedOnInput(SequenceControlSet *sequence_control_set_ptr)
 #else
 #if TWO_PASS_128x128
         sequence_control_set_ptr->static_config.super_block_size =
-        ((sequence_control_set_ptr->static_config.enc_mode <= ENC_M3 || sequence_control_set_ptr->static_config.use_output_stat_file)
+        ((sequence_control_set_ptr->static_config.enc_mode <= ENC_M3 || sequence_control_set_ptr->static_config.pass = 1)
             && sequence_control_set_ptr->input_resolution >= INPUT_SIZE_1080i_RANGE) ? 128 : 64;
 #else
 #if m3_ibc_graph
@@ -2417,19 +2417,17 @@ void CopyApiFromApp(
     sequence_control_set_ptr->static_config.base_layer_switch_mode = ((EbSvtAv1EncConfiguration*)pComponentParameterStructure)->base_layer_switch_mode;
     sequence_control_set_ptr->static_config.hierarchical_levels = ((EbSvtAv1EncConfiguration*)pComponentParameterStructure)->hierarchical_levels;
     sequence_control_set_ptr->static_config.enc_mode = ((EbSvtAv1EncConfiguration*)pComponentParameterStructure)->enc_mode;
-#if TWO_PASS_USE_2NDP_ME_IN_1STP
-    sequence_control_set_ptr->static_config.enc_mode2p = ((EbSvtAv1EncConfiguration*)pComponentParameterStructure)->enc_mode2p;
-#endif
     sequence_control_set_ptr->intra_period_length = sequence_control_set_ptr->static_config.intra_period_length;
     sequence_control_set_ptr->intra_refresh_type = sequence_control_set_ptr->static_config.intra_refresh_type;
     sequence_control_set_ptr->max_temporal_layers = sequence_control_set_ptr->static_config.hierarchical_levels;
     sequence_control_set_ptr->static_config.use_qp_file = ((EbSvtAv1EncConfiguration*)pComponentParameterStructure)->use_qp_file;
 #if TWO_PASS
-    sequence_control_set_ptr->static_config.input_stat_file = ((EbSvtAv1EncConfiguration*)pComponentParameterStructure)->input_stat_file;
-    sequence_control_set_ptr->static_config.output_stat_file = ((EbSvtAv1EncConfiguration*)pComponentParameterStructure)->output_stat_file;
-    sequence_control_set_ptr->static_config.use_input_stat_file = ((EbSvtAv1EncConfiguration*)pComponentParameterStructure)->use_input_stat_file;
-    sequence_control_set_ptr->static_config.use_output_stat_file = ((EbSvtAv1EncConfiguration*)pComponentParameterStructure)->use_output_stat_file;
-    sequence_control_set_ptr->static_config.secondary_enc_mode = ((EbSvtAv1EncConfiguration*)pComponentParameterStructure)->secondary_enc_mode;
+    sequence_control_set_ptr->static_config.passes = ((EbSvtAv1EncConfiguration*)pComponentParameterStructure)->passes;
+    sequence_control_set_ptr->static_config.pass = ((EbSvtAv1EncConfiguration*)pComponentParameterStructure)->pass;
+    sequence_control_set_ptr->static_config.fpf = ((EbSvtAv1EncConfiguration*)pComponentParameterStructure)->fpf;
+#if TWO_PASS_USE_2NDP_ME_IN_1STP
+    sequence_control_set_ptr->static_config.enc_mode2p = ((EbSvtAv1EncConfiguration*)pComponentParameterStructure)->enc_mode2p;
+#endif
     sequence_control_set_ptr->static_config.stat_buffer= ((EbSvtAv1EncConfiguration*)pComponentParameterStructure)->stat_buffer;
 #endif
 #if SHUT_FILTERING
@@ -2946,11 +2944,12 @@ EbErrorType eb_svt_enc_init_parameter(
     config_ptr->qp = 50;
     config_ptr->use_qp_file = EB_FALSE;
 #if TWO_PASS
-    config_ptr->use_input_stat_file = EB_FALSE;
-    config_ptr->use_output_stat_file = EB_FALSE;
-    config_ptr->input_stat_file = NULL;
-    config_ptr->output_stat_file = NULL;
-    config_ptr->secondary_enc_mode = -1;
+    config_ptr->passes = 1;
+    config_ptr->pass = 0;
+    config_ptr->fpf = NULL;
+#if TWO_PASS_USE_2NDP_ME_IN_1STP
+    config_ptr->enc_mode2p = MAX_ENC_PRESET;
+#endif
     config_ptr->stat_buffer = NULL;
 #endif
     config_ptr->scene_change_detection = 0;
@@ -2965,9 +2964,6 @@ EbErrorType eb_svt_enc_init_parameter(
 #endif
     config_ptr->base_layer_switch_mode = 0;
     config_ptr->enc_mode = MAX_ENC_PRESET;
-#if TWO_PASS_USE_2NDP_ME_IN_1STP
-    config_ptr->enc_mode2p = MAX_ENC_PRESET;
-#endif
     config_ptr->intra_period_length = -2;
     config_ptr->intra_refresh_type = 1;
     config_ptr->hierarchical_levels = 4;

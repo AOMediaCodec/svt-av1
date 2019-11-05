@@ -886,7 +886,7 @@ EbErrorType signal_derivation_multi_processes_oq(
     uint8_t sc_content_detected = picture_control_set_ptr->sc_content_detected;
 
 #if TWO_PASS_USE_2NDP_ME_IN_1STP
-    uint8_t enc_mode = sequence_control_set_ptr->static_config.use_output_stat_file ? picture_control_set_ptr->enc_mode2p : picture_control_set_ptr->enc_mode;
+    uint8_t enc_mode = (sequence_control_set_ptr->static_config.pass == 1) ? picture_control_set_ptr->enc_mode2p : picture_control_set_ptr->enc_mode;
 #if m2_ibc_graph
     enc_mode = (picture_control_set_ptr->enc_mode == ENC_M2) ? ENC_M3 : enc_mode;
 #endif
@@ -1075,7 +1075,7 @@ EbErrorType signal_derivation_multi_processes_oq(
         else
             picture_control_set_ptr->mdc_depth_level = MAX_MDC_LEVEL; // Not tuned yet.
 #if TWO_PASS_PART
-        if(sequence_control_set_ptr->static_config.use_input_stat_file)
+        if(sequence_control_set_ptr->static_config.pass == 2)
 #if USE_PRED_ONLY_IN_2ND_PASS
             picture_control_set_ptr->mdc_depth_level = 0;
 #else
@@ -4654,7 +4654,7 @@ void* picture_decision_kernel(void *input_ptr)
 #endif
                                     (picture_control_set_ptr->slice_type != I_SLICE && picture_control_set_ptr->temporal_layer_index == 0)
 #if TWO_PASS && !TWO_PASSES_MATCH
-                                   || (sequence_control_set_ptr->static_config.use_input_stat_file && picture_control_set_ptr->temporal_layer_index == 1 && picture_control_set_ptr->sc_content_detected == 0)
+                                   || ((sequence_control_set_ptr->static_config.pass == 2) && picture_control_set_ptr->temporal_layer_index == 1 && picture_control_set_ptr->sc_content_detected == 0)
 #endif
                                 )) {
                                 int altref_nframes = picture_control_set_ptr->sequence_control_set_ptr->static_config.altref_nframes;
