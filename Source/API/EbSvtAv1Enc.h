@@ -189,10 +189,17 @@ typedef struct EbSvtAv1EncConfiguration
     EbBool                   use_qp_file;
 
 #if 1 //TWO_PASS
-    /* The two passes switch */
+    /* The two passes switch
+     * 1 for single pass, first or second pass
+     * 2 for two passes
+     * Default is 1 */
     uint8_t                  passes;
 
-    /* Specify which pass */
+    /* Specify which pass
+     * 1 for first pass
+     * 2 for second pass
+     * 0 for not-specified
+     * Default is 0 */
     uint8_t                  pass;
 
 #if TWO_PASS_USE_2NDP_ME_IN_1STP

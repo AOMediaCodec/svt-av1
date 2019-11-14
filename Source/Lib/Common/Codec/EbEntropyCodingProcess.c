@@ -531,12 +531,16 @@ void write_stat(
 {
     eb_block_on_mutex(sequence_control_set_ptr->encode_context_ptr->stat_mutex);
 
-    if (sequence_control_set_ptr->static_config.stat_buffer)
-        memcpy(sequence_control_set_ptr->static_config.stat_buffer + (long)(ref_poc * STAT_BUFFER_UNIT),
-               &stat_struct,
-               sizeof(stat_struct_t));
-    else
+    if (sequence_control_set_ptr->static_config.stat_buffer) {
+        if (ref_poc < sequence_control_set_ptr->static_config.frames_to_be_encoded)
+           memcpy(sequence_control_set_ptr->static_config.stat_buffer + (long)(ref_poc * STAT_BUFFER_UNIT),
+                  &stat_struct,
+                  sizeof(stat_struct_t));
+        else
+            printf("Invalid poc to write stat\n");
+    } else {
         printf("Invalid stat buffer\n");
+    }
 
     eb_release_mutex(sequence_control_set_ptr->encode_context_ptr->stat_mutex);
 }

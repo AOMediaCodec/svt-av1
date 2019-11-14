@@ -184,7 +184,7 @@ int32_t main(int32_t argc, char* argv[])
 
                         configs[0]->enc_mode = configs[0]->enc_mode2p;
 
-                        fseek(configs[0]->input_file, 0, SEEK_SET);
+                        fseeko64(configs[0]->input_file, 0, SEEK_SET);
                         configs[0]->recon_file = saved_recon_file;
                         configs[0]->bitstream_file = saved_bitstream_file;
 
@@ -355,13 +355,9 @@ int32_t main(int32_t argc, char* argv[])
                     return_errors[0] = de_init_encoder(appCallbacks[0], 0);
 
                 if (separated_first_pass) {
-                    if (configs[0]->fpf == NULL) {
-                        printf("Invalid first pass file to write\n");
-                    } else {
-                        size_t size = fwrite(configs[0]->stat_buffer, STAT_BUFFER_UNIT, configs[0]->frames_to_be_encoded, configs[0]->fpf);
-                        if (size != configs[0]->frames_to_be_encoded)
-                            printf("Fail to write to first pass file\n");
-                    }
+                    size_t size = fwrite(configs[0]->stat_buffer, STAT_BUFFER_UNIT, configs[0]->frames_to_be_encoded, configs[0]->fpf);
+                    if (size != configs[0]->frames_to_be_encoded)
+                        printf("Fail to write to first pass file\n");
                 }
              }
 #endif
