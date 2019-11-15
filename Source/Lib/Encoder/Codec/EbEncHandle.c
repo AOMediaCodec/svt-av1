@@ -2129,8 +2129,6 @@ void CopyApiFromApp(
     sequence_control_set_ptr->static_config.inter_intra_compound         = ((EbSvtAv1EncConfiguration*)pComponentParameterStructure)->inter_intra_compound;
     // fractional search 64x64
     sequence_control_set_ptr->static_config.fract_search_64              = ((EbSvtAv1EncConfiguration*)pComponentParameterStructure)->fract_search_64;
-    // global mv injection
-    sequence_control_set_ptr->static_config.inject_global_mv             = ((EbSvtAv1EncConfiguration*)pComponentParameterStructure)->inject_global_mv;
     // motion field motion vector
     sequence_control_set_ptr->static_config.enable_mfmv                  = ((EbSvtAv1EncConfiguration*)pComponentParameterStructure)->enable_mfmv;
     // quantize fp                                                       

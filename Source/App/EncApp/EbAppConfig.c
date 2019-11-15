@@ -72,7 +72,6 @@
 #define EDGE_SKIP_ANGLE_INTRA_TOKEN     "-intra-edge-skp"
 #define INTER_INTRA_COMPOUND_TOKEN      "-interintra-comp"
 #define FRAC_SEARCH_64_TOKEN            "-frac-search-64"
-#define GLOBAL_MV_INJECT_TOKEN          "-global-motion-inject"
 #define MFMV_ENABLE_TOKEN               "-mfmv"
 #define QUANT_FP_TOKEN                  "-quantize-fp"
 #define REDUNDANT_BLK_TOKEN             "-redundant-blk"
@@ -279,7 +278,6 @@ static void SetClass12Flag                      (const char *value, EbConfig *cf
 static void SetEdgeSkipAngleIntraFlag           (const char *value, EbConfig *cfg) {cfg->edge_skp_angle_intra = strtol(value, NULL, 0);};
 static void SetInterIntraCompoundFlag           (const char *value, EbConfig *cfg) {cfg->inter_intra_compound = strtol(value, NULL, 0);};
 static void SetFractionalSearch64Flag           (const char *value, EbConfig *cfg) {cfg->fract_search_64 = strtol(value, NULL, 0);};
-static void SetInjectGlobalMVFlag               (const char *value, EbConfig *cfg) {cfg->inject_global_mv = strtol(value, NULL, 0);};
 static void SetEnableMfmvFlag                   (const char *value, EbConfig *cfg) {cfg->enable_mfmv = strtol(value, NULL, 0);};
 static void SetQuantFpFlag                      (const char *value, EbConfig *cfg) {cfg->quant_fp = strtol(value, NULL, 0);};
 static void SetEnableRedundantBlkFlag           (const char *value, EbConfig *cfg) {cfg->enable_redundant_blk = strtol(value, NULL, 0);};
@@ -496,8 +494,6 @@ config_entry_t config_entry[] = {
     { SINGLE_INPUT, INTER_INTRA_COMPOUND_TOKEN, "InterIntraCompound", SetInterIntraCompoundFlag },
     // FRACTIONAL SEARCH 64x64
     { SINGLE_INPUT, FRAC_SEARCH_64_TOKEN, "FractionalSearch64", SetFractionalSearch64Flag },
-    // GLOBAL MV INJECTION
-    { SINGLE_INPUT, GLOBAL_MV_INJECT_TOKEN, "GlobalMvInjection", SetInjectGlobalMVFlag },
 
     // OBMC
     { SINGLE_INPUT, OBMC_TOKEN, "Obmc", SetEnableObmcFlag },
