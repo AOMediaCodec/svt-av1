@@ -275,6 +275,11 @@ typedef struct EbConfig
     EbBool                  enable_obmc;
 
     /****************************************
+     * RDOQ
+     * ****************************************/
+    int                  enable_rdoq;
+
+    /****************************************
      * Filter intra prediction
      ****************************************/
     EbBool                  enable_filter_intra;

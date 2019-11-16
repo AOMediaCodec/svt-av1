@@ -253,6 +253,11 @@ typedef struct EbSvtAv1EncConfiguration
     * Default is 1. */
     EbBool                   enable_obmc;
 
+    /* RDOQ
+    *
+    * Default is -1. */
+    int                   enable_rdoq;
+
     /* Filter intra prediction
     *
     * Default is 1. */

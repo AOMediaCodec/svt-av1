@@ -6056,6 +6056,7 @@ void md_stage_2(
 #else
     context_ptr->md_staging_skip_full_chroma = context_ptr->target_class == CAND_CLASS_0 || context_ptr->md_staging_mode == MD_STAGING_MODE_3;
 #endif
+
 #if REMOVE_MD_STAGE_1
     context_ptr->md_staging_skip_rdoq = EB_TRUE;
     for (fullLoopCandidateIndex = 0; fullLoopCandidateIndex < context_ptr->md_stage_1_count[context_ptr->target_class]; ++fullLoopCandidateIndex) {
@@ -6142,6 +6143,7 @@ void md_stage_3(
         context_ptr->md_staging_tx_search = candidate_ptr->cand_class == CAND_CLASS_0 ? 2 : 1;
 #endif
         context_ptr->md_staging_skip_full_chroma = EB_FALSE;
+
         context_ptr->md_staging_skip_rdoq = EB_FALSE;
 
         if (picture_control_set_ptr->slice_type != I_SLICE) {

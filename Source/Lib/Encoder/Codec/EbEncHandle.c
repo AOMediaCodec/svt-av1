@@ -2112,6 +2112,9 @@ void CopyApiFromApp(
     // OBMC
     sequence_control_set_ptr->static_config.enable_obmc = ((EbSvtAv1EncConfiguration*)pComponentParameterStructure)->enable_obmc;
 
+    // RDOQ
+    sequence_control_set_ptr->static_config.enable_rdoq = ((EbSvtAv1EncConfiguration*)pComponentParameterStructure)->enable_rdoq;
+
     // Filter intra prediction
     sequence_control_set_ptr->static_config.enable_filter_intra = ((EbSvtAv1EncConfiguration*)pComponentParameterStructure)->enable_filter_intra;
 
@@ -2658,6 +2661,7 @@ EbErrorType eb_svt_enc_init_parameter(
     config_ptr->enable_restoration_filtering = AUTO_MODE;
     config_ptr->set_chroma_mode = AUTO_MODE;
     config_ptr->enable_obmc = EB_TRUE;
+    config_ptr->enable_rdoq = AUTO_MODE;
     config_ptr->enable_filter_intra = EB_TRUE;
     config_ptr->in_loop_me_flag = EB_TRUE;
     config_ptr->ext_block_flag = EB_FALSE;
