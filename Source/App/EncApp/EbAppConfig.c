@@ -410,7 +410,6 @@ void eb_config_ctor(EbConfig *config_ptr)
 #if TWO_PASS_USE_2NDP_ME_IN_1STP
     config_ptr->enc_mode2p                            = MAX_ENC_PRESET;
 #endif
-    config_ptr->stat_buffer                           = NULL;
 #endif
     config_ptr->frame_rate                            = 30 << 16;
     config_ptr->frame_rate_numerator                   = 0;
@@ -590,11 +589,6 @@ void eb_config_dtor(EbConfig *config_ptr)
         fclose(config_ptr->fpf);
         config_ptr->fpf = (FILE *)NULL;
         memset(config_ptr->fpf_name, 0, sizeof(config_ptr->fpf_name));
-    }
-
-    if (config_ptr->stat_buffer) {
-        free(config_ptr->stat_buffer);
-        config_ptr->stat_buffer = NULL;
     }
 #endif
 
@@ -854,7 +848,7 @@ static EbErrorType VerifySettings(EbConfig *config, uint32_t channelNumber)
                 memset(config->fpf_name, 0, sizeof(config->fpf_name));
             }
         }
-        else if (config->pass >= 1) {
+        else {
             char mode[] = "wb";
             if (config->pass == 2)
                mode[0] = 'r';
@@ -866,7 +860,7 @@ static EbErrorType VerifySettings(EbConfig *config, uint32_t channelNumber)
 
             FOPEN(config->fpf, config->fpf_name, mode);
             if (config->fpf == NULL) {
-                fprintf(config->error_log_file, "Error instance %u: Invalid first pass file, which is required in separated test mode\n", channelNumber + 1);
+                fprintf(config->error_log_file, "Error instance %u: Can't open first pass file\n", channelNumber + 1);
                 return_error = EB_ErrorBadParameter;
             }
         }
@@ -877,28 +871,27 @@ static EbErrorType VerifySettings(EbConfig *config, uint32_t channelNumber)
             fprintf(config->error_log_file, "Error instance %u: Not allowed to specify pass for combined test mode\n", channelNumber + 1);
             return_error = EB_ErrorBadParameter;
         }
-        if (strlen(config->fpf_name) != 0) {
-            fprintf(config->error_log_file, "Warning instance %u: The fpf setting is ignored in combined test mode\n", channelNumber + 1);
-            memset(config->fpf_name, 0, sizeof(config->fpf_name));
-        }
+
         if (config->enc_mode >= 4) {
-            fprintf(config->error_log_file, "Warning instance %u: The enc mode %u is too large. Run as single pass\n", channelNumber + 1, config->enc_mode);
+            fprintf(config->error_log_file, "Warning instance %u: Two-pass is not supported for enc-mode %u. Run as single pass\n",
+                    channelNumber + 1, config->enc_mode);
             config->passes = 1;
-        }
-    }
+        } else {
+            if (config->fpf) {
+               fclose(config->fpf);
+               config->fpf = NULL;
+            }
 
-    if ((config->pass >= 1) || (config->passes == 2)) {
-        config->stat_buffer = malloc(config->frames_to_be_encoded * STAT_BUFFER_UNIT);
+            if (strlen(config->fpf_name) == 0)
+                strcpy(config->fpf_name, "./stat.bin");
 
-        if ((config->pass == 2) && (config->passes == 1)) {
-            size_t size = fread(config->stat_buffer, STAT_BUFFER_UNIT, config->frames_to_be_encoded, config->fpf);
-            if (size != config->frames_to_be_encoded) {
-                fprintf(config->error_log_file, "Error instance %u: Fail to read from first pass file\n", channelNumber + 1);
+            FOPEN(config->fpf, config->fpf_name, "wb");
+            if (config->fpf == NULL) {
+                fprintf(config->error_log_file, "Error instance %u: Can't open first pass file\n", channelNumber + 1);
                 return_error = EB_ErrorBadParameter;
             }
         }
     }
-
 #endif
 
     if (config->separate_fields > 1) {

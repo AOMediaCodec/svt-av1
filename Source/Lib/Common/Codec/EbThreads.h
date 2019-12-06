@@ -48,6 +48,10 @@ extern "C" {
     extern EbErrorType eb_block_on_semaphore(
         EbHandle semaphore_handle);
 
+    extern EbErrorType eb_block_on_semaphore_timeout(
+        EbHandle semaphore_handle,
+        uint32_t millisecond);
+
     extern EbErrorType eb_destroy_semaphore(
         EbHandle semaphore_handle);
 

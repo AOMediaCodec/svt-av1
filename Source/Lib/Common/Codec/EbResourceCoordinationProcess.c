@@ -569,25 +569,34 @@ static void CopyInputBuffer(
         copy_frame_buffer(sequenceControlSet, dst->p_buffer, src->p_buffer);
 }
 #endif
+
 #if TWO_PASS
 /******************************************************
  * Read Stat from File
  ******************************************************/
 static void read_stat(
     PictureParentControlSet  *picture_control_set_ptr,
-    SequenceControlSet       *sequence_control_set_ptr)
+    SequenceControlSet       *sequence_control_set_ptr,
+    uint8_t* p_stat_buffer,
+    uint32_t n_stat_filled_len)
 {
+    if (sequence_control_set_ptr->static_config.pass != 2) {
+        printf("Invalid pass to read stat\n");
+        return;
+    }
+
+    if (p_stat_buffer == NULL) {
+        printf("Invalid input stat buffer to read stat\n");
+        return;
+    }
+
+    if (n_stat_filled_len == 0)
+        return;
+
     eb_block_on_mutex(sequence_control_set_ptr->encode_context_ptr->stat_mutex);
 
-    if (sequence_control_set_ptr->static_config.stat_buffer) {
-        if (picture_control_set_ptr->picture_number < sequence_control_set_ptr->static_config.frames_to_be_encoded) {
-            memcpy(&picture_control_set_ptr->stat_struct,
-                   sequence_control_set_ptr->static_config.stat_buffer + (picture_control_set_ptr->picture_number * STAT_BUFFER_UNIT),
-                   sizeof(stat_struct_t));
-        }
-    } else {
-        printf("Invalid stat buffer\n");
-    }
+    if (picture_control_set_ptr->picture_number < sequence_control_set_ptr->static_config.frames_to_be_encoded)
+        memcpy(&picture_control_set_ptr->stat_struct, p_stat_buffer, STAT_BUFFER_UNIT);
 
     uint64_t referenced_area_avg = 0;
 #if TWO_PASS_128x128
@@ -600,6 +609,7 @@ static void read_stat(
     referenced_area_avg /= sequence_control_set_ptr->sb_total_count;
 #endif
     picture_control_set_ptr->referenced_area_avg = referenced_area_avg;
+
     eb_release_mutex(sequence_control_set_ptr->encode_context_ptr->stat_mutex);
 }
 #endif
@@ -956,7 +966,9 @@ void* resource_coordination_kernel(void *input_ptr)
             if (sequence_control_set_ptr->static_config.pass == 2)
                 read_stat(
                     picture_control_set_ptr,
-                    sequence_control_set_ptr);
+                    sequence_control_set_ptr,
+                    ebInputPtr->p_stat_buffer,
+                    ebInputPtr->n_stat_filled_len);
             else {
                 memset(&picture_control_set_ptr->stat_struct, 0, sizeof(stat_struct_t));
             }

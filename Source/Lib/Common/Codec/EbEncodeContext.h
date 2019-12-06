@@ -155,8 +155,10 @@ typedef struct EncodeContext
 #if ALT_REF_OVERLAY
     uint64_t                                          picture_number_alt; // The picture number overlay includes all the overlay frames
 #endif
+
 #if TWO_PASS
     EbHandle                                          stat_mutex;
+    uint64_t                                          total_number_of_stat;
 #endif
 } EncodeContext;
 

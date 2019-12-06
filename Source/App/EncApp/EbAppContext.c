@@ -181,7 +181,6 @@ EbErrorType CopyConfigurationParameters(
 #if TWO_PASS_USE_2NDP_ME_IN_1STP
     callback_data->eb_enc_parameters.enc_mode2p = (EbBool)config->enc_mode2p;
 #endif
-    callback_data->eb_enc_parameters.stat_buffer = config->stat_buffer;
 #endif
     callback_data->eb_enc_parameters.disable_dlf_flag = (EbBool)config->disable_dlf_flag;
     callback_data->eb_enc_parameters.enable_warped_motion = (EbBool)config->enable_warped_motion;
@@ -314,6 +313,11 @@ EbErrorType AllocateInputBuffers(
                     callback_data->input_buffer_pool->p_buffer);
         }
 
+        // Allocate input stat buffer
+        EB_APP_MALLOC(uint8_t*, callback_data->input_buffer_pool->p_stat_buffer, sizeof(STAT_BUFFER_UNIT), EB_N_PTR, EB_ErrorInsufficientResources);
+        callback_data->input_buffer_pool->n_stat_alloc_len = STAT_BUFFER_UNIT;
+        callback_data->input_buffer_pool->n_stat_filled_len = 0;
+
         // Assign the variables
         callback_data->input_buffer_pool->p_app_private = NULL;
         callback_data->input_buffer_pool->pic_type   = EB_AV1_INVALID_PICTURE;
@@ -344,6 +348,24 @@ EbErrorType AllocateOutputReconBuffers(
 
     callback_data->recon_buffer->n_alloc_len = (uint32_t)frameSize;
     callback_data->recon_buffer->p_app_private = NULL;
+    return return_error;
+}
+
+EbErrorType AllocateOutputStatBuffers(
+    EbConfig                *config,
+    EbAppContext            *callback_data)
+{
+    EbErrorType   return_error = EB_ErrorNone;
+
+    EB_APP_MALLOC(EbBufferHeaderType*, callback_data->stat_buffer, sizeof(EbBufferHeaderType), EB_N_PTR, EB_ErrorInsufficientResources);
+
+    memset(callback_data->stat_buffer, 0, sizeof(EbBufferHeaderType));
+
+    // Initialize Header
+    callback_data->stat_buffer->size = sizeof(EbBufferHeaderType);
+    callback_data->stat_buffer->n_alloc_len = (uint32_t)STAT_BUFFER_UNIT;
+    EB_APP_MALLOC(uint8_t*, callback_data->stat_buffer->p_buffer, STAT_BUFFER_UNIT, EB_N_PTR, EB_ErrorInsufficientResources);
+
     return return_error;
 }
 
@@ -589,6 +611,13 @@ EbErrorType init_encoder(
         return return_error;
     // STEP 8: Allocate output Recon Buffer
     return_error = AllocateOutputReconBuffers(
+        config,
+        callback_data);
+
+    if (return_error != EB_ErrorNone)
+        return return_error;
+    // STEP 9: Allocate output stat Buffer
+    return_error = AllocateOutputStatBuffers(
         config,
         callback_data);
 

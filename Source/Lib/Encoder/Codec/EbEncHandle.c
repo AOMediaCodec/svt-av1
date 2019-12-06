@@ -892,6 +892,10 @@ EbErrorType EbOutputReconBufferHeaderCtor(
     EbPtr *objectDblPtr,
     EbPtr  objectInitDataPtr);
 
+EbErrorType EbOutputStatBufferHeaderCtor(
+    EbPtr *objectDblPtr,
+    EbPtr  objectInitDataPtr);
+
 EbErrorType EbOutputBufferHeaderCtor(
     EbPtr *objectDblPtr,
     EbPtr objectInitDataPtr);
@@ -1354,6 +1358,30 @@ EB_API EbErrorType eb_init_encoder(EbComponentType *svt_enc_component)
         }
     }
 
+#if TWO_PASS
+    if (enc_handle_ptr->sequence_control_set_instance_array[0]->sequence_control_set_ptr->static_config.pass == 1) {
+        // EbBufferHeaderType Output Stat
+        EB_MALLOC(EbSystemResource**, enc_handle_ptr->output_statistics_buffer_resource_ptr_array, sizeof(EbSystemResource*) * enc_handle_ptr->encode_instance_total_count, EB_N_PTR);
+        EB_MALLOC(EbFifo***, enc_handle_ptr->output_statistics_buffer_producer_fifo_ptr_dbl_array, sizeof(EbFifo**)          * enc_handle_ptr->encode_instance_total_count, EB_N_PTR);
+        EB_MALLOC(EbFifo***, enc_handle_ptr->output_statistics_buffer_consumer_fifo_ptr_dbl_array, sizeof(EbFifo**)          * enc_handle_ptr->encode_instance_total_count, EB_N_PTR);
+
+        for (instance_index = 0; instance_index < enc_handle_ptr->encode_instance_total_count; ++instance_index) {
+            return_error = eb_system_resource_ctor(
+                &enc_handle_ptr->output_statistics_buffer_resource_ptr_array[instance_index],
+                20,
+                1,
+                1,
+                &enc_handle_ptr->output_statistics_buffer_producer_fifo_ptr_dbl_array[instance_index],
+                &enc_handle_ptr->output_statistics_buffer_consumer_fifo_ptr_dbl_array[instance_index],
+                EB_TRUE,
+                EbOutputStatBufferHeaderCtor,
+                enc_handle_ptr->sequence_control_set_instance_array[0]->sequence_control_set_ptr);
+            if (return_error == EB_ErrorInsufficientResources)
+                return EB_ErrorInsufficientResources;
+        }
+    }
+#endif
+
     // Resource Coordination Results
     {
         ResourceCoordinationResultInitData resourceCoordinationResultInitData;
@@ -1625,9 +1653,13 @@ EB_API EbErrorType eb_init_encoder(EbComponentType *svt_enc_component)
         enc_handle_ptr->sequence_control_set_instance_array[instance_index]->encode_context_ptr->app_callback_ptr = enc_handle_ptr->app_callback_ptr_array[instance_index];
     // svt Output Buffer Fifo Ptrs
     for (instance_index = 0; instance_index < enc_handle_ptr->encode_instance_total_count; ++instance_index) {
-        enc_handle_ptr->sequence_control_set_instance_array[instance_index]->encode_context_ptr->stream_output_fifo_ptr     = (enc_handle_ptr->output_stream_buffer_producer_fifo_ptr_dbl_array[instance_index])[0];
+        enc_handle_ptr->sequence_control_set_instance_array[instance_index]->encode_context_ptr->stream_output_fifo_ptr = (enc_handle_ptr->output_stream_buffer_producer_fifo_ptr_dbl_array[instance_index])[0];
         if (enc_handle_ptr->sequence_control_set_instance_array[0]->sequence_control_set_ptr->static_config.recon_enabled)
-            enc_handle_ptr->sequence_control_set_instance_array[instance_index]->encode_context_ptr->recon_output_fifo_ptr      = (enc_handle_ptr->output_recon_buffer_producer_fifo_ptr_dbl_array[instance_index])[0];
+            enc_handle_ptr->sequence_control_set_instance_array[instance_index]->encode_context_ptr->recon_output_fifo_ptr = (enc_handle_ptr->output_recon_buffer_producer_fifo_ptr_dbl_array[instance_index])[0];
+#if TWO_PASS
+        if (enc_handle_ptr->sequence_control_set_instance_array[0]->sequence_control_set_ptr->static_config.pass == 1)
+            enc_handle_ptr->sequence_control_set_instance_array[instance_index]->encode_context_ptr->statistics_output_fifo_ptr = (enc_handle_ptr->output_statistics_buffer_producer_fifo_ptr_dbl_array[instance_index])[0];
+#endif
     }
 
     /************************************
@@ -2427,7 +2459,6 @@ void CopyApiFromApp(
 #if TWO_PASS_USE_2NDP_ME_IN_1STP
     sequence_control_set_ptr->static_config.enc_mode2p = ((EbSvtAv1EncConfiguration*)pComponentParameterStructure)->enc_mode2p;
 #endif
-    sequence_control_set_ptr->static_config.stat_buffer= ((EbSvtAv1EncConfiguration*)pComponentParameterStructure)->stat_buffer;
 #endif
 #if SHUT_FILTERING
     sequence_control_set_ptr->static_config.disable_dlf_flag = 1;//
@@ -2948,7 +2979,6 @@ EbErrorType eb_svt_enc_init_parameter(
 #if TWO_PASS_USE_2NDP_ME_IN_1STP
     config_ptr->enc_mode2p = MAX_ENC_PRESET;
 #endif
-    config_ptr->stat_buffer = NULL;
 #endif
     config_ptr->scene_change_detection = 0;
     config_ptr->rate_control_mode = 0;
@@ -3215,7 +3245,6 @@ EB_API EbErrorType eb_svt_enc_eos_nal(
     UNUSED(output_stream_ptr);
     return return_error;
 }
-
 /***********************************************
 **** Copy the input buffer from the
 **** sample application to the library buffers
@@ -3372,6 +3401,7 @@ static EbErrorType CopyFrameBuffer(
     }
     return return_error;
 }
+
 static void CopyInputBuffer(
     SequenceControlSet*    sequenceControlSet,
     EbBufferHeaderType*     dst,
@@ -3391,6 +3421,16 @@ static void CopyInputBuffer(
     // Copy the picture buffer
     if (src->p_buffer != NULL)
         CopyFrameBuffer(sequenceControlSet, dst->p_buffer, src->p_buffer);
+
+#if TWO_PASS
+    // Copy the stat buffer
+    if ((src->p_stat_buffer != NULL) && (dst->n_stat_alloc_len == src->n_stat_alloc_len)) {
+        EB_MEMCPY(dst->p_stat_buffer,  src->p_stat_buffer, src->n_stat_filled_len);
+        dst->n_stat_filled_len = src->n_stat_filled_len;
+    } else {
+        dst->n_stat_filled_len = 0;
+    }
+#endif
 }
 
 /**********************************
@@ -3547,6 +3587,73 @@ EB_API EbErrorType eb_svt_get_recon(
     return return_error;
 }
 
+#if TWO_PASS
+static void CopyOutputStatBuffer(
+    EbBufferHeaderType   *dst,
+    EbBufferHeaderType   *src
+)
+{
+    dst->size = src->size;
+    dst->n_alloc_len = src->n_alloc_len;
+    dst->n_filled_len = src->n_filled_len;
+    dst->pts = src->pts;
+    dst->flags = src->flags;
+
+    if (src->p_buffer)
+        EB_MEMCPY(dst->p_buffer, src->p_buffer, src->n_filled_len);
+}
+
+/**********************************
+* Fill This Buffer
+**********************************/
+#if defined(__linux__) || defined(__APPLE__)
+__attribute__((visibility("default")))
+#endif
+EB_API EbErrorType eb_svt_get_stat(
+    EbComponentType      *svt_enc_component,
+    EbBufferHeaderType   *p_buffer,
+    EbBool               finished)
+{
+    EbErrorType return_error = EB_ErrorNone;
+    EbEncHandle *pEncCompData = (EbEncHandle*)svt_enc_component->p_component_private;
+    EbObjectWrapper *ebWrapperPtr = NULL;
+
+    if (pEncCompData->sequence_control_set_instance_array[0]->sequence_control_set_ptr->static_config.pass == 1) {
+        if (finished == EB_FALSE)
+            eb_get_full_object_non_blocking(
+                (pEncCompData->output_statistics_buffer_consumer_fifo_ptr_dbl_array[0])[0],
+                &ebWrapperPtr);
+        else
+            return_error = eb_get_full_object_timeout(
+                (pEncCompData->output_statistics_buffer_consumer_fifo_ptr_dbl_array[0])[0],
+                &ebWrapperPtr,
+                1000);
+
+        if (return_error != EB_ErrorNone)
+            return return_error; // Time out
+
+        if (ebWrapperPtr) {
+            EbBufferHeaderType* objPtr = (EbBufferHeaderType*)ebWrapperPtr->object_ptr;
+            CopyOutputStatBuffer(
+                p_buffer,
+                objPtr);
+
+            if (p_buffer->flags != EB_BUFFERFLAG_EOS && p_buffer->flags != 0)
+                return_error = EB_ErrorMax;
+
+            eb_release_object((EbObjectWrapper  *)ebWrapperPtr);
+        } else {
+            return_error = EB_NoErrorEmptyQueue;
+        }
+    } else {
+        // stat is not enabled
+        return_error = EB_ErrorMax;
+    }
+
+    return return_error;
+}
+#endif
+
 /**********************************
 * Encoder Error Handling
 **********************************/
@@ -3669,6 +3776,12 @@ EbErrorType EbInputBufferHeaderCtor(
         sequence_control_set_ptr,
         inputBuffer);
 
+#if TWO_PASS
+    EB_MALLOC(uint8_t*, inputBuffer->p_stat_buffer, STAT_BUFFER_UNIT, EB_N_PTR);
+    inputBuffer->n_stat_alloc_len = STAT_BUFFER_UNIT;
+    inputBuffer->n_stat_filled_len = 0;
+#endif
+
     inputBuffer->p_app_private = NULL;
 
     return EB_ErrorNone;
@@ -3729,6 +3842,30 @@ EbErrorType EbOutputReconBufferHeaderCtor(
 
     recon_buffer->n_alloc_len = frameSize;
     recon_buffer->p_app_private = NULL;
+
+    return EB_ErrorNone;
+}
+
+/**************************************
+* EbBufferHeaderType Constructor
+**************************************/
+EbErrorType EbOutputStatBufferHeaderCtor(
+    EbPtr *objectDblPtr,
+    EbPtr  objectInitDataPtr)
+{
+    EbBufferHeaderType *stat_buffer = NULL;
+
+    EB_MALLOC(EbBufferHeaderType*, stat_buffer, sizeof(EbBufferHeaderType), EB_N_PTR);
+    *objectDblPtr = (EbPtr)stat_buffer;
+
+    // Initialize Header
+    stat_buffer->size = sizeof(EbBufferHeaderType);
+
+    // Assign the variables
+    EB_MALLOC(uint8_t*, stat_buffer->p_buffer, STAT_BUFFER_UNIT, EB_N_PTR);
+
+    stat_buffer->n_alloc_len = STAT_BUFFER_UNIT;
+    stat_buffer->p_app_private = NULL;
 
     return EB_ErrorNone;
 }

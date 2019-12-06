@@ -529,18 +529,42 @@ void write_stat(
     stat_struct_t          stat_struct,
     uint64_t               ref_poc)
 {
+    EncodeContext *encode_context_ptr = sequence_control_set_ptr->encode_context_ptr;
+    EbObjectWrapper *wrapper_ptr = NULL;
+    EbBufferHeaderType *buffer_ptr = NULL;
+
+    if (sequence_control_set_ptr->static_config.pass != 1) {
+        printf("Invalid pass to write stat\n");
+        return;
+    }
+
+    if (ref_poc >= sequence_control_set_ptr->static_config.frames_to_be_encoded) {
+        printf("Invalid poc to write stat\n");
+        return;
+    }
+
     eb_block_on_mutex(sequence_control_set_ptr->encode_context_ptr->stat_mutex);
 
-    if (sequence_control_set_ptr->static_config.stat_buffer) {
-        if (ref_poc < sequence_control_set_ptr->static_config.frames_to_be_encoded)
-           memcpy(sequence_control_set_ptr->static_config.stat_buffer + (long)(ref_poc * STAT_BUFFER_UNIT),
-                  &stat_struct,
-                  sizeof(stat_struct_t));
-        else
-            printf("Invalid poc to write stat\n");
-    } else {
-        printf("Invalid stat buffer\n");
-    }
+    eb_get_empty_object(
+        sequence_control_set_ptr->encode_context_ptr->statistics_output_fifo_ptr,
+        &wrapper_ptr);
+
+    buffer_ptr = (EbBufferHeaderType*)wrapper_ptr->object_ptr;
+
+    ++encode_context_ptr->total_number_of_stat;
+
+    if (encode_context_ptr->total_number_of_stat
+        == sequence_control_set_ptr->static_config.frames_to_be_encoded)
+        buffer_ptr->flags = EB_BUFFERFLAG_EOS;
+    else
+        buffer_ptr->flags = 0;
+
+    memcpy(buffer_ptr->p_buffer, &stat_struct, STAT_BUFFER_UNIT);
+
+    buffer_ptr->pts = ref_poc;
+    buffer_ptr->n_filled_len = STAT_BUFFER_UNIT;
+
+    eb_post_full_object(wrapper_ptr);
 
     eb_release_mutex(sequence_control_set_ptr->encode_context_ptr->stat_mutex);
 }

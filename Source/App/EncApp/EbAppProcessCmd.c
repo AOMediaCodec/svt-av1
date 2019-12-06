@@ -920,6 +920,29 @@ void ReadInputFrames(
     return;
 }
 
+#if 1 // TWO_PASS
+void ReadInputStat(
+    EbConfig           *config,
+    EbBufferHeaderType *headerPtr)
+{
+    if (config->pass == 2) {
+        uint64_t read_size = fread(headerPtr->p_stat_buffer,
+                                   headerPtr->n_stat_alloc_len, 1,
+                                   config->fpf);
+        if (read_size != 1) {
+            printf("fread on first pass file failed with %lu\n", read_size);
+            return;
+        }
+        headerPtr->n_stat_filled_len = STAT_BUFFER_UNIT;
+
+    } else {
+        headerPtr->p_stat_buffer = NULL;
+        headerPtr->n_stat_filled_len = 0;
+    }
+    return;
+}
+#endif
+
 void SendQpOnTheFly(
     EbConfig                  *config,
     EbBufferHeaderType        *headerPtr){
@@ -996,6 +1019,10 @@ AppExitConditionType ProcessInputBuffer(
             is16bit,
             headerPtr);
 
+#if 1 // TWO_PASS
+        ReadInputStat(config, headerPtr);
+#endif
+
         // Update the context parameters
         config->processed_byte_count += headerPtr->n_filled_len;
         headerPtr->p_app_private          = (EbPtr)EB_NULL;
@@ -1026,7 +1053,11 @@ AppExitConditionType ProcessInputBuffer(
             headerPtr->flags       = EB_BUFFERFLAG_EOS;
             headerPtr->p_buffer      = NULL;
             headerPtr->pic_type    = EB_AV1_INVALID_PICTURE;
-
+#if 1 // TWO_PASS
+            headerPtr->n_stat_alloc_len    = 0;
+            headerPtr->n_stat_filled_len   = 0;
+            headerPtr->p_stat_buffer = NULL;
+#endif
             eb_svt_enc_send_picture(componentHandle, headerPtr);
         }
 
@@ -1343,4 +1374,54 @@ AppExitConditionType ProcessOutputReconBuffer(
         return_value = (headerPtr->flags & EB_BUFFERFLAG_EOS) ? APP_ExitConditionFinished : APP_ExitConditionNone;
     }
     return return_value;
+}
+
+AppExitConditionType ProcessOutputStatBuffer(
+    EbConfig             *config,
+    EbAppContext         *appCallBack,
+    EbBool               finished)
+{
+    EbBufferHeaderType *header_ptr = appCallBack->stat_buffer; // needs to change for buffered input
+    EbComponentType *component_handle = (EbComponentType*)appCallBack->svt_encoder_handle;
+    EbErrorType stat_status = EB_ErrorNone;
+
+    if (config->pass != 1)
+        return APP_ExitConditionFinished;
+
+    // non-blocking call until all input frames are sent
+    stat_status = eb_svt_get_stat(component_handle, header_ptr, finished);
+
+    if (stat_status == EB_ErrorNone) {
+        int32_t returned_value;
+
+        if (config->fpf == NULL) {
+            printf("Invalid first pass file\n");
+            return APP_ExitConditionError;
+        }
+
+        returned_value = fseeko64(config->fpf, header_ptr->pts * STAT_BUFFER_UNIT, SEEK_SET);
+        if (returned_value != 0) {
+            printf("fseeko64 on first pass file failed with %i\n", returned_value);
+            return APP_ExitConditionError;
+        }
+
+        returned_value = fwrite(header_ptr->p_buffer, header_ptr->n_filled_len, 1, config->fpf);
+        if (returned_value != 1) {
+            printf("fwrite on first pass file failed with %i\n", returned_value);
+            return APP_ExitConditionError;
+        }
+
+        return (header_ptr->flags & EB_BUFFERFLAG_EOS) ? APP_ExitConditionFinished : APP_ExitConditionNone;
+    } else if (stat_status == EB_NoErrorEmptyQueue) {
+        return APP_ExitConditionNone;
+    } else if (stat_status == EB_ErrorSemaphoreUnresponsive) {
+        return APP_ExitConditionFinished;
+    } else {
+        printf("\n");
+        LogErrorOutput(
+            config->error_log_file,
+            header_ptr->flags);
+
+        return APP_ExitConditionError;
+    }
 }

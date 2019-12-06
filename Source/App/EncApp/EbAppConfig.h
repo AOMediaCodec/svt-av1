@@ -180,7 +180,6 @@ typedef struct EbConfig
 #if TWO_PASS_USE_2NDP_ME_IN_1STP
     uint8_t                 enc_mode2p;
 #endif
-    uint8_t                 *stat_buffer;
 #endif
 
     EbBool                  y4m_input;

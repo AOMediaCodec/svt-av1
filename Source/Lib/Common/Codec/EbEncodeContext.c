@@ -38,6 +38,7 @@ EbErrorType encode_context_ctor(
     // Output Buffer Fifos
     encode_context_ptr->stream_output_fifo_ptr = (EbFifo*)EB_NULL;
     encode_context_ptr->recon_output_fifo_ptr = (EbFifo*)EB_NULL;
+    encode_context_ptr->statistics_output_fifo_ptr = (EbFifo*)EB_NULL;
 
     // Picture Buffer Fifos
     encode_context_ptr->reference_picture_pool_fifo_ptr = (EbFifo*)EB_NULL;
@@ -214,7 +215,9 @@ EbErrorType encode_context_ctor(
 #endif
 
 #if TWO_PASS
+    encode_context_ptr->total_number_of_stat = 0;
     EB_CREATEMUTEX(EbHandle, encode_context_ptr->stat_mutex, sizeof(EbHandle), EB_MUTEX);
 #endif
+
     return EB_ErrorNone;
 }

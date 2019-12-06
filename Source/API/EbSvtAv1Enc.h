@@ -210,9 +210,6 @@ typedef struct EbSvtAv1EncConfiguration
      * Default is defined as MAX_ENC_PRESET. */
     uint8_t                  enc_mode2p;
 #endif
-
-    /* Stat data generated in the 1st pass and used in the 2nd */
-    uint8_t                  *stat_buffer;
 #endif
 
     /* Enable picture QP scaling between hierarchical levels
@@ -532,6 +529,16 @@ typedef struct EbSvtAv1EncConfiguration
     EB_API EbErrorType eb_svt_get_recon(
         EbComponentType      *svt_enc_component,
         EbBufferHeaderType   *p_buffer);
+
+    /* OPTIONAL: Fill buffer with stat data.
+     *
+     * Parameter:
+     * @ *svt_enc_component  Encoder handler.
+     * @ *p_buffer           Output buffer. */
+    EB_API EbErrorType eb_svt_get_stat(
+        EbComponentType      *svt_enc_component,
+        EbBufferHeaderType   *p_buffer,
+        EbBool               finished);
 
     /* STEP 6: Deinitialize encoder library.
      *
