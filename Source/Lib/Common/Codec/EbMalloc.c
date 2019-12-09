@@ -305,7 +305,7 @@ static int compare_time(const void* a,const void* b)
 
 static void print_top_10_locations() {
     EbHandle m = get_malloc_mutex();
-    EbPtrType type = EB_N_PTR;
+    EbPtrType type = EB_C_PTR;//EB_N_PTR;
     eb_block_on_mutex(m);
     g_profile_entry = (MemoryEntry*)calloc(MEM_ENTRY_SIZE, sizeof(MemoryEntry));
     if (!g_profile_entry) {

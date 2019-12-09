@@ -13,15 +13,24 @@ static void mode_decision_context_dctor(EbPtr p)
 {
     ModeDecisionContext* obj = (ModeDecisionContext*)p;
 #if PAL_SUP
-    for (int cd = 0; cd < MAX_PAL_CAND; cd++)
-        if (obj->palette_cand_array[cd].color_idx_map)
-            EB_FREE_ARRAY(obj->palette_cand_array[cd].color_idx_map);
-    for (uint32_t candidateIndex = 0; candidateIndex < MODE_DECISION_CANDIDATE_MAX_COUNT; ++candidateIndex)
-        if (obj->fast_candidate_ptr_array[candidateIndex]->palette_info.color_idx_map)
-            EB_FREE_ARRAY(obj->fast_candidate_ptr_array[candidateIndex]->palette_info.color_idx_map);
-    for (uint32_t codedLeafIndex = 0; codedLeafIndex < BLOCK_MAX_COUNT_SB_128; ++codedLeafIndex)
-        if (obj->md_cu_arr_nsq[codedLeafIndex].palette_info.color_idx_map)
-            EB_FREE_ARRAY(obj->md_cu_arr_nsq[codedLeafIndex].palette_info.color_idx_map);
+    if (obj->fast_color_idx_map) {
+        EB_FREE_ARRAY(obj->fast_color_idx_map);
+    }
+    if (obj->pal_color_idx_map) {
+        EB_FREE_ARRAY(obj->pal_color_idx_map);
+    }
+    if (obj->md_color_idx_map) {
+        EB_FREE_ARRAY(obj->md_color_idx_map);
+    }
+    // for (int cd = 0; cd < MAX_PAL_CAND; cd++)
+    //     if (obj->palette_cand_array[cd].color_idx_map)
+    //         EB_FREE_ARRAY(obj->palette_cand_array[cd].color_idx_map);
+    // for (uint32_t candidateIndex = 0; candidateIndex < MODE_DECISION_CANDIDATE_MAX_COUNT; ++candidateIndex)
+    //     if (obj->fast_candidate_ptr_array[candidateIndex]->palette_info.color_idx_map)
+    //         EB_FREE_ARRAY(obj->fast_candidate_ptr_array[candidateIndex]->palette_info.color_idx_map);
+    // for (uint32_t codedLeafIndex = 0; codedLeafIndex < BLOCK_MAX_COUNT_SB_128; ++codedLeafIndex)
+    //     if (obj->md_cu_arr_nsq[codedLeafIndex].palette_info.color_idx_map)
+    //         EB_FREE_ARRAY(obj->md_cu_arr_nsq[codedLeafIndex].palette_info.color_idx_map);
 #endif
     EB_FREE_ARRAY(obj->ref_best_ref_sq_table);
     EB_FREE_ARRAY(obj->ref_best_cost_sq_table);
@@ -149,22 +158,29 @@ EbErrorType mode_decision_context_ctor(
     EB_MALLOC_ARRAY(context_ptr->fast_candidate_array, MODE_DECISION_CANDIDATE_MAX_COUNT);
 
     EB_MALLOC_ARRAY(context_ptr->fast_candidate_ptr_array, MODE_DECISION_CANDIDATE_MAX_COUNT);
-
+#if PAL_SUP
+    if (cfg_palette) {
+        EB_MALLOC_ARRAY(context_ptr->fast_color_idx_map, MAX_PALETTE_SQUARE * MODE_DECISION_CANDIDATE_MAX_COUNT);
+    }
+#endif
     for (candidateIndex = 0; candidateIndex < MODE_DECISION_CANDIDATE_MAX_COUNT; ++candidateIndex) {
         context_ptr->fast_candidate_ptr_array[candidateIndex] = &context_ptr->fast_candidate_array[candidateIndex];
         context_ptr->fast_candidate_ptr_array[candidateIndex]->md_rate_estimation_ptr = context_ptr->md_rate_estimation_ptr;
 #if PAL_SUP
         if (cfg_palette)
-            EB_MALLOC_ARRAY(context_ptr->fast_candidate_ptr_array[candidateIndex]->palette_info.color_idx_map, MAX_PALETTE_SQUARE);
+            context_ptr->fast_candidate_ptr_array[candidateIndex]->palette_info.color_idx_map = context_ptr->fast_color_idx_map + candidateIndex * MAX_PALETTE_SQUARE;
         else
             context_ptr->fast_candidate_ptr_array[candidateIndex]->palette_info.color_idx_map = NULL;
 #endif
     }
 
 #if PAL_SUP
+    if (cfg_palette) {
+        EB_MALLOC_ARRAY(context_ptr->pal_color_idx_map, MAX_PALETTE_SQUARE * MAX_PAL_CAND);
+    }
     for (int cd = 0; cd < MAX_PAL_CAND; cd++)
         if (cfg_palette)
-            EB_MALLOC_ARRAY(context_ptr->palette_cand_array[cd].color_idx_map, MAX_PALETTE_SQUARE);
+            context_ptr->palette_cand_array[cd].color_idx_map = context_ptr->pal_color_idx_map + cd * MAX_PALETTE_SQUARE;
         else
             context_ptr->palette_cand_array[cd].color_idx_map = NULL;
 #endif
@@ -223,6 +239,11 @@ EbErrorType mode_decision_context_ctor(
         EB_MALLOC_ARRAY(context_ptr->md_cu_arr_nsq[0].neigh_left_recon[0], BLOCK_MAX_COUNT_SB_128 * 128 * 3);
         EB_MALLOC_ARRAY(context_ptr->md_cu_arr_nsq[0].neigh_top_recon[0], BLOCK_MAX_COUNT_SB_128 * 128 * 3);
     }
+#if PAL_SUP
+    if (cfg_palette) {
+        EB_MALLOC_ARRAY(context_ptr->md_color_idx_map, MAX_PALETTE_SQUARE * BLOCK_MAX_COUNT_SB_128);
+    }
+#endif
     uint32_t codedLeafIndex, tu_index;
     for (codedLeafIndex = 0; codedLeafIndex < BLOCK_MAX_COUNT_SB_128; ++codedLeafIndex) {
         for (tu_index = 0; tu_index < TRANSFORM_UNIT_MAX_COUNT; ++tu_index)
@@ -251,7 +272,7 @@ EbErrorType mode_decision_context_ctor(
         }
 #if PAL_SUP
         if (cfg_palette)
-            EB_MALLOC_ARRAY(context_ptr->md_cu_arr_nsq[codedLeafIndex].palette_info.color_idx_map, MAX_PALETTE_SQUARE);
+            context_ptr->md_cu_arr_nsq[codedLeafIndex].palette_info.color_idx_map = context_ptr->md_color_idx_map + codedLeafIndex * MAX_PALETTE_SQUARE;
         else
             context_ptr->md_cu_arr_nsq[codedLeafIndex].palette_info.color_idx_map = NULL;
 #endif

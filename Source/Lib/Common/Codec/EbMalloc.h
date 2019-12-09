@@ -93,6 +93,11 @@ void eb_remove_mem_entry(void* ptr, EbPtrType type);
         EB_MALLOC(pa, (count)*size); \
     } while (0)
 
+#define EB_MALLOC_ARRAY_BLOCK(pa, size) \
+    do {\
+        EB_MALLOC(pa, size); \
+    } while (0)
+
 #define EB_CALLOC_ARRAY(pa, count) \
     do {\
         size_t size = sizeof(*(pa)); \
