@@ -2358,8 +2358,8 @@ static EbErrorType VerifySettings(
         SVT_LOG("Error instance %u: QP must be [0 - %d]\n", channelNumber + 1, MAX_QP_VALUE);
         return_error = EB_ErrorBadParameter;
     }
-    if (config->hierarchical_levels != 3 && config->hierarchical_levels != 4) {
-        SVT_LOG("Error instance %u: Hierarchical Levels supported [3-4]\n", channelNumber + 1);
+    if (config->hierarchical_levels != 3 && config->hierarchical_levels != 4 && config->hierarchical_levels != 5) {
+        SVT_LOG("Error instance %u: Hierarchical Levels supported [3-5]\n", channelNumber + 1);
         return_error = EB_ErrorBadParameter;
     }
     if (config->intra_period_length < -2 || config->intra_period_length > 255) {

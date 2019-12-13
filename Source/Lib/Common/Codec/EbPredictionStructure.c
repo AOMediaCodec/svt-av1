@@ -457,7 +457,7 @@ PredictionStructureConfigEntry five_level_hierarchical_pred_struct[] = {
  *                                      0               3  2  4     1     6  5  7                   1  0  2     9     4  3  5       8       8  7  9     6     1  0  2
  *
  **********************************************************************************************************************************************************************************************************************/
-static PredictionStructureConfigEntry six_level_hierarchical_pred_struct[] = {
+PredictionStructureConfigEntry six_level_hierarchical_pred_struct[] = {
     {
         0,                  // GOP Index 0 - Temporal Layer
         0,                  // GOP Index 0 - Decode Order
@@ -1754,6 +1754,12 @@ EbErrorType prediction_structure_group_ctor(
             for (int i = 1; i < 4; ++i) {
                 five_level_hierarchical_pred_struct[gop_i].ref_list0[i] = 0;
                 five_level_hierarchical_pred_struct[gop_i].ref_list1[i] = 0;
+            }
+        }
+        for (int gop_i = 1; gop_i < 32; ++gop_i) {
+            for (int i = 1; i < 4; ++i) {
+                six_level_hierarchical_pred_struct[gop_i].ref_list0[i] = 0;
+                six_level_hierarchical_pred_struct[gop_i].ref_list1[i] = 0;
             }
         }
     }

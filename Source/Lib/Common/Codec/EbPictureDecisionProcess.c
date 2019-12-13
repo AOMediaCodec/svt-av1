@@ -35,6 +35,7 @@
 #endif
 extern PredictionStructureConfigEntry four_level_hierarchical_pred_struct[];
 extern PredictionStructureConfigEntry five_level_hierarchical_pred_struct[];
+extern PredictionStructureConfigEntry six_level_hierarchical_pred_struct[];
 
 uint64_t  get_ref_poc(PictureDecisionContext *context, uint64_t curr_picture_number, int32_t delta_poc)
 {
@@ -482,7 +483,7 @@ EbErrorType initialize_mini_gop_activity_array(
 
     // Loop over all mini GOPs
     for (MiniGopIndex = 0; MiniGopIndex < MINI_GOP_MAX_COUNT; ++MiniGopIndex) {
-        context_ptr->mini_gop_activity_array[MiniGopIndex] = (get_mini_gop_stats(MiniGopIndex)->hierarchical_levels == MIN_HIERARCHICAL_LEVEL) ?
+        context_ptr->mini_gop_activity_array[MiniGopIndex] = (get_mini_gop_stats(MiniGopIndex)->hierarchical_levels == MIN_HIERARCHICAL_LEVEL + 1) ?
             EB_FALSE :
             EB_TRUE;
     }
@@ -1910,7 +1911,7 @@ void  Av1GenerateRpsInfo(
             }
             else//B pic
             {
-                if (context_ptr->mini_gop_length[0] != picture_control_set_ptr->pred_struct_ptr->pred_struct_period)
+                if (context_ptr->mini_gop_length[mini_gop_index] != picture_control_set_ptr->pred_struct_ptr->pred_struct_period)
                     printf("Error in GOp indexing3\n");
 #if PRED_CHANGE
                 if (picture_control_set_ptr->is_used_as_reference_flag && picture_index != 0)
@@ -2650,7 +2651,7 @@ void  Av1GenerateRpsInfo(
             }
             else//B pic
             {
-                if (context_ptr->mini_gop_length[0] != picture_control_set_ptr->pred_struct_ptr->pred_struct_period)
+                if (context_ptr->mini_gop_length[mini_gop_index] != picture_control_set_ptr->pred_struct_ptr->pred_struct_period)
                     printf("Error in GOp indexing3\n");
 #if PRED_CHANGE_5L
                 if (picture_control_set_ptr->is_used_as_reference_flag && picture_index != 0 && picture_index != 8)
@@ -2860,7 +2861,7 @@ void  Av1GenerateRpsInfo(
         }
         else//B pic
         {
-            if (context_ptr->mini_gop_length[0] != picture_control_set_ptr->pred_struct_ptr->pred_struct_period)
+            if (context_ptr->mini_gop_length[mini_gop_index] != picture_control_set_ptr->pred_struct_ptr->pred_struct_period)
                 printf("Error in GOp indexing3\n");
 
             if (picture_control_set_ptr->is_used_as_reference_flag)
@@ -2908,13 +2909,282 @@ void  Av1GenerateRpsInfo(
         }
     }
 
-    else
+    else if (picture_control_set_ptr->hierarchical_levels == 5)
     {
-        printf("Error: Not supported GOP structure!");
-        exit(0);
-    }
-}
+        uint8_t gop_i;
+        //Reset miniGop Toggling. The first miniGop after a KEY frame has toggle=0
+        if (frm_hdr->frame_type == KEY_FRAME)
+        {
+            context_ptr->lay0_toggle = 0;
+			context_ptr->lay1_toggle = 0;
+			context_ptr->lay2_toggle = 0;
+            frm_hdr->show_frame = EB_TRUE;
+            picture_control_set_ptr->has_show_existing = EB_FALSE;
+            return;
+        }
 
+        //DPB: Loc7|Loc6|Loc5|Loc4|Loc3|Loc2|Loc1|Loc0
+        //Layer 0 : circular move 0-1-2
+        //Layer 1 : DPB Location 3
+        //Layer 2 : DPB Location 4
+        //Layer 3 : DPB Location 5
+        //Layer 4 : DPB Location 6
+        //Layer 5 : DPB Location 7
+
+        const uint8_t  base0_idx = context_ptr->lay0_toggle == 0 ? 1 : context_ptr->lay0_toggle == 1 ? 2 : 0;    //the oldest L0 picture in the DPB
+        const uint8_t  base1_idx = context_ptr->lay0_toggle == 0 ? 2 : context_ptr->lay0_toggle == 1 ? 0 : 1;    //the middle L0 picture in the DPB
+        const uint8_t  base2_idx = context_ptr->lay0_toggle == 0 ? 0 : context_ptr->lay0_toggle == 1 ? 1 : 2;    //the newest L0 picture in the DPB
+
+        const uint8_t  lay1_idx = LAY1_OFF;            //the newest L1 picture in the DPB
+        const uint8_t  lay2_idx = LAY1_OFF + 1;        //the newest L2 picture in the DPB
+        const uint8_t  lay3_idx = LAY1_OFF + 2;        //the newest L3 picture in the DPB
+        const uint8_t  lay4_idx = LAY1_OFF + 3;        //the newest L4 picture in the DPB
+        const uint8_t  lay5_idx = LAY1_OFF + 4;;       //the newest L5 picture in the DPB
+
+        //level5 only support one forward pred and one backward pred.
+        switch (picture_control_set_ptr->temporal_layer_index) {
+        case 0:
+            av1_rps->ref_dpb_index[LAST] = base1_idx;
+            av1_rps->ref_dpb_index[ALT] = base1_idx;
+            gop_i = 0;
+            av1_rps->refresh_frame_mask = 1 << context_ptr->lay0_toggle;
+            break;
+
+        case 1:
+            av1_rps->ref_dpb_index[LAST] = base1_idx;
+            av1_rps->ref_dpb_index[ALT] = base2_idx;
+            gop_i = 16;
+            av1_rps->refresh_frame_mask = 1 << (LAY1_OFF);
+            break;
+
+        case 2:
+            if (picture_index == 7) {
+                av1_rps->ref_dpb_index[LAST] = base1_idx;
+                av1_rps->ref_dpb_index[ALT] = lay1_idx;
+                gop_i = 8;
+            }
+            else if (picture_index == 23) {
+                av1_rps->ref_dpb_index[LAST] = lay1_idx;
+                av1_rps->ref_dpb_index[ALT] = base2_idx;
+                gop_i = 24;
+            }
+            av1_rps->refresh_frame_mask = 1 << (LAY1_OFF + 1);
+            break;
+
+        case 3:
+            if (picture_index == 3) {
+                av1_rps->ref_dpb_index[LAST] = base1_idx;
+                av1_rps->ref_dpb_index[ALT] = lay2_idx;
+                gop_i = 4;
+            }
+            else if (picture_index == 11) {
+                av1_rps->ref_dpb_index[LAST] = lay2_idx;
+                av1_rps->ref_dpb_index[ALT] = lay1_idx;
+                gop_i = 12;
+            }
+            else if (picture_index == 19) {
+                av1_rps->ref_dpb_index[LAST] = lay1_idx;
+                av1_rps->ref_dpb_index[ALT] = lay2_idx;
+                gop_i = 20;
+            }
+            else if (picture_index == 27) {
+                av1_rps->ref_dpb_index[LAST] = lay2_idx;
+                av1_rps->ref_dpb_index[ALT] = base2_idx;
+                gop_i = 28;
+            }
+            else
+                printf("Error in GOp indexing 3292\n");
+            av1_rps->refresh_frame_mask = 1 << (LAY1_OFF + 2);
+            break;
+
+        case 4:
+            if (picture_index == 1) {
+                av1_rps->ref_dpb_index[LAST] = base1_idx;
+                av1_rps->ref_dpb_index[ALT] = lay3_idx;
+            }
+            else if (picture_index == 5) {
+                av1_rps->ref_dpb_index[LAST] = lay3_idx;
+                av1_rps->ref_dpb_index[ALT] = lay2_idx;
+            }
+            else if (picture_index == 9) {
+                av1_rps->ref_dpb_index[LAST] = lay2_idx;
+                av1_rps->ref_dpb_index[ALT] = lay3_idx;
+            }
+            else if (picture_index == 13) {
+                av1_rps->ref_dpb_index[LAST] = lay3_idx;
+                av1_rps->ref_dpb_index[ALT] = lay1_idx;
+            }
+            else if (picture_index == 17) {
+                av1_rps->ref_dpb_index[LAST] = lay1_idx;
+                av1_rps->ref_dpb_index[ALT] = lay3_idx;
+            }
+            else if (picture_index == 21) {
+                av1_rps->ref_dpb_index[LAST] = lay3_idx;
+                av1_rps->ref_dpb_index[ALT] = lay2_idx;
+            }
+            else if (picture_index == 25) {
+                av1_rps->ref_dpb_index[LAST] = lay2_idx;
+                av1_rps->ref_dpb_index[ALT] = lay3_idx;
+            }
+            else if (picture_index == 29) {
+                av1_rps->ref_dpb_index[LAST] = lay3_idx;
+                av1_rps->ref_dpb_index[ALT] = base2_idx;
+            }
+            else
+                printf("Error in GOp indexing 3330\n");
+            gop_i = picture_index + 1;
+            av1_rps->refresh_frame_mask = 1 << (LAY1_OFF + 3);
+            break;
+
+        case 5:
+            // update RPS for the overlay frame.
+            if (picture_control_set_ptr->is_overlay) {
+                av1_rps->ref_dpb_index[LAST] = base1_idx;
+                av1_rps->ref_dpb_index[ALT] = base1_idx;
+                av1_rps->ref_poc_array[LAST] = get_ref_poc(context_ptr, picture_control_set_ptr->picture_number, 0);
+                av1_rps->ref_poc_array[ALT] = get_ref_poc(context_ptr, picture_control_set_ptr->picture_number, 0);
+            }
+            else if (picture_index == 0) {
+                av1_rps->ref_dpb_index[LAST] = base1_idx;
+                av1_rps->ref_dpb_index[ALT] = lay4_idx;
+            }
+            else if (picture_index == 2 || picture_index == 10 || picture_index == 18 || picture_index == 26) {
+                av1_rps->ref_dpb_index[LAST] = lay4_idx;
+                av1_rps->ref_dpb_index[ALT] = lay3_idx;
+            }
+            else if (picture_index == 4 || picture_index == 12 || picture_index == 20 || picture_index == 28) {
+                av1_rps->ref_dpb_index[LAST] = lay3_idx;
+                av1_rps->ref_dpb_index[ALT] = lay4_idx;
+            }
+            else if (picture_index == 6 || picture_index == 22) {
+                av1_rps->ref_dpb_index[LAST] = lay4_idx;
+                av1_rps->ref_dpb_index[ALT] = lay2_idx;
+            }
+            else if (picture_index == 8 || picture_index == 24) {
+                av1_rps->ref_dpb_index[LAST] = lay2_idx;
+                av1_rps->ref_dpb_index[ALT] = lay4_idx;
+            }
+            else if (picture_index == 14) {
+                av1_rps->ref_dpb_index[LAST] = lay4_idx;
+                av1_rps->ref_dpb_index[ALT] = lay1_idx;
+            }
+            else if (picture_index == 16) {
+                av1_rps->ref_dpb_index[LAST] = lay1_idx;
+                av1_rps->ref_dpb_index[ALT] = lay4_idx;
+            }
+            else if (picture_index == 30) {
+                av1_rps->ref_dpb_index[LAST] = lay4_idx;
+                av1_rps->ref_dpb_index[ALT] = base2_idx;
+            }
+            else
+                printf("Error in GOp indexing 3377\n");
+            gop_i = picture_index + 1;
+            av1_rps->refresh_frame_mask = 0;
+            break;
+
+        default:
+            printf("Error: unexpected picture mini Gop number\n");
+            break;
+        }
+        av1_rps->ref_dpb_index[LAST2] = av1_rps->ref_dpb_index[LAST];
+        av1_rps->ref_dpb_index[LAST3] = av1_rps->ref_dpb_index[LAST];
+        av1_rps->ref_dpb_index[GOLD] = av1_rps->ref_dpb_index[LAST];
+        av1_rps->ref_dpb_index[BWD] = av1_rps->ref_dpb_index[ALT];
+        av1_rps->ref_dpb_index[ALT2] = av1_rps->ref_dpb_index[ALT];
+        
+        av1_rps->ref_poc_array[LAST] = get_ref_poc(context_ptr, picture_control_set_ptr->picture_number, six_level_hierarchical_pred_struct[gop_i].ref_list0[0]);
+        av1_rps->ref_poc_array[ALT] = get_ref_poc(context_ptr, picture_control_set_ptr->picture_number, six_level_hierarchical_pred_struct[gop_i].ref_list1[0]);            
+        av1_rps->ref_poc_array[LAST2] = av1_rps->ref_poc_array[LAST];
+        av1_rps->ref_poc_array[LAST3] = av1_rps->ref_poc_array[LAST];
+        av1_rps->ref_poc_array[GOLD] = av1_rps->ref_poc_array[LAST];
+        av1_rps->ref_poc_array[BWD] = av1_rps->ref_poc_array[ALT];
+        av1_rps->ref_poc_array[ALT2] = av1_rps->ref_poc_array[ALT];
+
+        // update RPS for the overlay frame.
+        if (picture_control_set_ptr->pred_struct_ptr->pred_type == EB_PRED_LOW_DELAY_P || picture_control_set_ptr->is_overlay)
+        {
+            //P frames.
+            av1_rps->ref_dpb_index[4] = av1_rps->ref_dpb_index[5] = av1_rps->ref_dpb_index[6] = av1_rps->ref_dpb_index[0];
+            av1_rps->ref_poc_array[4] = av1_rps->ref_poc_array[5] = av1_rps->ref_poc_array[6] = av1_rps->ref_poc_array[0];
+            frm_hdr->show_frame = EB_TRUE;
+            picture_control_set_ptr->has_show_existing = EB_FALSE;
+        } else if (picture_control_set_ptr->pred_struct_ptr->pred_type == EB_PRED_LOW_DELAY_B) {
+            av1_rps->ref_dpb_index[4] = av1_rps->ref_dpb_index[0];
+            av1_rps->ref_dpb_index[5] = av1_rps->ref_dpb_index[1];
+            av1_rps->ref_dpb_index[6] = av1_rps->ref_dpb_index[2];
+            av1_rps->ref_poc_array[4] = av1_rps->ref_poc_array[0];
+            av1_rps->ref_poc_array[5] = av1_rps->ref_poc_array[1];
+            av1_rps->ref_poc_array[6] = av1_rps->ref_poc_array[2];
+
+            frm_hdr->show_frame = EB_TRUE;
+            picture_control_set_ptr->has_show_existing = EB_FALSE;
+        } else if (picture_control_set_ptr->pred_struct_ptr->pred_type == EB_PRED_RANDOM_ACCESS) {    
+            //Decide on Show Mecanism
+            if (picture_control_set_ptr->slice_type == I_SLICE)
+            {
+                //3 cases for I slice:    1:Key Frame treated above.    2: broken MiniGop due to sc or intra refresh  3: complete miniGop due to sc or intra refresh
+                if (context_ptr->mini_gop_length[0] < picture_control_set_ptr->pred_struct_ptr->pred_struct_period)
+                {
+                    //Scene Change that breaks the mini gop and switch to LDP (if I scene change happens to be aligned with a complete miniGop, then we do not break the pred structure)
+                    frm_hdr->show_frame = EB_TRUE;
+                    picture_control_set_ptr->has_show_existing = EB_FALSE;
+                }
+                else
+                {
+                    frm_hdr->show_frame = EB_FALSE;
+                    picture_control_set_ptr->has_show_existing = EB_FALSE;
+                }
+            }
+            else//B pic
+            {
+                if (context_ptr->mini_gop_length[mini_gop_index] != picture_control_set_ptr->pred_struct_ptr->pred_struct_period)
+                    printf("Error in GOp indexing3\n");
+#if PRED_CHANGE_5L
+                if (picture_control_set_ptr->is_used_as_reference_flag && picture_index != 0 && picture_index != 8)
+#else
+                if (picture_control_set_ptr->is_used_as_reference_flag)
+#endif
+                {
+                    frm_hdr->show_frame = EB_FALSE;
+                    picture_control_set_ptr->has_show_existing = EB_FALSE;
+                }
+                else
+                {
+                    frm_hdr->show_frame = EB_TRUE;
+                    picture_control_set_ptr->has_show_existing = EB_TRUE;
+
+                    if (picture_index == 0 || picture_index == 4 || picture_index == 8 || picture_index == 12 ||
+                        picture_index == 16 || picture_index == 20 || picture_index == 24 || picture_index == 28)
+                        frm_hdr->show_existing_frame = lay4_idx;
+                    else if (picture_index == 2 || picture_index == 10 || picture_index == 18 || picture_index == 26)
+                        frm_hdr->show_existing_frame = lay3_idx;
+                    else if (picture_index == 6 || picture_index == 22)
+                        frm_hdr->show_existing_frame = lay2_idx;
+                    else if (picture_index == 14)
+                        frm_hdr->show_existing_frame = lay1_idx;
+                    else if (picture_index == 30)
+                        frm_hdr->show_existing_frame = base2_idx;
+                    else
+                        printf("Error in GOp indexing2\n");
+                }
+            }
+        }
+        else {
+            printf("Error: Not supported GOP structure!");
+            exit(0);
+        }
+    
+        //last pic in MiniGop: Base layer toggling
+        //mini GOP toggling since last Key Frame.
+        //a regular I keeps the toggling process and does not reset the toggle.  K-0-1-0-1-0-K-0-1-0-1-K-0-1.....
+        //whoever needs a miniGOP Level toggling, this is the time
+        if ((picture_index == (context_ptr->mini_gop_end_index[mini_gop_index])) && !picture_control_set_ptr->is_overlay) {
+            //Layer0 toggle 0->1->2
+            context_ptr->lay0_toggle = circ_inc(3, 1, context_ptr->lay0_toggle);
+        }
+    }
+    return;
+}
 /***************************************************************************************************
 // Perform Required Picture Analysis Processing for the Overlay frame
 ***************************************************************************************************/
@@ -3360,13 +3630,10 @@ void* picture_decision_kernel(void *input_ptr)
                         {
                             initialize_mini_gop_activity_array(
                                 context_ptr);
-
-                            if (encode_context_ptr->pre_assignment_buffer_count == 16)
+                            if (encode_context_ptr->pre_assignment_buffer_count >= 32)
+                                context_ptr->mini_gop_activity_array[L6_INDEX] = EB_FALSE;
+                            if (encode_context_ptr->pre_assignment_buffer_count >= 16)
                                 context_ptr->mini_gop_activity_array[L5_0_INDEX] = EB_FALSE;
-                            else {
-                                context_ptr->mini_gop_activity_array[L4_0_INDEX] = EB_FALSE;
-                                context_ptr->mini_gop_activity_array[L4_1_INDEX] = EB_FALSE;
-                            }
 
                             generate_picture_window_split(
                                 context_ptr,
