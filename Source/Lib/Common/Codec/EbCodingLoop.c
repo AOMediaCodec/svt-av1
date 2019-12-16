@@ -32,6 +32,9 @@
 #include "aom_dsp_rtcd.h"
 #include "EbCodingLoop.h"
 #include "EbComputeSAD.h"
+#if RATE_ESTIMATION_UPDATE
+#include "EbMdRateEstimation.h"
+#endif
 void av1_set_ref_frame(MvReferenceFrame *rf,
     int8_t ref_frame_type);
 
@@ -59,7 +62,7 @@ static EB_AV1_INTER_PREDICTION_FUNC_PTR   av1_inter_prediction_function_table[2]
 typedef void(*EB_AV1_ENCODE_LOOP_FUNC_PTR)(
     PictureControlSet    *picture_control_set_ptr,
     EncDecContext       *context_ptr,
-    LargestCodingUnit   *sb_ptr,
+    SuperBlock          *sb_ptr,
     uint32_t                 origin_x,
     uint32_t                 origin_y,
     uint32_t                 cb_qp,
@@ -412,7 +415,7 @@ void GeneratePuIntraLumaNeighborModes(
 void encode_pass_tx_search(
     PictureControlSet            *picture_control_set_ptr,
     EncDecContext                *context_ptr,
-    LargestCodingUnit            *sb_ptr,
+    SuperBlock                   *sb_ptr,
     uint32_t                       cb_qp,
     EbPictureBufferDesc          *coeffSamplesTB,
     EbPictureBufferDesc          *residual16bit,
@@ -446,7 +449,7 @@ void encode_pass_tx_search(
 static void Av1EncodeLoop(
     PictureControlSet    *picture_control_set_ptr,
     EncDecContext       *context_ptr,
-    LargestCodingUnit   *sb_ptr,
+    SuperBlock          *sb_ptr,
     uint32_t                 origin_x,   //pic based tx org x
     uint32_t                 origin_y,   //pic based tx org y
     uint32_t                 cb_qp,
@@ -506,7 +509,11 @@ static void Av1EncodeLoop(
             residual16bit->stride_y,
             context_ptr->blk_geom->tx_width[cu_ptr->tx_depth][context_ptr->txb_itr],
             context_ptr->blk_geom->tx_height[cu_ptr->tx_depth][context_ptr->txb_itr]);
+#if MULTI_PASS_PD
+        uint8_t  tx_search_skip_flag = context_ptr->md_context->tx_search_level == TX_SEARCH_ENC_DEC ? get_skip_tx_search_flag(
+#else
         uint8_t  tx_search_skip_flag = (picture_control_set_ptr->parent_pcs_ptr->tx_search_level == TX_SEARCH_ENC_DEC && (picture_control_set_ptr->parent_pcs_ptr->atb_mode == 0 || cu_ptr->prediction_mode_flag == INTER_MODE)) ? get_skip_tx_search_flag(
+#endif
             context_ptr->blk_geom->sq_size,
             MAX_MODE_COST,
             0,
@@ -822,7 +829,7 @@ static void Av1EncodeLoop(
 void encode_pass_tx_search_hbd(
     PictureControlSet            *picture_control_set_ptr,
     EncDecContext                *context_ptr,
-    LargestCodingUnit            *sb_ptr,
+    SuperBlock                   *sb_ptr,
     uint32_t                       cb_qp,
     EbPictureBufferDesc          *coeffSamplesTB,
     EbPictureBufferDesc          *residual16bit,
@@ -856,7 +863,7 @@ void encode_pass_tx_search_hbd(
 static void Av1EncodeLoop16bit(
     PictureControlSet    *picture_control_set_ptr,
     EncDecContext       *context_ptr,
-    LargestCodingUnit   *sb_ptr,
+    SuperBlock          *sb_ptr,
     uint32_t                 origin_x,
     uint32_t                 origin_y,
     uint32_t                 cb_qp,
@@ -913,7 +920,11 @@ static void Av1EncodeLoop16bit(
                 residual16bit->stride_y,
                 context_ptr->blk_geom->tx_width[cu_ptr->tx_depth][context_ptr->txb_itr],
                 context_ptr->blk_geom->tx_height[cu_ptr->tx_depth][context_ptr->txb_itr]);
+#if MULTI_PASS_PD
+            uint8_t  tx_search_skip_flag = context_ptr->md_context->tx_search_level == TX_SEARCH_ENC_DEC ? get_skip_tx_search_flag(
+#else
             uint8_t  tx_search_skip_flag = (picture_control_set_ptr->parent_pcs_ptr->tx_search_level == TX_SEARCH_ENC_DEC && (picture_control_set_ptr->parent_pcs_ptr->atb_mode == 0 || cu_ptr->prediction_mode_flag == INTER_MODE)) ? get_skip_tx_search_flag(
+#endif
                 context_ptr->blk_geom->sq_size,
                 MAX_MODE_COST,
                 0,
@@ -1472,7 +1483,7 @@ void move_cu_data(
 
 void perform_intra_coding_loop(
     PictureControlSet  *picture_control_set_ptr,
-    LargestCodingUnit  *sb_ptr,
+    SuperBlock         *sb_ptr,
     uint32_t            tbAddr,
     CodingUnit         *cu_ptr,
     PredictionUnit     *pu_ptr,
@@ -2124,7 +2135,7 @@ void av1_copy_frame_mvs(PictureControlSet *picture_control_set_ptr, const Av1Com
 EB_EXTERN void av1_encode_pass(
     SequenceControlSet      *sequence_control_set_ptr,
     PictureControlSet       *picture_control_set_ptr,
-    LargestCodingUnit       *sb_ptr,
+    SuperBlock              *sb_ptr,
     uint32_t                 tbAddr,
     uint32_t                 sb_origin_x,
     uint32_t                 sb_origin_y,
@@ -2323,13 +2334,9 @@ EB_EXTERN void av1_encode_pass(
 #endif
 
     uint8_t allow_update_cdf = picture_control_set_ptr->update_cdf;
-
     uint32_t final_cu_itr = 0;
-
     // CU Loop
-
     uint32_t    blk_it = 0;
-
     while (blk_it < sequence_control_set_ptr->max_block_cnt) {
         CodingUnit  *cu_ptr = context_ptr->cu_ptr = &context_ptr->md_context->md_cu_arr_nsq[blk_it];
         PartitionType part = cu_ptr->part;
@@ -2337,6 +2344,17 @@ EB_EXTERN void av1_encode_pass(
         const BlockGeom * blk_geom = context_ptr->blk_geom = get_blk_geom_mds(blk_it);
         UNUSED(blk_geom);
         sb_ptr->cu_partition_array[blk_it] = context_ptr->md_context->md_cu_arr_nsq[blk_it].part;
+#if RATE_ESTIMATION_UPDATE
+        if (picture_control_set_ptr->update_cdf) {
+            cu_ptr->av1xd->tile_ctx = &picture_control_set_ptr->ec_ctx_array[tbAddr];
+            // Update the partition stats
+            update_part_stats(
+                picture_control_set_ptr,
+                cu_ptr,
+                (sb_origin_y + blk_geom->origin_y) >> MI_SIZE_LOG2,
+                (sb_origin_x + blk_geom->origin_x)>> MI_SIZE_LOG2);
+        }
+#endif
         if (part != PARTITION_SPLIT && sequence_control_set_ptr->sb_geom[tbAddr].block_is_allowed[blk_it]) {
             int32_t offset_d1 = ns_blk_offset[(int32_t)part]; //cu_ptr->best_d1_blk; // TOCKECK
             int32_t num_d1_block = ns_blk_num[(int32_t)part]; // context_ptr->blk_geom->totns; // TOCKECK
@@ -3794,7 +3812,31 @@ EB_EXTERN void av1_encode_pass(
                     context_ptr->cu_origin_y,
                     blk_geom,
                     picture_control_set_ptr);
+#if RATE_ESTIMATION_UPDATE
+                if (picture_control_set_ptr->update_cdf) {
+                    // Update the partition Neighbor Array
+                    PartitionContext         partition;
+                    partition.above = partition_context_lookup[blk_geom->bsize].above;
+                    partition.left  = partition_context_lookup[blk_geom->bsize].left;
 
+                    neighbor_array_unit_mode_write(
+                        picture_control_set_ptr->ep_partition_context_neighbor_array,
+                        (uint8_t*)&partition,
+                        context_ptr->cu_origin_x,
+                        context_ptr->cu_origin_y,
+                        blk_geom->bwidth,
+                        blk_geom->bheight,
+                        NEIGHBOR_ARRAY_UNIT_TOP_AND_LEFT_ONLY_MASK);
+
+                    // Update the CDFs based on the current block
+                    cu_ptr->av1xd->tile_ctx = &picture_control_set_ptr->ec_ctx_array[tbAddr];
+                    update_stats(
+                        picture_control_set_ptr,
+                        cu_ptr,
+                        context_ptr->cu_origin_y >> MI_SIZE_LOG2,
+                        context_ptr->cu_origin_x >> MI_SIZE_LOG2);
+                }
+#endif
                 if (dlfEnableFlag)
                 {
                 }
@@ -3864,7 +3906,7 @@ EB_EXTERN void av1_encode_pass(
 EB_EXTERN void no_enc_dec_pass(
     SequenceControlSet    *sequence_control_set_ptr,
     PictureControlSet     *picture_control_set_ptr,
-    LargestCodingUnit     *sb_ptr,
+    SuperBlock            *sb_ptr,
     uint32_t                   tbAddr,
     uint32_t                   sb_origin_x,
     uint32_t                   sb_origin_y,

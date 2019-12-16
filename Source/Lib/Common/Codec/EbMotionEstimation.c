@@ -19,6 +19,7 @@
 
 #include "EbComputeSAD.h"
 #include "EbReferenceObject.h"
+#include "EbAvcStyleMcp.h"
 #include "EbMeSadCalculation.h"
 
 #include "EbIntraPrediction.h"
@@ -12377,47 +12378,6 @@ uint32_t get_me_info_index(uint32_t max_me_block, const BlockGeom *blk_geom,
     return me_info_index;
 }
 
-// Nader - to be replaced by loock-up table
-/*******************************************
- * get_me_info_index
- *   search the correct index of the motion
- *   info that corresponds to the input
- *   md candidate
- *******************************************/
-uint32_t get_in_loop_me_info_index(uint32_t max_me_block, uint8_t is_128_sb,
-                                   const BlockGeom *blk_geom) {
-    // search for motion info
-    uint32_t block_index;
-    uint32_t me_info_index = 0xFFFFFFF;
-    if (is_128_sb) {
-        for (block_index = 0; block_index < max_me_block; block_index++) {
-            if (blk_geom->bwidth ==
-                    in_loop_me_block_width_128_sb[block_index] &&
-                blk_geom->bheight ==
-                    in_loop_me_block_height_128_sb[block_index] &&
-                blk_geom->origin_x ==
-                    in_loop_me_block_index_128_sb[block_index][0] &&
-                blk_geom->origin_y ==
-                    in_loop_me_block_index_128_sb[block_index][1]) {
-                me_info_index = block_index;
-                break;
-            }
-        }
-    } else {
-        for (block_index = 0; block_index < max_me_block; block_index++) {
-            if (blk_geom->bwidth == in_loop_me_block_width[block_index] &&
-                blk_geom->bheight == in_loop_me_block_height[block_index] &&
-                blk_geom->origin_x == in_loop_me_block_index[block_index][0] &&
-                blk_geom->origin_y == in_loop_me_block_index[block_index][1]) {
-                me_info_index = block_index;
-                break;
-            }
-        }
-    }
-
-    return me_info_index;
-}
-
 #define NSET_CAND(mePuResult, num, dist, dir)                      \
     (mePuResult)->distortion_direction[(num)].distortion = (dist); \
     (mePuResult)->distortion_direction[(num)].direction = (dir);
@@ -12515,12 +12475,6 @@ EbErrorType CheckZeroZeroCenter(EbPictureBufferDesc *refPicPtr,
     hmeMvSad = hmeMvSad << subsampleSad;
 
     hmeMvdRate = 0;
-    // AMIR use AV1 rate estimation functions
-    // MeGetMvdFractionBits(
-    //    ABS(*x_search_center << 2),
-    //    ABS(*y_search_center << 2),
-    //    context_ptr->mvd_bits_array,
-    //    &hmeMvdRate);
 
     hmeMvCost = (hmeMvSad << COST_PRECISION) +
                 (((context_ptr->lambda * hmeMvdRate) + MD_OFFSET) >> MD_SHIFT);
@@ -13668,7 +13622,18 @@ EbErrorType motion_estimate_lcu(
             ? EB_TRUE
             : EB_FALSE;
 
-    is_nsq_table_used = picture_control_set_ptr->enc_mode == ENC_M0 ?  EB_FALSE : is_nsq_table_used;
+#if MULTI_PASS_PD
+    is_nsq_table_used = (picture_control_set_ptr->enc_mode == ENC_M0                         ||
+                         picture_control_set_ptr->pic_depth_mode == PIC_MULTI_PASS_PD_MODE_0 ||
+                         picture_control_set_ptr->pic_depth_mode == PIC_MULTI_PASS_PD_MODE_1 ||
+                         picture_control_set_ptr->pic_depth_mode == PIC_MULTI_PASS_PD_MODE_2 ||
+                         picture_control_set_ptr->pic_depth_mode == PIC_MULTI_PASS_PD_MODE_3 )? EB_FALSE : is_nsq_table_used;
+#else
+    if (sequence_control_set_ptr->static_config.nsq_table == DEFAULT)
+        is_nsq_table_used = picture_control_set_ptr->enc_mode == ENC_M0 ?  EB_FALSE : is_nsq_table_used;
+    else
+        is_nsq_table_used = sequence_control_set_ptr->static_config.nsq_table;
+#endif
 
     if (context_ptr->me_alt_ref == EB_TRUE)
         numOfListToSearch = 0;

@@ -228,9 +228,10 @@ uint8_t  circ_inc(uint8_t max, uint8_t off, uint8_t input)
 
 #define WTH 64
 #define OTH 64
+#if !MULTI_PASS_PD
 #define FC_SKIP_TX_SR_TH025                     125 // Fast cost skip tx search threshold.
 #define FC_SKIP_TX_SR_TH010                     110 // Fast cost skip tx search threshold.
-
+#endif
 void picture_decision_context_dctor(EbPtr p)
 {
     PictureDecisionContext* obj = (PictureDecisionContext*)p;
@@ -767,11 +768,6 @@ EbErrorType signal_derivation_multi_processes_oq(
     PictureParentControlSet   *picture_control_set_ptr) {
     EbErrorType return_error = EB_ErrorNone;
     FrameHeader *frm_hdr = &picture_control_set_ptr->frm_hdr;
-    //  MDC Partitioning Method              Settings
-    //  PIC_ALL_DEPTH_MODE                   ALL sq and nsq: SB size -> 4x4
-    //  PIC_ALL_C_DEPTH_MODE                 ALL sq and nsq: SB size -> 4x4  (No 4xN ; Nx4)
-    //  PIC_SQ_DEPTH_MODE                    ONLY sq: SB size -> 4x4
-    //  PIC_SQ_NON4_DEPTH_MODE               ONLY sq: SB size -> 8x8  (No 4x4)
 
     uint8_t sc_content_detected = picture_control_set_ptr->sc_content_detected;
 
@@ -817,9 +813,22 @@ EbErrorType signal_derivation_multi_processes_oq(
                     picture_control_set_ptr->pic_depth_mode = PIC_SQ_NON4_DEPTH_MODE;
             else
                 picture_control_set_ptr->pic_depth_mode = PIC_SQ_NON4_DEPTH_MODE;
+#if MULTI_PASS_PD
+        else if (MR_MODE)
+            picture_control_set_ptr->pic_depth_mode = PIC_ALL_DEPTH_MODE;
+        else if (picture_control_set_ptr->enc_mode == ENC_M0)
+            // Use a single-stage PD if I_SLICE
+            picture_control_set_ptr->pic_depth_mode = (picture_control_set_ptr->slice_type == I_SLICE) ? PIC_ALL_DEPTH_MODE : PIC_MULTI_PASS_PD_MODE_1;
+        else if (picture_control_set_ptr->enc_mode <= ENC_M2)
+            // Use a single-stage PD if I_SLICE
+            picture_control_set_ptr->pic_depth_mode = (picture_control_set_ptr->slice_type == I_SLICE) ? PIC_ALL_DEPTH_MODE : PIC_MULTI_PASS_PD_MODE_2;
+#endif
 
+// These are the default settings to use
+#if !MULTI_PASS_PD
         else if (picture_control_set_ptr->enc_mode <= ENC_M2)
             picture_control_set_ptr->pic_depth_mode = PIC_ALL_DEPTH_MODE;
+#endif
 
         //Jing: TODO:
         //In M3, sb_sz may be 128x128, and init_sq_non4_block only works for 64x64 sb size
@@ -840,7 +849,6 @@ EbErrorType signal_derivation_multi_processes_oq(
                 picture_control_set_ptr->pic_depth_mode = PIC_SQ_NON4_DEPTH_MODE;
             else
                 picture_control_set_ptr->pic_depth_mode = PIC_SB_SWITCH_DEPTH_MODE;
-
 
         if (picture_control_set_ptr->pic_depth_mode < PIC_SQ_DEPTH_MODE)
             assert(sequence_control_set_ptr->nsq_present == 1 && "use nsq_present 1");
@@ -890,6 +898,10 @@ EbErrorType signal_derivation_multi_processes_oq(
 #endif
 #endif
 
+#if MULTI_PASS_PD && MDC_ADAPTIVE_LEVEL
+    picture_control_set_ptr->enable_adaptive_ol_partitioning = 0;
+#endif
+
     // NSQ search Level                               Settings
     // NSQ_SEARCH_OFF                                 OFF
     // NSQ_SEARCH_LEVEL1                              Allow only NSQ Inter-NEAREST/NEAR/GLOBAL if parent SQ has no coeff + reordering nsq_table number and testing only 1 NSQ SHAPE
@@ -902,6 +914,15 @@ EbErrorType signal_derivation_multi_processes_oq(
 
         if (MR_MODE)
             picture_control_set_ptr->nsq_search_level = NSQ_SEARCH_FULL;
+#if MULTI_PASS_PD
+        else if (picture_control_set_ptr->pic_depth_mode == PIC_MULTI_PASS_PD_MODE_0 ||
+                 picture_control_set_ptr->pic_depth_mode == PIC_MULTI_PASS_PD_MODE_1 ||
+                 picture_control_set_ptr->pic_depth_mode == PIC_MULTI_PASS_PD_MODE_2 ||
+                 picture_control_set_ptr->pic_depth_mode == PIC_MULTI_PASS_PD_MODE_3 ){
+
+            picture_control_set_ptr->nsq_search_level = NSQ_SEARCH_LEVEL6;
+        }
+#endif
         else if (sc_content_detected)
             if (picture_control_set_ptr->enc_mode <= ENC_M1)
 #if M0_OPT
@@ -930,6 +951,7 @@ EbErrorType signal_derivation_multi_processes_oq(
         else if (picture_control_set_ptr->mdc_depth_level == (MAX_MDC_LEVEL - 1))
             picture_control_set_ptr->nsq_search_level = NSQ_SEARCH_LEVEL7;
 #endif
+
         else if (picture_control_set_ptr->enc_mode <= ENC_M1)
             picture_control_set_ptr->nsq_search_level = NSQ_SEARCH_LEVEL6;
 
@@ -983,6 +1005,7 @@ EbErrorType signal_derivation_multi_processes_oq(
         if (picture_control_set_ptr->pic_depth_mode <= PIC_ALL_C_DEPTH_MODE) picture_control_set_ptr->pic_depth_mode = PIC_SQ_DEPTH_MODE;
     if (picture_control_set_ptr->pic_depth_mode > PIC_SQ_DEPTH_MODE)
         assert(picture_control_set_ptr->nsq_search_level == NSQ_SEARCH_OFF);
+#if !MULTI_PASS_PD
     // Interpolation search Level                     Settings
     // 0                                              OFF
     // 1                                              Interpolation search at inter-depth
@@ -1008,7 +1031,7 @@ EbErrorType signal_derivation_multi_processes_oq(
                 picture_control_set_ptr->interpolation_search_level = IT_SEARCH_OFF;
         else
             picture_control_set_ptr->interpolation_search_level = IT_SEARCH_OFF;
-
+#endif
     // Loop filter Level                            Settings
     // 0                                            OFF
     // 1                                            CU-BASED
@@ -1154,7 +1177,7 @@ EbErrorType signal_derivation_multi_processes_oq(
         cm->wn_filter_mode = 2;
     else
         cm->wn_filter_mode = 0;
-
+#if !MULTI_PASS_PD
     // Tx_search Level                                Settings
     // 0                                              OFF
     // 1                                              Tx search at encdec
@@ -1218,7 +1241,7 @@ EbErrorType signal_derivation_multi_processes_oq(
             picture_control_set_ptr->tx_search_reduced_set = 1;
     else
         picture_control_set_ptr->tx_search_reduced_set = 1;
-
+#endif
     // Intra prediction modes                       Settings
     // 0                                            FULL
     // 1                                            LIGHT per block : disable_z2_prediction && disable_angle_refinement  for 64/32/4
@@ -1302,13 +1325,14 @@ EbErrorType signal_derivation_multi_processes_oq(
         // 1                 ON for INTRA blocks
 #if ATB_10_BIT
 #if ATB_HBD
-        if (picture_control_set_ptr->enc_mode <= ENC_M1 && !picture_control_set_ptr->sc_content_detected)
+        if (picture_control_set_ptr->enc_mode <= ENC_M1)
 #else
         if (picture_control_set_ptr->enc_mode <= ENC_M1 &&  !sequence_control_set_ptr->static_config.enable_hbd_mode_decision)
 #endif
 #else
         if (picture_control_set_ptr->enc_mode <= ENC_M1 && sequence_control_set_ptr->static_config.encoder_bit_depth == EB_8BIT)
 #endif
+
 #if SPEED_OPT
             picture_control_set_ptr->atb_mode = (MR_MODE || picture_control_set_ptr->temporal_layer_index == 0) ? 1 : 0;
 #else
@@ -1322,7 +1346,11 @@ EbErrorType signal_derivation_multi_processes_oq(
         // 1                                     ON
 
 #if SPEED_OPT
+#if ENHANCED_M0_SETTINGS
+        if (picture_control_set_ptr->enc_mode == ENC_M0 || picture_control_set_ptr->sc_content_detected)
+#else
         if (MR_MODE || picture_control_set_ptr->sc_content_detected)
+#endif
 #else
         if (MR_MODE || picture_control_set_ptr->enc_mode == ENC_M0 || picture_control_set_ptr->sc_content_detected)
 #endif
@@ -1338,49 +1366,80 @@ EbErrorType signal_derivation_multi_processes_oq(
 
         picture_control_set_ptr->wedge_mode = 0;
 
-#if II_COMP_FLAG
         // inter intra pred                      Settings
         // 0                                     OFF
         // 1                                     ON
+#if II_COMP_FLAG
+        if (sequence_control_set_ptr->static_config.inter_intra_compound == DEFAULT)
             picture_control_set_ptr->enable_inter_intra = picture_control_set_ptr->slice_type != I_SLICE ? sequence_control_set_ptr->seq_header.enable_interintra_compound : 0;
+        else
+            picture_control_set_ptr->enable_inter_intra = sequence_control_set_ptr->static_config.inter_intra_compound;
 #endif
+
         // Set compound mode      Settings
         // 0                 OFF: No compond mode search : AVG only
         // 1                 ON: compond mode search: AVG/DIST/DIFF
         // 2                 ON: AVG/DIST/DIFF/WEDGE
-        if (sequence_control_set_ptr->compound_mode)
-            picture_control_set_ptr->compound_mode = picture_control_set_ptr->sc_content_detected ? 0 :
-            picture_control_set_ptr->enc_mode <= ENC_M1 ? 2 : 1;
+        if (sequence_control_set_ptr->static_config.compound_level == DEFAULT) {
+            if (sequence_control_set_ptr->compound_mode)
+                picture_control_set_ptr->compound_mode = picture_control_set_ptr->sc_content_detected ? 0 :
+                picture_control_set_ptr->enc_mode <= ENC_M1 ? 2 : 1;
+            else
+                picture_control_set_ptr->compound_mode = 0;
+#if !MULTI_PASS_PD
+            // set compound_types_to_try
+            if (picture_control_set_ptr->compound_mode)
+                picture_control_set_ptr->compound_types_to_try = picture_control_set_ptr->compound_mode == 1 ? MD_COMP_DIFF0 : MD_COMP_WEDGE;
+            else
+                picture_control_set_ptr->compound_types_to_try = MD_COMP_AVG;
+#endif
+        }
         else
-            picture_control_set_ptr->compound_mode = 0;
-
-        // set compound_types_to_try
-        if (picture_control_set_ptr->compound_mode)
-            picture_control_set_ptr->compound_types_to_try = picture_control_set_ptr->compound_mode == 1 ? MD_COMP_DIFF0 : MD_COMP_WEDGE;
-        else
-            picture_control_set_ptr->compound_types_to_try = MD_COMP_AVG;
+            picture_control_set_ptr->compound_mode = sequence_control_set_ptr->static_config.compound_level;
 
         // Set frame end cdf update mode      Settings
         // 0                                     OFF
         // 1                                     ON
-        if (picture_control_set_ptr->enc_mode == ENC_M0)
-            picture_control_set_ptr->frame_end_cdf_update_mode = 1;
+        if (sequence_control_set_ptr->static_config.frame_end_cdf_update == DEFAULT)
+            if (picture_control_set_ptr->enc_mode == ENC_M0)
+                picture_control_set_ptr->frame_end_cdf_update_mode = 1;
+            else
+                picture_control_set_ptr->frame_end_cdf_update_mode = 0;
         else
-            picture_control_set_ptr->frame_end_cdf_update_mode = 0;
+            picture_control_set_ptr->frame_end_cdf_update_mode = sequence_control_set_ptr->static_config.frame_end_cdf_update;
+
+        if (sequence_control_set_ptr->static_config.prune_unipred_me == DEFAULT)
 #if M0_OPT
-        if (picture_control_set_ptr->sc_content_detected || picture_control_set_ptr->enc_mode >= ENC_M4)
+            if (picture_control_set_ptr->sc_content_detected || picture_control_set_ptr->enc_mode >= ENC_M4)
 #else
-        if (picture_control_set_ptr->sc_content_detected || picture_control_set_ptr->enc_mode == ENC_M0 || picture_control_set_ptr->enc_mode >= ENC_M4)
+            if (picture_control_set_ptr->sc_content_detected || picture_control_set_ptr->enc_mode == ENC_M0 || picture_control_set_ptr->enc_mode >= ENC_M4)
 #endif
-            picture_control_set_ptr->prune_unipred_at_me = 0;
+                picture_control_set_ptr->prune_unipred_at_me = 0;
+            else
+                picture_control_set_ptr->prune_unipred_at_me = 1;
         else
-            picture_control_set_ptr->prune_unipred_at_me = 1;
+            picture_control_set_ptr->prune_unipred_at_me = sequence_control_set_ptr->static_config.prune_unipred_me;
+
         //CHKN: Temporal MVP should be disabled for pictures beloning to 4L MiniGop preceeded by 5L miniGOP. in this case the RPS is wrong(known issue). check RPS construction for more info.
         if ((sequence_control_set_ptr->static_config.hierarchical_levels == 4 && picture_control_set_ptr->hierarchical_levels == 3) ||
             picture_control_set_ptr->slice_type == I_SLICE)
             picture_control_set_ptr->frm_hdr.use_ref_frame_mvs = 0;
         else
             picture_control_set_ptr->frm_hdr.use_ref_frame_mvs = sequence_control_set_ptr->mfmv_enabled;
+
+#if GM_OPT
+        // Global motion level                        Settings
+        // GM_FULL                                    Exhaustive search mode.
+        // GM_DOWN                                    Downsampled resolution with a downsampling factor of 2 in each dimension
+        // GM_TRAN_ONLY                               Translation only using ME MV.
+        picture_control_set_ptr->gm_level = GM_FULL;
+#endif
+#if TX_SIZE_EARLY_EXIT
+        //Exit TX size search when all coefficients are zero
+        // 0: OFF
+        // 1: ON
+        picture_control_set_ptr->tx_size_early_exit = 1;
+#endif
     return return_error;
 }
 
@@ -3631,7 +3690,6 @@ void* picture_decision_kernel(void *input_ptr)
                                 TX_MODE_LARGEST;
 
                                 picture_control_set_ptr->use_src_ref = EB_FALSE;
-                                picture_control_set_ptr->enable_in_loop_motion_estimation_flag = EB_FALSE;
                                 picture_control_set_ptr->limit_ois_to_dc_mode_flag = EB_FALSE;
 
                                 // Update the Dependant List Count - If there was an I-frame or Scene Change, then cleanup the Picture Decision PA Reference Queue Dependent Counts
@@ -3825,12 +3883,24 @@ void* picture_decision_kernel(void *input_ptr)
                                 //initilize list
                                 for (int pic_itr = 0; pic_itr < ALTREF_MAX_NFRAMES; pic_itr++)
                                     picture_control_set_ptr->temp_filt_pcs_list[pic_itr] = NULL;
+#if NON_KF_INTRA_TF_FIX
+                                // Jing: Intra CRA case
+                                num_past_pics = MIN(num_past_pics, (int)encode_context_ptr->pre_assignment_buffer_count -1);
 
                                 //get previous+current pictures from the the pre-assign buffer
                                 for (int pic_itr = 0; pic_itr <= num_past_pics; pic_itr++) {
                                     PictureParentControlSet* pcs_itr = (PictureParentControlSet*)encode_context_ptr->pre_assignment_buffer[pictureIndex - num_past_pics + pic_itr]->object_ptr;
                                     picture_control_set_ptr->temp_filt_pcs_list[pic_itr] = pcs_itr;
                                 }
+
+#else
+                                //get previous+current pictures from the the pre-assign buffer
+                                for (int pic_itr = 0; pic_itr <= num_past_pics; pic_itr++) {
+                                    PictureParentControlSet* pcs_itr = (PictureParentControlSet*)encode_context_ptr->pre_assignment_buffer[pictureIndex - num_past_pics + pic_itr]->object_ptr;
+                                    picture_control_set_ptr->temp_filt_pcs_list[pic_itr] = pcs_itr;
+                                }
+#endif
+
 #if FIX_ALTREF
                                 int actual_past_pics = num_past_pics;
                                 int actual_future_pics = 0;
@@ -3899,7 +3969,11 @@ void* picture_decision_kernel(void *input_ptr)
                                 actual_past_pics = actual_future_pics;
                                 actual_past_pics += (altref_nframes + 1) & 0x1;
 #endif
+#if NON_KF_INTRA_TF_FIX
+                                int index_center = actual_past_pics;
+#else
                                 int index_center = (uint8_t)(picture_control_set_ptr->sequence_control_set_ptr->static_config.altref_nframes / 2);
+#endif
                                 int pic_itr;
                                 int ahd;
 

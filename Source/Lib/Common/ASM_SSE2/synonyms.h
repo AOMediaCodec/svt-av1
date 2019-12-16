@@ -15,6 +15,8 @@
 #include <immintrin.h>
 #include "EbDefinitions.h"
 
+//#define EB_TEST_SIMD_ALIGN
+
  /**
   * Various reusable shorthands for x86 SIMD intrinsics.
   *
@@ -22,6 +24,11 @@
   * Intrinsics prefixed with yy_ operate on or return 256bit YMM registers.
   */
 
+static INLINE __m128i xx_loadl_32(const void *a) {
+    int val;
+    memcpy(&val, a, sizeof(val));
+    return _mm_cvtsi32_si128(val);
+}
 static INLINE __m128i xx_loadl_64(const void *a) {
     return _mm_loadl_epi64((const __m128i *)a);
 }
@@ -50,6 +57,12 @@ static INLINE void _mm_storeh_epi64(__m128i *const p, const __m128i x) {
     _mm_storeh_pd((double *)p, _mm_castsi128_pd(x));
 }
 
+static INLINE __m128i load_u8_2x2_sse2(const uint8_t *const src,
+    const uint32_t stride) {
+    const __m128i s = _mm_cvtsi32_si128(*(int16_t *)src);
+    return _mm_insert_epi16(s, *(int16_t *)(src + stride), 1);
+}
+
 static INLINE __m128i load8bit_8x2_sse2(const void *const src,
     const ptrdiff_t strideInByte) {
     const __m128i s = _mm_loadl_epi64((__m128i *)src);
@@ -67,25 +80,25 @@ static INLINE __m128i load_u16_4x2_sse2(const uint16_t *const src,
 }
 
 SIMD_INLINE void store_u8_4x2_sse2(const __m128i src, uint8_t *const dst,
-    const int32_t stride) {
+    const ptrdiff_t stride) {
     xx_storel_32(dst, src);
     *(int32_t *)(dst + stride) = _mm_extract_epi32(src, 1);
 }
 
 SIMD_INLINE void store_u16_2x2_sse2(const __m128i src, uint16_t *const dst,
-    const int32_t stride) {
+    const ptrdiff_t stride) {
     xx_storel_32(dst, src);
     *(int32_t *)(dst + stride) = _mm_extract_epi32(src, 1);
 }
 
 SIMD_INLINE void store_s16_4x2_sse2(const __m128i src, int16_t *const dst,
-    const int32_t stride) {
+    const ptrdiff_t stride) {
     _mm_storel_epi64((__m128i *)dst, src);
     _mm_storeh_epi64((__m128i *)(dst + stride), src);
 }
 
 SIMD_INLINE void store_u16_4x2_sse2(const __m128i src, uint16_t *const dst,
-    const int32_t stride) {
+    const ptrdiff_t stride) {
     _mm_storel_epi64((__m128i *)dst, src);
     _mm_storeh_epi64((__m128i *)(dst + stride), src);
 }

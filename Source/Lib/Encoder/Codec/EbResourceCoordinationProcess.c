@@ -113,8 +113,15 @@ EbErrorType signal_derivation_pre_analysis_oq(
     picture_control_set_ptr->tf_enable_hme_level1_flag = tf_enable_hme_level1_flag[0][input_resolution][hme_me_level] || tf_enable_hme_level1_flag[1][input_resolution][hme_me_level];
     picture_control_set_ptr->tf_enable_hme_level2_flag = tf_enable_hme_level2_flag[0][input_resolution][hme_me_level] || tf_enable_hme_level2_flag[1][input_resolution][hme_me_level];
 
-    if (picture_control_set_ptr->enc_mode >= ENC_M8)
-        sequence_control_set_ptr->seq_header.enable_restoration = 0;
+    if (sequence_control_set_ptr->static_config.enable_restoration_filtering == DEFAULT) {
+        if (picture_control_set_ptr->enc_mode >= ENC_M8)
+            sequence_control_set_ptr->seq_header.enable_restoration = 0;
+        else
+            sequence_control_set_ptr->seq_header.enable_restoration = 1;
+    }
+    else
+        sequence_control_set_ptr->seq_header.enable_restoration = (uint8_t)sequence_control_set_ptr->static_config.enable_restoration_filtering;
+
     sequence_control_set_ptr->cdf_mode = (picture_control_set_ptr->enc_mode <= ENC_M6) ? 0 : 1;
     return return_error;
 }
@@ -300,18 +307,19 @@ void ResetPcsAv1(
 #endif
 
     frm_hdr->quantization_params.base_q_idx = 31;
-    frm_hdr->quantization_params.delta_q_y_dc = 0;
-    frm_hdr->quantization_params.delta_q_u_dc = 0;
-    frm_hdr->quantization_params.delta_q_v_dc = 0;
-    frm_hdr->quantization_params.delta_q_u_ac = 0;
-    frm_hdr->quantization_params.delta_q_v_ac = 0;
+    frm_hdr->quantization_params.delta_q_dc[AOM_PLANE_Y] = 0;
+    frm_hdr->quantization_params.delta_q_ac[AOM_PLANE_Y] = 0;
+    frm_hdr->quantization_params.delta_q_ac[AOM_PLANE_U] = 0;
+    frm_hdr->quantization_params.delta_q_dc[AOM_PLANE_U] = 0;
+    frm_hdr->quantization_params.delta_q_ac[AOM_PLANE_V] = 0;
+    frm_hdr->quantization_params.delta_q_dc[AOM_PLANE_V] = 0;
 
     picture_control_set_ptr->separate_uv_delta_q = 0;
     // Encoder
     frm_hdr->quantization_params.using_qmatrix = 0;
-    frm_hdr->quantization_params.qm_y = 5;
-    frm_hdr->quantization_params.qm_u = 5;
-    frm_hdr->quantization_params.qm_v = 5;
+    frm_hdr->quantization_params.qm[AOM_PLANE_Y] = 5;
+    frm_hdr->quantization_params.qm[AOM_PLANE_U] = 5;
+    frm_hdr->quantization_params.qm[AOM_PLANE_V] = 5;
     frm_hdr->is_motion_mode_switchable = 0;
     // Flag signaling how frame contexts should be updated at the end of
     // a frame decode
@@ -693,6 +701,7 @@ void* resource_coordination_kernel(void *input_ptr)
                     ((sequence_control_set_ptr->static_config.encoder_bit_depth >= 8 && sequence_control_set_ptr->static_config.enc_mode == ENC_M0) ||
                     sequence_control_set_ptr->static_config.encoder_bit_depth == 8) ? EB_TRUE : EB_FALSE;
 
+            if (sequence_control_set_ptr->static_config.inter_intra_compound == DEFAULT) {
 #if II_COMP_FLAG
 #if INTER_INTRA_HBD
             // Set inter-intra mode      Settings
@@ -718,6 +727,9 @@ void* resource_coordination_kernel(void *input_ptr)
                                                                               (sequence_control_set_ptr->static_config.enc_mode == ENC_M0) ? 1 : 0;
 #endif
 #endif
+            } else
+                sequence_control_set_ptr->seq_header.enable_interintra_compound = sequence_control_set_ptr->static_config.inter_intra_compound;
+
 #if FILTER_INTRA_FLAG
             // Set filter intra mode      Settings
             // 0                 OFF
@@ -730,18 +742,23 @@ void* resource_coordination_kernel(void *input_ptr)
             // Set compound mode      Settings
             // 0                 OFF: No compond mode search : AVG only
             // 1                 ON: full
+            if (sequence_control_set_ptr->static_config.compound_level == DEFAULT) {
 #if INTER_INTER_HBD
 #if COMP_HBD
-            sequence_control_set_ptr->compound_mode = (sequence_control_set_ptr->static_config.enc_mode <= ENC_M4) ? 1 : 0;
+                sequence_control_set_ptr->compound_mode = (sequence_control_set_ptr->static_config.enc_mode <= ENC_M4) ? 1 : 0;
 #else
-            sequence_control_set_ptr->compound_mode = (sequence_control_set_ptr->static_config.encoder_bit_depth == EB_10BIT &&
-                                                       sequence_control_set_ptr->static_config.enable_hbd_mode_decision ) ? 0:
-                                                      (sequence_control_set_ptr->static_config.enc_mode <= ENC_M4) ? 1 : 0;
+                sequence_control_set_ptr->compound_mode = (sequence_control_set_ptr->static_config.encoder_bit_depth == EB_10BIT &&
+                                                           sequence_control_set_ptr->static_config.enable_hbd_mode_decision ) ? 0:
+                                                          (sequence_control_set_ptr->static_config.enc_mode <= ENC_M4) ? 1 : 0;
 #endif
 #else
-            sequence_control_set_ptr->compound_mode = sequence_control_set_ptr->static_config.encoder_bit_depth == EB_10BIT ? 0 :
-                (sequence_control_set_ptr->static_config.enc_mode <= ENC_M4) ? 1 : 0;
+                sequence_control_set_ptr->compound_mode = sequence_control_set_ptr->static_config.encoder_bit_depth == EB_10BIT ? 0 :
+                                                         (sequence_control_set_ptr->static_config.enc_mode <= ENC_M4) ? 1 : 0;
 #endif
+            }
+            else
+                sequence_control_set_ptr->compound_mode = sequence_control_set_ptr->static_config.compound_level;
+
             if (sequence_control_set_ptr->compound_mode)
             {
                 sequence_control_set_ptr->seq_header.order_hint_info.enable_jnt_comp = 1; //DISTANCE
@@ -893,13 +910,13 @@ void* resource_coordination_kernel(void *input_ptr)
                 if (picture_control_set_ptr->input_ptr->qp > MAX_QP_VALUE) {
                     SVT_LOG("SVT [WARNING]: INPUT QP OUTSIDE OF RANGE\n");
                     picture_control_set_ptr->qp_on_the_fly = EB_FALSE;
-                    picture_control_set_ptr->picture_qp = (uint8_t)sequence_control_set_ptr->qp;
+                    picture_control_set_ptr->picture_qp = (uint8_t)sequence_control_set_ptr->static_config.qp;
                 }
                 picture_control_set_ptr->picture_qp = (uint8_t)picture_control_set_ptr->input_ptr->qp;
             }
             else {
                 picture_control_set_ptr->qp_on_the_fly = EB_FALSE;
-                picture_control_set_ptr->picture_qp = (uint8_t)sequence_control_set_ptr->qp;
+                picture_control_set_ptr->picture_qp = (uint8_t)sequence_control_set_ptr->static_config.qp;
             }
 
             // Picture Stats
@@ -936,23 +953,6 @@ void* resource_coordination_kernel(void *input_ptr)
                     picture_control_set_ptr->pa_reference_picture_wrapper_ptr,
                     2);
             ((EbPaReferenceObject*)picture_control_set_ptr->pa_reference_picture_wrapper_ptr->object_ptr)->input_padded_picture_ptr->buffer_y = picture_control_set_ptr->enhanced_picture_ptr->buffer_y;
-
-            // Get Empty Output Results Object
-            if (picture_control_set_ptr->picture_number > 0 && (prevPictureControlSetWrapperPtr != NULL))
-            {
-                ((PictureParentControlSet       *)prevPictureControlSetWrapperPtr->object_ptr)->end_of_sequence_flag = end_of_sequence_flag;
-                eb_get_empty_object(
-                    context_ptr->resource_coordination_results_output_fifo_ptr,
-                    &outputWrapperPtr);
-                outputResultsPtr = (ResourceCoordinationResults*)outputWrapperPtr->object_ptr;
-                outputResultsPtr->picture_control_set_wrapper_ptr = prevPictureControlSetWrapperPtr;
-                // since overlay frame has the end of sequence set properly, set the end of sequence to true in the alt ref picture
-                if (((PictureParentControlSet       *)prevPictureControlSetWrapperPtr->object_ptr)->is_overlay && end_of_sequence_flag)
-                    ((PictureParentControlSet       *)prevPictureControlSetWrapperPtr->object_ptr)->alt_ref_ppcs_ptr->end_of_sequence_flag = EB_TRUE;
-                // Post the finished Results Object
-                eb_post_full_object(outputWrapperPtr);
-            }
-            prevPictureControlSetWrapperPtr = picture_control_set_wrapper_ptr;
 
             set_tile_info(picture_control_set_ptr);
             if(sequence_control_set_ptr->static_config.unrestricted_motion_vector == 0)
@@ -993,6 +993,23 @@ void* resource_coordination_kernel(void *input_ptr)
                     }
                 }
             }
+
+            // Get Empty Output Results Object
+            if (picture_control_set_ptr->picture_number > 0 && (prevPictureControlSetWrapperPtr != NULL))
+            {
+                ((PictureParentControlSet       *)prevPictureControlSetWrapperPtr->object_ptr)->end_of_sequence_flag = end_of_sequence_flag;
+                eb_get_empty_object(
+                    context_ptr->resource_coordination_results_output_fifo_ptr,
+                    &outputWrapperPtr);
+                outputResultsPtr = (ResourceCoordinationResults*)outputWrapperPtr->object_ptr;
+                outputResultsPtr->picture_control_set_wrapper_ptr = prevPictureControlSetWrapperPtr;
+                // since overlay frame has the end of sequence set properly, set the end of sequence to true in the alt ref picture
+                if (((PictureParentControlSet       *)prevPictureControlSetWrapperPtr->object_ptr)->is_overlay && end_of_sequence_flag)
+                    ((PictureParentControlSet       *)prevPictureControlSetWrapperPtr->object_ptr)->alt_ref_ppcs_ptr->end_of_sequence_flag = EB_TRUE;
+                // Post the finished Results Object
+                eb_post_full_object(outputWrapperPtr);
+            }
+            prevPictureControlSetWrapperPtr = picture_control_set_wrapper_ptr;
         }
     }
 

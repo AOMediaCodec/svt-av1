@@ -109,24 +109,34 @@ typedef struct logicalProcessorGroup {
 #define INITIAL_PROCESSOR_GROUP 16
 processorGroup                  *lp_group = NULL;
 #endif
-static int32_t CanUseIntelCore4thGenFeatures()
-{
-    static int32_t the_4th_gen_features_available = -1;
-    /* test is performed once */
-    if (the_4th_gen_features_available < 0)
-        the_4th_gen_features_available = Check4thGenIntelCoreFeatures();
-    return the_4th_gen_features_available;
-}
-EbAsm GetCpuAsmType()
-{
-    EbAsm asm_type = ASM_NON_AVX2;
 
-    if (CanUseIntelCore4thGenFeatures() == 1)
-        asm_type = ASM_AVX2;
-    else
-        // Need to change to support lower CPU Technologies
-        asm_type = ASM_NON_AVX2;
-    return asm_type;
+static const char *get_asm_level_name_str(CPU_FLAGS cpu_flags) {
+
+    const struct {
+        char *name;
+        CPU_FLAGS flags;
+    } param_maps[] = {
+        {"c",       0},
+        {"mmx",     CPU_FLAGS_MMX},
+        {"sse",     CPU_FLAGS_SSE},
+        {"sse2",    CPU_FLAGS_SSE2},
+        {"sse3",    CPU_FLAGS_SSE3},
+        {"ssse3",   CPU_FLAGS_SSSE3},
+        {"sse4_1",  CPU_FLAGS_SSE4_1},
+        {"sse4_2",  CPU_FLAGS_SSE4_2},
+        {"avx",     CPU_FLAGS_AVX},
+        {"avx2",    CPU_FLAGS_AVX2},
+        {"avx512",  CPU_FLAGS_AVX512F}
+    };
+    const uint32_t para_map_size = sizeof(param_maps) / sizeof(param_maps[0]);
+    int32_t i;
+
+    for (i = para_map_size -1; i >= 0; --i) {
+        if (param_maps[i].flags & cpu_flags) {
+            return param_maps[i].name;
+        }
+    }
+    return "c";
 }
 
 //Get Number of logical processors
@@ -509,6 +519,15 @@ EbErrorType load_default_buffer_configuration_settings(
     sequence_control_set_ptr->total_process_init_count += 6; // single processes count
     printf("Number of logical cores available: %u\nNumber of PPCS %u\n", core_count, sequence_control_set_ptr->picture_control_set_pool_init_count);
 
+    /******************************************************************
+    * Platform detection, limit cpu flags to hardware available CPU
+    ******************************************************************/
+    const CPU_FLAGS cpu_flags = get_cpu_flags();
+    const CPU_FLAGS cpu_flags_to_use = get_cpu_flags_to_use();
+    sequence_control_set_ptr->static_config.use_cpu_flags &= cpu_flags_to_use;
+    printf("[asm level on system : up to %s]\n", get_asm_level_name_str(cpu_flags));
+    printf("[asm level selected : up to %s]\n", get_asm_level_name_str(sequence_control_set_ptr->static_config.use_cpu_flags));
+
     return return_error;
 }
  // Rate Control
@@ -830,14 +849,7 @@ EB_API EbErrorType eb_init_encoder(EbComponentType *svt_enc_component)
     EbColorFormat color_format = enc_handle_ptr->sequence_control_set_instance_array[0]->sequence_control_set_ptr->static_config.encoder_color_format;
     SequenceControlSet* control_set_ptr;
 
-    /************************************
-    * Plateform detection
-    ************************************/
-    if (enc_handle_ptr->sequence_control_set_instance_array[0]->sequence_control_set_ptr->static_config.asm_type == 1)
-        enc_handle_ptr->sequence_control_set_instance_array[0]->encode_context_ptr->asm_type = GetCpuAsmType();
-    else
-        enc_handle_ptr->sequence_control_set_instance_array[0]->encode_context_ptr->asm_type = enc_handle_ptr->sequence_control_set_instance_array[0]->sequence_control_set_ptr->static_config.asm_type;
-    setup_rtcd_internal(enc_handle_ptr->sequence_control_set_instance_array[0]->encode_context_ptr->asm_type);
+    setup_rtcd_internal(enc_handle_ptr->sequence_control_set_instance_array[0]->sequence_control_set_ptr->static_config.use_cpu_flags);
     asmSetConvolveAsmTable();
 
     init_intra_dc_predictors_c_internal();
@@ -896,10 +908,7 @@ EB_API EbErrorType eb_init_encoder(EbComponentType *svt_enc_component)
         inputData.hbd_mode_decision = enc_handle_ptr->sequence_control_set_instance_array[instance_index]->sequence_control_set_ptr->static_config.enable_hbd_mode_decision;
         inputData.film_grain_noise_level = enc_handle_ptr->sequence_control_set_instance_array[0]->sequence_control_set_ptr->static_config.film_grain_denoise_strength;
         inputData.bit_depth = enc_handle_ptr->sequence_control_set_instance_array[instance_index]->sequence_control_set_ptr->static_config.encoder_bit_depth;
-
         inputData.ext_block_flag = (uint8_t)enc_handle_ptr->sequence_control_set_instance_array[instance_index]->sequence_control_set_ptr->static_config.ext_block_flag;
-
-        inputData.in_loop_me_flag = (uint8_t)enc_handle_ptr->sequence_control_set_instance_array[instance_index]->sequence_control_set_ptr->static_config.in_loop_me_flag;
         inputData.mrp_mode = enc_handle_ptr->sequence_control_set_instance_array[instance_index]->sequence_control_set_ptr->mrp_mode;
         inputData.nsq_present = enc_handle_ptr->sequence_control_set_instance_array[instance_index]->sequence_control_set_ptr->nsq_present;
         EB_NEW(
@@ -1899,7 +1908,7 @@ void SetDefaultConfigurationParameters(
 static uint32_t compute_default_look_ahead(
     EbSvtAv1EncConfiguration*   config){
     int32_t lad = 0;
-    if (config->rate_control_mode == 0)
+    if (config->rate_control_mode == 0 || config->intra_period_length < 0)
         lad = (2 << config->hierarchical_levels)+1;
     else
         lad = config->intra_period_length;
@@ -1934,9 +1943,6 @@ void SetParamBasedOnInput(SequenceControlSet *sequence_control_set_ptr)
 {
     uint16_t subsampling_x = sequence_control_set_ptr->subsampling_x;
     uint16_t subsampling_y = sequence_control_set_ptr->subsampling_y;
-    sequence_control_set_ptr->general_frame_only_constraint_flag = 0;
-    sequence_control_set_ptr->general_progressive_source_flag = 1;
-    sequence_control_set_ptr->general_interlaced_source_flag = 0;
 
     // Update picture width, and picture height
     if (sequence_control_set_ptr->max_input_luma_width % MIN_BLOCK_SIZE) {
@@ -2012,15 +2018,22 @@ void SetParamBasedOnInput(SequenceControlSet *sequence_control_set_ptr)
     // Set over_boundary_block_mode     Settings
     // 0                            0: not allowed
     // 1                            1: allowed
-    if (sequence_control_set_ptr->static_config.enc_mode == ENC_M0)
-        sequence_control_set_ptr->over_boundary_block_mode = 1;
+    if (sequence_control_set_ptr->static_config.over_bndry_blk == DEFAULT)
+        if (sequence_control_set_ptr->static_config.enc_mode == ENC_M0)
+            sequence_control_set_ptr->over_boundary_block_mode = 1;
+        else
+            sequence_control_set_ptr->over_boundary_block_mode = 0;
     else
-        sequence_control_set_ptr->over_boundary_block_mode = 0;
+        sequence_control_set_ptr->over_boundary_block_mode = sequence_control_set_ptr->static_config.over_bndry_blk;
+
+    if (sequence_control_set_ptr->static_config.enable_mfmv == DEFAULT)
 #if M0_OPT
-    sequence_control_set_ptr->mfmv_enabled = (uint8_t)(sequence_control_set_ptr->static_config.enc_mode == ENC_M0 && sequence_control_set_ptr->static_config.screen_content_mode != 1) ? 1 : 0;
+        sequence_control_set_ptr->mfmv_enabled = (uint8_t)(sequence_control_set_ptr->static_config.enc_mode == ENC_M0 && sequence_control_set_ptr->static_config.screen_content_mode != 1) ? 1 : 0;
 #else
-    sequence_control_set_ptr->mfmv_enabled = (uint8_t)(sequence_control_set_ptr->static_config.enc_mode == ENC_M0) ? 1 : 0;
+        sequence_control_set_ptr->mfmv_enabled = (uint8_t)(sequence_control_set_ptr->static_config.enc_mode == ENC_M0) ? 1 : 0;
 #endif
+    else
+        sequence_control_set_ptr->mfmv_enabled = sequence_control_set_ptr->static_config.enable_mfmv;
 
     // Set hbd_mode_decision OFF for high encode modes or bitdepth < 10
     if (sequence_control_set_ptr->static_config.enc_mode > ENC_M0 || sequence_control_set_ptr->static_config.encoder_bit_depth < 10)
@@ -2034,17 +2047,10 @@ void CopyApiFromApp(
 
     sequence_control_set_ptr->max_input_luma_width = pComponentParameterStructure->source_width;
     sequence_control_set_ptr->max_input_luma_height = pComponentParameterStructure->source_height;
-
     sequence_control_set_ptr->frame_rate = ((EbSvtAv1EncConfiguration*)pComponentParameterStructure)->frame_rate;
-
-    sequence_control_set_ptr->general_frame_only_constraint_flag = 0;
-    sequence_control_set_ptr->general_progressive_source_flag = 1;
-    sequence_control_set_ptr->general_interlaced_source_flag = 0;
-
     // SB Definitions
     sequence_control_set_ptr->static_config.pred_structure = 2; // Hardcoded(Cleanup)
     sequence_control_set_ptr->static_config.enable_qp_scaling_flag = 1;
-
     sequence_control_set_ptr->max_cu_size = (uint8_t)64;
     sequence_control_set_ptr->min_cu_size = (uint8_t)8;
     sequence_control_set_ptr->max_intra_size = (uint8_t)32;
@@ -2106,11 +2112,57 @@ void CopyApiFromApp(
     // Global motion
     sequence_control_set_ptr->static_config.enable_global_motion = ((EbSvtAv1EncConfiguration*)pComponentParameterStructure)->enable_global_motion;
 
+    // Restoration filtering
+    sequence_control_set_ptr->static_config.enable_restoration_filtering = ((EbSvtAv1EncConfiguration*)pComponentParameterStructure)->enable_restoration_filtering;
+
+    //combine class 12
+    sequence_control_set_ptr->static_config.combine_class_12             = ((EbSvtAv1EncConfiguration*)pComponentParameterStructure)->combine_class_12;
+    // edge skip angle intra
+    sequence_control_set_ptr->static_config.edge_skp_angle_intra         = ((EbSvtAv1EncConfiguration*)pComponentParameterStructure)->edge_skp_angle_intra;
+    // inter intra compoound
+    sequence_control_set_ptr->static_config.inter_intra_compound         = ((EbSvtAv1EncConfiguration*)pComponentParameterStructure)->inter_intra_compound;
+    // fractional search 64x64
+    sequence_control_set_ptr->static_config.fract_search_64              = ((EbSvtAv1EncConfiguration*)pComponentParameterStructure)->fract_search_64;
+    // motion field motion vector
+    sequence_control_set_ptr->static_config.enable_mfmv                  = ((EbSvtAv1EncConfiguration*)pComponentParameterStructure)->enable_mfmv;
+    // redundant block
+    sequence_control_set_ptr->static_config.enable_redundant_blk         = ((EbSvtAv1EncConfiguration*)pComponentParameterStructure)->enable_redundant_blk;
+    //trellis
+    sequence_control_set_ptr->static_config.enable_trellis               = ((EbSvtAv1EncConfiguration*)pComponentParameterStructure)->enable_trellis;
+    // spatial sse in full loop
+    sequence_control_set_ptr->static_config.spatial_sse_fl               = ((EbSvtAv1EncConfiguration*)pComponentParameterStructure)->spatial_sse_fl;
+    // subpel
+    sequence_control_set_ptr->static_config.enable_subpel                = ((EbSvtAv1EncConfiguration*)pComponentParameterStructure)->enable_subpel;
+    // over boundry block mode
+    sequence_control_set_ptr->static_config.over_bndry_blk               = ((EbSvtAv1EncConfiguration*)pComponentParameterStructure)->over_bndry_blk;
+    // new nearest comb injection
+    sequence_control_set_ptr->static_config.new_nearest_comb_inject      = ((EbSvtAv1EncConfiguration*)pComponentParameterStructure)->new_nearest_comb_inject;
+    // nx4 4xn parent mv injection
+    sequence_control_set_ptr->static_config.nx4_4xn_parent_mv_inject     = ((EbSvtAv1EncConfiguration*)pComponentParameterStructure)->nx4_4xn_parent_mv_inject;
+    // prune unipred at me
+    sequence_control_set_ptr->static_config.prune_unipred_me             = ((EbSvtAv1EncConfiguration*)pComponentParameterStructure)->prune_unipred_me;
+    //prune ref frame for rec partitions
+    sequence_control_set_ptr->static_config.prune_ref_rec_part           = ((EbSvtAv1EncConfiguration*)pComponentParameterStructure)->prune_ref_rec_part;
+    // NSQ table
+    sequence_control_set_ptr->static_config.nsq_table                    = ((EbSvtAv1EncConfiguration*)pComponentParameterStructure)->nsq_table;
+    // frame end cdf update mode
+    sequence_control_set_ptr->static_config.frame_end_cdf_update         = ((EbSvtAv1EncConfiguration*)pComponentParameterStructure)->frame_end_cdf_update;
+
+    // Chroma mode
+    sequence_control_set_ptr->static_config.set_chroma_mode = ((EbSvtAv1EncConfiguration*)pComponentParameterStructure)->set_chroma_mode;
+
     // OBMC
     sequence_control_set_ptr->static_config.enable_obmc = ((EbSvtAv1EncConfiguration*)pComponentParameterStructure)->enable_obmc;
 
     // RDOQ
     sequence_control_set_ptr->static_config.enable_rdoq = ((EbSvtAv1EncConfiguration*)pComponentParameterStructure)->enable_rdoq;
+
+    // Predictive ME
+    sequence_control_set_ptr->static_config.pred_me  = ((EbSvtAv1EncConfiguration*)pComponentParameterStructure)->pred_me;
+    // BiPred 3x3 injection
+    sequence_control_set_ptr->static_config.bipred_3x3_inject = ((EbSvtAv1EncConfiguration*)pComponentParameterStructure)->bipred_3x3_inject;
+    // Compound mode
+    sequence_control_set_ptr->static_config.compound_level = ((EbSvtAv1EncConfiguration*)pComponentParameterStructure)->compound_level;
 
     // Filter intra prediction
     sequence_control_set_ptr->static_config.enable_filter_intra = ((EbSvtAv1EncConfiguration*)pComponentParameterStructure)->enable_filter_intra;
@@ -2128,8 +2180,6 @@ void CopyApiFromApp(
     sequence_control_set_ptr->static_config.hme_level0_total_search_area_width = ((EbSvtAv1EncConfiguration*)pComponentParameterStructure)->hme_level0_total_search_area_width;
     sequence_control_set_ptr->static_config.hme_level0_total_search_area_height = ((EbSvtAv1EncConfiguration*)pComponentParameterStructure)->hme_level0_total_search_area_height;
     sequence_control_set_ptr->static_config.ext_block_flag = ((EbSvtAv1EncConfiguration*)pComponentParameterStructure)->ext_block_flag;
-    sequence_control_set_ptr->static_config.in_loop_me_flag = ((EbSvtAv1EncConfiguration*)pComponentParameterStructure)->in_loop_me_flag;
-
     for (hmeRegionIndex = 0; hmeRegionIndex < sequence_control_set_ptr->static_config.number_hme_search_region_in_width; ++hmeRegionIndex) {
         sequence_control_set_ptr->static_config.hme_level0_search_area_in_width_array[hmeRegionIndex] = ((EbSvtAv1EncConfiguration*)pComponentParameterStructure)->hme_level0_search_area_in_width_array[hmeRegionIndex];
         sequence_control_set_ptr->static_config.hme_level1_search_area_in_width_array[hmeRegionIndex] = ((EbSvtAv1EncConfiguration*)pComponentParameterStructure)->hme_level1_search_area_in_width_array[hmeRegionIndex];
@@ -2213,13 +2263,13 @@ void CopyApiFromApp(
     sequence_control_set_ptr->static_config.speed_control_flag = ((EbSvtAv1EncConfiguration*)pComponentParameterStructure)->speed_control_flag;
 
     // Buffers - Hardcoded(Cleanup)
-    sequence_control_set_ptr->static_config.asm_type = ((EbSvtAv1EncConfiguration*)pComponentParameterStructure)->asm_type;
+    sequence_control_set_ptr->static_config.use_cpu_flags = ((EbSvtAv1EncConfiguration*)pComponentParameterStructure)->use_cpu_flags;
 
     sequence_control_set_ptr->static_config.channel_id = ((EbSvtAv1EncConfiguration*)pComponentParameterStructure)->channel_id;
     sequence_control_set_ptr->static_config.active_channel_count = ((EbSvtAv1EncConfiguration*)pComponentParameterStructure)->active_channel_count;
     sequence_control_set_ptr->static_config.logical_processors = ((EbSvtAv1EncConfiguration*)pComponentParameterStructure)->logical_processors;
     sequence_control_set_ptr->static_config.target_socket = ((EbSvtAv1EncConfiguration*)pComponentParameterStructure)->target_socket;
-    sequence_control_set_ptr->qp = ((EbSvtAv1EncConfiguration*)pComponentParameterStructure)->qp;
+    sequence_control_set_ptr->static_config.qp = ((EbSvtAv1EncConfiguration*)pComponentParameterStructure)->qp;
     sequence_control_set_ptr->static_config.recon_enabled = ((EbSvtAv1EncConfiguration*)pComponentParameterStructure)->recon_enabled;
 
     // Extract frame rate from Numerator and Denominator if not 0
@@ -2239,6 +2289,7 @@ void CopyApiFromApp(
     sequence_control_set_ptr->static_config.enable_overlays = pComponentParameterStructure->enable_overlays;
 
     sequence_control_set_ptr->static_config.sq_weight = pComponentParameterStructure->sq_weight;
+    sequence_control_set_ptr->static_config.enable_auto_max_partition = pComponentParameterStructure->enable_auto_max_partition;
 
     sequence_control_set_ptr->static_config.md_stage_1_cand_prune_th = pComponentParameterStructure->md_stage_1_cand_prune_th;
     sequence_control_set_ptr->static_config.md_stage_1_class_prune_th = pComponentParameterStructure->md_stage_1_class_prune_th;
@@ -2306,12 +2357,6 @@ static EbErrorType VerifySettings(
         SVT_LOG("Error instance %u: ExtBlockFlag must be [0-1]\n", channelNumber + 1);
         return_error = EB_ErrorBadParameter;
     }
-
-    if (config->in_loop_me_flag > 1) {
-        SVT_LOG("Error instance %u: InLoopMeFlag must be [0-1]\n", channelNumber + 1);
-        return_error = EB_ErrorBadParameter;
-    }
-
     if (sequence_control_set_ptr->max_input_luma_width < 64) {
         SVT_LOG("Error instance %u: Source Width must be at least 64\n", channelNumber + 1);
         return_error = EB_ErrorBadParameter;
@@ -2472,15 +2517,12 @@ static EbErrorType VerifySettings(
         SVT_LOG("Error Instance %u: The constrained intra must be [0 - 1] \n", channelNumber + 1);
         return_error = EB_ErrorBadParameter;
     }
-    if (config->rate_control_mode > 3) {
-        SVT_LOG("Error Instance %u: The rate control mode must be [0 - 3] \n", channelNumber + 1);
+    if (config->rate_control_mode > 2) {
+
+        SVT_LOG("Error Instance %u: The rate control mode must be [0 - 2] \n", channelNumber + 1);
         return_error = EB_ErrorBadParameter;
     }
-    if (config->rate_control_mode == 1) {
-        SVT_LOG("Error Instance %u: The rate control mode 1 is currently not supported \n", channelNumber + 1);
-        return_error = EB_ErrorBadParameter;
-    }
-    if ((config->rate_control_mode == 3|| config->rate_control_mode == 2) && config->look_ahead_distance != (uint32_t)config->intra_period_length) {
+    if ((config->rate_control_mode == 3|| config->rate_control_mode == 2) && config->look_ahead_distance != (uint32_t)config->intra_period_length && config->intra_period_length >= 0) {
         SVT_LOG("Error Instance %u: The rate control mode 2/3 LAD must be equal to intra_period \n", channelNumber + 1);
         return_error = EB_ErrorBadParameter;
     }
@@ -2572,9 +2614,9 @@ static EbErrorType VerifySettings(
         return_error = EB_ErrorBadParameter;
     }
 
-    if (((int32_t)(config->asm_type) < -1) || ((int32_t)(config->asm_type) != 1)) {
-       // SVT_LOG("Error Instance %u: Invalid asm type value [0: C Only, 1: Auto] .\n", channelNumber + 1);
-        SVT_LOG("Error Instance %u: Asm 0 is not supported in this build .\n", channelNumber + 1);
+    if (config->use_cpu_flags & CPU_FLAGS_INVALID) {
+        SVT_LOG("Error Instance %u: param '-asm' have invalid value.\n"
+            "Value should be [0 - 11, c, mmx, sse, sse2, sse3, ssse3, sse4_1, sse4_2, avx, avx2, avx512, max]\n", channelNumber + 1);
         return_error = EB_ErrorBadParameter;
     }
 
@@ -2594,6 +2636,36 @@ static EbErrorType VerifySettings(
         return_error = EB_ErrorBadParameter;
     }
 
+    // Local Warped Motion
+    if (config->enable_warped_motion != 0 && config->enable_warped_motion != 1) {
+      SVT_LOG("Error instance %u: Invalid warped motion flag [0 - 1], your input: %d\n", channelNumber + 1, config->enable_warped_motion);
+      return_error = EB_ErrorBadParameter;
+    }
+
+    // Global Motion
+    if (config->enable_global_motion != 0 && config->enable_global_motion != 1) {
+      SVT_LOG("Error instance %u: Invalid global motion flag [0 - 1], your input: %d\n", channelNumber + 1, config->enable_global_motion);
+      return_error = EB_ErrorBadParameter;
+    }
+
+    // OBMC
+    if (config->enable_obmc != 0 && config->enable_obmc != 1) {
+      SVT_LOG("Error instance %u: Invalid OBMC flag [0 - 1], your input: %d\n", channelNumber + 1, config->enable_obmc);
+      return_error = EB_ErrorBadParameter;
+    }
+
+    // Filter Intra prediction
+    if (config->enable_filter_intra != 0 && config->enable_filter_intra != 1) {
+      SVT_LOG("Error instance %u: Invalid Filter Intra flag [0 - 1], your input: %d\n", channelNumber + 1, config->enable_filter_intra);
+      return_error = EB_ErrorBadParameter;
+    }
+
+    // HBD mode decision
+    if (config->enable_hbd_mode_decision != 0 && config->enable_hbd_mode_decision != 1 && config->enable_hbd_mode_decision != 2) {
+    SVT_LOG("Error instance %u: Invalid HBD mode decision flag [0 - 2], your input: %d\n", channelNumber + 1, config->enable_hbd_mode_decision);
+    return_error = EB_ErrorBadParameter;
+    }
+
     // palette
     if (config->enable_palette < (int32_t)(-1) || config->enable_palette >6) {
         SVT_LOG( "Error instance %u: Invalid Palette Mode [0 .. 6], your input: %i\n", channelNumber + 1, config->enable_palette);
@@ -2601,9 +2673,116 @@ static EbErrorType VerifySettings(
     }
 
     // RDOQ
-    if (config->enable_rdoq != (int8_t)0 && config->enable_rdoq != (int8_t)1 && config->enable_rdoq != (int8_t)-1) {
+    if (config->enable_rdoq != 0 && config->enable_rdoq != 1 && config->enable_rdoq != -1) {
         SVT_LOG( "Error instance %u: Invalid RDOQ parameter [-1, 0, 1], your input: %i\n", channelNumber + 1, config->enable_rdoq);
         return_error = EB_ErrorBadParameter;
+    }
+
+    // Chroma Level
+    if (config->set_chroma_mode > 3 || config->set_chroma_mode < -1) {
+      SVT_LOG("Error instance %u: Invalid Chroma Mode [0 - 3, -1 for auto], your input: %d\n", channelNumber + 1, config->set_chroma_mode);
+      return_error = EB_ErrorBadParameter;
+    }
+
+    // Restoration Filtering
+    if (config->enable_restoration_filtering != 0 && config->enable_restoration_filtering != 1 && config->enable_restoration_filtering != -1) {
+      SVT_LOG("Error instance %u: Invalid restoration flag [0 - 1, -1 for auto], your input: %d\n", channelNumber + 1, config->enable_restoration_filtering);
+      return_error = EB_ErrorBadParameter;
+    }
+
+    if (config->pred_me > 5 || config->pred_me < -1) {
+      SVT_LOG("Error instance %u: Invalid predictive me level [0-5, -1 for auto], your input: %d\n", channelNumber + 1, config->pred_me);
+      return_error = EB_ErrorBadParameter;
+    }
+
+    if (config->bipred_3x3_inject > 2 || config->bipred_3x3_inject < -1) {
+      SVT_LOG("Error instance %u: Invalid bipred_3x3_inject mode [0-2, -1 for auto], your input: %d\n", channelNumber + 1, config->bipred_3x3_inject);
+      return_error = EB_ErrorBadParameter;
+    }
+
+    if (config->compound_level > 2 || config->compound_level < -1) {
+      SVT_LOG("Error instance %u: Invalid compound level [0-2, -1 for auto], your input: %d\n", channelNumber + 1, config->compound_level);
+      return_error = EB_ErrorBadParameter;
+    }
+
+    if (config->combine_class_12 != 0 && config->combine_class_12 != 1 && config->combine_class_12 != -1) {
+      SVT_LOG("Error instance %u: Invalid combine MD Class1&2 flag [0/1 or -1 for auto], your input: %d\n", channelNumber + 1, config->combine_class_12);
+      return_error = EB_ErrorBadParameter;
+    }
+
+    if (config->edge_skp_angle_intra != 0 && config->edge_skp_angle_intra != 1 && config->edge_skp_angle_intra != -1) {
+      SVT_LOG("Error instance %u: Invalid Enable skip angle intra based on edge flag [0/1 or -1 for auto], your input: %d\n", channelNumber + 1, config->edge_skp_angle_intra);
+      return_error = EB_ErrorBadParameter;
+    }
+
+    if (config->inter_intra_compound != 0 && config->inter_intra_compound != 1 && config->inter_intra_compound != -1) {
+      SVT_LOG("Error instance %u: Invalid Inter Intra Compound flag [0/1 or -1 for auto], your input: %d\n", channelNumber + 1, config->inter_intra_compound);
+      return_error = EB_ErrorBadParameter;
+    }
+
+    if (config->fract_search_64 != 0 && config->fract_search_64 != 1 && config->fract_search_64 != -1) {
+      SVT_LOG("Error instance %u: Invalid fractional search for 64x64 flag [0/1 or -1 for auto], your input: %d\n", channelNumber + 1, config->fract_search_64);
+      return_error = EB_ErrorBadParameter;
+    }
+
+    if (config->enable_mfmv != 0 && config->enable_mfmv != 1 && config->enable_mfmv != -1) {
+      SVT_LOG("Error instance %u: Invalid motion field motion vector flag [0/1 or -1 for auto], your input: %d\n", channelNumber + 1, config->enable_mfmv);
+      return_error = EB_ErrorBadParameter;
+    }
+
+    if (config->enable_redundant_blk != 0 && config->enable_redundant_blk != 1 && config->enable_redundant_blk != -1) {
+      SVT_LOG("Error instance %u: Invalid enable_redundant_blk  flag [0/1 or -1 for auto], your input: %d\n", channelNumber + 1, config->enable_redundant_blk);
+      return_error = EB_ErrorBadParameter;
+    }
+
+    if (config->enable_trellis != 0 && config->enable_trellis != 1 && config->enable_trellis != -1) {
+      SVT_LOG("Error instance %u: Invalid enable_trellis flag [0/1 or -1 for auto], your input: %d\n", channelNumber + 1, config->enable_trellis);
+      return_error = EB_ErrorBadParameter;
+    }
+
+    if (config->spatial_sse_fl != 0 && config->spatial_sse_fl != 1 && config->spatial_sse_fl != -1) {
+      SVT_LOG("Error instance %u: Invalid spatial_sse_fl flag [0/1 or -1 for auto], your input: %d\n", channelNumber + 1, config->spatial_sse_fl);
+      return_error = EB_ErrorBadParameter;
+    }
+
+    if (config->enable_subpel != 0 && config->enable_subpel != 1 && config->enable_subpel != -1) {
+      SVT_LOG("Error instance %u: Invalid enable_subpel flag [0/1 or -1 for auto], your input: %d\n", channelNumber + 1, config->enable_subpel);
+      return_error = EB_ErrorBadParameter;
+    }
+
+    if (config->over_bndry_blk != 0 && config->over_bndry_blk != 1 && config->over_bndry_blk != -1) {
+      SVT_LOG("Error instance %u: Invalid over_bndry_blk flag [0/1 or -1 for auto], your input: %d\n", channelNumber + 1, config->over_bndry_blk);
+      return_error = EB_ErrorBadParameter;
+    }
+
+    if (config->new_nearest_comb_inject != 0 && config->new_nearest_comb_inject != 1 && config->new_nearest_comb_inject != -1) {
+      SVT_LOG("Error instance %u: Invalid new_nearest_comb_inject flag [0/1 or -1 for auto], your input: %d\n", channelNumber + 1, config->new_nearest_comb_inject);
+      return_error = EB_ErrorBadParameter;
+    }
+
+    if (config->nx4_4xn_parent_mv_inject != 0 && config->nx4_4xn_parent_mv_inject != 1 && config->nx4_4xn_parent_mv_inject != -1) {
+      SVT_LOG("Error instance %u: Invalid nx4_4xn_parent_mv_inject flag [0/1 or -1 for auto], your input: %d\n", channelNumber + 1, config->nx4_4xn_parent_mv_inject);
+      return_error = EB_ErrorBadParameter;
+    }
+
+    if (config->prune_unipred_me != 0 && config->prune_unipred_me != 1 && config->prune_unipred_me != -1) {
+      SVT_LOG("Error instance %u: Invalid prune_unipred_me flag [0/1 or -1 for auto], your input: %d\n", channelNumber + 1, config->prune_unipred_me);
+      return_error = EB_ErrorBadParameter;
+    }
+
+    if (config->prune_ref_rec_part != 0 && config->prune_ref_rec_part != 1 && config->prune_ref_rec_part != -1) {
+      SVT_LOG("Error instance %u: Invalid prune_ref_rec_part flag [0/1 or -1 for auto], your input: %d\n", channelNumber + 1, config->prune_ref_rec_part);
+      return_error = EB_ErrorBadParameter;
+    }
+
+    if (config->nsq_table != 0 && config->nsq_table != 1 && config->nsq_table != -1) {
+      SVT_LOG("Error instance %u: Invalid nsq_table flag [0/1 or -1 for auto], your input: %d\n", channelNumber + 1, config->nsq_table);
+      return_error = EB_ErrorBadParameter;
+    }
+
+    if (config->frame_end_cdf_update != 0 && config->frame_end_cdf_update != 1 && config->frame_end_cdf_update != -1) {
+      SVT_LOG("Error instance %u: Invalid frame_end_cdf_update flag [0/1 or -1 for auto], your input: %d\n", channelNumber + 1, config->frame_end_cdf_update);
+      return_error = EB_ErrorBadParameter;
     }
 
     // mdc refinement
@@ -2665,10 +2844,30 @@ EbErrorType eb_svt_enc_init_parameter(
     config_ptr->disable_dlf_flag = EB_FALSE;
     config_ptr->enable_warped_motion = EB_TRUE;
     config_ptr->enable_global_motion = EB_TRUE;
+    config_ptr->enable_restoration_filtering = DEFAULT;
+    config_ptr->edge_skp_angle_intra = DEFAULT;
+    config_ptr->combine_class_12 = DEFAULT;
+    config_ptr->inter_intra_compound = DEFAULT;
+    config_ptr->fract_search_64 = DEFAULT;
+    config_ptr->enable_mfmv = DEFAULT;
+    config_ptr->enable_redundant_blk = DEFAULT;
+    config_ptr->enable_trellis = DEFAULT;
+    config_ptr->spatial_sse_fl = DEFAULT;
+    config_ptr->enable_subpel = DEFAULT;
+    config_ptr->over_bndry_blk = DEFAULT;
+    config_ptr->new_nearest_comb_inject = DEFAULT;
+    config_ptr->nx4_4xn_parent_mv_inject = DEFAULT;
+    config_ptr->prune_unipred_me = DEFAULT;
+    config_ptr->prune_ref_rec_part = DEFAULT;
+    config_ptr->nsq_table = DEFAULT;
+    config_ptr->frame_end_cdf_update = DEFAULT;
+    config_ptr->set_chroma_mode = DEFAULT;
     config_ptr->enable_obmc = EB_TRUE;
-    config_ptr->enable_rdoq = AUTO_MODE;
+    config_ptr->enable_rdoq = DEFAULT;
+    config_ptr->pred_me = DEFAULT;
+    config_ptr->bipred_3x3_inject = DEFAULT;
+    config_ptr->compound_level = DEFAULT;
     config_ptr->enable_filter_intra = EB_TRUE;
-    config_ptr->in_loop_me_flag = EB_TRUE;
     config_ptr->ext_block_flag = EB_FALSE;
     config_ptr->use_default_me_hme = EB_TRUE;
     config_ptr->enable_hme_flag = EB_TRUE;
@@ -2721,8 +2920,8 @@ EbErrorType eb_svt_enc_init_parameter(
     config_ptr->speed_control_flag = 0;
     config_ptr->film_grain_denoise_strength = 0;
 
-    // ASM Type
-    config_ptr->asm_type = 1;
+    // CPU Flags
+    config_ptr->use_cpu_flags = CPU_FLAGS_ALL;
 
     // Channel info
     config_ptr->logical_processors = 0;
@@ -2746,7 +2945,7 @@ EbErrorType eb_svt_enc_init_parameter(
     config_ptr->md_stage_2_cand_prune_th = 15;
     config_ptr->md_stage_2_class_prune_th = 25;
 
-    return return_error;
+    config_ptr->enable_auto_max_partition = 1;    return return_error;
 }
 //#define DEBUG_BUFFERS
 static void print_lib_params(
@@ -2788,13 +2987,11 @@ static void print_lib_params(
         SVT_LOG("\nSVT [config]: FrameRate / Gop Size\t\t\t\t\t\t: %d / %d ", config->frame_rate > 1000 ? config->frame_rate >> 16 : config->frame_rate, config->intra_period_length + 1);
     SVT_LOG("\nSVT [config]: HierarchicalLevels / BaseLayerSwitchMode / PredStructure\t\t: %d / %d / %d ", config->hierarchical_levels, config->base_layer_switch_mode, config->pred_structure);
     if (config->rate_control_mode == 1)
-        SVT_LOG("\nSVT [config]: RCMode / TargetBitrate / LookaheadDistance / SceneChange\t\t: ABR / %d / %d / %d ", config->target_bit_rate, config->look_ahead_distance, config->scene_change_detection);
+        SVT_LOG("\nSVT [config]: RCMode / TargetBitrate (kbps)/ LookaheadDistance / SceneChange\t\t: VBR / %d / %d / %d ", (int)config->target_bit_rate/1000, config->look_ahead_distance, config->scene_change_detection);
     else if (config->rate_control_mode == 2)
-        SVT_LOG("\nSVT [config]: RCMode / TargetBitrate / LookaheadDistance / SceneChange\t\t: VBR / %d / %d / %d ", config->target_bit_rate, config->look_ahead_distance, config->scene_change_detection);
-    else if (config->rate_control_mode == 3)
-        SVT_LOG("\nSVT [config]: RCMode / TargetBitrate / LookaheadDistance / SceneChange\t\t: Constraint VBR / %d / %d / %d ", config->target_bit_rate, config->look_ahead_distance, config->scene_change_detection);
+        SVT_LOG("\nSVT [config]: RCMode / TargetBitrate (kbps)/ LookaheadDistance / SceneChange\t\t: Constraint VBR / %d / %d / %d ", (int)config->target_bit_rate/1000, config->look_ahead_distance, config->scene_change_detection);
     else
-        SVT_LOG("\nSVT [config]: BRC Mode / QP  / LookaheadDistance / SceneChange\t\t\t: CQP / %d / %d / %d ", scs->qp, config->look_ahead_distance, config->scene_change_detection);
+        SVT_LOG("\nSVT [config]: BRC Mode / QP  / LookaheadDistance / SceneChange\t\t\t: CQP / %d / %d / %d ", scs->static_config.qp, config->look_ahead_distance, config->scene_change_detection);
 #ifdef DEBUG_BUFFERS
     SVT_LOG("\nSVT [config]: INPUT / OUTPUT \t\t\t\t\t\t\t: %d / %d", scs->input_buffer_fifo_init_count, scs->output_stream_buffer_fifo_init_count);
     SVT_LOG("\nSVT [config]: CPCS / PAREF / REF \t\t\t\t\t\t: %d / %d / %d", scs->picture_control_set_pool_init_count_child, scs->pa_reference_picture_buffer_init_count, scs->reference_picture_buffer_init_count);

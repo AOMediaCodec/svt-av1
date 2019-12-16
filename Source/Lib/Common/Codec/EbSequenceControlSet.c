@@ -92,17 +92,13 @@ EbErrorType eb_sequence_control_set_ctor(
     sequence_control_set_ptr->max_intra_size = 32;
     sequence_control_set_ptr->min_intra_size = 8;
     sequence_control_set_ptr->intra4x4_flag = EB_TRUE;
-
-    sequence_control_set_ptr->general_progressive_source_flag = 1;
-    sequence_control_set_ptr->general_interlaced_source_flag = 0;
-    sequence_control_set_ptr->general_frame_only_constraint_flag = 0;
     // Rate Control
     sequence_control_set_ptr->rate_control_mode = 0;
     sequence_control_set_ptr->target_bitrate = 0x1000;
     sequence_control_set_ptr->available_bandwidth = 0x1000;
 
     // Quantization
-    sequence_control_set_ptr->qp = 20;
+    sequence_control_set_ptr->static_config.qp = 20;
     // Initialize SB params
     EB_MALLOC_ARRAY(sequence_control_set_ptr->sb_params_array,
         ((MAX_PICTURE_WIDTH_SIZE + sequence_control_set_ptr->sb_sz - 1) / sequence_control_set_ptr->sb_sz) *
@@ -154,12 +150,18 @@ EbErrorType eb_sequence_control_set_ctor(
 
     sequence_control_set_ptr->seq_header.order_hint_info.enable_ref_frame_mvs = 1;
 #if NO_ENCDEC || SHUT_FILTERING
-    sequence_control_set_ptr->enable_cdef = 0;
+    sequence_control_set_ptr->seq_header.enable_cdef = 0;
 
-    sequence_control_set_ptr->enable_restoration = 0;
+    if (sequence_control_set_ptr->static_config.enable_restoration_filtering == DEFAULT)
+        sequence_control_set_ptr->seq_header.enable_restoration = 0;
+    else
+        sequence_control_set_ptr->seq_header.enable_restoration = (uint8_t)sequence_control_set_ptr->static_config.enable_restoration_filtering;
 #else
     sequence_control_set_ptr->seq_header.enable_cdef = 1;
-    sequence_control_set_ptr->seq_header.enable_restoration = 1;
+    if (sequence_control_set_ptr->static_config.enable_restoration_filtering == DEFAULT)
+        sequence_control_set_ptr->seq_header.enable_restoration = 1;
+    else
+        sequence_control_set_ptr->seq_header.enable_restoration = (uint8_t)sequence_control_set_ptr->static_config.enable_restoration_filtering;
 #endif
 
     sequence_control_set_ptr->film_grain_random_seed = 7391;
@@ -234,12 +236,9 @@ EbErrorType copy_sequence_control_set(
     dst->max_intra_size = src->max_intra_size;                            writeCount += sizeof(uint32_t);
     dst->min_intra_size = src->min_intra_size;                            writeCount += sizeof(uint32_t);
     dst->intra4x4_flag = src->intra4x4_flag;                            writeCount += sizeof(EbBool);
-    dst->general_progressive_source_flag = src->general_progressive_source_flag;        writeCount += sizeof(uint32_t);
-    dst->general_interlaced_source_flag = src->general_interlaced_source_flag;         writeCount += sizeof(uint32_t);
-    dst->general_frame_only_constraint_flag = src->general_frame_only_constraint_flag;      writeCount += sizeof(uint32_t);
     dst->target_bitrate = src->target_bitrate;                           writeCount += sizeof(uint32_t);
     dst->available_bandwidth = src->available_bandwidth;                      writeCount += sizeof(uint32_t);
-    dst->qp = src->qp;                                      writeCount += sizeof(uint32_t);
+    dst->static_config.qp = src->static_config.qp;                                      writeCount += sizeof(uint32_t);
     dst->film_grain_denoise_strength = src->film_grain_denoise_strength;          writeCount += sizeof(int32_t);
     dst->seq_header.film_grain_params_present = src->seq_header.film_grain_params_present;              writeCount += sizeof(int32_t);
     dst->seq_header.film_grain_params_present = src->seq_header.film_grain_params_present;              writeCount += sizeof(int32_t);

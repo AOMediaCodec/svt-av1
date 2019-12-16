@@ -208,12 +208,6 @@ typedef struct EbConfig
 
     uint8_t                  latency_mode;
 
-    /****************************************
-     * // Interlaced Video
-     ****************************************/
-    EbBool                  interlaced_video;
-    EbBool                  separate_fields;
-
     /*****************************************
      * Coding Structure
      *****************************************/
@@ -252,15 +246,108 @@ typedef struct EbConfig
     EbBool                  enable_global_motion;
 
     /****************************************
+     * Restoration filtering
+    ****************************************/
+    int                     enable_restoration_filtering;
+
+    /****************************************
+     * class12
+    ****************************************/
+    int                    combine_class_12;
+    /****************************************
+     * edge based skip angle intra
+    ****************************************/
+    int                    edge_skp_angle_intra;
+    /****************************************
+     * intra inter compoound
+    ****************************************/
+    int                    inter_intra_compound;
+    /****************************************
+     * fractional search 64x64
+    ****************************************/
+    int                     fract_search_64;
+    /****************************************
+     * motion field motion vector
+    ****************************************/
+     int                   enable_mfmv;
+    /****************************************
+     * redundant block
+    ****************************************/
+     int                   enable_redundant_blk;
+     /****************************************
+      * trellis quant coeff optimization
+     ****************************************/
+     int                   enable_trellis;
+     /****************************************
+      * spatial sse in full loop
+     ****************************************/
+     int                   spatial_sse_fl;
+     /****************************************
+      * subpel
+     ****************************************/
+     int                   enable_subpel;
+     /****************************************
+      * over boundry block
+     ****************************************/
+     int                   over_bndry_blk;
+     /****************************************
+      * new nearest comb injection
+     ****************************************/
+     int                   new_nearest_comb_inject;
+     /****************************************
+      * nx4 4xn parent motion vector injection
+     ****************************************/
+     int                   nx4_4xn_parent_mv_inject;
+     /****************************************
+      * prune unipred at me
+     ****************************************/
+     int                   prune_unipred_me;
+     /****************************************
+      * prune ref frame for rec partitions
+     ****************************************/
+     int                   prune_ref_rec_part;
+     /****************************************
+      * nsq table
+     ****************************************/
+     int                   nsq_table;
+     /****************************************
+      * frame end cdf update
+     ****************************************/
+     int                   frame_end_cdf_update;
+     /****************************************
+      * predictive me
+     ****************************************/
+     int                    pred_me;
+     /****************************************
+      * bipred 3x3 injection
+     ****************************************/
+     int                    bipred_3x3_inject;
+     /****************************************
+      * compound level
+     ****************************************/
+     int                    compound_level;
+
+     /****************************************
+     * Chroma
+     *
+     * Level                Settings
+     * CHROMA_MODE_0  0     Full chroma search @ MD
+     * CHROMA_MODE_1  1     Fast chroma search @ MD
+     * CHROMA_MODE_2  2     Chroma blind @ MD + CFL @ EP
+     * CHROMA_MODE_3  3     Chroma blind @ MD + no CFL @ EP
+     *
+     * Default is -1 (AUTO)  */
+    int                   set_chroma_mode;
+
+    /****************************************
      * OBMC
      ****************************************/
     EbBool                  enable_obmc;
 
     /****************************************
      * RDOQ
-     ****************************************/
-
-     int8_t                  enable_rdoq;
+     * ****************************************/
+    int                      enable_rdoq;
 
     /****************************************
      * Filter intra prediction
@@ -275,7 +362,6 @@ typedef struct EbConfig
     EbBool                  enable_hme_level1_flag;
     EbBool                  enable_hme_level2_flag;
     EbBool                  ext_block_flag;
-    EbBool                  in_loop_me_flag;
 
     /****************************************
      * ME Parameters
@@ -347,9 +433,9 @@ typedef struct EbConfig
     EbBool                   eos_flag;
 
     /****************************************
-    * Optimization Type
+    * CPU FLAGS available
     ****************************************/
-    uint32_t                  asm_type;
+    CPU_FLAGS                cpu_flags_limit;
 
     /****************************************
      * Computational Performance Data
@@ -389,6 +475,9 @@ typedef struct EbConfig
     uint64_t                 md_stage_1_cand_prune_th;
     uint64_t                 md_stage_2_class_prune_th;
     uint64_t                 md_stage_2_cand_prune_th;
+
+    // signal for enabling shortcut to skip search depths
+    uint8_t                 enable_auto_max_partition;
 
 } EbConfig;
 

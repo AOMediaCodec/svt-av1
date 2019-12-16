@@ -28,7 +28,7 @@ extern "C" {
     };
 
     void full_loop_r(
-        LargestCodingUnit            *sb_ptr,
+        SuperBlock                   *sb_ptr,
         ModeDecisionCandidateBuffer  *candidate_buffer,
         ModeDecisionContext          *context_ptr,
         EbPictureBufferDesc          *input_picture_ptr,
@@ -40,7 +40,7 @@ extern "C" {
         uint32_t                          *cr_count_non_zero_coeffs);
 
     void cu_full_distortion_fast_tu_mode_r(
-        LargestCodingUnit            *sb_ptr,
+        SuperBlock                   *sb_ptr,
         ModeDecisionCandidateBuffer  *candidate_buffer,
         ModeDecisionContext            *context_ptr,
         ModeDecisionCandidate           *candidate_ptr,
@@ -102,7 +102,7 @@ extern "C" {
     extern uint32_t d2_inter_depth_block_decision(
         ModeDecisionContext          *context_ptr,
         uint32_t                        blk_mds,
-        LargestCodingUnit            *tb_ptr,
+        SuperBlock                   *tb_ptr,
         uint32_t                          lcuAddr,
         uint32_t                          tbOriginX,
         uint32_t                          tbOriginY,
@@ -118,7 +118,11 @@ extern "C" {
         uint32_t             step,
         uint64_t            *above_depth_cost,
         uint64_t            *curr_depth_cost);
+#if MULTI_PASS_PD
+    uint64_t d1_non_square_block_decision(
+#else
     void  d1_non_square_block_decision(
+#endif
         ModeDecisionContext               *context_ptr
 #if ADD_SUPPORT_TO_SKIP_PART_N
         , uint32_t                         d1_block_itr

@@ -23,7 +23,7 @@ extern "C" {
         SequenceControlSet                *sequence_control_set_ptr,
         PictureControlSet                 *picture_control_set_ptr,
         const MdcLcuData * const           mdcResultTbPtr,
-        LargestCodingUnit                 *sb_ptr,
+        SuperBlock                         *sb_ptr,
         uint32_t                             sb_origin_x,
         uint32_t                             sb_origin_y,
         uint32_t                             lcuAddr,
@@ -33,37 +33,26 @@ extern "C" {
         SequenceControlSet                *sequence_control_set_ptr,
         PictureControlSet                 *picture_control_set_ptr,
         const MdcLcuData * const           mdcResultTbPtr,
-        LargestCodingUnit                 *sb_ptr,
+        SuperBlock                        *sb_ptr,
         uint32_t                             sb_origin_x,
         uint32_t                             sb_origin_y,
         uint32_t                             lcuAddr,
         ModeDecisionContext               *context_ptr);
 
-    extern EbErrorType in_loop_motion_estimation_sblock(
-        PictureControlSet                 *picture_control_set_ptr,  // input parameter, Picture Control Set Ptr
-        uint32_t                             sb_origin_x,            // input parameter, SB Origin X
-        uint32_t                             sb_origin_y,            // input parameter, SB Origin X
-        int16_t                              x_mv_l0,
-        int16_t                              y_mv_l0,
-        int16_t                              x_mv_l1,
-        int16_t                              y_mv_l1,
-        SsMeContext                        *context_ptr);          // input parameter, ME Context Ptr, used to store decimated/interpolated LCU/SR
-
     extern EbErrorType mode_decision_sb(
         SequenceControlSet                *sequence_control_set_ptr,
         PictureControlSet                 *picture_control_set_ptr,
         const MdcLcuData * const           mdcResultTbPtr,
-        LargestCodingUnit                 *sb_ptr,
+        SuperBlock                        *sb_ptr,
         uint16_t                             sb_origin_x,
         uint16_t                             sb_origin_y,
         uint32_t                             lcuAddr,
-        SsMeContext                       *ss_mecontext,
         ModeDecisionContext               *context_ptr);
 
     extern EbErrorType ModeDecisionRefinementLcu(
         SequenceControlSet                *sequence_control_set_ptr,
         PictureControlSet                 *picture_control_set_ptr,
-        LargestCodingUnit                 *sb_ptr,
+        SuperBlock                        *sb_ptr,
         uint32_t                               sb_origin_x,
         uint32_t                               sb_origin_y,
         ModeDecisionContext               *context_ptr);
@@ -76,7 +65,7 @@ extern "C" {
     extern void av1_encode_pass(
         SequenceControlSet    *sequence_control_set_ptr,
         PictureControlSet     *picture_control_set_ptr,
-        LargestCodingUnit     *sb_ptr,
+        SuperBlock            *sb_ptr,
         uint32_t                   tbAddr,
         uint32_t                   sb_origin_x,
         uint32_t                   sb_origin_y,
@@ -87,7 +76,7 @@ extern "C" {
     void no_enc_dec_pass(
         SequenceControlSet    *sequence_control_set_ptr,
         PictureControlSet     *picture_control_set_ptr,
-        LargestCodingUnit     *sb_ptr,
+        SuperBlock            *sb_ptr,
         uint32_t                   tbAddr,
         uint32_t                   sb_origin_x,
         uint32_t                   sb_origin_y,

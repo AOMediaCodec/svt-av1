@@ -168,7 +168,6 @@ EbErrorType CopyConfigurationParameters(
     callback_data->eb_enc_parameters.frame_rate_numerator = config->frame_rate_numerator;
     callback_data->eb_enc_parameters.hierarchical_levels = config->hierarchical_levels;
     callback_data->eb_enc_parameters.pred_structure = (uint8_t)config->pred_structure;
-    callback_data->eb_enc_parameters.in_loop_me_flag = config->in_loop_me_flag;
     callback_data->eb_enc_parameters.ext_block_flag = config->ext_block_flag;
     callback_data->eb_enc_parameters.tile_rows = config->tile_rows;
     callback_data->eb_enc_parameters.tile_columns = config->tile_columns;
@@ -192,8 +191,29 @@ EbErrorType CopyConfigurationParameters(
     callback_data->eb_enc_parameters.disable_dlf_flag = (EbBool)config->disable_dlf_flag;
     callback_data->eb_enc_parameters.enable_warped_motion = (EbBool)config->enable_warped_motion;
     callback_data->eb_enc_parameters.enable_global_motion = (EbBool)config->enable_global_motion;
+    callback_data->eb_enc_parameters.enable_restoration_filtering = config->enable_restoration_filtering;
+    callback_data->eb_enc_parameters.combine_class_12 = config->combine_class_12;
+    callback_data->eb_enc_parameters.edge_skp_angle_intra = config->edge_skp_angle_intra;
+    callback_data->eb_enc_parameters.inter_intra_compound = config->inter_intra_compound;
+    callback_data->eb_enc_parameters.fract_search_64 = config->fract_search_64;
+    callback_data->eb_enc_parameters.enable_mfmv = config->enable_mfmv;
+    callback_data->eb_enc_parameters.enable_redundant_blk = config->enable_redundant_blk;
+    callback_data->eb_enc_parameters.enable_trellis = config->enable_trellis;
+    callback_data->eb_enc_parameters.spatial_sse_fl = config->spatial_sse_fl;
+    callback_data->eb_enc_parameters.enable_subpel = config->enable_subpel;
+    callback_data->eb_enc_parameters.over_bndry_blk = config->over_bndry_blk;
+    callback_data->eb_enc_parameters.new_nearest_comb_inject = config->new_nearest_comb_inject;
+    callback_data->eb_enc_parameters.nx4_4xn_parent_mv_inject = config->nx4_4xn_parent_mv_inject;
+    callback_data->eb_enc_parameters.prune_unipred_me = config->prune_unipred_me;
+    callback_data->eb_enc_parameters.prune_ref_rec_part = config->prune_ref_rec_part;
+    callback_data->eb_enc_parameters.nsq_table = config->nsq_table;
+    callback_data->eb_enc_parameters.frame_end_cdf_update = config->frame_end_cdf_update;
     callback_data->eb_enc_parameters.enable_obmc = (EbBool)config->enable_obmc;
     callback_data->eb_enc_parameters.enable_rdoq = config->enable_rdoq;
+    callback_data->eb_enc_parameters.pred_me = config->pred_me;
+    callback_data->eb_enc_parameters.bipred_3x3_inject = config->bipred_3x3_inject;
+    callback_data->eb_enc_parameters.compound_level = config->compound_level;
+    callback_data->eb_enc_parameters.set_chroma_mode = config->set_chroma_mode;
     callback_data->eb_enc_parameters.enable_filter_intra = (EbBool)config->enable_filter_intra;
     callback_data->eb_enc_parameters.use_default_me_hme = (EbBool)config->use_default_me_hme;
     callback_data->eb_enc_parameters.enable_hme_flag = (EbBool)config->enable_hme_flag;
@@ -223,7 +243,7 @@ EbErrorType CopyConfigurationParameters(
     callback_data->eb_enc_parameters.level = config->level;
     callback_data->eb_enc_parameters.injector_frame_rate = config->injector_frame_rate;
     callback_data->eb_enc_parameters.speed_control_flag = config->speed_control_flag;
-    callback_data->eb_enc_parameters.asm_type = config->asm_type;
+    callback_data->eb_enc_parameters.use_cpu_flags = config->cpu_flags_limit;
     callback_data->eb_enc_parameters.logical_processors = config->logical_processors;
     callback_data->eb_enc_parameters.target_socket = config->target_socket;
     callback_data->eb_enc_parameters.unrestricted_motion_vector = config->unrestricted_motion_vector;
@@ -248,6 +268,7 @@ EbErrorType CopyConfigurationParameters(
     }
 
     callback_data->eb_enc_parameters.sq_weight = config->sq_weight;
+    callback_data->eb_enc_parameters.enable_auto_max_partition = config->enable_auto_max_partition;
 
     callback_data->eb_enc_parameters.md_stage_1_cand_prune_th = config->md_stage_1_cand_prune_th;
     callback_data->eb_enc_parameters.md_stage_1_class_prune_th = config->md_stage_1_class_prune_th;
@@ -433,124 +454,6 @@ EbErrorType PreloadFramesIntoRam(
 
     for (processed_frame_count = 0; processed_frame_count < config->buffered_input; ++processed_frame_count) {
         EB_APP_MALLOC(uint8_t*, config->sequence_buffer[processed_frame_count], readSize, EB_N_PTR, EB_ErrorInsufficientResources);
-        // Interlaced Video
-        if (config->separate_fields) {
-            EbBool is16bit = config->encoder_bit_depth > 8;
-            if (is16bit == 0 || (is16bit == 1 && config->compressed_ten_bit_format == 0)) {
-                const int32_t tenBitPackedMode = (config->encoder_bit_depth > 8) && (config->compressed_ten_bit_format == 0) ? 1 : 0;
-
-                const size_t luma8bitSize =
-
-                    (config->input_padded_width) *
-                    (config->input_padded_height) *
-
-                    (1 << tenBitPackedMode);
-
-                const size_t chroma8bitSize = luma8bitSize >> 2;
-
-                filledLen = 0;
-
-                ProcessInputFieldBufferingMode(
-                    processed_frame_count,
-                    &filledLen,
-                    input_file,
-                    config->sequence_buffer[processed_frame_count],
-                    config->sequence_buffer[processed_frame_count] + luma8bitSize,
-                    config->sequence_buffer[processed_frame_count] + luma8bitSize + chroma8bitSize,
-                    (uint32_t)input_padded_width,
-                    (uint32_t)input_padded_height,
-                    is16bit);
-
-                if (readSize != filledLen) {
-                    fseek(input_file, 0, SEEK_SET);
-                    filledLen = 0;
-
-                    ProcessInputFieldBufferingMode(
-                        processed_frame_count,
-                        &filledLen,
-                        input_file,
-                        config->sequence_buffer[processed_frame_count],
-                        config->sequence_buffer[processed_frame_count] + luma8bitSize,
-                        config->sequence_buffer[processed_frame_count] + luma8bitSize + chroma8bitSize,
-                        (uint32_t)input_padded_width,
-                        (uint32_t)input_padded_height,
-                        is16bit);
-                }
-
-                // Reset the pointer position after a top field
-                if (processed_frame_count % 2 == 0)
-                    fseek(input_file, -(long)(readSize << 1), SEEK_CUR);
-            }
-            // Unpacked 10 bit
-            else {
-                const int32_t tenBitPackedMode = (config->encoder_bit_depth > 8) && (config->compressed_ten_bit_format == 0) ? 1 : 0;
-
-                const size_t luma8bitSize =
-                    (config->input_padded_width) *
-                    (config->input_padded_height) *
-                    (1 << tenBitPackedMode);
-
-                const size_t chroma8bitSize = luma8bitSize >> 2;
-
-                const size_t luma10bitSize = (config->encoder_bit_depth > 8 && tenBitPackedMode == 0) ? luma8bitSize : 0;
-                const size_t chroma10bitSize = (config->encoder_bit_depth > 8 && tenBitPackedMode == 0) ? chroma8bitSize : 0;
-
-                filledLen = 0;
-
-                ProcessInputFieldBufferingMode(
-                    processed_frame_count,
-                    &filledLen,
-                    input_file,
-                    config->sequence_buffer[processed_frame_count],
-                    config->sequence_buffer[processed_frame_count] + luma8bitSize,
-                    config->sequence_buffer[processed_frame_count] + luma8bitSize + chroma8bitSize,
-                    (uint32_t)input_padded_width,
-                    (uint32_t)input_padded_height,
-                    0);
-
-                ProcessInputFieldBufferingMode(
-                    processed_frame_count,
-                    &filledLen,
-                    input_file,
-                    config->sequence_buffer[processed_frame_count] + luma8bitSize + (chroma8bitSize << 1),
-                    config->sequence_buffer[processed_frame_count] + luma8bitSize + (chroma8bitSize << 1) + luma10bitSize,
-                    config->sequence_buffer[processed_frame_count] + luma8bitSize + (chroma8bitSize << 1) + luma10bitSize + chroma10bitSize,
-                    (uint32_t)input_padded_width,
-                    (uint32_t)input_padded_height,
-                    0);
-
-                if (readSize != filledLen) {
-                    fseek(input_file, 0, SEEK_SET);
-                    filledLen = 0;
-
-                    ProcessInputFieldBufferingMode(
-                        processed_frame_count,
-                        &filledLen,
-                        input_file,
-                        config->sequence_buffer[processed_frame_count],
-                        config->sequence_buffer[processed_frame_count] + luma8bitSize,
-                        config->sequence_buffer[processed_frame_count] + luma8bitSize + chroma8bitSize,
-                        (uint32_t)input_padded_width,
-                        (uint32_t)input_padded_height,
-                        0);
-
-                    ProcessInputFieldBufferingMode(
-                        processed_frame_count,
-                        &filledLen,
-                        input_file,
-                        config->sequence_buffer[processed_frame_count] + luma8bitSize + (chroma8bitSize << 1),
-                        config->sequence_buffer[processed_frame_count] + luma8bitSize + (chroma8bitSize << 1) + luma10bitSize,
-                        config->sequence_buffer[processed_frame_count] + luma8bitSize + (chroma8bitSize << 1) + luma10bitSize + chroma10bitSize,
-                        (uint32_t)input_padded_width,
-                        (uint32_t)input_padded_height,
-                        0);
-                }
-
-                // Reset the pointer position after a top field
-                if (processed_frame_count % 2 == 0)
-                    fseek(input_file, -(long)(readSize << 1), SEEK_CUR);
-            }
-        } else {
             // Fill the buffer with a complete frame
             filledLen = 0;
             filledLen += (uint32_t)fread(config->sequence_buffer[processed_frame_count], 1, readSize, input_file);
@@ -562,7 +465,6 @@ EbErrorType PreloadFramesIntoRam(
                 filledLen = 0;
                 filledLen += (uint32_t)fread(config->sequence_buffer[processed_frame_count], 1, readSize, input_file);
             }
-        }
     }
 
     return return_error;

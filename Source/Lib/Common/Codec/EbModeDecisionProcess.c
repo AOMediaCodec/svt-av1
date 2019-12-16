@@ -230,6 +230,7 @@ EbErrorType mode_decision_context_ctor(
         const BlockGeom * blk_geom = get_blk_geom_mds(codedLeafIndex);
         UNUSED(blk_geom);
         context_ptr->md_cu_arr_nsq[codedLeafIndex].av1xd = context_ptr->md_cu_arr_nsq[0].av1xd + codedLeafIndex;
+        context_ptr->md_cu_arr_nsq[codedLeafIndex].segment_id = 0;
 #if !HBD_CLEAN_UP
         if (context_ptr->hbd_mode_decision) {
 #endif
@@ -547,13 +548,18 @@ void reset_mode_decision(
 #endif
 #endif
 #endif
+#if !MULTI_PASS_PD
     EbBool enable_wm;
     if (picture_control_set_ptr->parent_pcs_ptr->sc_content_detected)
         enable_wm = EB_FALSE;
     else
 #if WARP_UPDATE
+#if ENHANCED_M0_SETTINGS
+        enable_wm = (picture_control_set_ptr->parent_pcs_ptr->enc_mode == ENC_M0 ||
+#else
         enable_wm = (MR_MODE ||
         (picture_control_set_ptr->parent_pcs_ptr->enc_mode == ENC_M0 && picture_control_set_ptr->parent_pcs_ptr->is_used_as_reference_flag) ||
+#endif
         (picture_control_set_ptr->parent_pcs_ptr->enc_mode <= ENC_M5 && picture_control_set_ptr->parent_pcs_ptr->temporal_layer_index == 0)) ? EB_TRUE : EB_FALSE;
 #else
         enable_wm = (picture_control_set_ptr->parent_pcs_ptr->enc_mode <= ENC_M5) || MR_MODE ? EB_TRUE : EB_FALSE;
@@ -594,6 +600,7 @@ void reset_mode_decision(
     frm_hdr->is_motion_mode_switchable =
         frm_hdr->is_motion_mode_switchable || picture_control_set_ptr->parent_pcs_ptr->pic_obmc_mode;
 
+#endif
 #endif
 #if FIX_SETTINGS_RESET
     }

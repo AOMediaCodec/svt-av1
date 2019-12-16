@@ -151,6 +151,7 @@ extern "C" {
     * Function Ptrs Definitions
     **************************************/
     typedef EbErrorType(*EbPredictionFunc)(
+        uint8_t                              hbd_mode_decision,
         struct ModeDecisionContext           *context_ptr,
         PictureControlSet                    *picture_control_set_ptr,
         struct ModeDecisionCandidateBuffer   *candidate_buffer_ptr);
@@ -167,12 +168,16 @@ extern "C" {
         const BlockGeom                        *blk_geom,
         uint32_t                                miRow,
         uint32_t                                miCol,
+#if MULTI_PASS_PD
+        uint8_t                                 enable_inter_intra,
+        EbBool                                  full_cost_shut_fast_rate_flag,
+#endif
         uint8_t                                 md_pass,
         uint32_t                                left_neighbor_mode,
         uint32_t                                top_neighbor_mode);
 
     typedef EbErrorType(*EB_FULL_COST_FUNC)(
-        LargestCodingUnit                    *sb_ptr,
+        SuperBlock                          *sb_ptr,
         CodingUnit                           *cu_ptr,
         uint32_t                                cu_size,
         uint32_t                                cu_size_log2,
