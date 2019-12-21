@@ -2405,6 +2405,7 @@ EbErrorType av1_tu_calc_cost(
     uint64_t                   lambda)                              // input parameter, lambda for Luma
 
 {
+    (void)txsize;
     (void)txb_skip_ctx;
     (void)cr_tu_coeff_bits;
     (void)cb_tu_coeff_bits;
@@ -2460,7 +2461,7 @@ EbErrorType av1_tu_calc_cost_luma(
 
 {
     (void)txb_skip_ctx;
-
+    (void)tx_size;
     EbErrorType return_error = EB_ErrorNone;
 
     // Non Zero Cbf mode variables
