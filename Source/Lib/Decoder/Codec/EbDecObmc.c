@@ -44,11 +44,11 @@ void av1_modify_neighbor_predictor_for_obmc(BlockModeInfo *mbmi) {
     return;
 }
 
-int av1_skip_u4x4_pred_in_obmc(BlockSize bsize, int dir, int32_t sub_x, int32_t sub_y);
+int eb_av1_skip_u4x4_pred_in_obmc(BlockSize bsize, int dir, int32_t sub_x, int32_t sub_y);
 
 // obmc_mask_N[overlap_position]
 
-const uint8_t *av1_get_obmc_mask(int length);
+const uint8_t *eb_av1_get_obmc_mask(int length);
 
 static INLINE void build_obmc_inter_pred_above(EbDecHandle *dec_handle,
     PartitionInfo_t *pi, BlockSize bsize, int rel_mi_col, uint8_t above_mi_width,
@@ -73,7 +73,7 @@ static INLINE void build_obmc_inter_pred_above(EbDecHandle *dec_handle,
         const int bw = (above_mi_width * MI_SIZE) >> sub_x;
         const int bh = overlap >> sub_y;
 
-        if (av1_skip_u4x4_pred_in_obmc(bsize, 0, sub_x, sub_y)) continue;
+        if (eb_av1_skip_u4x4_pred_in_obmc(bsize, 0, sub_x, sub_y)) continue;
 
         if (recon_picture_buf->bit_depth != EB_8BIT) {
             above_buf = (uint8_t *)((uint16_t *)above_tmp_buf[plane] +
@@ -96,16 +96,16 @@ static INLINE void build_obmc_inter_pred_above(EbDecHandle *dec_handle,
             tmp_recon_stride = curr_recon_stride[plane];
         }
 
-        const uint8_t *const mask = av1_get_obmc_mask(bh);
+        const uint8_t *const mask = eb_av1_get_obmc_mask(bh);
 
         if (is_hbd)
-            aom_highbd_blend_a64_vmask((tmp_recon_buf),
+            eb_aom_highbd_blend_a64_vmask((tmp_recon_buf),
                 tmp_recon_stride, (tmp_recon_buf),
                 tmp_recon_stride, (above_buf), above_stride,
                 mask, bw, bh, recon_picture_buf->bit_depth);
 
         else
-            aom_blend_a64_vmask(tmp_recon_buf, tmp_recon_stride, tmp_recon_buf,
+            eb_aom_blend_a64_vmask(tmp_recon_buf, tmp_recon_stride, tmp_recon_buf,
                 tmp_recon_stride, above_buf, above_stride, mask, bw, bh);
     }
 
@@ -137,7 +137,7 @@ static INLINE void build_obmc_inter_pred_left(EbDecHandle *dec_handle,
         const int bh = (left_mi_height * MI_SIZE) >> sub_y;
 
 
-        if (av1_skip_u4x4_pred_in_obmc(bsize, 1, sub_x, sub_y)) continue;
+        if (eb_av1_skip_u4x4_pred_in_obmc(bsize, 1, sub_x, sub_y)) continue;
 
         if (recon_picture_buf->bit_depth != EB_8BIT) {
             left_buf = (uint8_t *)((uint16_t *)left_tmp_buf[plane] +
@@ -162,15 +162,15 @@ static INLINE void build_obmc_inter_pred_left(EbDecHandle *dec_handle,
             tmp_recon_stride = curr_recon_stride[plane];
         }
 
-        const uint8_t *const mask = av1_get_obmc_mask(bw);
+        const uint8_t *const mask = eb_av1_get_obmc_mask(bw);
 
         if (is_hbd)
-            aom_highbd_blend_a64_hmask((uint8_t *)tmp_recon_buf,
+            eb_aom_highbd_blend_a64_hmask((uint8_t *)tmp_recon_buf,
                 tmp_recon_stride, (uint8_t *)tmp_recon_buf,
                 tmp_recon_stride, (uint8_t *)left_buf, left_stride,
                 mask, bw, bh, recon_picture_buf->bit_depth);
         else
-            aom_blend_a64_hmask(tmp_recon_buf, tmp_recon_stride, tmp_recon_buf,
+            eb_aom_blend_a64_hmask(tmp_recon_buf, tmp_recon_stride, tmp_recon_buf,
                 tmp_recon_stride, left_buf, left_stride, mask, bw, bh);
     }
 
@@ -229,7 +229,7 @@ static INLINE void dec_build_prediction_by_above_pred(DecModCtxt *dec_mod_ctx,
             tmp_recon_stride = tmp_stride[plane];
         }
 
-        if (av1_skip_u4x4_pred_in_obmc(bsize, 0, sub_x, sub_y)) continue;
+        if (eb_av1_skip_u4x4_pred_in_obmc(bsize, 0, sub_x, sub_y)) continue;
         svtav1_predict_inter_block_plane(dec_mod_ctx, dec_handle, backup_pi, plane,
             1/*obmc*/, mi_x, mi_y, (void *)tmp_recon_buf, tmp_recon_stride,
             0/*some_use_intra*/, recon_picture_buf->bit_depth);
@@ -375,7 +375,7 @@ static INLINE void dec_build_prediction_by_left_pred(DecModCtxt *dec_mod_ctx,
             tmp_recon_stride = tmp_stride[plane];
         }
 
-        if (av1_skip_u4x4_pred_in_obmc(bsize, 1, sub_x, sub_y)) continue;
+        if (eb_av1_skip_u4x4_pred_in_obmc(bsize, 1, sub_x, sub_y)) continue;
        // dec_build_inter_predictors(ctxt->cm, pi, j, &backup_mbmi, 1, bw, bh, mi_x,
        //                            mi_y);
         svtav1_predict_inter_block_plane(dec_mod_ctx, dec_handle, backup_pi, plane,
@@ -479,4 +479,3 @@ void dec_build_obmc_inter_predictors_sb(void *pv_dec_mod_ctxt,
     dec_build_prediction_by_left_preds(dec_mod_ctxt, dec_handle, pi, mi_row, mi_col,
         dst_buf, dec_mod_ctxt->obmc_ctx.dst_stride);
 }
-

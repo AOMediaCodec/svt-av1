@@ -166,7 +166,7 @@ EbErrorType av1_inter_prediction_hbd(
         struct ModeDecisionContext                    *context_ptr,
         ModeDecisionCandidate                *candidate_ptr);
 
-    void av1_dist_wtd_comp_weight_assign(
+    void eb_av1_dist_wtd_comp_weight_assign(
         SeqHeader *seq_header,
         int cur_frame_index,
         int bck_frame_index,
@@ -211,7 +211,7 @@ EbErrorType av1_inter_prediction_hbd(
         int interstride, const uint8_t *intrapred8, int intrastride, int bd);
 
 
-    void av1_setup_scale_factors_for_frame(ScaleFactors *sf, int other_w,
+    void eb_av1_setup_scale_factors_for_frame(ScaleFactors *sf, int other_w,
         int other_h, int this_w, int this_h);
 
     static INLINE int av1_is_valid_scale(const struct ScaleFactors *sf) {
@@ -228,7 +228,7 @@ EbErrorType av1_inter_prediction_hbd(
         return 2 * this_width >= ref_width && 2 * this_height >= ref_height &&
             this_width <= 16 * ref_width && this_height <= 16 * ref_height;
     }
-    MV32 av1_scale_mv(const MV *mvq4, int x, int y,
+    MV32 eb_av1_scale_mv(const MV *mvq4, int x, int y,
         const ScaleFactors *sf);
 
     EbErrorType inter_pu_prediction_av1(
@@ -273,7 +273,7 @@ EbErrorType av1_inter_prediction_hbd(
         EbBool                                perform_chroma);
 
     extern aom_highbd_convolve_fn_t convolveHbd[/*subX*/2][/*subY*/2][/*bi*/2];
-    extern aom_convolve_fn_t convolve[/*subX*/2][/*subY*/2][/*bi*/2];
+    extern eb_aom_convolve_fn_t convolve[/*subX*/2][/*subY*/2][/*bi*/2];
 
 #ifdef __cplusplus
 }

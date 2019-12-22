@@ -8,9 +8,9 @@
  *
  * @brief Unit test for util functions in palette mode:
  * - eb_av1_count_colors
- * - av1_count_colors_highbd
- * - av1_k_means_dim1
- * - av1_k_means_dim2
+ * - eb_av1_count_colors_highbd
+ * - eb_av1_k_means_dim1
+ * - eb_av1_k_means_dim2
  *
  * @author Cidana-Edmond
  *
@@ -40,13 +40,13 @@ namespace {
 
 extern "C" int eb_av1_count_colors(const uint8_t *src, int stride, int rows,
                                    int cols, int *val_count);
-extern "C" int av1_count_colors_highbd(uint16_t *src, int stride, int rows,
+extern "C" int eb_av1_count_colors_highbd(uint16_t *src, int stride, int rows,
                                        int cols, int bit_depth, int *val_count);
 
 /**
  * @brief Unit test for counting colors:
  * - eb_av1_count_colors
- * - av1_count_colors_highbd
+ * - eb_av1_count_colors_highbd
  *
  * Test strategy:
  * Feeds the random value both into test function and the vector without
@@ -137,7 +137,7 @@ class ColorCountHbdTest : public ColorCountTest<uint16_t> {
     unsigned int count_color() override {
         const int max_colors = (1 << bd_);
         memset(val_count_, 0, max_colors * sizeof(int));
-        unsigned int colors = (unsigned int)av1_count_colors_highbd(
+        unsigned int colors = (unsigned int)eb_av1_count_colors_highbd(
             input_, 64, 64, 64, bd_, val_count_);
         return colors;
     }
@@ -158,15 +158,15 @@ TEST_F(ColorCountHbdTest, MatchTest12Bit) {
     run_test(1000);
 }
 
-extern "C" void av1_k_means_dim1_c(const int *data, int *centroids,
+extern "C" void eb_av1_k_means_dim1_c(const int *data, int *centroids,
                                  uint8_t *indices, int n, int k, int max_itr);
-extern "C" void av1_k_means_dim2_c(const int *data, int *centroids,
+extern "C" void eb_av1_k_means_dim2_c(const int *data, int *centroids,
                                  uint8_t *indices, int n, int k, int max_itr);
 static const int MaxItr = 50;
 /**
  * @brief Unit test for kmeans functions:
- * - av1_k_means_dim1
- * - av1_k_means_dim2
+ * - eb_av1_k_means_dim1
+ * - eb_av1_k_means_dim2
  *
  * Test strategy:
  * Feeds the plane buffer with random colors into kmeans function and get the
@@ -214,7 +214,7 @@ class KMeansTest : public ::testing::TestWithParam<int> {
             const int colors = prepare_data(max_colors);
             int centroids[PALETTE_MAX_SIZE] = {0};
             int k = AOMMIN(colors, k_);
-            av1_k_means_dim1_c(
+            eb_av1_k_means_dim1_c(
                 data_, centroids, indices, MAX_PALETTE_SQUARE, k, MaxItr);
             check_output(centroids, k, data_, indices, MAX_PALETTE_SQUARE);
         }
@@ -262,7 +262,7 @@ class KMeansTest : public ::testing::TestWithParam<int> {
             const int colors = prepare_data_2d(max_colors);
             int centroids[2 * PALETTE_MAX_SIZE] = {0};
             int k = AOMMIN(colors, k_);
-            av1_k_means_dim2_c(
+            eb_av1_k_means_dim2_c(
                 data_, centroids, indices, MAX_PALETTE_SQUARE, k, MaxItr);
             check_output_2d(centroids, k, data_, indices, MAX_PALETTE_SQUARE);
         }
@@ -336,42 +336,42 @@ BlockSize TEST_BLOCK_SIZES[] = {BlockSize(4, 4),
                                 BlockSize(128, 128)};
 TestPattern TEST_PATTERNS[] = {MIN, MAX, RANDOM};
 
-static void av1_calc_indices_dim1_c_wrap(const int *data, int *centroids,
+static void eb_av1_calc_indices_dim1_c_wrap(const int *data, int *centroids,
                                     uint8_t *indices, int n, int k,
                                     int max_itr)
 {
     (void)max_itr;
-    av1_calc_indices_dim1_c(data, centroids, indices, n, k);
+    eb_av1_calc_indices_dim1_c(data, centroids, indices, n, k);
 }
 
-static void av1_calc_indices_dim1_avx2_wrap(const int *data, int *centroids,
+static void eb_av1_calc_indices_dim1_avx2_wrap(const int *data, int *centroids,
                                     uint8_t *indices, int n, int k,
                                     int max_itr)
 {
     (void)max_itr;
-    av1_calc_indices_dim1_avx2(data, centroids, indices, n, k);
+    eb_av1_calc_indices_dim1_avx2(data, centroids, indices, n, k);
 }
 
-static void av1_calc_indices_dim2_c_wrap(const int *data, int *centroids,
+static void eb_av1_calc_indices_dim2_c_wrap(const int *data, int *centroids,
                                          uint8_t *indices, int n, int k,
                                          int max_itr) {
     (void)max_itr;
-    av1_calc_indices_dim2_c(data, centroids, indices, n, k);
+    eb_av1_calc_indices_dim2_c(data, centroids, indices, n, k);
 }
 
-static void av1_calc_indices_dim2_avx2_wrap(const int *data, int *centroids,
+static void eb_av1_calc_indices_dim2_avx2_wrap(const int *data, int *centroids,
                                             uint8_t *indices, int n, int k,
                                             int max_itr) {
     (void)max_itr;
-    av1_calc_indices_dim2_avx2(data, centroids, indices, n, k);
+    eb_av1_calc_indices_dim2_avx2(data, centroids, indices, n, k);
 }
 
 typedef std::tuple<av1_k_means_func, av1_k_means_func> FuncPair;
 FuncPair TEST_FUNC_PAIRS[] = {
-    FuncPair(av1_calc_indices_dim1_c_wrap, av1_calc_indices_dim1_avx2_wrap),
-    FuncPair(av1_k_means_dim1_c, av1_k_means_dim1_avx2),
-    FuncPair(av1_calc_indices_dim2_c_wrap, av1_calc_indices_dim2_avx2_wrap),
-    FuncPair(av1_k_means_dim2_c, av1_k_means_dim2_avx2)
+    FuncPair(eb_av1_calc_indices_dim1_c_wrap, eb_av1_calc_indices_dim1_avx2_wrap),
+    FuncPair(eb_av1_k_means_dim1_c, eb_av1_k_means_dim1_avx2),
+    FuncPair(eb_av1_calc_indices_dim2_c_wrap, eb_av1_calc_indices_dim2_avx2_wrap),
+    FuncPair(eb_av1_k_means_dim2_c, eb_av1_k_means_dim2_avx2)
 };
 
 typedef std::tuple<TestPattern, BlockSize, FuncPair> Av1KMeansDimParam;

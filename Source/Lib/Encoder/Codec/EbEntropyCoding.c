@@ -2268,7 +2268,7 @@ int32_t eb_av1_get_reference_mode_context(
     assert(ctx >= 0 && ctx < COMP_INTER_CONTEXTS);
     return ctx;
 }
-int av1_get_intra_inter_context(const MacroBlockD *xd);
+int eb_av1_get_intra_inter_context(const MacroBlockD *xd);
 int av1_get_reference_mode_context_new(const MacroBlockD *xd);
 AomCdfProb *av1_get_reference_mode_cdf(const MacroBlockD *xd) {
     return xd->tile_ctx->comp_inter_cdf[av1_get_reference_mode_context_new(xd)];
@@ -5102,7 +5102,7 @@ int av1_allow_palette(int allow_screen_content_tools,
 int av1_get_palette_bsize_ctx(BlockSize bsize) {
     return num_pels_log2_lookup[bsize] - num_pels_log2_lookup[BLOCK_8X8];
 }
-void av1_tokenize_color_map(FRAME_CONTEXT *frameContext,CodingUnit*cu_ptr, int plane,
+void eb_av1_tokenize_color_map(FRAME_CONTEXT *frameContext,CodingUnit*cu_ptr, int plane,
     TOKENEXTRA **t, BlockSize bsize, TxSize tx_size,
     COLOR_MAP_TYPE type, int allow_update_cdf);
 void av1_get_block_dimensions(BlockSize bsize, int plane,
@@ -5112,7 +5112,7 @@ void av1_get_block_dimensions(BlockSize bsize, int plane,
     int *cols_within_bounds);
 int eb_get_palette_cache(const MacroBlockD *const xd, int plane,
     uint16_t *cache);
-int av1_index_color_cache(const uint16_t *color_cache, int n_cache,
+int eb_av1_index_color_cache(const uint16_t *color_cache, int n_cache,
     const uint16_t *colors, int n_colors,
     uint8_t *cache_color_found, int *out_cache_colors);
 
@@ -5192,7 +5192,7 @@ static AOM_INLINE void write_palette_colors_y(
     int out_cache_colors[PALETTE_MAX_SIZE];
     uint8_t cache_color_found[2 * PALETTE_MAX_SIZE];
     const int n_out_cache =
-        av1_index_color_cache(color_cache, n_cache, pmi->palette_colors, n,
+        eb_av1_index_color_cache(color_cache, n_cache, pmi->palette_colors, n,
             cache_color_found, out_cache_colors);
     int n_in_cache = 0;
     for (int i = 0; i < n_cache && n_in_cache < n; ++i) {
@@ -6086,7 +6086,7 @@ assert(bsize < BlockSizeS_ALL);
                     cu_ptr->palette_info.pmi.palette_size[plane];
                 if (palette_size_plane > 0) {
                     const MbModeInfo *const mbmi = &cu_ptr->av1xd->mi[0]->mbmi;
-                    av1_tokenize_color_map(frameContext, cu_ptr, plane, &tok, bsize, mbmi->tx_size,
+                    eb_av1_tokenize_color_map(frameContext, cu_ptr, plane, &tok, bsize, mbmi->tx_size,
                         PALETTE_MAP, 0); //NO CDF update in entropy, the update will take place in arithmetic encode
 
                     assert(cu_ptr->av1xd->use_intrabc == 0);
@@ -6478,7 +6478,7 @@ assert(bsize < BlockSizeS_ALL);
                         cu_ptr->palette_info.pmi.palette_size[plane];
                     if (palette_size_plane > 0) {
                         const MbModeInfo *const mbmi = &cu_ptr->av1xd->mi[0]->mbmi;
-                        av1_tokenize_color_map(frameContext, cu_ptr, plane, &tok, bsize, mbmi->tx_size,
+                        eb_av1_tokenize_color_map(frameContext, cu_ptr, plane, &tok, bsize, mbmi->tx_size,
                             PALETTE_MAP, 0); //NO CDF update in entropy, the update will take place in arithmetic encode
                         assert(cu_ptr->av1xd->use_intrabc == 0);
                         assert(av1_allow_palette(picture_control_set_ptr->parent_pcs_ptr->frm_hdr.allow_screen_content_tools, blk_geom->bsize));

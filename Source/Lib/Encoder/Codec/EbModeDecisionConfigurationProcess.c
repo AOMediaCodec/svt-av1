@@ -1891,7 +1891,7 @@ static int motion_field_projection(Av1Common *cm, PictureControlSet       *pictu
 
     return 1;
 }
-void av1_setup_motion_field(
+void eb_av1_setup_motion_field(
     Av1Common               *cm,
     PictureControlSet       *picture_control_set_ptr)
 {
@@ -1984,7 +1984,7 @@ void* mode_decision_configuration_kernel(void *input_ptr)
         picture_control_set_ptr = (PictureControlSet*)rateControlResultsPtr->picture_control_set_wrapper_ptr->object_ptr;
         sequence_control_set_ptr = (SequenceControlSet*)picture_control_set_ptr->sequence_control_set_wrapper_ptr->object_ptr;
         if (picture_control_set_ptr->parent_pcs_ptr->frm_hdr.use_ref_frame_mvs)
-            av1_setup_motion_field(picture_control_set_ptr->parent_pcs_ptr->av1_cm, picture_control_set_ptr);
+            eb_av1_setup_motion_field(picture_control_set_ptr->parent_pcs_ptr->av1_cm, picture_control_set_ptr);
 
         frm_hdr = &picture_control_set_ptr->parent_pcs_ptr->frm_hdr;
 
@@ -2210,53 +2210,53 @@ void* mode_decision_configuration_kernel(void *input_ptr)
                 }
 
                 //picture_control_set_ptr->hash_table.p_lookup_table = NULL;
-                //av1_hash_table_create(&picture_control_set_ptr->hash_table);
+                //eb_av1_hash_table_create(&picture_control_set_ptr->hash_table);
 
                 Yv12BufferConfig cpi_source;
                 link_Eb_to_aom_buffer_desc_8bit(
                     picture_control_set_ptr->parent_pcs_ptr->enhanced_picture_ptr,
                     &cpi_source);
 
-                av1_crc_calculator_init(&picture_control_set_ptr->crc_calculator1, 24, 0x5D6DCB);
-                av1_crc_calculator_init(&picture_control_set_ptr->crc_calculator2, 24, 0x864CFB);
+                eb_av1_crc_calculator_init(&picture_control_set_ptr->crc_calculator1, 24, 0x5D6DCB);
+                eb_av1_crc_calculator_init(&picture_control_set_ptr->crc_calculator2, 24, 0x864CFB);
 
-                av1_generate_block_2x2_hash_value(&cpi_source, block_hash_values[0],
+                eb_av1_generate_block_2x2_hash_value(&cpi_source, block_hash_values[0],
                     is_block_same[0], picture_control_set_ptr);
-                av1_generate_block_hash_value(&cpi_source, 4, block_hash_values[0],
+                eb_av1_generate_block_hash_value(&cpi_source, 4, block_hash_values[0],
                     block_hash_values[1], is_block_same[0],
                     is_block_same[1], picture_control_set_ptr);
-                av1_add_to_hash_map_by_row_with_precal_data(
+                eb_av1_add_to_hash_map_by_row_with_precal_data(
                     &picture_control_set_ptr->hash_table, block_hash_values[1], is_block_same[1][2],
                     pic_width, pic_height, 4);
-                av1_generate_block_hash_value(&cpi_source, 8, block_hash_values[1],
+                eb_av1_generate_block_hash_value(&cpi_source, 8, block_hash_values[1],
                     block_hash_values[0], is_block_same[1],
                     is_block_same[0], picture_control_set_ptr);
-                av1_add_to_hash_map_by_row_with_precal_data(
+                eb_av1_add_to_hash_map_by_row_with_precal_data(
                     &picture_control_set_ptr->hash_table, block_hash_values[0], is_block_same[0][2],
                     pic_width, pic_height, 8);
-                av1_generate_block_hash_value(&cpi_source, 16, block_hash_values[0],
+                eb_av1_generate_block_hash_value(&cpi_source, 16, block_hash_values[0],
                     block_hash_values[1], is_block_same[0],
                     is_block_same[1], picture_control_set_ptr);
-                av1_add_to_hash_map_by_row_with_precal_data(
+                eb_av1_add_to_hash_map_by_row_with_precal_data(
                     &picture_control_set_ptr->hash_table, block_hash_values[1], is_block_same[1][2],
                     pic_width, pic_height, 16);
-                av1_generate_block_hash_value(&cpi_source, 32, block_hash_values[1],
+                eb_av1_generate_block_hash_value(&cpi_source, 32, block_hash_values[1],
                     block_hash_values[0], is_block_same[1],
                     is_block_same[0], picture_control_set_ptr);
-                av1_add_to_hash_map_by_row_with_precal_data(
+                eb_av1_add_to_hash_map_by_row_with_precal_data(
                     &picture_control_set_ptr->hash_table, block_hash_values[0], is_block_same[0][2],
                     pic_width, pic_height, 32);
-                av1_generate_block_hash_value(&cpi_source, 64, block_hash_values[0],
+                eb_av1_generate_block_hash_value(&cpi_source, 64, block_hash_values[0],
                     block_hash_values[1], is_block_same[0],
                     is_block_same[1], picture_control_set_ptr);
-                av1_add_to_hash_map_by_row_with_precal_data(
+                eb_av1_add_to_hash_map_by_row_with_precal_data(
                     &picture_control_set_ptr->hash_table, block_hash_values[1], is_block_same[1][2],
                     pic_width, pic_height, 64);
 
-                av1_generate_block_hash_value(&cpi_source, 128, block_hash_values[1],
+                eb_av1_generate_block_hash_value(&cpi_source, 128, block_hash_values[1],
                     block_hash_values[0], is_block_same[1],
                     is_block_same[0], picture_control_set_ptr);
-                av1_add_to_hash_map_by_row_with_precal_data(
+                eb_av1_add_to_hash_map_by_row_with_precal_data(
                     &picture_control_set_ptr->hash_table, block_hash_values[0], is_block_same[0][2],
                     pic_width, pic_height, 128);
 

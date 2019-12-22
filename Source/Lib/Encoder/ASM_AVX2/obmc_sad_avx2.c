@@ -127,7 +127,7 @@ static INLINE unsigned int obmc_sad_w8n_avx2(
 }
 
 #define OBMCSADWXH(w, h)                                          \
-  unsigned int aom_obmc_sad##w##x##h##_avx2(                      \
+  unsigned int eb_aom_obmc_sad##w##x##h##_avx2(                      \
       const uint8_t *pre, int pre_stride, const int32_t *wsrc,    \
       const int32_t *msk) {                                       \
     if (w == 4) {                                                 \

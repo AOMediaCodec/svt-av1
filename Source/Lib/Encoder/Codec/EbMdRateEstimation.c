@@ -562,7 +562,7 @@ static INLINE InterpFilter av1_extract_interp_filter(InterpFilters filters,
 * 2 - intra/--, --/intra
 * 3 - intra/intra
  ******************************************************************************/
-int av1_get_intra_inter_context(const MacroBlockD *xd) {
+int eb_av1_get_intra_inter_context(const MacroBlockD *xd) {
     const MbModeInfo *const above_mbmi = xd->above_mbmi;
     const MbModeInfo *const left_mbmi = xd->left_mbmi;
     const int has_above = xd->up_available;
@@ -704,7 +704,7 @@ MvJointType av1_get_mv_joint(const MV *mv);
 /*******************************************************************************
  * Updates all the mv stats/CDF for the current block
  ******************************************************************************/
-void av1_update_mv_stats(const MV *mv, const MV *ref, NmvContext *mvctx,
+static void eb_av1_update_mv_stats(const MV *mv, const MV *ref, NmvContext *mvctx,
     MvSubpelPrecision precision) {
     const MV diff = { mv->row - ref->row, mv->col - ref->col };
     const MvJointType j = av1_get_mv_joint(&diff);
@@ -900,7 +900,7 @@ void update_stats(
     if (frame_is_intra_only(picture_control_set_ptr->parent_pcs_ptr) || mbmi->block_mi.skip_mode) return;
     const int inter_block = is_inter_block(&mbmi->block_mi);
     if (!seg_ref_active) {
-        update_cdf(fc->intra_inter_cdf[av1_get_intra_inter_context(xd)],
+        update_cdf(fc->intra_inter_cdf[eb_av1_get_intra_inter_context(xd)],
             inter_block, 2);
         // If the segment reference feature is enabled we have only a single
         // reference frame allowed for the segment so exclude it from
@@ -1106,7 +1106,7 @@ void update_stats(
                 IntMv ref_mv;
                 for (int ref = 0; ref < 1 + has_second_ref(mbmi); ++ref) {
                     ref_mv = cu_ptr->predmv[ref];
-                    av1_update_mv_stats(&mbmi->block_mi.mv[ref].as_mv, &ref_mv.as_mv, &fc->nmvc,
+                    eb_av1_update_mv_stats(&mbmi->block_mi.mv[ref].as_mv, &ref_mv.as_mv, &fc->nmvc,
                         allow_hp);
                 }
             }
@@ -1115,7 +1115,7 @@ void update_stats(
                 MV mv;
                 mv.row = cu_ptr->prediction_unit_array[0].mv[1].y;
                 mv.col = cu_ptr->prediction_unit_array[0].mv[1].x;
-                av1_update_mv_stats(&mv,&ref_mv.as_mv, &fc->nmvc,
+                eb_av1_update_mv_stats(&mv,&ref_mv.as_mv, &fc->nmvc,
                     allow_hp);
             }
             else if (mbmi->block_mi.mode == NEW_NEARESTMV || mbmi->block_mi.mode == NEW_NEARMV) {
@@ -1124,7 +1124,7 @@ void update_stats(
                 MV mv;
                 mv.row = cu_ptr->prediction_unit_array[0].mv[0].y;
                 mv.col = cu_ptr->prediction_unit_array[0].mv[0].x;
-                av1_update_mv_stats(&mv, &ref_mv.as_mv, &fc->nmvc,
+                eb_av1_update_mv_stats(&mv, &ref_mv.as_mv, &fc->nmvc,
                     allow_hp);
             }
         }

@@ -7,7 +7,7 @@
  * @file PsnrTest.cc
  *
  * @brief Unit test of PSNR calculation:
- * - eb_aom_sse_to_psnr
+ * - eb_eb_aom_sse_to_psnr
  * - eb_aom_get_y_sse_part
  * - eb_aom_get_y_sse
  * - eb_aom_get_u_sse_part
@@ -153,9 +153,9 @@ class PsnrCalcTest : public ::testing::TestWithParam<ParamType> {
 
         uint32_t peak = (1 << bd_) - 1;
         double size = (double)width_ * height_;
-        ASSERT_DOUBLE_EQ(eb_aom_sse_to_psnr(size, peak, y_sse), MAX_PSNR);
-        ASSERT_DOUBLE_EQ(eb_aom_sse_to_psnr(size / 4, peak, u_sse), MAX_PSNR);
-        ASSERT_DOUBLE_EQ(eb_aom_sse_to_psnr(size / 4, peak, v_sse), MAX_PSNR);
+        ASSERT_DOUBLE_EQ(eb_eb_aom_sse_to_psnr(size, peak, y_sse), MAX_PSNR);
+        ASSERT_DOUBLE_EQ(eb_eb_aom_sse_to_psnr(size / 4, peak, u_sse), MAX_PSNR);
+        ASSERT_DOUBLE_EQ(eb_eb_aom_sse_to_psnr(size / 4, peak, v_sse), MAX_PSNR);
     }
 
     /**< fill video frame buffer with random value */
@@ -346,14 +346,14 @@ class PsnrCalcHbdTest : public PsnrCalcTest<uint16_t, PsnrCalcHbdParam> {
         uint32_t peak = (1 << bd_) - 1;
         double size = (double)width_ * height_;
         const double threshold = 0.3f;
-        ASSERT_LE(fabs(eb_aom_sse_to_psnr(size, 255.0f, ref_y_sse) -
-                       eb_aom_sse_to_psnr(size, peak, y_sse)),
+        ASSERT_LE(fabs(eb_eb_aom_sse_to_psnr(size, 255.0f, ref_y_sse) -
+                       eb_eb_aom_sse_to_psnr(size, peak, y_sse)),
                   threshold);
-        ASSERT_LE(fabs(eb_aom_sse_to_psnr(size / 4, 255.0f, ref_u_sse) -
-                       eb_aom_sse_to_psnr(size / 4, peak, u_sse)),
+        ASSERT_LE(fabs(eb_eb_aom_sse_to_psnr(size / 4, 255.0f, ref_u_sse) -
+                       eb_eb_aom_sse_to_psnr(size / 4, peak, u_sse)),
                   threshold);
-        ASSERT_LE(fabs(eb_aom_sse_to_psnr(size / 4, 255.0f, ref_v_sse) -
-                       eb_aom_sse_to_psnr(size / 4, peak, v_sse)),
+        ASSERT_LE(fabs(eb_eb_aom_sse_to_psnr(size / 4, 255.0f, ref_v_sse) -
+                       eb_eb_aom_sse_to_psnr(size / 4, peak, v_sse)),
                   threshold);
     }
 
@@ -385,16 +385,16 @@ class PsnrCalcHbdTest : public PsnrCalcTest<uint16_t, PsnrCalcHbdParam> {
                 uint32_t peak = (1 << bd_) - 1;
                 double size = (double)part_h * part_w;
                 const double threshold = 0.3f;
-                ASSERT_LE(fabs(eb_aom_sse_to_psnr(size, 255.0f, ref_y_sse) -
-                               eb_aom_sse_to_psnr(size, peak, y_sse)),
+                ASSERT_LE(fabs(eb_eb_aom_sse_to_psnr(size, 255.0f, ref_y_sse) -
+                               eb_eb_aom_sse_to_psnr(size, peak, y_sse)),
                           threshold)
                     << "sse y error found in (" << w << "," << h << ")";
-                ASSERT_LE(fabs(eb_aom_sse_to_psnr(size / 4, 255.0f, ref_u_sse) -
-                               eb_aom_sse_to_psnr(size / 4, peak, u_sse)),
+                ASSERT_LE(fabs(eb_eb_aom_sse_to_psnr(size / 4, 255.0f, ref_u_sse) -
+                               eb_eb_aom_sse_to_psnr(size / 4, peak, u_sse)),
                           threshold)
                     << "sse u error found in (" << w << "," << h << ")";
-                ASSERT_LE(fabs(eb_aom_sse_to_psnr(size / 4, 255.0f, ref_v_sse) -
-                               eb_aom_sse_to_psnr(size / 4, peak, v_sse)),
+                ASSERT_LE(fabs(eb_eb_aom_sse_to_psnr(size / 4, 255.0f, ref_v_sse) -
+                               eb_eb_aom_sse_to_psnr(size / 4, peak, v_sse)),
                           threshold)
                     << "sse v error found in (" << w << "," << h << ")";
             }

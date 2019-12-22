@@ -266,7 +266,7 @@ static void convolve_vert(const uint8_t *src, ptrdiff_t src_stride,
   }
 }
 
-void aom_convolve8_horiz_c(const uint8_t *src, ptrdiff_t src_stride,
+void eb_aom_convolve8_horiz_c(const uint8_t *src, ptrdiff_t src_stride,
                            uint8_t *dst, ptrdiff_t dst_stride,
                            const int16_t *filter_x, int x_step_q4,
                            const int16_t *filter_y, int y_step_q4, int w,
@@ -281,7 +281,7 @@ void aom_convolve8_horiz_c(const uint8_t *src, ptrdiff_t src_stride,
                  w, h);
 }
 
-void aom_convolve8_vert_c(const uint8_t *src, ptrdiff_t src_stride,
+void eb_aom_convolve8_vert_c(const uint8_t *src, ptrdiff_t src_stride,
                           uint8_t *dst, ptrdiff_t dst_stride,
                           const int16_t *filter_x, int x_step_q4,
                           const int16_t *filter_y, int y_step_q4, int w,
@@ -299,4 +299,3 @@ void aom_convolve8_vert_c(const uint8_t *src, ptrdiff_t src_stride,
         const InterpFilterParams filter_params, const int32_t subpel) ;
 
 // clang-format on
-

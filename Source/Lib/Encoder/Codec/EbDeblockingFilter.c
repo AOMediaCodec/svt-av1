@@ -174,7 +174,7 @@ static INLINE void filter4(int8_t mask, uint8_t thresh, uint8_t *op1,
     *op1 = signed_char_clamp(ps1 + filter) ^ 0x80;
 }
 
-void aom_lpf_horizontal_4_c(uint8_t *s, int32_t p /* pitch */,
+void eb_aom_lpf_horizontal_4_c(uint8_t *s, int32_t p /* pitch */,
     const uint8_t *blimit, const uint8_t *limit,
     const uint8_t *thresh) {
     int32_t i;
@@ -191,7 +191,7 @@ void aom_lpf_horizontal_4_c(uint8_t *s, int32_t p /* pitch */,
     }
 }
 
-void aom_lpf_vertical_4_c(uint8_t *s, int32_t pitch, const uint8_t *blimit,
+void eb_aom_lpf_vertical_4_c(uint8_t *s, int32_t pitch, const uint8_t *blimit,
     const uint8_t *limit, const uint8_t *thresh) {
     int32_t i;
     int32_t count = 4;
@@ -245,7 +245,7 @@ static INLINE void filter8(int8_t mask, uint8_t thresh, int8_t flat,
         filter4(mask, thresh, op1, op0, oq0, oq1);
 }
 
-void aom_lpf_horizontal_6_c(uint8_t *s, int32_t p, const uint8_t *blimit,
+void eb_aom_lpf_horizontal_6_c(uint8_t *s, int32_t p, const uint8_t *blimit,
     const uint8_t *limit, const uint8_t *thresh) {
     int32_t i;
     int32_t count = 4;
@@ -265,7 +265,7 @@ void aom_lpf_horizontal_6_c(uint8_t *s, int32_t p, const uint8_t *blimit,
     }
 }
 
-void aom_lpf_horizontal_8_c(uint8_t *s, int32_t p, const uint8_t *blimit,
+void eb_aom_lpf_horizontal_8_c(uint8_t *s, int32_t p, const uint8_t *blimit,
     const uint8_t *limit, const uint8_t *thresh) {
     int32_t i;
     int32_t count = 4;
@@ -285,7 +285,7 @@ void aom_lpf_horizontal_8_c(uint8_t *s, int32_t p, const uint8_t *blimit,
     }
 }
 
-void aom_lpf_vertical_8_c(uint8_t *s, int32_t pitch, const uint8_t *blimit,
+void eb_aom_lpf_vertical_8_c(uint8_t *s, int32_t pitch, const uint8_t *blimit,
     const uint8_t *limit, const uint8_t *thresh) {
     int32_t i;
     int32_t count = 4;
@@ -394,7 +394,7 @@ static INLINE void highbd_filter4(int8_t mask, uint8_t thresh, uint16_t *op1,
     *op1 = signed_char_clamp_high(ps1 + filter, bd) + (0x80 << shift);
 }
 
-void aom_highbd_lpf_horizontal_4_c(uint16_t *s, int32_t p /* pitch */,
+void eb_aom_highbd_lpf_horizontal_4_c(uint16_t *s, int32_t p /* pitch */,
     const uint8_t *blimit, const uint8_t *limit,
     const uint8_t *thresh, int32_t bd) {
     int32_t i;
@@ -414,7 +414,7 @@ void aom_highbd_lpf_horizontal_4_c(uint16_t *s, int32_t p /* pitch */,
     }
 }
 
-void aom_highbd_lpf_vertical_4_c(uint16_t *s, int32_t pitch, const uint8_t *blimit,
+void eb_aom_highbd_lpf_vertical_4_c(uint16_t *s, int32_t pitch, const uint8_t *blimit,
     const uint8_t *limit, const uint8_t *thresh,
     int32_t bd) {
     int32_t i;
@@ -452,7 +452,7 @@ static INLINE void highbd_filter8(int8_t mask, uint8_t thresh, int8_t flat,
         highbd_filter4(mask, thresh, op1, op0, oq0, oq1, bd);
 }
 
-void aom_highbd_lpf_horizontal_8_c(uint16_t *s, int32_t p, const uint8_t *blimit,
+void eb_aom_highbd_lpf_horizontal_8_c(uint16_t *s, int32_t p, const uint8_t *blimit,
     const uint8_t *limit, const uint8_t *thresh,
     int32_t bd) {
     int32_t i;
@@ -474,7 +474,7 @@ void aom_highbd_lpf_horizontal_8_c(uint16_t *s, int32_t p, const uint8_t *blimit
     }
 }
 
-void aom_highbd_lpf_vertical_8_c(uint16_t *s, int32_t pitch, const uint8_t *blimit,
+void eb_aom_highbd_lpf_vertical_8_c(uint16_t *s, int32_t pitch, const uint8_t *blimit,
     const uint8_t *limit, const uint8_t *thresh,
     int32_t bd) {
     int32_t i;
@@ -954,7 +954,7 @@ void eb_av1_filter_block_plane_vert(
                 // apply 4-tap filtering
             case 4:
                 if (is16bit)
-                    aom_highbd_lpf_vertical_4(
+                    eb_aom_highbd_lpf_vertical_4(
                     (uint16_t*)(p),//CONVERT_TO_SHORTPTR(p),
                         dst_stride,
                         params.mblim,
@@ -962,7 +962,7 @@ void eb_av1_filter_block_plane_vert(
                         params.hev_thr,
                         scs_ptr->static_config.encoder_bit_depth);
                 else
-                    aom_lpf_vertical_4(
+                    eb_aom_lpf_vertical_4(
                         p,
                         dst_stride,
                         params.mblim,
@@ -972,7 +972,7 @@ void eb_av1_filter_block_plane_vert(
             case 6:  // apply 6-tap filter for chroma plane only
                 assert(plane != 0);
                 if (is16bit)
-                    aom_highbd_lpf_vertical_6(
+                    eb_aom_highbd_lpf_vertical_6(
                     (uint16_t*)(p),//CONVERT_TO_SHORTPTR(p),
                         dst_stride,
                         params.mblim,
@@ -980,7 +980,7 @@ void eb_av1_filter_block_plane_vert(
                         params.hev_thr,
                         scs_ptr->static_config.encoder_bit_depth);
                 else
-                    aom_lpf_vertical_6(
+                    eb_aom_lpf_vertical_6(
                         p,
                         dst_stride,
                         params.mblim,
@@ -990,7 +990,7 @@ void eb_av1_filter_block_plane_vert(
                 // apply 8-tap filtering
             case 8:
                 if (is16bit)
-                    aom_highbd_lpf_vertical_8(
+                    eb_aom_highbd_lpf_vertical_8(
                     (uint16_t*)(p),//CONVERT_TO_SHORTPTR(p),
                         dst_stride,
                         params.mblim,
@@ -998,7 +998,7 @@ void eb_av1_filter_block_plane_vert(
                         params.hev_thr,
                         scs_ptr->static_config.encoder_bit_depth);
                 else
-                    aom_lpf_vertical_8(
+                    eb_aom_lpf_vertical_8(
                         p,
                         dst_stride,
                         params.mblim,
@@ -1008,7 +1008,7 @@ void eb_av1_filter_block_plane_vert(
                 // apply 14-tap filtering
             case 14:
                 if (is16bit)
-                    aom_highbd_lpf_vertical_14(
+                    eb_aom_highbd_lpf_vertical_14(
                     (uint16_t*)(p),//CONVERT_TO_SHORTPTR(p),
                         dst_stride,
                         params.mblim,
@@ -1016,7 +1016,7 @@ void eb_av1_filter_block_plane_vert(
                         params.hev_thr,
                         scs_ptr->static_config.encoder_bit_depth);
                 else
-                    aom_lpf_vertical_14(
+                    eb_aom_lpf_vertical_14(
                         p,
                         dst_stride,
                         params.mblim,
@@ -1085,7 +1085,7 @@ void eb_av1_filter_block_plane_horz(
                 // apply 4-tap filtering
             case 4:
                 if (is16bit)
-                    aom_highbd_lpf_horizontal_4(
+                    eb_aom_highbd_lpf_horizontal_4(
                     (uint16_t*)(p),//CONVERT_TO_SHORTPTR(p),
                         dst_stride,
                         params.mblim,
@@ -1093,7 +1093,7 @@ void eb_av1_filter_block_plane_horz(
                         params.hev_thr,
                         scs_ptr->static_config.encoder_bit_depth);
                 else
-                    aom_lpf_horizontal_4(
+                    eb_aom_lpf_horizontal_4(
                         p,
                         dst_stride,
                         params.mblim,
@@ -1104,7 +1104,7 @@ void eb_av1_filter_block_plane_horz(
             case 6:
                 assert(plane != 0);
                 if (is16bit)
-                    aom_highbd_lpf_horizontal_6(
+                    eb_aom_highbd_lpf_horizontal_6(
                     (uint16_t*)(p),//CONVERT_TO_SHORTPTR(p),
                         dst_stride,
                         params.mblim,
@@ -1112,7 +1112,7 @@ void eb_av1_filter_block_plane_horz(
                         params.hev_thr,
                         scs_ptr->static_config.encoder_bit_depth);
                 else
-                    aom_lpf_horizontal_6(
+                    eb_aom_lpf_horizontal_6(
                         p,
                         dst_stride,
                         params.mblim,
@@ -1122,7 +1122,7 @@ void eb_av1_filter_block_plane_horz(
                 // apply 8-tap filtering
             case 8:
                 if (is16bit)
-                    aom_highbd_lpf_horizontal_8(
+                    eb_aom_highbd_lpf_horizontal_8(
                     (uint16_t*)(p),//CONVERT_TO_SHORTPTR(p),
                         dst_stride,
                         params.mblim,
@@ -1130,7 +1130,7 @@ void eb_av1_filter_block_plane_horz(
                         params.hev_thr,
                         scs_ptr->static_config.encoder_bit_depth);
                 else
-                    aom_lpf_horizontal_8(
+                    eb_aom_lpf_horizontal_8(
                         p,
                         dst_stride,
                         params.mblim,
@@ -1140,7 +1140,7 @@ void eb_av1_filter_block_plane_horz(
                 // apply 14-tap filtering
             case 14:
                 if (is16bit)
-                    aom_highbd_lpf_horizontal_14(
+                    eb_aom_highbd_lpf_horizontal_14(
                     (uint16_t*)(p),//CONVERT_TO_SHORTPTR(p),
                         dst_stride,
                         params.mblim,
@@ -1148,7 +1148,7 @@ void eb_av1_filter_block_plane_horz(
                         params.hev_thr,
                         scs_ptr->static_config.encoder_bit_depth);
                 else
-                    aom_lpf_horizontal_14(
+                    eb_aom_lpf_horizontal_14(
                         p,
                         dst_stride,
                         params.mblim,

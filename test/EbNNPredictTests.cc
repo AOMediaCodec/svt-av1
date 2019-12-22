@@ -30,13 +30,13 @@ using namespace std;
 
 namespace {
 
-    typedef void (*av1_nn_predict_func)(
+    typedef void (*eb_av1_nn_predict_func)(
         const float *input_nodes,
         const NN_CONFIG *const nn_config,
         int reduce_prec,
         float *const output);
 
-    class NNPredTest : public ::testing::TestWithParam<av1_nn_predict_func> {
+    class NNPredTest : public ::testing::TestWithParam<eb_av1_nn_predict_func> {
 
     public:
         NNPredTest() : func_(GetParam()){}
@@ -72,7 +72,7 @@ namespace {
                     << " SSE3 value: " << test[i];
         }
 
-        av1_nn_predict_func func_;
+        eb_av1_nn_predict_func func_;
 
         const NN_CONFIG *nn_config;
 
@@ -90,17 +90,17 @@ namespace {
         init_data();
 
         // ALL zeroes
-        av1_nn_predict_c(features1, nn_config, 1, ref_output);
+        eb_av1_nn_predict_c(features1, nn_config, 1, ref_output);
         func_(features1,nn_config,1,test_output);
         check_output(ref_output, test_output);
 
         // ALL ones
-        av1_nn_predict_c(features2, nn_config, 1, ref_output);
+        eb_av1_nn_predict_c(features2, nn_config, 1, ref_output);
         func_(features2, nn_config, 1, test_output);
         check_output(ref_output, test_output);
 
         // Random input
-        av1_nn_predict_c(features3, nn_config, 1, ref_output);
+        eb_av1_nn_predict_c(features3, nn_config, 1, ref_output);
         func_(features3, nn_config, 1, test_output);
         check_output(ref_output, test_output);
 
@@ -111,6 +111,6 @@ namespace {
     };
 
     INSTANTIATE_TEST_CASE_P(NNPRED, NNPredTest,
-                            ::testing::Values(av1_nn_predict_sse3));
+                            ::testing::Values(eb_av1_nn_predict_sse3));
 
 }  // namespace

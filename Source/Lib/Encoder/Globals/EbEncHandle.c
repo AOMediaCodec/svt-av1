@@ -889,7 +889,7 @@ EbErrorType RestResultsCreator(
 }
 
 void init_fn_ptr(void);
-extern void av1_init_wedge_masks(void);
+extern void eb_av1_init_wedge_masks(void);
 /**********************************
 * Initialize Encoder Library
 **********************************/
@@ -924,7 +924,7 @@ EB_API EbErrorType eb_init_encoder(EbComponentType *svt_enc_component)
 
     eb_av1_init_me_luts();
     init_fn_ptr();
-    av1_init_wedge_masks();
+    eb_av1_init_wedge_masks();
     /************************************
     * Sequence Control Set
     ************************************/

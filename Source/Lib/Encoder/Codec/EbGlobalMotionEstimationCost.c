@@ -21,7 +21,7 @@
 #include "global_motion.h"
 
 
-int aom_count_signed_primitive_refsubexpfin(uint16_t n, uint16_t k, int16_t ref,
+int eb_aom_count_signed_primitive_refsubexpfin(uint16_t n, uint16_t k, int16_t ref,
                                             int16_t v) {
   ref += n - 1;
   v += n - 1;
@@ -38,20 +38,20 @@ int gm_get_params_cost(const EbWarpedMotionParams *gm,
   switch (gm->wmtype) {
     case AFFINE:
     case ROTZOOM:
-      params_cost += aom_count_signed_primitive_refsubexpfin(
+      params_cost += eb_aom_count_signed_primitive_refsubexpfin(
           GM_ALPHA_MAX + 1, SUBEXPFIN_K,
           (ref_gm->wmmat[2] >> GM_ALPHA_PREC_DIFF) - (1 << GM_ALPHA_PREC_BITS),
           (gm->wmmat[2] >> GM_ALPHA_PREC_DIFF) - (1 << GM_ALPHA_PREC_BITS));
-      params_cost += aom_count_signed_primitive_refsubexpfin(
+      params_cost += eb_aom_count_signed_primitive_refsubexpfin(
           GM_ALPHA_MAX + 1, SUBEXPFIN_K,
           (ref_gm->wmmat[3] >> GM_ALPHA_PREC_DIFF),
           (gm->wmmat[3] >> GM_ALPHA_PREC_DIFF));
       if (gm->wmtype >= AFFINE) {
-        params_cost += aom_count_signed_primitive_refsubexpfin(
+        params_cost += eb_aom_count_signed_primitive_refsubexpfin(
             GM_ALPHA_MAX + 1, SUBEXPFIN_K,
             (ref_gm->wmmat[4] >> GM_ALPHA_PREC_DIFF),
             (gm->wmmat[4] >> GM_ALPHA_PREC_DIFF));
-        params_cost += aom_count_signed_primitive_refsubexpfin(
+        params_cost += eb_aom_count_signed_primitive_refsubexpfin(
             GM_ALPHA_MAX + 1, SUBEXPFIN_K,
             (ref_gm->wmmat[5] >> GM_ALPHA_PREC_DIFF) -
                 (1 << GM_ALPHA_PREC_BITS),
@@ -65,11 +65,11 @@ int gm_get_params_cost(const EbWarpedMotionParams *gm,
       trans_prec_diff = (gm->wmtype == TRANSLATION)
                             ? GM_TRANS_ONLY_PREC_DIFF + !allow_hp
                             : GM_TRANS_PREC_DIFF;
-      params_cost += aom_count_signed_primitive_refsubexpfin(
+      params_cost += eb_aom_count_signed_primitive_refsubexpfin(
           (1 << trans_bits) + 1, SUBEXPFIN_K,
           (ref_gm->wmmat[0] >> trans_prec_diff),
           (gm->wmmat[0] >> trans_prec_diff));
-      params_cost += aom_count_signed_primitive_refsubexpfin(
+      params_cost += eb_aom_count_signed_primitive_refsubexpfin(
           (1 << trans_bits) + 1, SUBEXPFIN_K,
           (ref_gm->wmmat[1] >> trans_prec_diff),
           (gm->wmmat[1] >> trans_prec_diff));

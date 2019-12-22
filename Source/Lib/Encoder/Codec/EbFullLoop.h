@@ -153,18 +153,18 @@ extern "C" {
     // The ctx offset table when TX is TX_CLASS_2D.
     // TX col and row indices are clamped to 4
 
-    static const int8_t eb_av1_nz_map_ctx_offset_4x4[16] = {
+    static const int8_t eb_eb_av1_nz_map_ctx_offset_4x4[16] = {
       0, 1, 6, 6, 1, 6, 6, 21, 6, 6, 21, 21, 6, 21, 21, 21,
     };
 
-    static const int8_t eb_av1_nz_map_ctx_offset_8x8[64] = {
+    static const int8_t eb_eb_av1_nz_map_ctx_offset_8x8[64] = {
       0,  1,  6,  6,  21, 21, 21, 21, 1,  6,  6,  21, 21, 21, 21, 21,
       6,  6,  21, 21, 21, 21, 21, 21, 6,  21, 21, 21, 21, 21, 21, 21,
       21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21,
       21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21,
     };
 
-    static const int8_t eb_av1_nz_map_ctx_offset_16x16[256] = {
+    static const int8_t eb_eb_av1_nz_map_ctx_offset_16x16[256] = {
       0,  1,  6,  6,  21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 1,  6,  6,
       21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 6,  6,  21, 21, 21, 21,
       21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 6,  21, 21, 21, 21, 21, 21, 21, 21,
@@ -181,7 +181,7 @@ extern "C" {
       21, 21, 21, 21, 21, 21, 21, 21, 21,
     };
 
-    static const int8_t eb_av1_nz_map_ctx_offset_32x32[1024] = {
+    static const int8_t eb_eb_av1_nz_map_ctx_offset_32x32[1024] = {
       0,  1,  6,  6,  21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21,
       21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 1,  6,  6,  21, 21, 21,
       21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21,
@@ -238,12 +238,12 @@ extern "C" {
       21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21,
     };
 
-    static const int8_t eb_av1_nz_map_ctx_offset_8x4[32] = {
+    static const int8_t eb_eb_av1_nz_map_ctx_offset_8x4[32] = {
       0,  16, 6,  6,  21, 21, 21, 21, 16, 16, 6,  21, 21, 21, 21, 21,
       16, 16, 21, 21, 21, 21, 21, 21, 16, 16, 21, 21, 21, 21, 21, 21,
     };
 
-    static const int8_t eb_av1_nz_map_ctx_offset_16x8[128] = {
+    static const int8_t eb_eb_av1_nz_map_ctx_offset_16x8[128] = {
       0,  16, 6,  6,  21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 16, 16, 6,
       21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 16, 16, 21, 21, 21, 21,
       21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 16, 16, 21, 21, 21, 21, 21, 21, 21,
@@ -253,7 +253,7 @@ extern "C" {
       21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21,
     };
 
-    static const int8_t eb_av1_nz_map_ctx_offset_16x32[512] = {
+    static const int8_t eb_eb_av1_nz_map_ctx_offset_16x32[512] = {
       0,  11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11,
       11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 6,  6,  21, 21, 21, 21,
       21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 6,  21, 21, 21, 21, 21, 21, 21, 21,
@@ -283,7 +283,7 @@ extern "C" {
       21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21,
     };
 
-    static const int8_t eb_av1_nz_map_ctx_offset_32x16[512] = {
+    static const int8_t eb_eb_av1_nz_map_ctx_offset_32x16[512] = {
       0,  16, 6,  6,  21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21,
       21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 16, 16, 6,  21, 21, 21,
       21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21,
@@ -313,7 +313,7 @@ extern "C" {
       21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21,
     };
 
-    static const int8_t eb_av1_nz_map_ctx_offset_32x64[1024] = {
+    static const int8_t eb_eb_av1_nz_map_ctx_offset_32x64[1024] = {
       0,  11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11,
       11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11,
       11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11,
@@ -370,7 +370,7 @@ extern "C" {
       21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21,
     };
 
-    static const int8_t eb_av1_nz_map_ctx_offset_64x32[1024] = {
+    static const int8_t eb_eb_av1_nz_map_ctx_offset_64x32[1024] = {
       0,  16, 6,  6,  21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21,
       21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 16, 16, 6,  21, 21, 21,
       21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21,
@@ -427,21 +427,21 @@ extern "C" {
       21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21,
     };
 
-    static const int8_t eb_av1_nz_map_ctx_offset_4x16[64] = {
+    static const int8_t eb_eb_av1_nz_map_ctx_offset_4x16[64] = {
       0,  11, 11, 11, 11, 11, 11, 11, 6,  6,  21, 21, 6,  21, 21, 21,
       21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21,
       21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21,
       21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21,
     };
 
-    static const int8_t eb_av1_nz_map_ctx_offset_16x4[64] = {
+    static const int8_t eb_eb_av1_nz_map_ctx_offset_16x4[64] = {
       0,  16, 6,  6,  21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21,
       16, 16, 6,  21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21,
       16, 16, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21,
       16, 16, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21,
     };
 
-    static const int8_t eb_av1_nz_map_ctx_offset_8x32[256] = {
+    static const int8_t eb_eb_av1_nz_map_ctx_offset_8x32[256] = {
       0,  11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 6,  6,  21,
       21, 21, 21, 21, 21, 6,  21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21,
       21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21,
@@ -458,7 +458,7 @@ extern "C" {
       21, 21, 21, 21, 21, 21, 21, 21, 21,
     };
 
-    static const int8_t eb_av1_nz_map_ctx_offset_32x8[256] = {
+    static const int8_t eb_eb_av1_nz_map_ctx_offset_32x8[256] = {
       0,  16, 6,  6,  21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21,
       21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 16, 16, 6,  21, 21, 21,
       21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21,
@@ -475,26 +475,26 @@ extern "C" {
       21, 21, 21, 21, 21, 21, 21, 21, 21,
     };
 
-    static const int8_t *eb_av1_nz_map_ctx_offset[19] = {
-      eb_av1_nz_map_ctx_offset_4x4,    // TX_4x4
-      eb_av1_nz_map_ctx_offset_8x8,    // TX_8x8
-      eb_av1_nz_map_ctx_offset_16x16,  // TX_16x16
-      eb_av1_nz_map_ctx_offset_32x32,  // TX_32x32
-      eb_av1_nz_map_ctx_offset_32x32,  // TX_32x32
-      eb_av1_nz_map_ctx_offset_4x16,   // TX_4x8
-      eb_av1_nz_map_ctx_offset_8x4,    // TX_8x4
-      eb_av1_nz_map_ctx_offset_8x32,   // TX_8x16
-      eb_av1_nz_map_ctx_offset_16x8,   // TX_16x8
-      eb_av1_nz_map_ctx_offset_16x32,  // TX_16x32
-      eb_av1_nz_map_ctx_offset_32x16,  // TX_32x16
-      eb_av1_nz_map_ctx_offset_32x64,  // TX_32x64
-      eb_av1_nz_map_ctx_offset_64x32,  // TX_64x32
-      eb_av1_nz_map_ctx_offset_4x16,   // TX_4x16
-      eb_av1_nz_map_ctx_offset_16x4,   // TX_16x4
-      eb_av1_nz_map_ctx_offset_8x32,   // TX_8x32
-      eb_av1_nz_map_ctx_offset_32x8,   // TX_32x8
-      eb_av1_nz_map_ctx_offset_16x32,  // TX_16x64
-      eb_av1_nz_map_ctx_offset_64x32,  // TX_64x16
+    static const int8_t *eb_eb_av1_nz_map_ctx_offset[19] = {
+      eb_eb_av1_nz_map_ctx_offset_4x4,    // TX_4x4
+      eb_eb_av1_nz_map_ctx_offset_8x8,    // TX_8x8
+      eb_eb_av1_nz_map_ctx_offset_16x16,  // TX_16x16
+      eb_eb_av1_nz_map_ctx_offset_32x32,  // TX_32x32
+      eb_eb_av1_nz_map_ctx_offset_32x32,  // TX_32x32
+      eb_eb_av1_nz_map_ctx_offset_4x16,   // TX_4x8
+      eb_eb_av1_nz_map_ctx_offset_8x4,    // TX_8x4
+      eb_eb_av1_nz_map_ctx_offset_8x32,   // TX_8x16
+      eb_eb_av1_nz_map_ctx_offset_16x8,   // TX_16x8
+      eb_eb_av1_nz_map_ctx_offset_16x32,  // TX_16x32
+      eb_eb_av1_nz_map_ctx_offset_32x16,  // TX_32x16
+      eb_eb_av1_nz_map_ctx_offset_32x64,  // TX_32x64
+      eb_eb_av1_nz_map_ctx_offset_64x32,  // TX_64x32
+      eb_eb_av1_nz_map_ctx_offset_4x16,   // TX_4x16
+      eb_eb_av1_nz_map_ctx_offset_16x4,   // TX_16x4
+      eb_eb_av1_nz_map_ctx_offset_8x32,   // TX_8x32
+      eb_eb_av1_nz_map_ctx_offset_32x8,   // TX_32x8
+      eb_eb_av1_nz_map_ctx_offset_16x32,  // TX_16x64
+      eb_eb_av1_nz_map_ctx_offset_64x32,  // TX_64x16
     };
 
     static AOM_FORCE_INLINE int get_nz_map_ctx_from_stats(
@@ -507,7 +507,7 @@ extern "C" {
         ctx = AOMMIN(ctx, 4);
         switch (tx_class) {
         case TX_CLASS_2D: {
-            // This is the algorithm to generate eb_av1_nz_map_ctx_offset[][]
+            // This is the algorithm to generate eb_eb_av1_nz_map_ctx_offset[][]
             //   const int width = tx_size_wide[tx_size];
             //   const int height = tx_size_high[tx_size];
             //   if (width < height) {
@@ -518,7 +518,7 @@ extern "C" {
             //   if (row + col < 2) return ctx + 1;
             //   if (row + col < 4) return 5 + ctx + 1;
             //   return 21 + ctx;
-            return ctx + eb_av1_nz_map_ctx_offset[tx_size][coeff_idx];
+            return ctx + eb_eb_av1_nz_map_ctx_offset[tx_size][coeff_idx];
         }
         case TX_CLASS_HORIZ: {
             const int row = coeff_idx >> bwl;

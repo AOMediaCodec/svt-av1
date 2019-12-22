@@ -4101,7 +4101,7 @@ void DownsampleDecimationInputPicture(
         sixteenth_decimated_picture_ptr->origin_y);
 
 }
-int av1_count_colors_highbd(uint16_t *src, int stride, int rows, int cols,
+int eb_av1_count_colors_highbd(uint16_t *src, int stride, int rows, int cols,
     int bit_depth, int *val_count) {
     assert(bit_depth <= 12);
     const int max_pix_val = 1 << bit_depth;
@@ -4191,7 +4191,7 @@ static void is_screen_content(
         for (int c = 0; c + blk_w <= width; c += blk_w) {
             int count_buf[1 << 12];  // Maximum (1 << 12) color levels.
             const int n_colors =
-                use_hbd ? 0 /*av1_count_colors_highbd(src + r * stride + c, stride, blk_w,
+                use_hbd ? 0 /*eb_av1_count_colors_highbd(src + r * stride + c, stride, blk_w,
                     blk_h, bd, count_buf)*/
                 : eb_av1_count_colors(src + r * stride + c, stride, blk_w, blk_h,
                     count_buf);

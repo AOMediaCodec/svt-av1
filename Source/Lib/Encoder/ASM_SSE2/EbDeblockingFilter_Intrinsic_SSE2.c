@@ -295,7 +295,7 @@ static AOM_FORCE_INLINE void filter4_14_sse2(__m128i *p1p0, __m128i *q1q0,
     *ps1ps0 = _mm_xor_si128(ps1ps0_work, t80); /* ^ 0x80 */
 }
 
-void aom_lpf_horizontal_4_sse2(uint8_t *s, int32_t p /* pitch */,
+void eb_aom_lpf_horizontal_4_sse2(uint8_t *s, int32_t p /* pitch */,
     const uint8_t *_blimit, const uint8_t *_limit,
     const uint8_t *_thresh) {
     const __m128i zero = _mm_setzero_si128();
@@ -321,7 +321,7 @@ void aom_lpf_horizontal_4_sse2(uint8_t *s, int32_t p /* pitch */,
     xx_storel_32(s + 1 * p, _mm_srli_si128(qs1qs0, 8));
 }
 
-void aom_lpf_vertical_4_sse2(uint8_t *s, int32_t p /* pitch */,
+void eb_aom_lpf_vertical_4_sse2(uint8_t *s, int32_t p /* pitch */,
     const uint8_t *_blimit, const uint8_t *_limit,
     const uint8_t *_thresh) {
     const __m128i zero = _mm_setzero_si128();
@@ -651,7 +651,7 @@ static AOM_FORCE_INLINE void lpf_internal_14_sse2(
   }
 }
 
-void aom_lpf_horizontal_14_sse2(uint8_t *s, int32_t p,
+void eb_aom_lpf_horizontal_14_sse2(uint8_t *s, int32_t p,
     const uint8_t *_blimit,
     const uint8_t *_limit,
     const uint8_t *_thresh)
@@ -818,7 +818,7 @@ static AOM_FORCE_INLINE void lpf_internal_6_sse2(
     *p1p0 = _mm_or_si128(ps1ps0, *p1p0);
 }
 
-void aom_lpf_horizontal_6_sse2(uint8_t *s, int32_t p,
+void eb_aom_lpf_horizontal_6_sse2(uint8_t *s, int32_t p,
     const uint8_t *_blimit,
     const uint8_t *_limit,
     const uint8_t *_thresh) {
@@ -996,7 +996,7 @@ static AOM_FORCE_INLINE void lpf_internal_8_sse2(
     *p2_out = _mm_or_si128(work_a, p2);
 }
 
-void aom_lpf_horizontal_8_sse2(uint8_t *s, int32_t p,
+void eb_aom_lpf_horizontal_8_sse2(uint8_t *s, int32_t p,
     const uint8_t *_blimit,
     const uint8_t *_limit,
     const uint8_t *_thresh) {
@@ -1228,7 +1228,7 @@ static INLINE void transpose_pq_14_inv_sse2(__m128i *x0, __m128i *x1,
     *pq3 = _mm_unpackhi_epi64(d2, d3);  // pq
 }
 
-void aom_lpf_vertical_6_sse2(uint8_t *s, int32_t p,
+void eb_aom_lpf_vertical_6_sse2(uint8_t *s, int32_t p,
     const uint8_t *blimit,
     const uint8_t *limit,
     const uint8_t *thresh) {
@@ -1269,7 +1269,7 @@ void aom_lpf_vertical_6_sse2(uint8_t *s, int32_t p,
     memcpy((s - 3) + 3 * p, temp_dst + 8, 6);
 }
 
-void aom_lpf_vertical_8_sse2(uint8_t *s, int32_t p,
+void eb_aom_lpf_vertical_8_sse2(uint8_t *s, int32_t p,
     const uint8_t *blimit,
     const uint8_t *limit,
     const uint8_t *thresh) {
@@ -1311,7 +1311,7 @@ void aom_lpf_vertical_8_sse2(uint8_t *s, int32_t p,
     _mm_storel_epi64((__m128i *)(s - 4 + 3 * p), _mm_srli_si128(d2d3, 8));
 }
 
-void aom_lpf_vertical_14_sse2(uint8_t *s, int32_t p,
+void eb_aom_lpf_vertical_14_sse2(uint8_t *s, int32_t p,
     const uint8_t *_blimit,
     const uint8_t *_limit,
     const uint8_t *_thresh)
@@ -1672,7 +1672,7 @@ static AOM_FORCE_INLINE void highbd_lpf_internal_14_sse2(
     }
 }
 
-void aom_highbd_lpf_horizontal_14_sse2(uint16_t *s, int32_t pitch,
+void eb_aom_highbd_lpf_horizontal_14_sse2(uint16_t *s, int32_t pitch,
     const uint8_t *blt, const uint8_t *lt,
     const uint8_t *thr, int32_t bd) {
     __m128i p[7], q[7], pq[7];
@@ -1813,7 +1813,7 @@ static AOM_FORCE_INLINE void highbd_lpf_internal_6_sse2(
     *p1p0_out = _mm_or_si128(ps1ps0, p1p0);
 }
 
-void aom_highbd_lpf_horizontal_6_sse2(uint16_t *s, int32_t p,
+void eb_aom_highbd_lpf_horizontal_6_sse2(uint16_t *s, int32_t p,
     const uint8_t *_blimit,
     const uint8_t *_limit,
     const uint8_t *_thresh, int32_t bd) {
@@ -1969,7 +1969,7 @@ static AOM_FORCE_INLINE void highbd_lpf_internal_8_sse2(
     *p2 = _mm_or_si128(work_a, *p2);
 }
 
-void aom_highbd_lpf_horizontal_8_sse2(uint16_t *s, int32_t p,
+void eb_aom_highbd_lpf_horizontal_8_sse2(uint16_t *s, int32_t p,
     const uint8_t *_blimit,
     const uint8_t *_limit,
     const uint8_t *_thresh, int32_t bd) {
@@ -2046,7 +2046,7 @@ static AOM_FORCE_INLINE void highbd_lpf_internal_4_sse2(
     highbd_filter4_sse2(&p1p0, &q1q0, &hev, &mask, q1q0_out, p1p0_out, &t80, bd);
 }
 
-void aom_highbd_lpf_horizontal_4_sse2(uint16_t *s, int32_t p,
+void eb_aom_highbd_lpf_horizontal_4_sse2(uint16_t *s, int32_t p,
     const uint8_t *_blimit,
     const uint8_t *_limit,
     const uint8_t *_thresh, int32_t bd) {
@@ -2065,7 +2065,7 @@ void aom_highbd_lpf_horizontal_4_sse2(uint16_t *s, int32_t p,
     _mm_storel_epi64((__m128i *)(s + 1 * p), _mm_srli_si128(q1q0, 8));
 }
 
-void aom_highbd_lpf_vertical_4_sse2(uint16_t *s, int32_t p, const uint8_t *blimit,
+void eb_aom_highbd_lpf_vertical_4_sse2(uint16_t *s, int32_t p, const uint8_t *blimit,
     const uint8_t *limit, const uint8_t *thresh,
     int32_t bd) {
     __m128i x0, x1, x2, x3, d0, d1, d2, d3, d4, d5, d6, d7;
@@ -2096,7 +2096,7 @@ void aom_highbd_lpf_vertical_4_sse2(uint16_t *s, int32_t p, const uint8_t *blimi
 }
 
 
-void aom_highbd_lpf_vertical_6_sse2(uint16_t *s, int32_t p, const uint8_t *blimit,
+void eb_aom_highbd_lpf_vertical_6_sse2(uint16_t *s, int32_t p, const uint8_t *blimit,
     const uint8_t *limit, const uint8_t *thresh,
     int32_t bd) {
     __m128i d0, d1, d2, d3, d4, d5;
@@ -2132,7 +2132,7 @@ void aom_highbd_lpf_vertical_6_sse2(uint16_t *s, int32_t p, const uint8_t *blimi
     *(int32_t *)((s - 3) + 3 * p + 4) = _mm_cvtsi128_si32(_mm_srli_si128(d3, 8));
 }
 
-void aom_highbd_lpf_vertical_8_sse2(uint16_t *s, int32_t p, const uint8_t *blimit,
+void eb_aom_highbd_lpf_vertical_8_sse2(uint16_t *s, int32_t p, const uint8_t *blimit,
     const uint8_t *limit, const uint8_t *thresh,
     int32_t bd) {
     __m128i d0, d1, d2, d3, d4, d5, d6, d7;
@@ -2163,7 +2163,7 @@ void aom_highbd_lpf_vertical_8_sse2(uint16_t *s, int32_t p, const uint8_t *blimi
     _mm_storeu_si128((__m128i *)(s - 4 + 3 * p), d3);
 }
 
-void aom_highbd_lpf_vertical_14_sse2(uint16_t *s, int32_t pitch,
+void eb_aom_highbd_lpf_vertical_14_sse2(uint16_t *s, int32_t pitch,
     const uint8_t *blimit,
     const uint8_t *limit,
     const uint8_t *thresh, int32_t bd) {
@@ -2214,4 +2214,3 @@ void aom_highbd_lpf_vertical_14_sse2(uint16_t *s, int32_t pitch,
     _mm_storeu_si128((__m128i *)(s + 2 * pitch), d2_2);
     _mm_storeu_si128((__m128i *)(s + 3 * pitch), d3_2);
 }
-

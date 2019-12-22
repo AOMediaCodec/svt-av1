@@ -22,7 +22,7 @@
 
 #define UPSCALE_NORMATIVE_TAPS 8
 
-const int16_t av1_resize_filter_normative[(
+const int16_t eb_av1_resize_filter_normative[(
     1 << RS_SUBPEL_BITS)][UPSCALE_NORMATIVE_TAPS] = {
 #if UPSCALE_NORMATIVE_TAPS == 8
   { 0, 0, 0, 128, 0, 0, 0, 0 },        { 0, 0, -1, 128, 2, -1, 0, 0 },
@@ -62,7 +62,7 @@ const int16_t av1_resize_filter_normative[(
 #endif  // UPSCALE_NORMATIVE_TAPS == 8
 };
 
-int32_t av1_get_upscale_convolve_step(int in_length, int out_length) {
+int32_t eb_av1_get_upscale_convolve_step(int in_length, int out_length) {
     return ((in_length << RS_SCALE_SUBPEL_BITS) + out_length / 2) / out_length;
 }
 
@@ -77,7 +77,7 @@ int32_t get_upscale_convolve_x0(int in_length, int out_length,
     return (int32_t)((uint32_t)x0 & RS_SCALE_SUBPEL_MASK);
 }
 
-void av1_convolve_horiz_rs_c(const uint8_t *src, int src_stride, uint8_t *dst,
+void eb_av1_convolve_horiz_rs_c(const uint8_t *src, int src_stride, uint8_t *dst,
     int dst_stride, int w, int h, const int16_t *x_filters,
     int x0_qn, int x_step_qn)
 {
@@ -102,7 +102,7 @@ void av1_convolve_horiz_rs_c(const uint8_t *src, int src_stride, uint8_t *dst,
     }
 }
 
-void av1_highbd_convolve_horiz_rs_c(const uint16_t *src, int src_stride,
+void eb_av1_highbd_convolve_horiz_rs_c(const uint16_t *src, int src_stride,
     uint16_t *dst, int dst_stride, int w, int h, const int16_t *x_filters,
     int x0_qn, int x_step_qn, int bd)
 {
@@ -170,8 +170,8 @@ void upscale_normative_rect(const uint8_t *const input, int height,
         }
     }
 
-    av1_convolve_horiz_rs_c(input - 1, in_stride, output, out_stride,
-        width2, height2, &av1_resize_filter_normative[0][0], x0_qn,
+    eb_av1_convolve_horiz_rs_c(input - 1, in_stride, output, out_stride,
+        width2, height2, &eb_av1_resize_filter_normative[0][0], x0_qn,
         x_step_qn);
 
     /* Restore the left/right border pixels */
@@ -236,9 +236,9 @@ void highbd_upscale_normative_rect(
         }
     }
 
-    av1_highbd_convolve_horiz_rs_c(((uint16_t*)(input)-1), in_stride,
+    eb_av1_highbd_convolve_horiz_rs_c(((uint16_t*)(input)-1), in_stride,
         (uint16_t*)(output), out_stride, width2, height2,
-        &av1_resize_filter_normative[0][0], x0_qn, x_step_qn, bd);
+        &eb_av1_resize_filter_normative[0][0], x0_qn, x_step_qn, bd);
 
     /*Restore the left/right border pixels*/
     if (pad_left) {
@@ -257,7 +257,7 @@ void highbd_upscale_normative_rect(
     }
 }
 
-void av1_upscale_normative_rows(const Av1Common *cm, const uint8_t *src,
+void eb_av1_upscale_normative_rows(const Av1Common *cm, const uint8_t *src,
     int src_stride, uint8_t *dst, int dst_stride, int rows, int sub_x, int bd)
 {
     int high_bd = bd > 8;
@@ -268,7 +268,7 @@ void av1_upscale_normative_rows(const Av1Common *cm, const uint8_t *src,
     const int superres_denom = cm->frm_size.superres_denominator;
 
     TileInfo tile_col;
-    const int32_t x_step_qn = av1_get_upscale_convolve_step(
+    const int32_t x_step_qn = eb_av1_get_upscale_convolve_step(
         downscaled_plane_width, upscaled_plane_width);
     int32_t x0_qn = get_upscale_convolve_x0(downscaled_plane_width,
         upscaled_plane_width, x_step_qn);

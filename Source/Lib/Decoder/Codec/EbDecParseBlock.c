@@ -1846,7 +1846,7 @@ static INLINE int get_lower_levels_ctx_2d(const uint8_t *levels,
     mag += AOMMIN(levels[(2 << bwl) + (2 << TX_PAD_HOR_LOG2)], 3);  // { 2, 0 }
 
     const int ctx = AOMMIN((mag + 1) >> 1, 4);
-    return ctx + eb_av1_nz_map_ctx_offset[tx_size][coeff_idx];
+    return ctx + eb_eb_av1_nz_map_ctx_offset[tx_size][coeff_idx];
 }
 
 static INLINE int read_golomb(SvtReader *r) {

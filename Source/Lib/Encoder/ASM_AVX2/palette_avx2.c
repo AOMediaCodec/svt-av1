@@ -13,9 +13,9 @@ static INLINE unsigned int lcg_rand16(unsigned int *state) {
     return *state / 65536 % 32768;
 }
 
-/* That same calcualtion as: av1_calc_indices_dist_dim1_avx2(),
+/* That same calcualtion as: eb_av1_calc_indices_dist_dim1_avx2(),
    but not calculate sum at the end. */
-void av1_calc_indices_dim1_avx2(const int* data,
+void eb_av1_calc_indices_dim1_avx2(const int* data,
     const int* centroids,
     uint8_t* indices, int n, int k) {
 
@@ -71,7 +71,7 @@ void av1_calc_indices_dim1_avx2(const int* data,
     }
 }
 
-static INLINE int64_t av1_calc_indices_dist_dim1_avx2(const int *data,
+static INLINE int64_t eb_av1_calc_indices_dist_dim1_avx2(const int *data,
     const int *centroids,
     uint8_t *indices, int n, int k) {
     int64_t dist = 0;
@@ -167,13 +167,13 @@ static INLINE void calc_centroids_1_avx2(const int *data, int *centroids,
     }
 }
 
-void av1_k_means_dim1_avx2(const int *data, int *centroids, uint8_t *indices,
+void eb_av1_k_means_dim1_avx2(const int *data, int *centroids, uint8_t *indices,
                            int n, int k, int max_itr) {
     int pre_centroids[2 * PALETTE_MAX_SIZE];
     uint8_t pre_indices[MAX_SB_SQUARE];
     assert((n & 15) == 0);
 
-    int64_t this_dist = av1_calc_indices_dist_dim1_avx2(data, centroids, indices, n, k);
+    int64_t this_dist = eb_av1_calc_indices_dist_dim1_avx2(data, centroids, indices, n, k);
 
     for (int i = 0; i < max_itr; ++i) {
         const int64_t pre_dist = this_dist;
@@ -181,7 +181,7 @@ void av1_k_means_dim1_avx2(const int *data, int *centroids, uint8_t *indices,
         memcpy(pre_indices, indices, sizeof(pre_indices[0]) * n);
 
         calc_centroids_1_avx2(data, centroids, indices, n, k);
-        this_dist = av1_calc_indices_dist_dim1_avx2(data, centroids, indices, n, k);
+        this_dist = eb_av1_calc_indices_dist_dim1_avx2(data, centroids, indices, n, k);
 
         if (this_dist > pre_dist) {
             memcpy(centroids, pre_centroids, sizeof(pre_centroids[0]) * k);
@@ -193,9 +193,9 @@ void av1_k_means_dim1_avx2(const int *data, int *centroids, uint8_t *indices,
     }
 }
 
-/* That same calcualtion as: av1_calc_indices_dist_dim2_avx2(),
+/* That same calcualtion as: eb_av1_calc_indices_dist_dim2_avx2(),
    but not calculate sum at the end. */
-void av1_calc_indices_dim2_avx2(const int *data, const int *centroids,
+void eb_av1_calc_indices_dim2_avx2(const int *data, const int *centroids,
     uint8_t *indices, int n, int k) {
 
     int i = 0;
@@ -277,7 +277,7 @@ void av1_calc_indices_dim2_avx2(const int *data, const int *centroids,
 
 }
 
-static INLINE int64_t av1_calc_indices_dist_dim2_avx2(const int *data,
+static INLINE int64_t eb_av1_calc_indices_dist_dim2_avx2(const int *data,
     const int *centroids,
     uint8_t *indices, int n, int k)
 {
@@ -406,14 +406,14 @@ static INLINE void calc_centroids_2_avx2(const int *data, int *centroids,
     }
 }
 
-void av1_k_means_dim2_avx2(const int *data, int *centroids, uint8_t *indices,
+void eb_av1_k_means_dim2_avx2(const int *data, int *centroids, uint8_t *indices,
     int n, int k, int max_itr) {
     int pre_centroids[2 * PALETTE_MAX_SIZE];
     uint8_t pre_indices[MAX_SB_SQUARE];
 
     assert((n & 15) == 0);
 
-    int64_t this_dist = av1_calc_indices_dist_dim2_avx2(data, centroids, indices, n, k);
+    int64_t this_dist = eb_av1_calc_indices_dist_dim2_avx2(data, centroids, indices, n, k);
 
     for (int i = 0; i < max_itr; ++i) {
         const int64_t pre_dist = this_dist;
@@ -422,7 +422,7 @@ void av1_k_means_dim2_avx2(const int *data, int *centroids, uint8_t *indices,
         memcpy(pre_indices, indices, sizeof(pre_indices[0]) * n);
 
         calc_centroids_2_avx2(data, centroids, indices, n, k);
-        this_dist = av1_calc_indices_dist_dim2_avx2(data, centroids, indices, n, k);
+        this_dist = eb_av1_calc_indices_dist_dim2_avx2(data, centroids, indices, n, k);
 
         if (this_dist > pre_dist) {
             memcpy(centroids, pre_centroids,
@@ -435,4 +435,3 @@ void av1_k_means_dim2_avx2(const int *data, int *centroids, uint8_t *indices,
             break;
     }
 }
-

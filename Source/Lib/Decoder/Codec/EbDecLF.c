@@ -43,28 +43,28 @@ svt_hbd_filter_tap_fn_t hbd_horz_filter_tap[FILTER_LEN];
 
 void set_lbd_lf_filter_tap_functions(void)
 {
-    lbd_horz_filter_tap[0] = aom_lpf_horizontal_4;
-    lbd_horz_filter_tap[1] = aom_lpf_horizontal_6;
-    lbd_horz_filter_tap[2] = aom_lpf_horizontal_8;
-    lbd_horz_filter_tap[3] = aom_lpf_horizontal_14;
+    lbd_horz_filter_tap[0] = eb_aom_lpf_horizontal_4;
+    lbd_horz_filter_tap[1] = eb_aom_lpf_horizontal_6;
+    lbd_horz_filter_tap[2] = eb_aom_lpf_horizontal_8;
+    lbd_horz_filter_tap[3] = eb_aom_lpf_horizontal_14;
 
-    lbd_vert_filter_tap[0] = aom_lpf_vertical_4;
-    lbd_vert_filter_tap[1] = aom_lpf_vertical_6;
-    lbd_vert_filter_tap[2] = aom_lpf_vertical_8;
-    lbd_vert_filter_tap[3] = aom_lpf_vertical_14;
+    lbd_vert_filter_tap[0] = eb_aom_lpf_vertical_4;
+    lbd_vert_filter_tap[1] = eb_aom_lpf_vertical_6;
+    lbd_vert_filter_tap[2] = eb_aom_lpf_vertical_8;
+    lbd_vert_filter_tap[3] = eb_aom_lpf_vertical_14;
 }
 
 void set_hbd_lf_filter_tap_functions(void)
 {
-    hbd_horz_filter_tap[0] = aom_highbd_lpf_horizontal_4;
-    hbd_horz_filter_tap[1] = aom_highbd_lpf_horizontal_6;
-    hbd_horz_filter_tap[2] = aom_highbd_lpf_horizontal_8;
-    hbd_horz_filter_tap[3] = aom_highbd_lpf_horizontal_14;
+    hbd_horz_filter_tap[0] = eb_aom_highbd_lpf_horizontal_4;
+    hbd_horz_filter_tap[1] = eb_aom_highbd_lpf_horizontal_6;
+    hbd_horz_filter_tap[2] = eb_aom_highbd_lpf_horizontal_8;
+    hbd_horz_filter_tap[3] = eb_aom_highbd_lpf_horizontal_14;
 
-    hbd_vert_filter_tap[0] = aom_highbd_lpf_vertical_4;
-    hbd_vert_filter_tap[1] = aom_highbd_lpf_vertical_6;
-    hbd_vert_filter_tap[2] = aom_highbd_lpf_vertical_8;
-    hbd_vert_filter_tap[3] = aom_highbd_lpf_vertical_14;
+    hbd_vert_filter_tap[0] = eb_aom_highbd_lpf_vertical_4;
+    hbd_vert_filter_tap[1] = eb_aom_highbd_lpf_vertical_6;
+    hbd_vert_filter_tap[2] = eb_aom_highbd_lpf_vertical_8;
+    hbd_vert_filter_tap[3] = eb_aom_highbd_lpf_vertical_14;
 }
 
 /*Population of neighbour block LUMA params for each 4x4 block*/

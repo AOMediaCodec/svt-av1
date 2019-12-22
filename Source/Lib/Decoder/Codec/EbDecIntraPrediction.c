@@ -95,7 +95,7 @@ static INLINE void cfl_pad(CflCtx *cfl, int32_t width, int32_t height) {
     }
 }
 
-void cfl_luma_subsampling_422_lbd_c(const uint8_t *input,
+void eb_cfl_luma_subsampling_422_lbd_c(const uint8_t *input,
     int32_t input_stride, int16_t *output_q3,
     int32_t width, int32_t height)
 {
@@ -108,7 +108,7 @@ void cfl_luma_subsampling_422_lbd_c(const uint8_t *input,
     }
 }
 
-void cfl_luma_subsampling_444_lbd_c(const uint8_t *input,
+void eb_cfl_luma_subsampling_444_lbd_c(const uint8_t *input,
     int32_t input_stride, int16_t *output_q3,
     int32_t width, int32_t height)
 {
@@ -121,7 +121,7 @@ void cfl_luma_subsampling_444_lbd_c(const uint8_t *input,
     }
 }
 
-void cfl_luma_subsampling_422_hbd_c(
+void eb_cfl_luma_subsampling_422_hbd_c(
     const uint16_t *input,
     int32_t input_stride, int16_t *output_q3,
     int32_t width, int32_t height)
@@ -135,7 +135,7 @@ void cfl_luma_subsampling_422_hbd_c(
     }
 }
 
-void cfl_luma_subsampling_444_hbd_c(
+void eb_cfl_luma_subsampling_444_hbd_c(
     const uint16_t *input,
     int32_t input_stride, int16_t *output_q3,
     int32_t width, int32_t height)

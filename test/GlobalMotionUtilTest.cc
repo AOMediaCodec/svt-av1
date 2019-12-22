@@ -340,7 +340,7 @@ class RansacIntTest : public RansacTest<int, RansacFunc> {
     }
 
     RansacFunc get_ransac_func(TransformationType type) {
-        return av1_get_ransac_type(type);
+        return eb_av1_get_ransac_type(type);
     }
 };
 
@@ -356,7 +356,7 @@ class RansacDoubleTest : public RansacTest<double, RansacFuncDouble> {
     }
 
     RansacFuncDouble get_ransac_func(TransformationType type) {
-        return av1_get_ransac_double_prec_type(type);
+        return eb_av1_get_ransac_double_prec_type(type);
     }
 };
 

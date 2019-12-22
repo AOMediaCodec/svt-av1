@@ -771,7 +771,7 @@ static int ransac_affine(int *matched_points, int npoints,
                 find_affine, project_points_double_affine);
 }
 
-RansacFunc av1_get_ransac_type(TransformationType type) {
+RansacFunc eb_av1_get_ransac_type(TransformationType type) {
   switch (type) {
     case AFFINE: return ransac_affine;
     case ROTZOOM: return ransac_rotzoom;
@@ -810,7 +810,7 @@ static int ransac_affine_double_prec(double *matched_points, int npoints,
                             project_points_double_affine);
 }
 
-RansacFuncDouble av1_get_ransac_double_prec_type(TransformationType type) {
+RansacFuncDouble eb_av1_get_ransac_double_prec_type(TransformationType type) {
   switch (type) {
     case AFFINE: return ransac_affine_double_prec;
     case ROTZOOM: return ransac_rotzoom_double_prec;

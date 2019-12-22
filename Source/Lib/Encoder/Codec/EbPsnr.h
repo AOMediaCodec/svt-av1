@@ -37,7 +37,7 @@ extern "C" {
      * \param[in]    peak          Max sample value
      * \param[in]    sse           Sum of squared errors
      */
-    double eb_aom_sse_to_psnr(
+    double eb_eb_aom_sse_to_psnr(
         double samples,
         double peak,
         double sse);

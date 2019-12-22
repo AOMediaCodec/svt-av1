@@ -53,10 +53,10 @@ typedef struct {
   MV coord;
   int coord_offset;
 } search_neighbors;
-typedef unsigned int (*aom_obmc_sad_fn_t)(const uint8_t *pred, int pred_stride,
+typedef unsigned int (*eb_aom_obmc_sad_fn_t)(const uint8_t *pred, int pred_stride,
                                           const int32_t *wsrc,
                                           const int32_t *msk);
-typedef unsigned int (*aom_obmc_variance_fn_t)(const uint8_t *pred,
+typedef unsigned int (*eb_aom_obmc_variance_fn_t)(const uint8_t *pred,
                                                int pred_stride,
                                                const int32_t *wsrc,
                                                const int32_t *msk,
@@ -79,8 +79,8 @@ typedef struct aom_variance_vtable {
     aom_sad_fn_t sdf;
     aom_variance_fn_t vf;
     aom_sad_multi_d_fn_t sdx4df;
-    aom_obmc_sad_fn_t osdf;
-    aom_obmc_variance_fn_t ovf;
+    eb_aom_obmc_sad_fn_t osdf;
+    eb_aom_obmc_variance_fn_t ovf;
     aom_obmc_subpixvariance_fn_t osvf;
 
 

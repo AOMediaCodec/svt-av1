@@ -593,7 +593,7 @@ static void Av1EncodeLoop(
             uint32_t reconLumaOffset = (reconSamples->origin_y + round_origin_y) * reconSamples->stride_y + (reconSamples->origin_x + round_origin_x);
 
             // Down sample Luma
-            cfl_luma_subsampling_420_lbd_c(
+            eb_cfl_luma_subsampling_420_lbd_c(
                 reconSamples->buffer_y + reconLumaOffset,
                 reconSamples->stride_y,
                 context_ptr->md_context->pred_buf_q3,
@@ -998,7 +998,7 @@ static void Av1EncodeLoop16bit(
             uint32_t reconLumaOffset = (reconSamples->origin_y + round_origin_y) * reconSamples->stride_y + (reconSamples->origin_x + round_origin_x);
 
             // Down sample Luma
-            cfl_luma_subsampling_420_hbd_c(
+            eb_cfl_luma_subsampling_420_hbd_c(
                 ((uint16_t*)reconSamples->buffer_y) + reconLumaOffset,
                 reconSamples->stride_y,
                 context_ptr->md_context->pred_buf_q3,
@@ -1995,7 +1995,7 @@ void perform_intra_coding_loop(
 }
 #define REFMVS_LIMIT ((1 << 12) - 1)
 
-void av1_copy_frame_mvs(PictureControlSet *picture_control_set_ptr, const Av1Common *const cm,
+void eb_av1_copy_frame_mvs(PictureControlSet *picture_control_set_ptr, const Av1Common *const cm,
     MbModeInfo  mi, int mi_row, int mi_col,
     int x_mis, int y_mis, EbReferenceObject *object_ptr) {
     const int frame_mvs_stride = ROUND_POWER_OF_TWO(cm->mi_cols, 1);
@@ -3585,7 +3585,7 @@ EB_EXTERN void av1_encode_pass(
                     const int y_mis = AOMMIN(context_ptr->blk_geom->bheight, picture_control_set_ptr->parent_pcs_ptr->av1_cm->mi_rows - mi_row);
                     EbReferenceObject *obj_l0 = (EbReferenceObject*)picture_control_set_ptr->parent_pcs_ptr->reference_picture_wrapper_ptr->object_ptr;
 
-                    av1_copy_frame_mvs(picture_control_set_ptr, picture_control_set_ptr->parent_pcs_ptr->av1_cm, miPtr->mbmi,
+                    eb_av1_copy_frame_mvs(picture_control_set_ptr, picture_control_set_ptr->parent_pcs_ptr->av1_cm, miPtr->mbmi,
                         mi_row, mi_col, x_mis, y_mis, obj_l0);
                 }
             }

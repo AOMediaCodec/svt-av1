@@ -135,7 +135,7 @@ void compute_global_motion(EbPictureBufferDesc *input_pic, EbPictureBufferDesc *
 
     {
         // compute interest points using FAST features
-        int num_frm_corners = av1_fast_corner_detect(
+        int num_frm_corners = eb_av1_fast_corner_detect(
             frm_buffer, input_pic->width, input_pic->height,
             input_pic->stride_y, frm_corners, MAX_CORNERS);
 
@@ -151,7 +151,7 @@ void compute_global_motion(EbPictureBufferDesc *input_pic, EbPictureBufferDesc *
                        (MAX_PARAMDIM - 1) * sizeof(*(params_by_motion[i].params)));
             }
 
-            av1_compute_global_motion(
+            eb_av1_compute_global_motion(
                         model, frm_buffer, input_pic->width, input_pic->height,
                         input_pic->stride_y, frm_corners, num_frm_corners,
                         ref_buffer, ref_pic->stride_y, EB_8BIT,
@@ -162,10 +162,10 @@ void compute_global_motion(EbPictureBufferDesc *input_pic, EbPictureBufferDesc *
                 if (inliers_by_motion[i] == 0) continue;
 
                 params_this_motion = params_by_motion[i].params;
-                av1_convert_model_to_params(params_this_motion, &tmp_wm_params);
+                eb_av1_convert_model_to_params(params_this_motion, &tmp_wm_params);
 
                 if (tmp_wm_params.wmtype != IDENTITY) {
-                    const int64_t warp_error = av1_refine_integerized_param(
+                    const int64_t warp_error = eb_av1_refine_integerized_param(
                                 &tmp_wm_params, tmp_wm_params.wmtype, EB_FALSE, EB_8BIT,
                                 ref_buffer, ref_pic->width, ref_pic->height, ref_pic->stride_y,
                                 frm_buffer, input_pic->width, input_pic->height, input_pic->stride_y, 5,
@@ -173,7 +173,7 @@ void compute_global_motion(EbPictureBufferDesc *input_pic, EbPictureBufferDesc *
                     if (warp_error < best_warp_error) {
                         best_warp_error = warp_error;
                         // Save the wm_params modified by
-                        // av1_refine_integerized_param() rather than motion index to
+                        // eb_av1_refine_integerized_param() rather than motion index to
                         // avoid rerunning refine() below.
                         memcpy(&global_motion, &tmp_wm_params,
                                sizeof(EbWarpedMotionParams));
@@ -207,7 +207,7 @@ void compute_global_motion(EbPictureBufferDesc *input_pic, EbPictureBufferDesc *
 
             // If the best error advantage found doesn't meet the threshold for
             // this motion type, revert to IDENTITY.
-            if (!av1_is_enough_erroradvantage(
+            if (!eb_av1_is_enough_erroradvantage(
                         (double)best_warp_error / ref_frame_error,
                         gm_get_params_cost(&global_motion, ref_params,
                                            allow_high_precision_mv),

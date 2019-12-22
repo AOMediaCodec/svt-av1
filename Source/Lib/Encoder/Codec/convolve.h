@@ -26,7 +26,7 @@ extern "C" {
 
 #define WIENER_CLAMP_LIMIT(r0, bd) (1 << ((bd) + 1 + FILTER_BITS - r0))
 
-    typedef void(*aom_convolve_fn_t)(const uint8_t *src, int32_t src_stride,
+    typedef void(*eb_aom_convolve_fn_t)(const uint8_t *src, int32_t src_stride,
         uint8_t *dst, int32_t dst_stride, int32_t w, int32_t h,
         InterpFilterParams *filter_params_x,
         InterpFilterParams *filter_params_y,

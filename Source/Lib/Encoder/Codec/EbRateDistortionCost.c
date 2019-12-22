@@ -37,10 +37,10 @@ int av1_get_palette_bsize_ctx(BlockSize bsize);
 int av1_get_palette_mode_ctx(const MacroBlockD *xd);
 int write_uniform_cost(int n, int v);
 int eb_get_palette_cache(const MacroBlockD *const xd, int plane,uint16_t *cache);
-int av1_palette_color_cost_y(const PaletteModeInfo *const pmi,
+int eb_av1_palette_color_cost_y(const PaletteModeInfo *const pmi,
     uint16_t *color_cache, int n_cache,
     int bit_depth);
-int av1_cost_color_map(PaletteInfo *palette_info, MdRateEstimationContext  *rate_table, CodingUnit*cu_ptr, int plane, BlockSize bsize,
+int eb_av1_cost_color_map(PaletteInfo *palette_info, MdRateEstimationContext  *rate_table, CodingUnit*cu_ptr, int plane, BlockSize bsize,
      COLOR_MAP_TYPE type);
 void av1_get_block_dimensions(BlockSize bsize, int plane,
     const MacroBlockD *xd, int *width,
@@ -718,10 +718,10 @@ uint64_t av1_intra_fast_cost(
             uint16_t color_cache[2 * PALETTE_MAX_SIZE];
             const int n_cache = eb_get_palette_cache(cu_ptr->av1xd, 0, color_cache);
             palette_mode_cost +=
-                av1_palette_color_cost_y(&candidate_ptr->palette_info.pmi, color_cache,
+                eb_av1_palette_color_cost_y(&candidate_ptr->palette_info.pmi, color_cache,
                     n_cache, EB_8BIT);
             palette_mode_cost +=
-                av1_cost_color_map(&candidate_ptr->palette_info, candidate_ptr->md_rate_estimation_ptr, cu_ptr, 0, blk_geom->bsize, PALETTE_MAP);
+                eb_av1_cost_color_map(&candidate_ptr->palette_info, candidate_ptr->md_rate_estimation_ptr, cu_ptr, 0, blk_geom->bsize, PALETTE_MAP);
             intraLumaModeBitsNum += palette_mode_cost;
         }
     }

@@ -27,7 +27,7 @@ void *eb_aom_malloc(size_t size);
 
 EbErrorType eb_av1_alloc_restoration_buffers(Av1Common *cm);
 
-EbErrorType av1_hash_table_create(HashTable *p_hash_table);
+EbErrorType eb_av1_hash_table_create(HashTable *p_hash_table);
 
 static void set_restoration_unit_size(int32_t width, int32_t height, int32_t sx, int32_t sy,
     RestorationInfo *rst) {
@@ -124,7 +124,7 @@ void picture_control_set_dctor(EbPtr p)
 {
     PictureControlSet* obj = (PictureControlSet*)p;
     uint8_t depth;
-    av1_hash_table_destroy(&obj->hash_table);
+    eb_av1_hash_table_destroy(&obj->hash_table);
     EB_FREE_ALIGNED_ARRAY(obj->tpl_mvs);
     EB_DELETE(obj->enc_dec_segment_ctrl);
     EB_DELETE(obj->ep_intra_luma_mode_neighbor_array);
@@ -1050,7 +1050,7 @@ EbErrorType picture_control_set_ctor(
         EB_CALLOC_ALIGNED_ARRAY(object_ptr->tpl_mvs, mem_size);
     }
     object_ptr->hash_table.p_lookup_table = NULL;
-    av1_hash_table_create(&object_ptr->hash_table);
+    eb_av1_hash_table_create(&object_ptr->hash_table);
     return EB_ErrorNone;
 }
 

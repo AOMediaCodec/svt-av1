@@ -840,7 +840,7 @@ extern "C" {
 #define INTER_COMPOUND_OFFSET(mode) (uint8_t)((mode)-NEAREST_NEARESTMV)
 
 // Number of possible contexts for a color index.
-// As can be seen from av1_get_palette_color_index_context(), the possible
+// As can be seen from eb_av1_get_palette_color_index_context(), the possible
 // contexts are (2,0,0), (2,2,1), (3,2,0), (4,1,0), (5,0,0). These are mapped to
 // a value from 0 to 4 using 'palette_color_index_context_lookup' table.
 #define PALETTE_COLOR_INDEX_CONTEXTS 5

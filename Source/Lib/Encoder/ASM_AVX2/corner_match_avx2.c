@@ -25,7 +25,7 @@ DECLARE_ALIGNED(16, static const uint8_t,
 correlation/standard deviation are taken over MATCH_SZ by MATCH_SZ windows
 of each image, centered at (x1, y1) and (x2, y2) respectively.
 */
-double av1_compute_cross_correlation_avx2(unsigned char *im1, int stride1,
+double eb_av1_compute_cross_correlation_avx2(unsigned char *im1, int stride1,
                                           int x1, int y1, unsigned char *im2,
                                           int stride2, int x2, int y2) {
   int i, stride1_i = 0, stride2_i = 0;
@@ -75,4 +75,3 @@ double av1_compute_cross_correlation_avx2(unsigned char *im1, int stride1,
   aom_clear_system_state();
   return cov / sqrt((double)var2);
 }
-

@@ -247,7 +247,7 @@ static INLINE void blend_a64_d16_mask_w8_sse41(
     _mm_storel_epi64((__m128i *)(dst), res);
 }
 
-static INLINE void aom_lowbd_blend_a64_d16_mask_subw0_subh0_w4_sse4_1(
+static INLINE void eb_aom_lowbd_blend_a64_d16_mask_subw0_subh0_w4_sse4_1(
     uint8_t *dst, uint32_t dst_stride, const CONV_BUF_TYPE *src0,
     uint32_t src0_stride, const CONV_BUF_TYPE *src1, uint32_t src1_stride,
     const uint8_t *mask, uint32_t mask_stride, int h,
@@ -267,7 +267,7 @@ static INLINE void aom_lowbd_blend_a64_d16_mask_subw0_subh0_w4_sse4_1(
     }
 }
 
-static INLINE void aom_lowbd_blend_a64_d16_mask_subw0_subh0_w8_sse4_1(
+static INLINE void eb_aom_lowbd_blend_a64_d16_mask_subw0_subh0_w8_sse4_1(
     uint8_t *dst, uint32_t dst_stride, const CONV_BUF_TYPE *src0,
     uint32_t src0_stride, const CONV_BUF_TYPE *src1, uint32_t src1_stride,
     const uint8_t *mask, uint32_t mask_stride, int h,
@@ -286,7 +286,7 @@ static INLINE void aom_lowbd_blend_a64_d16_mask_subw0_subh0_w8_sse4_1(
     }
 }
 
-static INLINE void aom_lowbd_blend_a64_d16_mask_subw1_subh1_w4_sse4_1(
+static INLINE void eb_aom_lowbd_blend_a64_d16_mask_subw1_subh1_w4_sse4_1(
     uint8_t *dst, uint32_t dst_stride, const CONV_BUF_TYPE *src0,
     uint32_t src0_stride, const CONV_BUF_TYPE *src1, uint32_t src1_stride,
     const uint8_t *mask, uint32_t mask_stride, int h,
@@ -312,7 +312,7 @@ static INLINE void aom_lowbd_blend_a64_d16_mask_subw1_subh1_w4_sse4_1(
     }
 }
 
-static INLINE void aom_lowbd_blend_a64_d16_mask_subw1_subh1_w8_sse4_1(
+static INLINE void eb_aom_lowbd_blend_a64_d16_mask_subw1_subh1_w8_sse4_1(
     uint8_t *dst, uint32_t dst_stride, const CONV_BUF_TYPE *src0,
     uint32_t src0_stride, const CONV_BUF_TYPE *src1, uint32_t src1_stride,
     const uint8_t *mask, uint32_t mask_stride, int h,
@@ -338,7 +338,7 @@ static INLINE void aom_lowbd_blend_a64_d16_mask_subw1_subh1_w8_sse4_1(
     }
 }
 
-static INLINE void aom_lowbd_blend_a64_d16_mask_subw1_subh0_w4_sse4_1(
+static INLINE void eb_aom_lowbd_blend_a64_d16_mask_subw1_subh0_w4_sse4_1(
     uint8_t *dst, uint32_t dst_stride, const CONV_BUF_TYPE *src0,
     uint32_t src0_stride, const CONV_BUF_TYPE *src1, uint32_t src1_stride,
     const uint8_t *mask, uint32_t mask_stride, int h,
@@ -361,7 +361,7 @@ static INLINE void aom_lowbd_blend_a64_d16_mask_subw1_subh0_w4_sse4_1(
     }
 }
 
-static INLINE void aom_lowbd_blend_a64_d16_mask_subw1_subh0_w8_sse4_1(
+static INLINE void eb_aom_lowbd_blend_a64_d16_mask_subw1_subh0_w8_sse4_1(
     uint8_t *dst, uint32_t dst_stride, const CONV_BUF_TYPE *src0,
     uint32_t src0_stride, const CONV_BUF_TYPE *src1, uint32_t src1_stride,
     const uint8_t *mask, uint32_t mask_stride, int h,
@@ -384,7 +384,7 @@ static INLINE void aom_lowbd_blend_a64_d16_mask_subw1_subh0_w8_sse4_1(
     }
 }
 
-static INLINE void aom_lowbd_blend_a64_d16_mask_subw0_subh1_w4_sse4_1(
+static INLINE void eb_aom_lowbd_blend_a64_d16_mask_subw0_subh1_w4_sse4_1(
     uint8_t *dst, uint32_t dst_stride, const CONV_BUF_TYPE *src0,
     uint32_t src0_stride, const CONV_BUF_TYPE *src1, uint32_t src1_stride,
     const uint8_t *mask, uint32_t mask_stride, int h,
@@ -407,7 +407,7 @@ static INLINE void aom_lowbd_blend_a64_d16_mask_subw0_subh1_w4_sse4_1(
     }
 }
 
-static INLINE void aom_lowbd_blend_a64_d16_mask_subw0_subh1_w8_sse4_1(
+static INLINE void eb_aom_lowbd_blend_a64_d16_mask_subw0_subh1_w8_sse4_1(
     uint8_t *dst, uint32_t dst_stride, const CONV_BUF_TYPE *src0,
     uint32_t src0_stride, const CONV_BUF_TYPE *src1, uint32_t src1_stride,
     const uint8_t *mask, uint32_t mask_stride, int h,

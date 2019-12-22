@@ -432,7 +432,7 @@ static INLINE void highbd_filter14(int8_t mask, uint8_t thresh, int8_t flat,
     }
 }
 
-static void aom_highbd_lpf_horizontal_6_c(uint16_t *s, int p,
+static void eb_aom_highbd_lpf_horizontal_6_c(uint16_t *s, int p,
                                           const uint8_t *blimit,
                                           const uint8_t *limit,
                                           const uint8_t *thresh, int bd) {
@@ -521,14 +521,14 @@ static void highbd_mb_lpf_horizontal_edge_w(uint16_t *s, int p,
     }
 }
 
-static void aom_highbd_lpf_horizontal_14_c(uint16_t *s, int pitch,
+static void eb_aom_highbd_lpf_horizontal_14_c(uint16_t *s, int pitch,
                                            const uint8_t *blimit,
                                            const uint8_t *limit,
                                            const uint8_t *thresh, int bd) {
     highbd_mb_lpf_horizontal_edge_w(s, pitch, blimit, limit, thresh, 1, bd);
 }
 
-static void aom_highbd_lpf_vertical_6_c(uint16_t *s, int pitch,
+static void eb_aom_highbd_lpf_vertical_6_c(uint16_t *s, int pitch,
                                         const uint8_t *blimit,
                                         const uint8_t *limit,
                                         const uint8_t *thresh, int bd) {
@@ -594,7 +594,7 @@ static void highbd_mb_lpf_vertical_edge_w(uint16_t *s, int p,
     }
 }
 
-static void aom_highbd_lpf_vertical_14_c(uint16_t *s, int p,
+static void eb_aom_highbd_lpf_vertical_14_c(uint16_t *s, int p,
                                          const uint8_t *blimit,
                                          const uint8_t *limit,
                                          const uint8_t *thresh, int bd) {
@@ -643,7 +643,7 @@ static void mb_lpf_horizontal_edge_w(uint8_t *s, int p, const uint8_t *blimit,
     }
 }
 
-static void aom_lpf_horizontal_14_c(uint8_t *s, int p, const uint8_t *blimit,
+static void eb_aom_lpf_horizontal_14_c(uint8_t *s, int p, const uint8_t *blimit,
                                     const uint8_t *limit,
                                     const uint8_t *thresh) {
     mb_lpf_horizontal_edge_w(s, p, blimit, limit, thresh, 1);
@@ -686,7 +686,7 @@ static void mb_lpf_vertical_edge_w(uint8_t *s, int p, const uint8_t *blimit,
     }
 }
 
-static void aom_lpf_vertical_14_c(uint8_t *s, int p, const uint8_t *blimit,
+static void eb_aom_lpf_vertical_14_c(uint8_t *s, int p, const uint8_t *blimit,
                                   const uint8_t *limit, const uint8_t *thresh) {
     mb_lpf_vertical_edge_w(s, p, blimit, limit, thresh, 4);
 }
@@ -696,32 +696,32 @@ static void aom_lpf_vertical_14_c(uint8_t *s, int p, const uint8_t *blimit,
 #if ORIGINAL_6_14_DUAL_REF
 // No assembly implementation, keep it in case the assembly implementation is
 // added.
-static void aom_lpf_horizontal_6_dual_c(
+static void eb_aom_lpf_horizontal_6_dual_c(
     uint8_t *s, int p, const uint8_t *blimit0, const uint8_t *limit0,
     const uint8_t *thresh0, const uint8_t *blimit1, const uint8_t *limit1,
     const uint8_t *thresh1) {
-    aom_lpf_horizontal_6_c(s, p, blimit0, limit0, thresh0);
-    aom_lpf_horizontal_6_c(s + 4, p, blimit1, limit1, thresh1);
+    eb_aom_lpf_horizontal_6_c(s, p, blimit0, limit0, thresh0);
+    eb_aom_lpf_horizontal_6_c(s + 4, p, blimit1, limit1, thresh1);
 }
 
-static void aom_lpf_vertical_6_dual_c(
+static void eb_aom_lpf_vertical_6_dual_c(
     uint8_t *s, int pitch, const uint8_t *blimit0, const uint8_t *limit0,
     const uint8_t *thresh0, const uint8_t *blimit1, const uint8_t *limit1,
     const uint8_t *thresh1) {
-    aom_lpf_vertical_6_c(s, pitch, blimit0, limit0, thresh0);
-    aom_lpf_vertical_6_c(s + 4 * pitch, pitch, blimit1, limit1, thresh1);
+    eb_aom_lpf_vertical_6_c(s, pitch, blimit0, limit0, thresh0);
+    eb_aom_lpf_vertical_6_c(s + 4 * pitch, pitch, blimit1, limit1, thresh1);
 }
 
-static void aom_highbd_lpf_horizontal_6_dual_c(
+static void eb_aom_highbd_lpf_horizontal_6_dual_c(
     uint16_t *s, int p, const uint8_t *blimit0, const uint8_t *limit0,
     const uint8_t *thresh0, const uint8_t *blimit1, const uint8_t *limit1,
     const uint8_t *thresh1, int bd) {
-    aom_highbd_lpf_horizontal_6_c(s, p, blimit0, limit0, thresh0, bd);
-    aom_highbd_lpf_horizontal_6_c(s + 4, p, blimit1, limit1, thresh1, bd);
+    eb_aom_highbd_lpf_horizontal_6_c(s, p, blimit0, limit0, thresh0, bd);
+    eb_aom_highbd_lpf_horizontal_6_c(s + 4, p, blimit1, limit1, thresh1, bd);
 }
 
 /* TODO: modify the implementation to match with assembly code */
-static void aom_lpf_horizontal_14_dual_c(
+static void eb_aom_lpf_horizontal_14_dual_c(
     uint8_t *s, int p, const uint8_t *blimit0, const uint8_t *limit0,
     const uint8_t *thresh0, const uint8_t *blimit1, const uint8_t *limit1,
     const uint8_t *thresh1) {
@@ -729,7 +729,7 @@ static void aom_lpf_horizontal_14_dual_c(
     mb_lpf_horizontal_edge_w(s + 4, p, blimit1, limit1, thresh1, 1);
 }
 
-static void aom_highbd_lpf_horizontal_14_dual_c(
+static void eb_aom_highbd_lpf_horizontal_14_dual_c(
     uint16_t *s, int p, const uint8_t *blimit0, const uint8_t *limit0,
     const uint8_t *thresh0, const uint8_t *blimit1, const uint8_t *limit1,
     const uint8_t *thresh1, int bd) {
@@ -737,7 +737,7 @@ static void aom_highbd_lpf_horizontal_14_dual_c(
     highbd_mb_lpf_horizontal_edge_w(s + 4, p, blimit1, limit1, thresh1, 1, bd);
 }
 
-static void aom_highbd_lpf_vertical_14_dual_c(
+static void eb_aom_highbd_lpf_vertical_14_dual_c(
     uint16_t *s, int pitch, const uint8_t *blimit0, const uint8_t *limit0,
     const uint8_t *thresh0, const uint8_t *blimit1, const uint8_t *limit1,
     const uint8_t *thresh1, int bd) {

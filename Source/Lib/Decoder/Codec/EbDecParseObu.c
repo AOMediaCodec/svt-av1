@@ -2136,7 +2136,7 @@ void read_uncompressed_header(bitstrm_t *bs, EbDecHandle *dec_handle_ptr,
             struct ScaleFactors *const ref_scale_factors =
                 get_ref_scale_factors(dec_handle_ptr, i);
 
-            av1_setup_scale_factors_for_frame(
+            eb_av1_setup_scale_factors_for_frame(
                 ref_scale_factors, ref_buf->superres_upscaled_width,
                 ref_buf->frame_height,
                 frame_info->frame_size.frame_width,
@@ -2307,7 +2307,7 @@ EbErrorType read_frame_header_obu(bitstrm_t *bs, EbDecHandle *dec_handle_ptr,
     read_uncompressed_header(bs, dec_handle_ptr, obu_header, num_planes);
 
     if (allow_intrabc(dec_handle_ptr)) {
-        av1_setup_scale_factors_for_frame(
+        eb_av1_setup_scale_factors_for_frame(
             &dec_handle_ptr->sf_identity,
             dec_handle_ptr->cur_pic_buf[0]->frame_width,
             dec_handle_ptr->cur_pic_buf[0]->frame_height,

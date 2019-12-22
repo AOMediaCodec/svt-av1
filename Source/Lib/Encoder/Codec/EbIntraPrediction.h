@@ -300,11 +300,11 @@ typedef struct CflCtx {
         int32_t subsampling_x, subsampling_y;
 } CflCtx;
 
-    extern void cfl_luma_subsampling_420_lbd_c(
+    extern void eb_cfl_luma_subsampling_420_lbd_c(
         const uint8_t *input, // AMIR-> Changed to 8 bit
         int32_t input_stride, int16_t *output_q3,
         int32_t width, int32_t height);
-    extern void cfl_luma_subsampling_420_hbd_c(
+    extern void eb_cfl_luma_subsampling_420_hbd_c(
         const uint16_t *input,
         int32_t input_stride, int16_t *output_q3,
         int32_t width, int32_t height);
@@ -404,9 +404,9 @@ cfl_subtract_average_fn eb_get_subtract_average_fn_c(TxSize tx_size);
     // will be constant allowing for loop unrolling and other constant propagated
     // goodness.
 #define CFL_SUBSAMPLE(arch, sub, bd, width, height)                       \
-      void subsample_##bd##_##sub##_##width##x##height##_##arch(              \
+      void eb_subsample_##bd##_##sub##_##width##x##height##_##arch(              \
           const CFL_##bd##_TYPE, int input_stride, int16_t *output_q3) {     \
-        cfl_luma_subsampling_##sub##_##bd##_##arch(cfl_type, input_stride,    \
+        eb_cfl_luma_subsampling_##sub##_##bd##_##arch(cfl_type, input_stride,    \
                                                    output_q3, width, height); \
       }
 
@@ -436,25 +436,25 @@ cfl_subtract_average_fn eb_get_subtract_average_fn_c(TxSize tx_size);
     // wrappers.
 #define CFL_SUBSAMPLE_FUNCTION_ARRAY(arch, sub, bd)                       \
              const cfl_subsample_##bd##_fn subfn_##sub[TX_SIZES_ALL] = {      \
-        subsample_##bd##_##sub##_4x4_##arch,   /* 4x4 */                      \
-        subsample_##bd##_##sub##_8x8_##arch,   /* 8x8 */                      \
-        subsample_##bd##_##sub##_16x16_##arch, /* 16x16 */                    \
-        subsample_##bd##_##sub##_32x32_##arch, /* 32x32 */                    \
-        NULL,                                  /* 64x64 (invalid CFL size) */ \
-        subsample_##bd##_##sub##_4x8_##arch,   /* 4x8 */                      \
-        subsample_##bd##_##sub##_8x4_##arch,   /* 8x4 */                      \
-        subsample_##bd##_##sub##_8x16_##arch,  /* 8x16 */                     \
-        subsample_##bd##_##sub##_16x8_##arch,  /* 16x8 */                     \
-        subsample_##bd##_##sub##_16x32_##arch, /* 16x32 */                    \
-        subsample_##bd##_##sub##_32x16_##arch, /* 32x16 */                    \
-        NULL,                                  /* 32x64 (invalid CFL size) */ \
-        NULL,                                  /* 64x32 (invalid CFL size) */ \
-        subsample_##bd##_##sub##_4x16_##arch,  /* 4x16  */                    \
-        subsample_##bd##_##sub##_16x4_##arch,  /* 16x4  */                    \
-        subsample_##bd##_##sub##_8x32_##arch,  /* 8x32  */                    \
-        subsample_##bd##_##sub##_32x8_##arch,  /* 32x8  */                    \
-        NULL,                                  /* 16x64 (invalid CFL size) */ \
-        NULL,                                  /* 64x16 (invalid CFL size) */ \
+        eb_subsample_##bd##_##sub##_4x4_##arch,   /* 4x4 */                      \
+        eb_subsample_##bd##_##sub##_8x8_##arch,   /* 8x8 */                      \
+        eb_subsample_##bd##_##sub##_16x16_##arch, /* 16x16 */                    \
+        eb_subsample_##bd##_##sub##_32x32_##arch, /* 32x32 */                    \
+        NULL,                                     /* 64x64 (invalid CFL size) */ \
+        eb_subsample_##bd##_##sub##_4x8_##arch,   /* 4x8 */                      \
+        eb_subsample_##bd##_##sub##_8x4_##arch,   /* 8x4 */                      \
+        eb_subsample_##bd##_##sub##_8x16_##arch,  /* 8x16 */                     \
+        eb_subsample_##bd##_##sub##_16x8_##arch,  /* 16x8 */                     \
+        eb_subsample_##bd##_##sub##_16x32_##arch, /* 16x32 */                    \
+        eb_subsample_##bd##_##sub##_32x16_##arch, /* 32x16 */                    \
+        NULL,                                     /* 32x64 (invalid CFL size) */ \
+        NULL,                                      /* 64x32 (invalid CFL size) */\
+        eb_subsample_##bd##_##sub##_4x16_##arch,  /* 4x16  */                    \
+        eb_subsample_##bd##_##sub##_16x4_##arch,  /* 16x4  */                    \
+        eb_subsample_##bd##_##sub##_8x32_##arch,  /* 8x32  */                    \
+        eb_subsample_##bd##_##sub##_32x8_##arch,  /* 32x8  */                    \
+        NULL,                                     /* 16x64 (invalid CFL size) */ \
+        NULL,                                     /* 64x16 (invalid CFL size) */ \
       };
 
     // The RTCD script does not support passing in an array, so we wrap it in this

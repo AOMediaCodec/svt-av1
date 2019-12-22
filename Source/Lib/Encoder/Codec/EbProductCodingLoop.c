@@ -3164,14 +3164,14 @@ static void CflPrediction(
 
     // Down sample Luma
     if (!context_ptr->hbd_mode_decision) {
-        cfl_luma_subsampling_420_lbd_c(
+        eb_cfl_luma_subsampling_420_lbd_c(
             &(context_ptr->cfl_temp_luma_recon[recLumaOffset]),
             candidate_buffer->recon_ptr->stride_y,
             context_ptr->pred_buf_q3,
             context_ptr->blk_geom->bwidth_uv == context_ptr->blk_geom->bwidth ? (context_ptr->blk_geom->bwidth_uv << 1) : context_ptr->blk_geom->bwidth,
             context_ptr->blk_geom->bheight_uv == context_ptr->blk_geom->bheight ? (context_ptr->blk_geom->bheight_uv << 1) : context_ptr->blk_geom->bheight);
     } else {
-        cfl_luma_subsampling_420_hbd_c(
+        eb_cfl_luma_subsampling_420_hbd_c(
             context_ptr->cfl_temp_luma_recon16bit + recLumaOffset,
             candidate_buffer->recon_ptr->stride_y,
             context_ptr->pred_buf_q3,
@@ -6458,7 +6458,7 @@ static EB_AV1_INTER_PREDICTION_FUNC_PTR   av1_inter_prediction_function_table[2]
     av1_inter_prediction_hbd
 };
 
-void av1_get_max_min_partition_features(
+static void eb_av1_get_max_min_partition_features(
     SequenceControlSet  *sequence_control_set_ptr,
     PictureControlSet   *picture_control_set_ptr,
     ModeDecisionContext *context_ptr,
@@ -6646,7 +6646,7 @@ void av1_get_max_min_partition_features(
 }
 
 #define MAX_NUM_CLASSES_MAX_MIN_PART_PRED 4
-BlockSize av1_predict_max_partition(
+static BlockSize eb_av1_predict_max_partition(
     PictureControlSet   *picture_control_set_ptr,
     const float         *features,
     EbPictureBufferDesc *input_picture_ptr,
@@ -6661,8 +6661,8 @@ BlockSize av1_predict_max_partition(
     assert(picture_control_set_ptr->sf.auto_max_partition_based_on_simple_motion != NOT_IN_USE);
 
     aom_clear_system_state();
-    av1_nn_predict(features, nn_config, 1, scores);
-    av1_nn_softmax(scores, probs, MAX_NUM_CLASSES_MAX_MIN_PART_PRED);
+    eb_av1_nn_predict(features, nn_config, 1, scores);
+    eb_av1_nn_softmax(scores, probs, MAX_NUM_CLASSES_MAX_MIN_PART_PRED);
 
     int result = MAX_NUM_CLASSES_MAX_MIN_PART_PRED - 1;
 
@@ -6822,8 +6822,8 @@ EB_EXTERN EbErrorType mode_decision_sb(
 
                 float features[FEATURE_SIZE_MAX_MIN_PART_PRED] = { 0.0f };
 
-                av1_get_max_min_partition_features(sequence_control_set_ptr, picture_control_set_ptr, context_ptr, features, input_picture_ptr, sb_origin_x, sb_origin_y);
-                max_bsize = MIN(av1_predict_max_partition(picture_control_set_ptr, features, input_picture_ptr, sb_origin_x, sb_origin_y), max_bsize);
+                eb_av1_get_max_min_partition_features(sequence_control_set_ptr, picture_control_set_ptr, context_ptr, features, input_picture_ptr, sb_origin_x, sb_origin_y);
+                max_bsize = MIN(eb_av1_predict_max_partition(picture_control_set_ptr, features, input_picture_ptr, sb_origin_x, sb_origin_y), max_bsize);
             }
         }
 
@@ -7126,4 +7126,3 @@ EB_EXTERN EbErrorType mode_decision_sb(
 #define MAX_SEARCH_AREA_SIZE     MAX_TATAL_SEARCH_AREA_WIDTH * MAX_TATAL_SEARCH_AREA_HEIGHT
 
 // clang-format on
-

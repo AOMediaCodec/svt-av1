@@ -17,7 +17,7 @@
 #include "EbUtility.h"
 #include "EbLog.h"
 
-void av1_upscale_normative_rows(const Av1Common *cm, const uint8_t *src,
+void eb_av1_upscale_normative_rows(const Av1Common *cm, const uint8_t *src,
     int src_stride, uint8_t *dst, int dst_stride, int rows, int sub_x, int bd);
 
 void av1_foreach_rest_unit_in_frame(Av1Common *cm, int32_t plane,
@@ -90,7 +90,7 @@ void *eb_aom_memset16(void *dest, int32_t val, size_t length);
 
 #define WIENER_CLAMP_LIMIT(r0, bd) (1 << ((bd) + 1 + FILTER_BITS - r0))
 
-typedef void(*aom_convolve_fn_t)(const uint8_t *src, int32_t src_stride,
+typedef void(*eb_aom_convolve_fn_t)(const uint8_t *src, int32_t src_stride,
     uint8_t *dst, int32_t dst_stride, int32_t w, int32_t h,
     InterpFilterParams *filter_params_x,
     InterpFilterParams *filter_params_y,
@@ -1587,7 +1587,7 @@ void save_deblock_boundary_lines(
         upscaled_width = (cm->frm_size.superres_upscaled_width + sx) >> sx;
         line_bytes = upscaled_width << use_highbd;
 
-        av1_upscale_normative_rows(cm, (src_rows),
+        eb_av1_upscale_normative_rows(cm, (src_rows),
             src_stride >> use_highbd, (bdry_rows),
             boundaries->stripe_boundary_stride,
             lines_to_save, sx, cm->bit_depth);

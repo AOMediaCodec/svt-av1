@@ -92,8 +92,8 @@ TEST_P(OBMCSadTest, RunCheckOutput) {
     run_test(1000);
 };
 
-#define OBMC_SAD_FUNC_C(W, H) aom_obmc_sad##W##x##H##_c
-#define OBMC_SAD_FUNC_AVX2(W, H) aom_obmc_sad##W##x##H##_avx2
+#define OBMC_SAD_FUNC_C(W, H) eb_aom_obmc_sad##W##x##H##_c
+#define OBMC_SAD_FUNC_AVX2(W, H) eb_aom_obmc_sad##W##x##H##_avx2
 #define GEN_OBMC_SAD_TEST_PARAM(W, H) \
     ObmcSadParam(OBMC_SAD_FUNC_C(W, H), OBMC_SAD_FUNC_AVX2(W, H))
 #define GEN_TEST_PARAMS(GEN_PARAM)                                          \

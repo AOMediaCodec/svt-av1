@@ -72,7 +72,7 @@ void asmSetConvolveAsmTable(void);
 void init_intra_dc_predictors_c_internal(void);
 void asmSetConvolveHbdAsmTable(void);
 void init_intra_predictors_internal(void);
-extern void av1_init_wedge_masks(void);
+extern void eb_av1_init_wedge_masks(void);
 void dec_sync_all_threads(EbDecHandle *dec_handle_ptr);
 
 EbErrorType decode_multiple_obu(EbDecHandle *dec_handle_ptr,
@@ -504,7 +504,7 @@ EB_API EbErrorType eb_init_decoder(
 
     init_intra_predictors_internal();
 
-    av1_init_wedge_masks();
+    eb_av1_init_wedge_masks();
 
     /************************************
     * Decoder Memory Init

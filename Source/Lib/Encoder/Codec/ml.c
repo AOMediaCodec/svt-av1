@@ -17,7 +17,7 @@
 
 #define AOMMAX(x, y) (((x) > (y)) ? (x) : (y))
 
-void av1_nn_output_prec_reduce(float *const output, int num_output) {
+void eb_av1_nn_output_prec_reduce(float *const output, int num_output) {
   const int prec_bits = 11;
   const int prec = 1 << prec_bits;
   const float inv_prec = (float)(1.0 / prec);
@@ -29,7 +29,7 @@ void av1_nn_output_prec_reduce(float *const output, int num_output) {
 // Calculate prediction based on the given input features and neural net config.
 // Assume there are no more than NN_MAX_NODES_PER_LAYER nodes in each hidden
 // layer.
-void av1_nn_predict_c(const float *input_nodes,
+void eb_av1_nn_predict_c(const float *input_nodes,
                       const NN_CONFIG *const nn_config, int reduce_prec,
                       float *const output) {
   int num_input_nodes = nn_config->num_inputs;
@@ -67,10 +67,10 @@ void av1_nn_predict_c(const float *input_nodes,
       val += layer_weights[node * num_input_nodes + i] * input_nodes[i];
     output[node] = val;
   }
-  if (reduce_prec) av1_nn_output_prec_reduce(output, nn_config->num_outputs);
+  if (reduce_prec) eb_av1_nn_output_prec_reduce(output, nn_config->num_outputs);
 }
 
-void av1_nn_softmax(const float *input, float *output, int n) {
+void eb_av1_nn_softmax(const float *input, float *output, int n) {
   // Softmax function is invariant to adding the same constant
   // to all input values, so we subtract the maximum input to avoid
   // possible overflow.

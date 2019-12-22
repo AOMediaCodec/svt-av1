@@ -249,7 +249,7 @@ static SubtractWxHFuncType getSubtractFunc(int rows, int cols) {
   return NULL;
 }
 
-void aom_highbd_subtract_block_sse2(int rows, int cols, int16_t *diff,
+void eb_aom_highbd_subtract_block_sse2(int rows, int cols, int16_t *diff,
                                     ptrdiff_t diff_stride, const uint8_t *src8,
                                     ptrdiff_t src_stride, const uint8_t *pred8,
                                     ptrdiff_t pred_stride, int bd) {

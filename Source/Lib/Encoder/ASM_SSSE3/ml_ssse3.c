@@ -149,7 +149,7 @@ static void nn_activate4(__m128 *x) { *x = _mm_max_ps(*x, _mm_setzero_ps()); }
 // Calculate prediction based on the given input features and neural net config.
 // Assume there are no more than NN_MAX_NODES_PER_LAYER nodes in each hidden
 // layer.
-void av1_nn_predict_sse3(const float *input_nodes,
+void eb_av1_nn_predict_sse3(const float *input_nodes,
                          const NN_CONFIG *const nn_config, int reduce_prec,
                          float *const output) {
   float buf[2][NN_MAX_NODES_PER_LAYER];
@@ -239,5 +239,5 @@ void av1_nn_predict_sse3(const float *input_nodes,
     num_inputs = num_outputs;
     buf_index = 1 - buf_index;
   }
-  if (reduce_prec) av1_nn_output_prec_reduce(output, nn_config->num_outputs);
+  if (reduce_prec) eb_av1_nn_output_prec_reduce(output, nn_config->num_outputs);
 }
