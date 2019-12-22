@@ -306,7 +306,7 @@ void init_intra_dc_predictors_c_internal(void);
 void init_intra_predictors_internal(void);
 void eb_av1_init_me_luts(void);
 
-void SwitchToRealTime(){
+static void EncSwitchToRealTime(){
 #ifndef _WIN32
 
     struct sched_param schedParam = {
@@ -3445,7 +3445,7 @@ EbErrorType init_svt_av1_encoder_handle(
     SVT_LOG("LIB Build date: %s %s\n", __DATE__, __TIME__);
     SVT_LOG("-------------------------------------------\n");
 
-    SwitchToRealTime();
+    EncSwitchToRealTime();
 
     // Set Component Size & Version
     svt_enc_component->size = sizeof(EbComponentType);

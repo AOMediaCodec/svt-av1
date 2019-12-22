@@ -84,6 +84,8 @@ if(COVERAGE)
     endif()
 endif()
 
+add_definitions(-Dnum_groups=enc_num_groups -Dlp_group=enc_lp_group)
+
 # Encoder Lib Source Files
 add_library(SvtAv1Enc
     ${all_files}

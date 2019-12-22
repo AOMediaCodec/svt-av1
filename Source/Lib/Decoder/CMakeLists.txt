@@ -74,6 +74,8 @@ if(COVERAGE)
     endif()
 endif()
 
+add_definitions(-Dnum_groups=dec_num_groups -Dlp_group=dec_lp_group)
+
 # Decoder Lib Source Files
 add_library(SvtAv1Dec
     ${all_files}
