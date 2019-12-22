@@ -39,18 +39,12 @@
 /**************************************
 * Globals
 **************************************/
-uint8_t num_groups = 0;
 #ifdef _WIN32
+uint8_t        num_groups = 0;
 GROUP_AFFINITY group_affinity;
 EbBool         alternate_groups = 0;
 #elif defined(__linux__)
 cpu_set_t group_affinity;
-typedef struct logicalProcessorGroup {
-    uint32_t num;
-    uint32_t group[1024];
-} processorGroup;
-#define INITIAL_PROCESSOR_GROUP 16
-processorGroup *lp_group = NULL;
 #endif
 
 EbMemoryMapEntry *svt_dec_memory_map;

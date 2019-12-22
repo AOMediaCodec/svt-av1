@@ -97,19 +97,18 @@
 /**************************************
  * Globals
  **************************************/
-
-uint8_t                          num_groups = 0;
+static uint8_t                   num_groups = 0;
 #ifdef _WIN32
-GROUP_AFFINITY                   group_affinity;
-EbBool                           alternate_groups = 0;
+static GROUP_AFFINITY            group_affinity;
+static EbBool                    alternate_groups = 0;
 #elif defined(__linux__)
-cpu_set_t                        group_affinity;
+static cpu_set_t                 group_affinity;
 typedef struct logicalProcessorGroup {
     uint32_t num;
     uint32_t group[1024];
-}processorGroup;
+} processorGroup;
 #define INITIAL_PROCESSOR_GROUP 16
-processorGroup                  *lp_group = NULL;
+static processorGroup           *lp_group = NULL;
 #endif
 
 static const char *get_asm_level_name_str(CPU_FLAGS cpu_flags) {
