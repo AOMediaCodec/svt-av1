@@ -1,6 +1,6 @@
 name: svt-av1-enc
 base: core18
-version: '0.1'
+version: '0.8+dev'
 summary: Scalable Video Technology implementation of AV1 encoder
 description: |
   An AV1-compliant cpu-based encoder library and sample application
@@ -18,7 +18,7 @@ apps:
 parts:
   svtav1:
     plugin: cmake
-    build-packages: [ 'yasm', ]
+    build-packages: [ 'yasm', 'g++', ]
     source: .
     configflags:
       - -DCMAKE_BUILD_TYPE=Release
