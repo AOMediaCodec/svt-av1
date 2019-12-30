@@ -3682,7 +3682,7 @@ uint8_t get_end_tx_depth(BlockSize bsize, uint8_t btype) {
     return tx_depth;
 }
 
-uint8_t allowed_tx_set_a[TX_SIZES_ALL][TX_TYPES];
+static uint8_t allowed_tx_set_a[TX_SIZES_ALL][TX_TYPES];
 
 void tx_initialize_neighbor_arrays(
     PictureControlSet            *picture_control_set_ptr,
