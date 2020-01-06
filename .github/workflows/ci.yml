@@ -1,5 +1,10 @@
-name: svt-av1
-on: [push, pull_request]
+name: CI
+on:
+  schedule:
+    - cron: '0 0 * * *'
+  push:
+  pull_request:
+
 
 jobs:
   build:
@@ -41,6 +46,33 @@ jobs:
       with:
         fetch-depth: 1
     - name: Compile SVT-AV1
-      run: |
-        ./Build/linux/build.sh release
-        ./Bin/Release/SvtAv1EncApp -help
+      if: github.event_name != 'schedule'
+      run: ./Build/linux/build.sh release
+    - name: Compile SVT-AV1 (with Tests)
+      if: github.event_name == 'schedule'
+      run: ./Build/linux/build.sh release test
+    - name: Run compiled binary (SvtAv1EncApp)
+      run: ./Bin/Release/SvtAv1EncApp -help
+    - name: Run unit tests
+      if: github.event_name == 'schedule'
+      run: ./Bin/Release/SvtAv1UnitTests
+
+  # Compile and run tests with only one compiler
+  quicktest:
+    name: 'Tests (Ubuntu 18.04, GCC 9.x)'
+    runs-on: ubuntu-18.04
+    env: { 'CC': 'gcc-9', 'CXX': 'g++-9' }
+    steps:
+      - name: Install dependencies
+        run: sudo apt-get install -y nasm yasm cmake gcc-9 g++-9
+      - uses: actions/checkout@v1
+        with:
+          fetch-depth: 1
+      - name: Compile SVT-AV1 (Debug, Tests)
+        run: ./Build/linux/build.sh debug test
+      - name: Run unit tests
+        run: ./Bin/Debug/SvtAv1UnitTests
+
+
+
+
