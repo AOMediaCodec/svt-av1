@@ -216,6 +216,9 @@ typedef struct EbSequenceControlSetInstance {
 extern EbErrorType eb_sequence_control_set_creator(EbPtr *object_dbl_ptr,
                                                    EbPtr  object_init_data_ptr);
 
+extern EbErrorType eb_sequence_control_set_ctor(SequenceControlSet *object,
+                                                EbPtr               object_init_data_ptr);
+
 extern EbErrorType copy_sequence_control_set(SequenceControlSet *dst, SequenceControlSet *src);
 
 extern EbErrorType eb_sequence_control_set_instance_ctor(
