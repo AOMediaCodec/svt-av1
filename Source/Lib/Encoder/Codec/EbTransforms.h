@@ -24,6 +24,8 @@ extern "C" {
 
 #include "EbEncDecProcess.h"
 
+#define TESTING_THE_MASTER 1
+  
 #define UNIT_QUANT_SHIFT 2
 #define INV_COS_BIT 12
 #define MAX_TXFM_STAGE_NUM 12
