@@ -14,10 +14,6 @@ addons:
     packages: &native_deps
       - cmake
       - yasm
-      - valgrind
-      - libgstreamer-plugins-base1.0-dev
-      - libgstreamer1.0-dev
-      - python3-pip
   homebrew:
     packages:
       - yasm
@@ -172,6 +168,12 @@ matrix:
     # GStreamer interation build
     - name: GStreamer patch
       env: build_type=release
+      addons:
+        apt:
+          packages:
+            - *native_deps
+            - libgstreamer-plugins-base1.0-dev
+            - libgstreamer1.0-dev
       script:
         # Build and install SVT-AV1
         - *base_script
@@ -211,6 +213,12 @@ matrix:
     - name: Coveralls Linux+gcc
       stage: coveralls+valgrind
       env: COVERALLS_PARALLEL=true build_type=debug CMAKE_EFLAGS="-DCOVERAGE=ON"
+      addons:
+        apt:
+          packages:
+            - *native_deps
+            - python3-pip
+      
       script:
         - *base_script
         - &coveralls_script |
@@ -246,6 +254,11 @@ matrix:
     # Valgrind on Linux and macOS
     - name: Valgrind
       env: build_type=debug
+      addons:
+        apt:
+          packages:
+            - *native_deps
+            - valgrind
       script:
         - *base_script
         - travis_wait 60 valgrind -- SvtAv1EncApp -enc-mode 4 -i akiyo_cif.y4m -n 20 -b test1.ivf
