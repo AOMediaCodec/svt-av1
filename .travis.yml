@@ -218,7 +218,6 @@ matrix:
           packages:
             - *native_deps
             - python3-pip
-      
       script:
         - *base_script
         - &coveralls_script |
