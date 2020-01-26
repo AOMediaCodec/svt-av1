@@ -6,6 +6,7 @@ jobs:
     runs-on: ubuntu-18.04
 
     strategy:
+      fail-fast: false
       matrix:
         compiler: ['gcc-7', 'gcc-8', 'gcc-9', 'clang-6', 'clang-10']
         include:
