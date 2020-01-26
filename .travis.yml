@@ -114,8 +114,9 @@ matrix:
       env: build_type=release CC=clang-10 CXX=clang++-10
       addons:
         apt:
-          - sourceline: "deb http://apt.llvm.org/bionic/ llvm-toolchain-bionic-10 main"
-            key_url: "https://apt.llvm.org/llvm-snapshot.gpg.key"
+          sources:
+            - sourceline: "deb http://apt.llvm.org/bionic/ llvm-toolchain-bionic-10 main"
+              key_url: "https://apt.llvm.org/llvm-snapshot.gpg.key"
     # FFmpeg interation build
     - name: FFmpeg patch
       env: build_type=release CMAKE_EFLAGS="-DBUILD_SHARED_LIBS=OFF"
