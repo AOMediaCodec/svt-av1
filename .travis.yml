@@ -11,8 +11,6 @@ git:
   submodules: false
 addons:
   apt:
-    sources:
-      - sourceline: "ppa:ubuntu-toolchain-r/test"
     packages: &native_deps
       - cmake
       - yasm
@@ -111,6 +109,8 @@ matrix:
       env: build_type=release CC=gcc-9 CXX=g++-9
       addons:
         apt:
+          sources:
+            - sourceline: "ppa:ubuntu-toolchain-r/test"
           packages:
             - *native_deps
             - gcc-9
