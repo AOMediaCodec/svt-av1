@@ -1285,20 +1285,20 @@ picture-decoding order.
 
 The following appendices highlight the design and implementation of features in much greater detail than this document.
 
-- [Altref Appendix](Appendix Alt Refs)
-- [CDEF Appendix](Appendix CDEF)
-- [CfL Appendix](Appendix CfL)
-- [Compliant Subpel Interpolation Filter Search Appendix](Appendix Compliant Subpel Interpolation Filter Search)
-- [Deblocking Loop Filter (LF) Appendix](Appendix DLF)
-- [Filter Intra Appendix](Appendix Filter Intra)
-- [Global Motion Appendix](Appendix GM)
-- [Intra Block Copy Appendix](Appendix Intra Block Copy)
-- [Local Warped Motion appendix](Appendix Local Warped Motion)
-- [OBMC Appendix](Appendix OBMC)
-- [Palette Prediction Appendix](Appendix Palette Prediction)
-- [Restoration Filter Appendix](Appendix Restoration Filter)
-- [Subpel Interpolation in the Open Loop Motion Estimation Appendix](Appendix Subpel Interpolation Open Loop ME)
-
+- [Altref Appendix](Appendix-Alt-Refs)
+- [CDEF Appendix](Appendix-CDEF)
+- [CfL Appendix](Appendix-CfL)
+- [Compliant Subpel Interpolation Filter Search Appendix](Appendix-Compliant-Subpel-Interpolation-Filter-Search)
+- [Deblocking Loop Filter (LF) Appendix](Appendix-DLF)
+- [Film Grain Synthesis](Appendix-Film-Grain-Synthesis)
+- [Filter Intra Appendix](Appendix-Filter-Intra)
+- [Global Motion Appendix](Appendix-Global-Motion)
+- [Intra Block Copy Appendix](Appendix-Intra-Block-Copy)
+- [Local Warped Motion appendix](Appendix-Local-Warped-Motion)
+- [Palette Prediction Appendix](Appendix-Palette-Prediction)
+- [Restoration Filter Appendix](Appendix-Restoration-Filter)
+- [Subpel Interpolation in the Open Loop Motion Estimation Appendix](Appendix-Subpel-Interpolation-Open-Loop-ME)
+- [Transform Search Appendix](Appendix-TX-Search)
 
 ## References
 
