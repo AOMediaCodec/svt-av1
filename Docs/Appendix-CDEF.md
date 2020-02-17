@@ -584,14 +584,14 @@ The search `in cdef_seg_search` and in `finish_cdef_search` for the
 filter strength is performed by considering a sub-interval of the filter
 strength index \[0,63\]. The subinterval is given by
 \[`cdef_ref_frame_strength` – `gi_step`, `cdef_ref_frame_strength` +
-`gi_step`\], where `cdf_ref_frame_strength` is the filter strength for
+`gi_step`\], where `cdef_ref_frame_strength` is the filter strength for
 the reference picture. The actual implementation is given below:
 
 ```c
 
 gi_step = get_cdef_gi_step(pPcs->cdef_filter_mode);
 
-mid_gi = pPcs->cdf_ref_frame_strength;
+mid_gi = pPcs->cdef_ref_frame_strength;
 
 start_gi = pPcs->use_ref_frame_cdef_strength && pPcs->cdef_filter_mode == 1 ? (AOMMAX(0, mid_gi - gi_step)) : 0;
 

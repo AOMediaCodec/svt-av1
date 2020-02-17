@@ -228,7 +228,7 @@ void cdef_seg_search(PictureControlSet *pcs_ptr, SequenceControlSet *scs_ptr,
                             ysize,
                             xsize);
                 gi_step  = get_cdef_gi_step(ppcs->cdef_filter_mode);
-                mid_gi   = ppcs->cdf_ref_frame_strenght;
+                mid_gi   = ppcs->cdef_ref_frame_strength;
                 start_gi = ppcs->use_ref_frame_cdef_strength && ppcs->cdef_filter_mode == 1
                                ? (AOMMAX(0, mid_gi - gi_step))
                                : 0;
@@ -430,7 +430,7 @@ void cdef_seg_search16bit(PictureControlSet *pcs_ptr, SequenceControlSet *scs_pt
                              ysize,
                              xsize);
                 gi_step  = get_cdef_gi_step(ppcs->cdef_filter_mode);
-                mid_gi   = ppcs->cdf_ref_frame_strenght;
+                mid_gi   = ppcs->cdef_ref_frame_strength;
                 start_gi = ppcs->use_ref_frame_cdef_strength && ppcs->cdef_filter_mode == 1
                                ? (AOMMAX(0, mid_gi - gi_step))
                                : 0;
@@ -523,6 +523,8 @@ void *cdef_kernel(void *input_ptr) {
         frm_hdr             = &pcs_ptr->parent_pcs_ptr->frm_hdr;
         int32_t selected_strength_cnt[64] = {0};
 
+        // TODO adaria: both need to be ON (>0) to enable cdef
+        //              should I remove OFF (0) from cdef_filter_mode ?
         if (scs_ptr->seq_header.enable_cdef && pcs_ptr->parent_pcs_ptr->cdef_filter_mode) {
             if (is_16bit)
                 cdef_seg_search16bit(pcs_ptr, scs_ptr, dlf_results_ptr->segment_index);
