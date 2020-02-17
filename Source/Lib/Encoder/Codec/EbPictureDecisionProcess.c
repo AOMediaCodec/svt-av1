@@ -988,7 +988,7 @@ EbErrorType signal_derivation_multi_processes_oq(
     // 5                                            64 step refinement
     // TODO adaria: do I need to decouple enable_cdef and allow_intrabc here? at least signal to the user that they're coupled
     if (scs_ptr->seq_header.enable_cdef && frm_hdr->allow_intrabc == 0) {
-//        if (scs_ptr->static_config.cdef_filter_mode == DEFAULT) {
+        if (scs_ptr->static_config.cdef_filter_mode == DEFAULT) {
             if (sc_content_detected)
                 if (pcs_ptr->enc_mode <= ENC_M5)
                     pcs_ptr->cdef_filter_mode = 4;
@@ -999,8 +999,8 @@ EbErrorType signal_derivation_multi_processes_oq(
                     pcs_ptr->cdef_filter_mode = 5;
                 else
                     pcs_ptr->cdef_filter_mode = 2;
-//        } else
-//            pcs_ptr->cdef_filter_mode = scs_ptr->static_config.cdef_filter_mode;
+        } else
+            pcs_ptr->cdef_filter_mode = scs_ptr->static_config.cdef_filter_mode;
     }
     else
         pcs_ptr->cdef_filter_mode = 0;
