@@ -143,10 +143,10 @@ EbErrorType eb_sequence_control_set_ctor(SequenceControlSet *scs_ptr, EbPtr obje
 
     scs_ptr->seq_header.order_hint_info.enable_ref_frame_mvs = 1;
 #if NO_ENCDEC || SHUT_FILTERING
-    if (scs_ptr->static_config.enable_cdef == DEFAULT)
+    if (scs_ptr->static_config.cdef_mode == DEFAULT)
         scs_ptr->seq_header.enable_cdef = 0;
     else
-        scs_ptr->seq_header.enable_cdef = scs_ptr->static_config.enable_cdef;
+        scs_ptr->seq_header.enable_cdef = (int)(scs_ptr->static_config.cdef_mode > 0);
 
     if (scs_ptr->static_config.enable_restoration_filtering == DEFAULT)
         scs_ptr->seq_header.enable_restoration = 0;
@@ -154,10 +154,10 @@ EbErrorType eb_sequence_control_set_ctor(SequenceControlSet *scs_ptr, EbPtr obje
         scs_ptr->seq_header.enable_restoration =
             (uint8_t)scs_ptr->static_config.enable_restoration_filtering;
 #else
-    if (scs_ptr->static_config.enable_cdef == DEFAULT)
+    if (scs_ptr->static_config.cdef_mode == DEFAULT)
         scs_ptr->seq_header.enable_cdef = 1;
     else
-        scs_ptr->seq_header.enable_cdef = scs_ptr->static_config.enable_cdef;
+        scs_ptr->seq_header.enable_cdef = (int)(scs_ptr->static_config.cdef_mode > 0);
 
     if (scs_ptr->static_config.enable_restoration_filtering == DEFAULT)
         scs_ptr->seq_header.enable_restoration = 1;

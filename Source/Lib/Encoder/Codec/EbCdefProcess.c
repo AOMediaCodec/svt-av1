@@ -523,8 +523,6 @@ void *cdef_kernel(void *input_ptr) {
         frm_hdr             = &pcs_ptr->parent_pcs_ptr->frm_hdr;
         int32_t selected_strength_cnt[64] = {0};
 
-        // TODO adaria: both need to be ON (>0) to enable cdef
-        //              should I remove OFF (0) from cdef_filter_mode ?
         if (scs_ptr->seq_header.enable_cdef && pcs_ptr->parent_pcs_ptr->cdef_filter_mode) {
             if (is_16bit)
                 cdef_seg_search16bit(pcs_ptr, scs_ptr, dlf_results_ptr->segment_index);

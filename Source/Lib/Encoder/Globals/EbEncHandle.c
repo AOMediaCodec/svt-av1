@@ -2073,8 +2073,7 @@ void copy_api_from_app(
     scs_ptr->static_config.enable_restoration_filtering = ((EbSvtAv1EncConfiguration*)config_struct)->enable_restoration_filtering;
 
     // CDEF
-    scs_ptr->static_config.enable_cdef = ((EbSvtAv1EncConfiguration*)config_struct)->enable_cdef;
-    scs_ptr->static_config.cdef_filter_mode = ((EbSvtAv1EncConfiguration*)config_struct)->cdef_filter_mode;
+    scs_ptr->static_config.cdef_mode = ((EbSvtAv1EncConfiguration*)config_struct)->cdef_mode;
 
     //combine class 12
     scs_ptr->static_config.combine_class_12             = ((EbSvtAv1EncConfiguration*)config_struct)->combine_class_12;
@@ -2679,13 +2678,8 @@ static EbErrorType verify_settings(
     }
 
     // CDEF
-    if (config->enable_cdef != 0 && config->enable_cdef != 1 && config->enable_cdef != -1) {
-        SVT_LOG("Error instance %u: Invalid CDEF flag [0 - 1, -1 for auto], your input: %d\n", channel_number + 1, config->enable_cdef);
-        return_error = EB_ErrorBadParameter;
-    }
-
-    if (config->cdef_filter_mode > 5 || config->cdef_filter_mode < -1) {
-        SVT_LOG("Error instance %u: Invalid CDEF filter mode [0 - 5, -1 for auto], your input: %d\n", channel_number + 1, config->cdef_filter_mode);
+    if (config->cdef_mode > 5 || config->cdef_mode < -1) {
+        SVT_LOG("Error instance %u: Invalid CDEF mode [0 - 5, -1 for auto], your input: %d\n", channel_number + 1, config->cdef_mode);
         return_error = EB_ErrorBadParameter;
     }
 
@@ -2903,8 +2897,7 @@ EbErrorType eb_svt_enc_init_parameter(
     config_ptr->enable_warped_motion = EB_TRUE;
     config_ptr->enable_global_motion = EB_TRUE;
     config_ptr->enable_restoration_filtering = DEFAULT;
-    config_ptr->enable_cdef = DEFAULT;
-    config_ptr->cdef_filter_mode = DEFAULT;
+    config_ptr->cdef_mode = DEFAULT;
     config_ptr->edge_skp_angle_intra = DEFAULT;
     config_ptr->combine_class_12 = DEFAULT;
     config_ptr->inter_intra_compound = DEFAULT;

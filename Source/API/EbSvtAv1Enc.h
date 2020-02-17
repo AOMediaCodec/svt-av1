@@ -238,15 +238,10 @@ typedef struct EbSvtAv1EncConfiguration {
     * Default is -1. */
     int enable_restoration_filtering;
 
-    /* CDEF
+    /* CDEF mode
     *
     * Default is -1. */
-    int enable_cdef;
-
-    /* CDEF Filter mode
-    *
-    * Default is -1. */
-    int cdef_filter_mode;
+    int cdef_mode;
 
     /* edge based skip angle intra
     *

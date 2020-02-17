@@ -62,8 +62,7 @@
 #define INTRA_REFRESH_TYPE_TOKEN "-irefresh-type" // no Eval
 #define LOOP_FILTER_DISABLE_TOKEN "-dlf"
 #define RESTORATION_ENABLE_TOKEN "-restoration-filtering"
-#define CDEF_ENABLE_TOKEN "-cdef"
-#define CDEF_FILTER_MODE_TOKEN "-cdef-filter-mode"
+#define CDEF_MODE_TOKEN "-cdef-mode"
 #define CLASS_12_TOKEN "-class-12"
 #define EDGE_SKIP_ANGLE_INTRA_TOKEN "-intra-edge-skp"
 #define INTER_INTRA_COMPOUND_TOKEN "-interintra-comp"
@@ -306,11 +305,8 @@ static void set_enable_global_motion_flag(const char *value, EbConfig *cfg) {
 static void set_enable_restoration_filter_flag(const char *value, EbConfig *cfg) {
     cfg->enable_restoration_filtering = strtol(value, NULL, 0);
 };
-static void set_enable_cdef_flag(const char *value, EbConfig *cfg) {
-    cfg->enable_cdef = strtol(value, NULL, 0);
-};
-static void set_cdef_filter_mode(const char *value, EbConfig *cfg) {
-    cfg->cdef_filter_mode = strtol(value, NULL, 0);
+static void set_cdef_mode(const char *value, EbConfig *cfg) {
+    cfg->cdef_mode = strtol(value, NULL, 0);
 };
 static void set_class_12_flag(const char *value, EbConfig *cfg) {
     cfg->combine_class_12 = strtol(value, NULL, 0);
@@ -764,10 +760,8 @@ ConfigEntry config_entry_specific[] = {
      set_enable_restoration_filter_flag},
     // CDEF
     {SINGLE_INPUT,
-     CDEF_ENABLE_TOKEN,
-     "Enable CDEF (0: OFF, 1: ON, -1: DEFAULT)",
-     set_enable_cdef_flag},
-    {SINGLE_INPUT, CDEF_FILTER_MODE_TOKEN, "CDEF Filter Mode (0: OFF, 1-5: 2,4,8,16,64 step refinement, -1: DEFAULT)", set_cdef_filter_mode},
+     CDEF_MODE_TOKEN, "CDEF Mode (0: OFF, 1-5: ON with 2,4,8,16,64 step refinement, -1: DEFAULT)",
+     set_cdef_mode},
     {SINGLE_INPUT,
      MFMV_ENABLE_TOKEN,
      "Enable motion field motion vector( 0: OFF, 1: ON, -1: DEFAULT)",
@@ -1074,8 +1068,7 @@ ConfigEntry config_entry[] = {
      set_enable_restoration_filter_flag},
 
     // CDEF
-    {SINGLE_INPUT, CDEF_ENABLE_TOKEN, "CDEF", set_enable_cdef_flag},
-    {SINGLE_INPUT, CDEF_FILTER_MODE_TOKEN, "CDEFFilterMode", set_cdef_filter_mode},
+    {SINGLE_INPUT, CDEF_MODE_TOKEN, "CDEFMode", set_cdef_mode},
 
     {SINGLE_INPUT, MFMV_ENABLE_TOKEN, "Mfmv", set_enable_mfmv_flag},
     {SINGLE_INPUT, REDUNDANT_BLK_TOKEN, "RedundantBlock", set_enable_redundant_blk_flag},
@@ -1260,8 +1253,7 @@ void eb_config_ctor(EbConfig *config_ptr) {
     config_ptr->pred_structure                            = 2;
     config_ptr->enable_global_motion                      = EB_TRUE;
     config_ptr->enable_restoration_filtering              = DEFAULT;
-    config_ptr->enable_cdef                               = DEFAULT;
-    config_ptr->cdef_filter_mode                          = DEFAULT;
+    config_ptr->cdef_mode                                 = DEFAULT;
     config_ptr->combine_class_12                          = DEFAULT;
     config_ptr->edge_skp_angle_intra                      = DEFAULT;
     config_ptr->inter_intra_compound                      = DEFAULT;
