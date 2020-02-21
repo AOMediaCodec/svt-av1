@@ -46,9 +46,9 @@ jobs:
         | sudo tee -a /etc/apt/sources.list.d/llvm.list
         curl -L https://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add -
     - name: Install dependencies
-    run: |
-    sudo apt-get update
-    sudo apt-get install -y ${native_deps} ${{ matrix.packages }}
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y ${native_deps} ${{ matrix.packages }}
     - uses: actions/checkout@v2
       with:
         fetch-depth: 1
