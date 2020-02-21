@@ -166,7 +166,9 @@ jobs:
     name: 'Unit Tests (Ubuntu 18.04, GCC 9.x) Shard ${{ matrix.index }}'
     steps:
       - name: Install dependencies
-        run: sudo apt-get install -y ${native_deps} gcc-9 g++-9
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ${native_deps} gcc-9 g++-9
       - uses: actions/checkout@v2
         with:
           fetch-depth: 1
@@ -196,7 +198,9 @@ jobs:
     name: 'E2E Tests (Ubuntu 18.04, GCC 9.x) Shard ${{ matrix.index }}'
     steps:
       - name: Install dependencies
-        run: sudo apt-get install -y ${native_deps} gcc-9 g++-9
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ${native_deps} gcc-9 g++-9
       - uses: actions/checkout@v2
         with:
           fetch-depth: 1
