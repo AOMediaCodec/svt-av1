@@ -98,8 +98,6 @@ jobs:
       uses: actions/checkout@v2
       with:
         repository: 'OpenVisualCloud/SVT-AV1'
-        ref: master
-        path: $HOME/master
     - name: Cache ccache files
       uses: actions/cache@v1.1.0
       with:
@@ -109,6 +107,8 @@ jobs:
           ${{ runner.os }}-binary-test-
     - name: Build SVT-AV1 (master)
       run: |
+        mkdir -p $HOME/master
+        mv * $HOME/master
         $HOME/master/Build/linux/build.sh static
     - name: Encode videos (master)
       run: |
