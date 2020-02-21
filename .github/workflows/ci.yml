@@ -51,8 +51,6 @@ jobs:
         sudo apt-get update
         sudo apt-get install -y ${native_deps} ${{ matrix.packages }}
     - uses: actions/checkout@v2
-      with:
-        fetch-depth: 1
     - name: Cache ccache files
       uses: actions/cache@v1.1.0
       with:
@@ -100,8 +98,8 @@ jobs:
       uses: actions/checkout@v2
       with:
         repository: 'OpenVisualCloud/SVT-AV1'
-        fetch-depth: 1
         ref: master
+        path: $HOME/master
     - name: Cache ccache files
       uses: actions/cache@v1.1.0
       with:
@@ -111,8 +109,6 @@ jobs:
           ${{ runner.os }}-binary-test-
     - name: Build SVT-AV1 (master)
       run: |
-        mkdir $HOME/master
-        mv * $HOME/master
         $HOME/master/Build/linux/build.sh static
     - name: Encode videos (master)
       run: |
@@ -172,8 +168,6 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y ${native_deps} gcc-9 g++-9
       - uses: actions/checkout@v2
-        with:
-          fetch-depth: 1
       - name: Cache ccache files
         uses: actions/cache@v1.1.0
         with:
@@ -204,8 +198,6 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y ${native_deps} gcc-9 g++-9
       - uses: actions/checkout@v2
-        with:
-          fetch-depth: 1
       - name: Cache ccache files
         uses: actions/cache@v1.1.0
         with:
@@ -240,8 +232,6 @@ jobs:
             python3-wheel
           pip3 install --user meson
       - uses: actions/checkout@v2
-        with:
-          fetch-depth: 1
       - name: Cache ccache files
         uses: actions/cache@v1.1.0
         with:
@@ -277,8 +267,6 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y ${native_deps}
       - uses: actions/checkout@v2
-        with:
-          fetch-depth: 1
       - name: Cache ccache files
         uses: actions/cache@v1.1.0
         with:
