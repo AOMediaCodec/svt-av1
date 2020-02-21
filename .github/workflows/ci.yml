@@ -39,8 +39,6 @@ jobs:
               CXX: 'ccache clang++-10'
     env: 
       ${{ matrix.env }}
-      # Build static
-      shared_libs: 'OFF'
     steps:
     - name: Add Clang apt repository
       if: matrix.compiler == 'clang-10'
@@ -63,6 +61,9 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-svt-av1-${{ matrix.compiler }}-
     - name: Compile SVT-AV1
+      env:
+        # Build static
+        shared_libs: 'OFF'
       run: |
         chmod +x .ci/ci.sh
         .ci/ci.sh
