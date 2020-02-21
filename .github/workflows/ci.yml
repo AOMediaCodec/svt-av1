@@ -177,3 +177,51 @@ jobs:
           popd
       - name: Run unit tests shard
         run: env SVT_AV1_TEST_VECTOR_PATH="./test/vectors" GTEST_TOTAL_SHARDS=8 GTEST_SHARD_INDEX=${{ matrix.index }} ./Bin/Release/SvtAv1E2ETests
+
+  gstreamer-patch:
+    runs-on: [ubuntu-18.04]
+    needs: [build]
+    steps:
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ${native_deps} \
+            libgstreamer-plugins-base1.0-dev \
+            libgstreamer1.0-dev \
+            pkg-config \
+            ninja-build \
+            python3 \
+            python3-pip \
+            python3-setuptools\
+            python3-wheel
+          pip3 install --user meson
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 1
+      - name: Cache ccache files
+        uses: actions/cache@v1.1.0
+        with:
+          path: ~/.ccache
+          key: ${{ runner.os }}-gstreamer-${{ hashFiles('**/*.c') }}
+          restore-keys: |
+              ${{ runner.os }}-gstreamer-
+      - name: Compile SVT-AV1
+        env:
+          CC: 'ccache gcc'
+          CXX: 'ccache g++'
+        run: |
+          [ -d "$HOME/.ccache" ] && sudo chown -R $USER: $HOME/.ccache
+          mkdir -p $GITHUB_WORKSPACE/Build/linux/${build_type:-Release}
+          cd $GITHUB_WORKSPACE/Build/linux/${build_type:-Release}
+          cmake $GITHUB_WORKSPACE -G"${generator:-Unix Makefiles}" -DCMAKE_BUILD_TYPE=${build_type:-Release}
+          cmake -j$(nproc) --build .
+          sudo cmake --build . --target install
+      - name: Build Gstreamer
+        run: |
+          [ -d "$HOME/.ccache" ] && sudo chown -R $USER: $HOME/.ccache
+          export LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:/usr/local/lib"
+          export PATH="${PATH}:~/.local/bin"
+          cd $GITHUB_WORKSPACE/gstreamer-plugin
+          meson -Dprefix=/usr build
+          ninja -C build
+          sudo ninja -C build install
