@@ -1497,7 +1497,7 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(SequenceControlSet * scs_ptr,
     else
         context_ptr->new_nearest_near_comb_injection =
             scs_ptr->static_config.new_nearest_comb_inject;
-
+#if !ENHANCED_ME_MV
     if (context_ptr->pd_pass == PD_PASS_0)
         context_ptr->nx4_4xn_parent_mv_injection = 0;
     else if (context_ptr->pd_pass == PD_PASS_1)
@@ -1515,7 +1515,7 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(SequenceControlSet * scs_ptr,
 
     else
         context_ptr->nx4_4xn_parent_mv_injection = scs_ptr->static_config.nx4_4xn_parent_mv_inject;
-
+#endif
     // Set warped motion injection
     // Level                Settings
     // 0                    OFF
@@ -1928,6 +1928,17 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(SequenceControlSet * scs_ptr,
                 ? FULL_PEL_REF_WINDOW_HEIGHT_EXTENDED
                 : FULL_PEL_REF_WINDOW_HEIGHT;
     }
+#if COMP_SIMILAR
+    //comp_similar_mode
+    //0: OFF
+    //1: If previous similar block is not compound, do not inject compound
+    //2: If previous similar block is not compound, do not inject compound
+    //   else consider the compound modes up the mode for the similar block
+    if (pcs_ptr->enc_mode <= ENC_M3)
+        context_ptr->comp_similar_mode = 1;
+    else
+        context_ptr->comp_similar_mode = 2;
+#else
 
     // set compound_types_to_try
     if (context_ptr->pd_pass == PD_PASS_0)
@@ -1941,6 +1952,15 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(SequenceControlSet * scs_ptr,
         else
             context_ptr->compound_types_to_try = MD_COMP_AVG;
     }
+#endif
+
+#if  INTRA_SIMILAR
+    //intra_similar_mode
+    //0: OFF
+    //1: If previous similar block is intra, do not inject any inter
+    context_ptr->intra_similar_mode = 1;
+#endif
+
     // Set coeff_based_nsq_cand_reduction
     if (context_ptr->pd_pass == PD_PASS_0)
         context_ptr->coeff_based_nsq_cand_reduction = EB_FALSE;
@@ -2036,6 +2056,16 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(SequenceControlSet * scs_ptr,
         context_ptr->best_me_cand_only_flag = EB_FALSE;
     else
         context_ptr->best_me_cand_only_flag = EB_FALSE;
+
+#if ENHANCED_ME_MV
+    // Set perform_me_mv_1_8_pel_ref
+    if (context_ptr->pd_pass == PD_PASS_0)
+        context_ptr->perform_me_mv_1_8_pel_ref = EB_FALSE;
+    else if (context_ptr->pd_pass == PD_PASS_1)
+        context_ptr->perform_me_mv_1_8_pel_ref = EB_FALSE;
+    else
+        context_ptr->perform_me_mv_1_8_pel_ref = (pcs_ptr->parent_pcs_ptr->frm_hdr.allow_high_precision_mv);
+#endif
 
     return return_error;
 }

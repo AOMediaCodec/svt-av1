@@ -34,6 +34,9 @@
 extern "C" {
 #endif
 
+
+#define COMP_SIMILAR        1 //use previously coded similar blocks to prune compound modes
+#define INTRA_SIMILAR       1 //If previous similar block is intra, do not inject any inter
 #define OIS_MEM              1 //reduce memory consumption due to ois struct
 #define MULTI_STAGE_ME       1
 #if MULTI_STAGE_ME
@@ -70,6 +73,8 @@ extern "C" {
 #define FASTER_RDOQ 1 // Perform a fast RDOQ stage to reduce non-zero coeffs before the main/complex RDOQ stage for inter and chroma blocks
 #define FP_QUANT_BOTH_INTRA_INTER 1 // Add quantize_fp for INTER blocks
 #define ENHANCED_SQ_WEIGHT 1 // tune sq_weight threshold based on block properties
+#define ENHANCED_ME_MV 1 // (1) Improved Nx4 and 4xN INTER candidates for all categories: used the parent ME_MV instead of using of the 64x64 ME_MV, (2) Added ME_MV 1 / 8 Pel refinement.
+#define TXS_DEPTH_2 1 // TXS for Depth_2
 
 #define HIGH_PRECISION_MV_QTHRESH 150
 
@@ -85,9 +90,16 @@ extern "C" {
 #define AOM_LEFT_TOP_MARGIN_SCALED(subsampling) \
     (AOM_LEFT_TOP_MARGIN_PX(subsampling) << SCALE_SUBPEL_BITS)
 
-#define H_PEL_SEARCH_WIND 3 // 1/2-pel serach window
-#define Q_PEL_SEARCH_WIND 2 // 1/4-pel serach window
+#define H_PEL_SEARCH_WIND 3 // 1/2-pel search window
+#define Q_PEL_SEARCH_WIND 2 // 1/4-pel search window
 #define HP_REF_OPT 1 // Remove redundant positions.
+
+#define ENABLE_PME_SAD 0
+#define SWITCH_XY_LOOPS_PME_SAD_SSD 0
+#if SWITCH_XY_LOOPS_PME_SAD_SSD
+#define RESTRUCTURE_SAD 1
+#endif
+
 typedef enum MeHpMode {
     EX_HP_MODE        = 0, // Exhaustive  1/2-pel serach mode.
     REFINEMENT_HP_MODE = 1 // Refinement 1/2-pel serach mode.
@@ -171,7 +183,11 @@ enum {
 #define ADD_DELTA_QP_SUPPORT 1 // Add delta QP support
 #define BLOCK_MAX_COUNT_SB_128 4421 // TODO: reduce alloction for 64x64
 #define BLOCK_MAX_COUNT_SB_64 1101 // TODO: reduce alloction for 64x64
+#if TXS_DEPTH_2
+#define MAX_TXB_COUNT 16 // Maximum number of transform blocks per depth
+#else
 #define MAX_TXB_COUNT 4 // Maximum number of transform blocks.
+#endif
 #define MAX_NFL 125 // Maximum number of candidates MD can support
 #define MAX_NFL_BUFF \
     (MAX_NFL + CAND_CLASS_TOTAL) //need one extra temp buffer for each fast loop call

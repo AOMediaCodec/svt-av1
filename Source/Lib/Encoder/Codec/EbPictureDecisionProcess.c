@@ -1095,7 +1095,11 @@ EbErrorType signal_derivation_multi_processes_oq(
         // 0                 OFF: no transform partitioning
         // 1                 ON for INTRA blocks
         if (pcs_ptr->enc_mode <= ENC_M2)
+#if TXS_DEPTH_2
+            pcs_ptr->tx_size_search_mode = (pcs_ptr->sc_content_detected && pcs_ptr->slice_type != I_SLICE) ? 0 : 1;
+#else
             pcs_ptr->tx_size_search_mode = (MR_MODE || pcs_ptr->temporal_layer_index == 0) ? 1 : 0;
+#endif
         else
             pcs_ptr->tx_size_search_mode = 0;
 
@@ -1130,6 +1134,9 @@ EbErrorType signal_derivation_multi_processes_oq(
         }
         else
             pcs_ptr->compound_mode = scs_ptr->static_config.compound_level;
+
+        if (pcs_ptr->wedge_mode > 0 && pcs_ptr->compound_mode != 2)
+            SVT_LOG("wedge_mode set but will not be active\n");
 
         // Set frame end cdf update mode      Settings
         // 0                                     OFF
