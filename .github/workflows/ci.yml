@@ -1,7 +1,7 @@
 name: CI
 on: [push, pull_request]
 env:
-  build_type: 'release'
+  build_type: 'Release'
   native_deps: nasm yasm cmake ccache
 
 jobs:
@@ -37,7 +37,10 @@ jobs:
             env:
               CC: 'ccache clang-10'
               CXX: 'ccache clang++-10'
-    env: ${{ matrix.env }}
+    env: 
+      ${{ matrix.env }}
+      # Build static
+      shared_libs: 'OFF'
     steps:
     - name: Add Clang apt repository
       if: matrix.compiler == 'clang-10'
@@ -62,8 +65,6 @@ jobs:
     - name: Compile SVT-AV1
       run: |
         chmod +x .ci/ci.sh
-        # Build static
-        export shared_libs="OFF"
         .ci/ci.sh
     - name: Compress SVT-AV1 binaries
       if: matrix.compiler == 'gcc-9'
@@ -78,6 +79,9 @@ jobs:
   binary-identical-test:
     runs-on: [ubuntu-18.04]
     needs: [build]
+    env:
+      # Build static
+      shared_libs: 'OFF'
     steps:
     - name: Install dependencies
       run: |
@@ -141,7 +145,11 @@ jobs:
   # Compile and run tests in shards with only one compiler
   unit-tests:
     runs-on: [ubuntu-18.04]
-    env: { 'CC': 'gcc-9', 'CXX': 'g++-9' }
+    env: 
+      CC: 'gcc-9'
+      CXX: 'g++-9'
+      # Build unit tests
+      testing: 'ON'
     strategy:
       matrix:
         index: [ 0, 1, 2, 3, 4, 5, 6, 7 ]
@@ -155,15 +163,17 @@ jobs:
       - name: Compile SVT-AV1 (Release, Tests)
         run: |
           chmod +x .ci/ci.sh
-          # Build tests
-          export testing="ON"
           .ci/ci.sh
       - name: Run unit tests shard
         run: env GTEST_TOTAL_SHARDS=8 GTEST_SHARD_INDEX=${{ matrix.index }} ./Bin/Release/SvtAv1UnitTests
 
   e2e-tests:
-    runs-on: ubuntu-18.04
-    env: { 'CC': 'gcc-9', 'CXX': 'g++-9' }
+    runs-on: [ubuntu-18.04]
+    env: 
+      CC: 'gcc-9'
+      CXX: 'g++-9'
+      # Build unit tests
+      testing: 'ON'
     strategy:
       matrix:
         index: [ 0, 1, 2, 3, 4, 5, 6, 7 ]
@@ -177,8 +187,6 @@ jobs:
       - name: Compile SVT-AV1 (Release, Tests and TestVectors)
         run: |
           chmod +x .ci/ci.sh
-          # Build tests
-          export testing="ON"
           .ci/ci.sh
           pushd ./Build/linux/Release
           make TestVectors
