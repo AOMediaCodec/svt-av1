@@ -1,10 +1,12 @@
 name: CI
 on: [push, pull_request]
+env:
+  build_type: 'release'
+  native_deps: nasm yasm cmake ccache
 
 jobs:
   build:
-    runs-on: ubuntu-18.04
-
+    runs-on: [ubuntu-18.04]
     strategy:
       fail-fast: false
       matrix:
@@ -12,22 +14,30 @@ jobs:
         include:
           - compiler: gcc-7
             packages: gcc-7 g++-7
-            env: { 'CC': 'gcc-7', 'CXX': 'g++-7' }
+            env:
+              CC: 'ccache gcc-7'
+              CXX: 'ccache g++-7'
           - compiler: gcc-8
             packages: gcc-8 g++-8
-            env: { 'CC': 'gcc-8', 'CXX': 'g++-8' }
+            env:
+              CC: 'ccache gcc-8'
+              CXX: 'ccache g++-8'
           - compiler: gcc-9
             packages: gcc-9 g++-9
-            env: { 'CC': 'gcc-9', 'CXX': 'g++-9' }
+            env:
+              CC: 'ccache gcc-9'
+              CXX: 'ccache g++-9'
           - compiler: clang-6
             packages: ''
-            env: { 'CC': 'clang-6.0', 'CXX': 'clang++-6.0' }
+            env:
+              CC: 'ccache clang-6.0'
+              CXX: 'ccache clang++-6.0'
           - compiler: clang-10
-            packages: 'clang-10'
-            env: { 'CC': 'clang-10', 'CXX': 'clang++-10' }
-
+            packages: clang-10
+            env:
+              CC: 'ccache clang-10'
+              CXX: 'ccache clang++-10'
     env: ${{ matrix.env }}
-
     steps:
     - name: Add Clang apt repository
       if: matrix.compiler == 'clang-10'
@@ -35,14 +45,23 @@ jobs:
         echo "deb http://apt.llvm.org/bionic/ llvm-toolchain-bionic-10 main" \
         | sudo tee -a /etc/apt/sources.list.d/llvm.list
         curl -L https://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add -
-        sudo apt-get update
     - name: Install dependencies
-      run: sudo apt-get install -y ${{ matrix.packages }} nasm yasm cmake
+    run: |
+    sudo apt-get update
+    sudo apt-get install -y ${native_deps} ${{ matrix.packages }}
     - uses: actions/checkout@v2
       with:
         fetch-depth: 1
+    - name: Cache ccache files
+      uses: actions/cache@v1.1.0
+      with:
+        path: ~/.ccache
+        key: ${{ runner.os }}-svt-av1-${{ matrix.compiler }}-${{ hashFiles('**/*.c') }}
+        restore-keys: |
+          ${{ runner.os }}-svt-av1-${{ matrix.compiler }}-
     - name: Compile SVT-AV1
       run: |
+        [ -d "$HOME/.ccache" ] && sudo chown -R $USER: $HOME/.ccache
         ./Build/linux/build.sh static
         ./Bin/Release/SvtAv1EncApp -help
     - name: Compress SVT-AV1 binaries
@@ -56,13 +75,13 @@ jobs:
         path: ./svtav1-current.tar.gz
 
   binary-identical-test:
-    runs-on: ubuntu-18.04
+    runs-on: [ubuntu-18.04]
     needs: [build]
     steps:
     - name: Install dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install -y gcc-9 g++-9 nasm yasm cmake
+        sudo apt-get install -y ${native_deps} gcc-9 g++-9
     - name: Download videos
       run: |
         wget -nc https://raw.githubusercontent.com/OpenVisualCloud/SVT-AV1-Resources/master/video.tar.gz || wget -nc http://randomderp.com/video.tar.gz
@@ -128,7 +147,7 @@ jobs:
     name: 'Unit Tests (Ubuntu 18.04, GCC 9.x) Shard ${{ matrix.index }}'
     steps:
       - name: Install dependencies
-        run: sudo apt-get install -y nasm yasm cmake gcc-9 g++-9
+        run: sudo apt-get install -y ${native_deps} gcc-9 g++-9
       - uses: actions/checkout@v1
         with:
           fetch-depth: 1
@@ -146,7 +165,7 @@ jobs:
     name: 'E2E Tests (Ubuntu 18.04, GCC 9.x) Shard ${{ matrix.index }}'
     steps:
       - name: Install dependencies
-        run: sudo apt-get install -y nasm yasm cmake gcc-9 g++-9
+        run: sudo apt-get install -y ${native_deps} gcc-9 g++-9
       - uses: actions/checkout@v1
         with:
           fetch-depth: 1
