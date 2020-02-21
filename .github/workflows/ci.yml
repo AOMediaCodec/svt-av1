@@ -108,7 +108,7 @@ jobs:
     - name: Build SVT-AV1 (master)
       run: |
         mkdir -p $HOME/master
-        mv * $HOME/master
+        cp -r * $HOME/master
         $HOME/master/Build/linux/build.sh static
     - name: Encode videos (master)
       run: |
