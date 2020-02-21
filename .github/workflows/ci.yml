@@ -61,9 +61,10 @@ jobs:
           ${{ runner.os }}-svt-av1-${{ matrix.compiler }}-
     - name: Compile SVT-AV1
       run: |
-        [ -d "$HOME/.ccache" ] && sudo chown -R $USER: $HOME/.ccache
-        ./Build/linux/build.sh static
-        ./Bin/Release/SvtAv1EncApp -help
+        chmod +x .ci/ci.sh
+        # Build static
+        export shared_libs="OFF"
+        .ci/ci.sh
     - name: Compress SVT-AV1 binaries
       if: matrix.compiler == 'gcc-9'
       run: tar czf ./svtav1-current.tar.gz ./Bin/Release/*
@@ -139,7 +140,7 @@ jobs:
 
   # Compile and run tests in shards with only one compiler
   unit-tests:
-    runs-on: ubuntu-18.04
+    runs-on: [ubuntu-18.04]
     env: { 'CC': 'gcc-9', 'CXX': 'g++-9' }
     strategy:
       matrix:
@@ -152,7 +153,10 @@ jobs:
         with:
           fetch-depth: 1
       - name: Compile SVT-AV1 (Release, Tests)
-        run: ./Build/linux/build.sh release test
+        chmod +x .ci/ci.sh
+        # Build tests
+        export testing="ON"
+        .ci/ci.sh
       - name: Run unit tests shard
         run: env GTEST_TOTAL_SHARDS=8 GTEST_SHARD_INDEX=${{ matrix.index }} ./Bin/Release/SvtAv1UnitTests
 
@@ -171,7 +175,10 @@ jobs:
           fetch-depth: 1
       - name: Compile SVT-AV1 (Release, Tests and TestVectors)
         run: |
-          ./Build/linux/build.sh release test
+          chmod +x .ci/ci.sh
+          # Build tests
+          export testing="ON"
+          .ci/ci.sh
           pushd ./Build/linux/Release
           make TestVectors
           popd
@@ -210,12 +217,8 @@ jobs:
           CC: 'ccache gcc'
           CXX: 'ccache g++'
         run: |
-          [ -d "$HOME/.ccache" ] && sudo chown -R $USER: $HOME/.ccache
-          mkdir -p $GITHUB_WORKSPACE/Build/linux/${build_type:-Release}
-          cd $GITHUB_WORKSPACE/Build/linux/${build_type:-Release}
-          cmake $GITHUB_WORKSPACE -G"${generator:-Unix Makefiles}" -DCMAKE_BUILD_TYPE=${build_type:-Release}
-          cmake -j$(nproc) --build .
-          sudo cmake --build . --target install
+          chmod +x .ci/ci.sh
+          .ci/ci.sh
       - name: Build Gstreamer
         run: |
           [ -d "$HOME/.ccache" ] && sudo chown -R $USER: $HOME/.ccache
@@ -251,12 +254,8 @@ jobs:
           CC: 'ccache gcc'
           CXX: 'ccache g++'
         run: |
-          [ -d "$HOME/.ccache" ] && sudo chown -R $USER: $HOME/.ccache
-          mkdir -p $GITHUB_WORKSPACE/Build/linux/${build_type:-Release}
-          cd $GITHUB_WORKSPACE/Build/linux/${build_type:-Release}
-          cmake $GITHUB_WORKSPACE -G"${generator:-Unix Makefiles}" -DCMAKE_BUILD_TYPE=${build_type:-Release} ${CMAKE_EFLAGS}
-          cmake -j$(nproc) --build .
-          sudo cmake --build . --target install
+          chmod +x .ci/ci.sh
+          .ci/ci.sh
       - name: Setup ffmpeg enviornment
         run: |
           cd $HOME
