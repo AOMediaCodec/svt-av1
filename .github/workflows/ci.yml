@@ -99,7 +99,7 @@ jobs:
     - name: Checkout SVT-AV1 (master)
       uses: actions/checkout@v2
       with:
-        repository: 'https://github.com/OpenVisualCloud/SVT-AV1.git'
+        repository: 'OpenVisualCloud/SVT-AV1'
         fetch-depth: 1
         ref: master
     - name: Cache ccache files
