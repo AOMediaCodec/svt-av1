@@ -153,10 +153,11 @@ jobs:
         with:
           fetch-depth: 1
       - name: Compile SVT-AV1 (Release, Tests)
-        chmod +x .ci/ci.sh
-        # Build tests
-        export testing="ON"
-        .ci/ci.sh
+        run: |
+          chmod +x .ci/ci.sh
+          # Build tests
+          export testing="ON"
+          .ci/ci.sh
       - name: Run unit tests shard
         run: env GTEST_TOTAL_SHARDS=8 GTEST_SHARD_INDEX=${{ matrix.index }} ./Bin/Release/SvtAv1UnitTests
 
