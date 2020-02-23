@@ -2752,7 +2752,9 @@ void read_refine_me_mvs(PictureControlSet *pcs_ptr, ModeDecisionContext *context
             // Get the ME MV
             const MeSbResults *me_results =
                 pcs_ptr->parent_pcs_ptr->me_results[context_ptr->me_sb_addr];
-
+#if MUS_ME
+            if (is_me_data_present(context_ptr, me_results, list_idx, ref_idx))
+#endif
             {
                 int16_t me_mv_x;
                 int16_t me_mv_y;
