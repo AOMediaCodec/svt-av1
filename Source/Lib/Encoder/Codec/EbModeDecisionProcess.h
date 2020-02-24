@@ -308,7 +308,7 @@ typedef struct ModeDecisionContext {
     uint16_t *           cfl_temp_luma_recon16bit;
     EbBool               spatial_sse_full_loop;
     EbBool               blk_skip_decision;
-    EbBool               trellis_quant_coeff_optimization;
+    EbBool               enable_rdoq;
 #if ENHANCED_ME_MV
     int16_t              sb_me_mv[BLOCK_MAX_COUNT_SB_128][2][4][2];
 #endif
@@ -396,7 +396,6 @@ typedef struct ModeDecisionContext {
     uint64_t     tx_weight;
     uint8_t      tx_search_reduced_set;
     uint8_t      interpolation_search_level;
-    EbBool       rdoq_quantize_fp;
     uint8_t      md_tx_size_search_mode;
     uint8_t      md_pic_obmc_mode;
     uint8_t      md_enable_inter_intra;
