@@ -34,15 +34,17 @@ extern "C" {
 #define DEPTH_ONE_STEP 21
 #define DEPTH_TWO_STEP 5
 #define DEPTH_THREE_STEP 1
-#define PREDICTIVE_ME_MAX_MVP_CANIDATES 4
-#define PREDICTIVE_ME_DEVIATION_TH 50
-#define FULL_PEL_REF_WINDOW_WIDTH 7
-#define FULL_PEL_REF_WINDOW_HEIGHT 5
-#define HALF_PEL_REF_WINDOW 3
-#define QUARTER_PEL_REF_WINDOW 3
-#define FULL_PEL_REF_WINDOW_WIDTH_EXTENDED 15
-#define FULL_PEL_REF_WINDOW_HEIGHT_EXTENDED 15
-#define EIGHT_PEL_REF_WINDOW 3
+#define PRED_ME_MAX_MVP_CANIDATES 4
+#define PRED_ME_DEVIATION_TH 50
+#define PRED_ME_FULL_PEL_SEARCH_WIDTH 7
+#define PRED_ME_FULL_PEL_SEARCH_HEIGHT 5
+#define PRED_ME_FULL_PEL_SEARCH_WIDTH_EXTENDED 15
+#define PRED_ME_FULL_PEL_SEARCH_HEIGHT_EXTENDED 15
+#define PRED_ME_HALF_PEL_REF_WINDOW 3
+#define PRED_ME_QUARTER_PEL_REF_WINDOW 3
+#define PRED_ME_EIGHT_PEL_REF_WINDOW 3
+
+#define REFINE_ME_MV_EIGHT_PEL_REF_WINDOW 3
 
 /**************************************
       * Macros
@@ -388,8 +390,8 @@ typedef struct ModeDecisionContext {
     uint8_t      md_filter_intra_mode;
     uint8_t      md_max_ref_count;
     EbBool       md_skip_mvp_generation;
-    int16_t      full_pel_ref_window_width_th;
-    int16_t      full_pel_ref_window_height_th;
+    int16_t      pred_me_full_pel_search_width;
+    int16_t      pred_me_full_pel_search_height;
 
     // Signal to control initial and final pass PD setting(s)
     PdPass pd_pass;

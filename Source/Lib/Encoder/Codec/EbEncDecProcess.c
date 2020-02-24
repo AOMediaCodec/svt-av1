@@ -1919,20 +1919,20 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(SequenceControlSet * scs_ptr,
 
     // Set pred ME full search area
     if (context_ptr->pd_pass == PD_PASS_0) {
-        context_ptr->full_pel_ref_window_width_th  = FULL_PEL_REF_WINDOW_WIDTH;
-        context_ptr->full_pel_ref_window_height_th = FULL_PEL_REF_WINDOW_HEIGHT;
+        context_ptr->pred_me_full_pel_search_width  = PRED_ME_FULL_PEL_SEARCH_WIDTH;
+        context_ptr->pred_me_full_pel_search_height = PRED_ME_FULL_PEL_SEARCH_HEIGHT;
     } else if (context_ptr->pd_pass == PD_PASS_1) {
-        context_ptr->full_pel_ref_window_width_th  = FULL_PEL_REF_WINDOW_WIDTH;
-        context_ptr->full_pel_ref_window_height_th = FULL_PEL_REF_WINDOW_HEIGHT;
+        context_ptr->pred_me_full_pel_search_width  = PRED_ME_FULL_PEL_SEARCH_WIDTH;
+        context_ptr->pred_me_full_pel_search_height = PRED_ME_FULL_PEL_SEARCH_HEIGHT;
     } else {
-        context_ptr->full_pel_ref_window_width_th =
+        context_ptr->pred_me_full_pel_search_width =
             (pcs_ptr->parent_pcs_ptr->sc_content_detected == 0 && pcs_ptr->enc_mode == ENC_M0)
-                ? FULL_PEL_REF_WINDOW_WIDTH_EXTENDED
-                : FULL_PEL_REF_WINDOW_WIDTH;
-        context_ptr->full_pel_ref_window_height_th =
+                ? PRED_ME_FULL_PEL_SEARCH_WIDTH_EXTENDED
+                : PRED_ME_FULL_PEL_SEARCH_WIDTH;
+        context_ptr->pred_me_full_pel_search_height =
             (pcs_ptr->parent_pcs_ptr->sc_content_detected == 0 && pcs_ptr->enc_mode == ENC_M0)
-                ? FULL_PEL_REF_WINDOW_HEIGHT_EXTENDED
-                : FULL_PEL_REF_WINDOW_HEIGHT;
+                ? PRED_ME_FULL_PEL_SEARCH_HEIGHT_EXTENDED
+                : PRED_ME_FULL_PEL_SEARCH_HEIGHT;
     }
 #if COMP_SIMILAR
     //comp_similar_mode

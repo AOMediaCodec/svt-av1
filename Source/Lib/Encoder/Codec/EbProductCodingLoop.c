@@ -2792,10 +2792,10 @@ void read_refine_me_mvs(PictureControlSet *pcs_ptr, ModeDecisionContext *context
                         ref_idx,
                         me_mv_x,
                         me_mv_y,
-                        -(EIGHT_PEL_REF_WINDOW >> 1),
-                        +(EIGHT_PEL_REF_WINDOW >> 1),
-                        -(EIGHT_PEL_REF_WINDOW >> 1),
-                        +(EIGHT_PEL_REF_WINDOW >> 1),
+                        -(REFINE_ME_MV_EIGHT_PEL_REF_WINDOW >> 1),
+                        +(REFINE_ME_MV_EIGHT_PEL_REF_WINDOW >> 1),
+                        -(REFINE_ME_MV_EIGHT_PEL_REF_WINDOW >> 1),
+                        +(REFINE_ME_MV_EIGHT_PEL_REF_WINDOW >> 1),
                         1,
                         &best_search_mvx,
                         &best_search_mvy,
@@ -2856,8 +2856,8 @@ void    predictive_me_search(PictureControlSet *pcs_ptr, ModeDecisionContext *co
         uint32_t best_search_distortion = (int32_t)~0;
 
         // Step 0: derive the MVP list; 1 nearest and up to 3 near
-        int16_t mvp_x_array[PREDICTIVE_ME_MAX_MVP_CANIDATES];
-        int16_t mvp_y_array[PREDICTIVE_ME_MAX_MVP_CANIDATES];
+        int16_t mvp_x_array[PRED_ME_MAX_MVP_CANIDATES];
+        int16_t mvp_y_array[PRED_ME_MAX_MVP_CANIDATES];
         int8_t  mvp_count = 0;
         if (rf[1] == NONE_FRAME) {
             MvReferenceFrame frame_type = rf[0];
@@ -3068,10 +3068,10 @@ void    predictive_me_search(PictureControlSet *pcs_ptr, ModeDecisionContext *co
                                    ref_idx,
                                    best_mvp_x,
                                    best_mvp_y,
-                                   -(context_ptr->full_pel_ref_window_width_th >> 1),
-                                   +(context_ptr->full_pel_ref_window_width_th >> 1),
-                                   -(context_ptr->full_pel_ref_window_height_th >> 1),
-                                   +(context_ptr->full_pel_ref_window_height_th >> 1),
+                                   -(context_ptr->pred_me_full_pel_search_width >> 1),
+                                   +(context_ptr->pred_me_full_pel_search_width >> 1),
+                                   -(context_ptr->pred_me_full_pel_search_height >> 1),
+                                   +(context_ptr->pred_me_full_pel_search_height >> 1),
                                    8,
                                    &best_search_mvx,
                                    &best_search_mvy,
@@ -3086,7 +3086,7 @@ void    predictive_me_search(PictureControlSet *pcs_ptr, ModeDecisionContext *co
                 else {
                     exit_predictive_me_sub_pel =
                         ((((best_search_distortion - pa_me_distortion) * 100) / pa_me_distortion) <
-                         PREDICTIVE_ME_DEVIATION_TH)
+                         PRED_ME_DEVIATION_TH)
                             ? EB_FALSE
                             : EB_TRUE;
                 }
@@ -3113,10 +3113,10 @@ void    predictive_me_search(PictureControlSet *pcs_ptr, ModeDecisionContext *co
                                           ref_idx,
                                           best_search_mvx,
                                           best_search_mvy,
-                                          -(HALF_PEL_REF_WINDOW >> 1),
-                                          +(HALF_PEL_REF_WINDOW >> 1),
-                                          -(HALF_PEL_REF_WINDOW >> 1),
-                                          +(HALF_PEL_REF_WINDOW >> 1),
+                                          -(PRED_ME_HALF_PEL_REF_WINDOW >> 1),
+                                          +(PRED_ME_HALF_PEL_REF_WINDOW >> 1),
+                                          -(PRED_ME_HALF_PEL_REF_WINDOW >> 1),
+                                          +(PRED_ME_HALF_PEL_REF_WINDOW >> 1),
                                           4,
                                           &best_search_mvx,
                                           &best_search_mvy,
@@ -3143,10 +3143,10 @@ void    predictive_me_search(PictureControlSet *pcs_ptr, ModeDecisionContext *co
                                                   ref_idx,
                                                   best_search_mvx,
                                                   best_search_mvy,
-                                                  -(HALF_PEL_REF_WINDOW >> 1),
-                                                  +(HALF_PEL_REF_WINDOW >> 1),
-                                                  -(HALF_PEL_REF_WINDOW >> 1),
-                                                  +(HALF_PEL_REF_WINDOW >> 1),
+                                                  -(PRED_ME_HALF_PEL_REF_WINDOW >> 1),
+                                                  +(PRED_ME_HALF_PEL_REF_WINDOW >> 1),
+                                                  -(PRED_ME_HALF_PEL_REF_WINDOW >> 1),
+                                                  +(PRED_ME_HALF_PEL_REF_WINDOW >> 1),
                                                   4,
                                                   &best_search_mvx,
                                                   &best_search_mvy,
@@ -3170,10 +3170,10 @@ void    predictive_me_search(PictureControlSet *pcs_ptr, ModeDecisionContext *co
                                           ref_idx,
                                           best_search_mvx,
                                           best_search_mvy,
-                                          -(QUARTER_PEL_REF_WINDOW >> 1),
-                                          +(QUARTER_PEL_REF_WINDOW >> 1),
-                                          -(QUARTER_PEL_REF_WINDOW >> 1),
-                                          +(QUARTER_PEL_REF_WINDOW >> 1),
+                                          -(PRED_ME_QUARTER_PEL_REF_WINDOW >> 1),
+                                          +(PRED_ME_QUARTER_PEL_REF_WINDOW >> 1),
+                                          -(PRED_ME_QUARTER_PEL_REF_WINDOW >> 1),
+                                          +(PRED_ME_QUARTER_PEL_REF_WINDOW >> 1),
                                           2,
                                           &best_search_mvx,
                                           &best_search_mvy,
@@ -3200,10 +3200,10 @@ void    predictive_me_search(PictureControlSet *pcs_ptr, ModeDecisionContext *co
                                                   ref_idx,
                                                   best_search_mvx,
                                                   best_search_mvy,
-                                                  -(QUARTER_PEL_REF_WINDOW >> 1),
-                                                  +(QUARTER_PEL_REF_WINDOW >> 1),
-                                                  -(QUARTER_PEL_REF_WINDOW >> 1),
-                                                  +(QUARTER_PEL_REF_WINDOW >> 1),
+                                                  -(PRED_ME_QUARTER_PEL_REF_WINDOW >> 1),
+                                                  +(PRED_ME_QUARTER_PEL_REF_WINDOW >> 1),
+                                                  -(PRED_ME_QUARTER_PEL_REF_WINDOW >> 1),
+                                                  +(PRED_ME_QUARTER_PEL_REF_WINDOW >> 1),
                                                   2,
                                                   &best_search_mvx,
                                                   &best_search_mvy,
@@ -3229,15 +3229,15 @@ void    predictive_me_search(PictureControlSet *pcs_ptr, ModeDecisionContext *co
                                           best_search_mvx,
                                           best_search_mvy,
 #if ENHANCED_ME_MV
-                                          -(EIGHT_PEL_REF_WINDOW >> 1),
-                                          +(EIGHT_PEL_REF_WINDOW >> 1),
-                                          -(EIGHT_PEL_REF_WINDOW >> 1),
-                                          +(EIGHT_PEL_REF_WINDOW >> 1),
+                                          -(PRED_ME_EIGHT_PEL_REF_WINDOW >> 1),
+                                          +(PRED_ME_EIGHT_PEL_REF_WINDOW >> 1),
+                                          -(PRED_ME_EIGHT_PEL_REF_WINDOW >> 1),
+                                          +(PRED_ME_EIGHT_PEL_REF_WINDOW >> 1),
 #else
-                                          -(QUARTER_PEL_REF_WINDOW >> 1),
-                                          +(QUARTER_PEL_REF_WINDOW >> 1),
-                                          -(QUARTER_PEL_REF_WINDOW >> 1),
-                                          +(QUARTER_PEL_REF_WINDOW >> 1),
+                                          -(PRED_ME_QUARTER_PEL_REF_WINDOW >> 1),
+                                          +(PRED_ME_QUARTER_PEL_REF_WINDOW >> 1),
+                                          -(PRED_ME_QUARTER_PEL_REF_WINDOW >> 1),
+                                          +(PRED_ME_QUARTER_PEL_REF_WINDOW >> 1),
 #endif
                                           1,
                                           &best_search_mvx,
