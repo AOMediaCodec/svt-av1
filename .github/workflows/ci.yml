@@ -113,7 +113,9 @@ jobs:
       run: |
         mkdir -p $HOME/master
         mv * $HOME/master
-        $HOME/master/Build/linux/build.sh static
+        cd $HOME/master
+        chmod +x .ci/ci.sh
+        .ci/ci.sh
     - name: Encode videos (master)
       run: |
         $HOME/master/Bin/Release/SvtAv1EncApp -enc-mode 8 -i $HOME/akiyo_cif.y4m -n 120 -b $HOME/test-master-8bit-m8.ivf
