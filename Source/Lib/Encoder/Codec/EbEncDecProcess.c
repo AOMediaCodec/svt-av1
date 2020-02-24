@@ -3015,6 +3015,8 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(SequenceControlSet * scs_ptr,
 
     // Set pred ME full search area
     if (context_ptr->pd_pass == PD_PASS_0) {
+        context_ptr->full_pel_ref_window_width_th  = FULL_PEL_REF_WINDOW_WIDTH;
+        context_ptr->full_pel_ref_window_height_th = FULL_PEL_REF_WINDOW_HEIGHT;
 #if M0_FEB22_ADOPTIONS
         if (pcs_ptr->parent_pcs_ptr->sc_content_detected) {
             context_ptr->full_pel_ref_window_width_th = FULL_PEL_REF_WINDOW_7;
@@ -3029,6 +3031,8 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(SequenceControlSet * scs_ptr,
         context_ptr->full_pel_ref_window_height_th = FULL_PEL_REF_WINDOW_HEIGHT;
 #endif
     } else if (context_ptr->pd_pass == PD_PASS_1) {
+        context_ptr->full_pel_ref_window_width_th  = FULL_PEL_REF_WINDOW_WIDTH;
+        context_ptr->full_pel_ref_window_height_th = FULL_PEL_REF_WINDOW_HEIGHT;
 #if M0_FEB22_ADOPTIONS
         if (pcs_ptr->parent_pcs_ptr->sc_content_detected) {
             context_ptr->full_pel_ref_window_width_th = FULL_PEL_REF_WINDOW_7;
@@ -3043,6 +3047,7 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(SequenceControlSet * scs_ptr,
         context_ptr->full_pel_ref_window_height_th = FULL_PEL_REF_WINDOW_HEIGHT;
 #endif
     } else {
+        context_ptr->full_pel_ref_window_width_th =
 #if M0_FEB22_ADOPTIONS
         if (pcs_ptr->parent_pcs_ptr->sc_content_detected) {
             context_ptr->full_pel_ref_window_width_th = FULL_PEL_REF_WINDOW_7;
