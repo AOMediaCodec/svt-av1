@@ -267,10 +267,6 @@ typedef struct EbSvtAv1EncConfiguration {
     *
     * Default is -1. */
     int enable_redundant_blk;
-    /* trellis quant coeff optimization
-    *
-    * Default is -1. */
-    int enable_trellis;
     /* spatial sse in full loop
     *
     * Default is -1. */
@@ -287,10 +283,6 @@ typedef struct EbSvtAv1EncConfiguration {
     *
     * Default is -1. */
     int new_nearest_comb_inject;
-    /* nx4 4xn parent motion vector injection
-    *
-    * Default is -1. */
-    int nx4_4xn_parent_mv_inject;
     /* prune unipred at me
     *
     * Default is -1. */
