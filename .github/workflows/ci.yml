@@ -111,11 +111,9 @@ jobs:
           ${{ runner.os }}-binary-test-
     - name: Build SVT-AV1 (master)
       run: |
-        mkdir -p $HOME/master
+        mkdir $HOME/master
         mv * $HOME/master
-        cd $HOME/master
-        chmod +x .ci/ci.sh
-        .ci/ci.sh
+        $HOME/master/Build/linux/build.sh static
     - name: Encode videos (master)
       run: |
         $HOME/master/Bin/Release/SvtAv1EncApp -enc-mode 8 -i $HOME/akiyo_cif.y4m -n 120 -b $HOME/test-master-8bit-m8.ivf
