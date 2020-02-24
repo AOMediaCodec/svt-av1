@@ -137,6 +137,8 @@ jobs:
         $HOME/current/Bin/Release/SvtAv1EncApp -enc-mode 8 -i $HOME/Chimera-Aerial_480x264_2997fps_10bit_420_150frames.y4m -n 120 -b $HOME/test-pr-10bit-m8.ivf
         $HOME/current/Bin/Release/SvtAv1EncApp -enc-mode 0 -i $HOME/Chimera-Aerial_480x264_2997fps_10bit_420_150frames.y4m -n 3 -b $HOME/test-pr-10bit-m0.ivf
     - name: Binary compare
+      id: binary_compare
+      continue-on-error: true
       run: |
         echo Comparing 8-bit M8: akiyo_cif.y4m
         diff $HOME/test-pr-8bit-m8.ivf $HOME/test-master-8bit-m8.ivf
@@ -146,11 +148,15 @@ jobs:
         diff $HOME/test-pr-10bit-m8.ivf $HOME/test-master-10bit-m8.ivf
         echo Comparing 10-bit M0: Chimera-Aerial_480x264_2997fps_10bit_420_150frames.y4m
         diff $HOME/test-pr-10bit-m0.ivf $HOME/test-master-10bit-m0.ivf
+        # Create variable that job succeded
+        # if it does not exist then the job failed and artifact will be uploaded
+        echo ::set-output name=status::success
+        
     - name: On fail, compress SVT-AV1 (master)
-      if: failure()
+      if: steps.binary_compare.outputs.status != 'success'
       run: tar czf ./svtav1-master.tar.gz $HOME/master/Bin/Release/*
     - name: On fail, upload artifact SVT-AV1 (master)
-      if: failure()
+      if: steps.binary_compare.outputs.status != 'success'
       uses: actions/upload-artifact@v1
       with:
         name: svtav1-master
