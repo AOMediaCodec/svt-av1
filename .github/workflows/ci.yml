@@ -100,7 +100,9 @@ jobs:
         repository: 'OpenVisualCloud/SVT-AV1'
     - name: Prepare cache hash
       id: cache_hash
-      run: message("::set-output name=hash::${{ hashFiles('**/*.c') }}")
+      run: |
+        string(hash hashfiles ${{ hashFiles('**/*.c') }})
+        message("::set-output name=hash::${hashfiles}")
     - name: Cache ccache files
       uses: actions/cache@v1.1.0
       with:
