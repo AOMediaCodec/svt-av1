@@ -101,8 +101,7 @@ jobs:
     - name: Prepare cache hash
       id: cache_hash
       run: |
-        string(hash hashfiles ${{ hashFiles('**/*.c') }})
-        message("::set-output name=hash::${hashfiles}")
+        echo "::set-output name=hash::${{ hashFiles('**/*.c') }}"
     - name: Cache ccache files
       uses: actions/cache@v1.1.0
       with:
