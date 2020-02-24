@@ -151,7 +151,6 @@ jobs:
         # Create variable that job succeded
         # if it does not exist then the job failed and artifact will be uploaded
         echo ::set-output name=status::success
-        
     - name: On fail, compress SVT-AV1 (master)
       if: steps.binary_compare.outputs.status != 'success'
       run: tar czf ./svtav1-master.tar.gz $HOME/master/Bin/Release/*
