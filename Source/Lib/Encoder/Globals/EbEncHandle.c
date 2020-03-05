@@ -3700,9 +3700,11 @@ void eb_input_buffer_header_destroyer(    EbPtr p)
 {
     EbBufferHeaderType *obj = (EbBufferHeaderType*)p;
     EbPictureBufferDesc* buf = (EbPictureBufferDesc*)obj->p_buffer;
-    EB_FREE_ALIGNED_ARRAY(buf->buffer_bit_inc_y);
-    EB_FREE_ALIGNED_ARRAY(buf->buffer_bit_inc_cb);
-    EB_FREE_ALIGNED_ARRAY(buf->buffer_bit_inc_cr);
+    if (buf) {
+        EB_FREE_ALIGNED_ARRAY(buf->buffer_bit_inc_y);
+        EB_FREE_ALIGNED_ARRAY(buf->buffer_bit_inc_cb);
+        EB_FREE_ALIGNED_ARRAY(buf->buffer_bit_inc_cr);
+    }
 
     EB_DELETE(buf);
     EB_FREE(obj);
