@@ -118,21 +118,24 @@ EbErrorType copy_configuration_parameters(EbConfig *config, EbAppContext *callba
     callback_data->eb_enc_parameters.output_stat_file     = config->output_stat_file;
     callback_data->eb_enc_parameters.stat_report          = (EbBool)config->stat_report;
     callback_data->eb_enc_parameters.disable_dlf_flag     = (EbBool)config->disable_dlf_flag;
-    callback_data->eb_enc_parameters.enable_warped_motion = (EbBool)config->enable_warped_motion;
+    callback_data->eb_enc_parameters.enable_warped_motion = config->enable_warped_motion;
     callback_data->eb_enc_parameters.enable_global_motion = (EbBool)config->enable_global_motion;
-    callback_data->eb_enc_parameters.enable_restoration_filtering =
-        config->enable_restoration_filtering;
+    callback_data->eb_enc_parameters.cdef_mode                = config->cdef_mode;
+    callback_data->eb_enc_parameters.enable_restoration_filtering = config->enable_restoration_filtering;
+    callback_data->eb_enc_parameters.sg_filter_mode           = config->sg_filter_mode;
+    callback_data->eb_enc_parameters.wn_filter_mode           = config->wn_filter_mode;
     callback_data->eb_enc_parameters.combine_class_12         = config->combine_class_12;
     callback_data->eb_enc_parameters.edge_skp_angle_intra     = config->edge_skp_angle_intra;
+    callback_data->eb_enc_parameters.intra_angle_delta        = config->intra_angle_delta;
     callback_data->eb_enc_parameters.inter_intra_compound     = config->inter_intra_compound;
+    callback_data->eb_enc_parameters.enable_paeth             = config->enable_paeth;
+    callback_data->eb_enc_parameters.enable_smooth            = config->enable_smooth;
     callback_data->eb_enc_parameters.enable_mfmv              = config->enable_mfmv;
     callback_data->eb_enc_parameters.enable_redundant_blk     = config->enable_redundant_blk;
-    callback_data->eb_enc_parameters.enable_trellis           = config->enable_trellis;
     callback_data->eb_enc_parameters.spatial_sse_fl           = config->spatial_sse_fl;
     callback_data->eb_enc_parameters.enable_subpel            = config->enable_subpel;
     callback_data->eb_enc_parameters.over_bndry_blk           = config->over_bndry_blk;
     callback_data->eb_enc_parameters.new_nearest_comb_inject  = config->new_nearest_comb_inject;
-    callback_data->eb_enc_parameters.nx4_4xn_parent_mv_inject = config->nx4_4xn_parent_mv_inject;
     callback_data->eb_enc_parameters.prune_unipred_me         = config->prune_unipred_me;
     callback_data->eb_enc_parameters.prune_ref_rec_part       = config->prune_ref_rec_part;
     callback_data->eb_enc_parameters.nsq_table                = config->nsq_table;
@@ -143,7 +146,9 @@ EbErrorType copy_configuration_parameters(EbConfig *config, EbAppContext *callba
     callback_data->eb_enc_parameters.bipred_3x3_inject        = config->bipred_3x3_inject;
     callback_data->eb_enc_parameters.compound_level           = config->compound_level;
     callback_data->eb_enc_parameters.set_chroma_mode          = config->set_chroma_mode;
+    callback_data->eb_enc_parameters.disable_cfl_flag         = config->disable_cfl_flag;
     callback_data->eb_enc_parameters.enable_filter_intra      = (EbBool)config->enable_filter_intra;
+    callback_data->eb_enc_parameters.enable_intra_edge_filter = config->enable_intra_edge_filter;
     callback_data->eb_enc_parameters.use_default_me_hme       = (EbBool)config->use_default_me_hme;
     callback_data->eb_enc_parameters.enable_hme_flag          = (EbBool)config->enable_hme_flag;
     callback_data->eb_enc_parameters.enable_hme_level0_flag =
@@ -163,6 +168,7 @@ EbErrorType copy_configuration_parameters(EbConfig *config, EbAppContext *callba
     callback_data->eb_enc_parameters.hme_level0_total_search_area_height =
         config->hme_level0_total_search_area_height;
     callback_data->eb_enc_parameters.screen_content_mode = (EbBool)config->screen_content_mode;
+    callback_data->eb_enc_parameters.intrabc_mode = config->intrabc_mode;
     callback_data->eb_enc_parameters.enable_hbd_mode_decision =
         (EbBool)config->enable_hbd_mode_decision;
     callback_data->eb_enc_parameters.enable_palette           = config->enable_palette;
@@ -224,10 +230,10 @@ EbErrorType copy_configuration_parameters(EbConfig *config, EbAppContext *callba
 
     callback_data->eb_enc_parameters.sq_weight                 = config->sq_weight;
 
-    callback_data->eb_enc_parameters.md_fast_cost_cand_prune_th  = config->md_fast_cost_cand_prune_th;
-    callback_data->eb_enc_parameters.md_fast_cost_class_prune_th = config->md_fast_cost_class_prune_th;
-    callback_data->eb_enc_parameters.md_full_cost_cand_prune_th  = config->md_full_cost_cand_prune_th;
-    callback_data->eb_enc_parameters.md_full_cost_class_prune_th = config->md_full_cost_class_prune_th;
+    callback_data->eb_enc_parameters.md_stage_1_cand_prune_th  = config->md_stage_1_cand_prune_th;
+    callback_data->eb_enc_parameters.md_stage_1_class_prune_th = config->md_stage_1_class_prune_th;
+    callback_data->eb_enc_parameters.md_stage_2_3_cand_prune_th  = config->md_stage_2_3_cand_prune_th;
+    callback_data->eb_enc_parameters.md_stage_2_3_class_prune_th = config->md_stage_2_3_class_prune_th;
 
     // Prediction Structure
     callback_data->eb_enc_parameters.enable_manual_pred_struct    = config->enable_manual_pred_struct;

@@ -1187,9 +1187,9 @@ void eb_av1_convolve_x_sr_avx2(const uint8_t *src, int32_t src_stride, uint8_t *
     } else {
         __m256i filt_256[4];
 
-        filt_256[0] = _mm256_load_si256((__m256i const *)filt1_global_avx);
-        filt_256[1] = _mm256_load_si256((__m256i const *)filt2_global_avx);
-        filt_256[2] = _mm256_load_si256((__m256i const *)filt3_global_avx);
+        filt_256[0] = _mm256_loadu_si256((__m256i const *)filt1_global_avx);
+        filt_256[1] = _mm256_loadu_si256((__m256i const *)filt2_global_avx);
+        filt_256[2] = _mm256_loadu_si256((__m256i const *)filt3_global_avx);
 
         if (is_convolve_6tap(filter_params_x->filter_ptr)) {
             // horz_filt as 6 tap
@@ -1245,7 +1245,7 @@ void eb_av1_convolve_x_sr_avx2(const uint8_t *src, int32_t src_stride, uint8_t *
             // horz_filt as 8 tap
             const uint8_t *src_ptr = src - 3;
 
-            filt_256[3] = _mm256_load_si256((__m256i const *)filt4_global_avx);
+            filt_256[3] = _mm256_loadu_si256((__m256i const *)filt4_global_avx);
 
             prepare_half_coeffs_8tap_avx2(filter_params_x, subpel_x_q4, coeffs_256);
 
@@ -1299,7 +1299,7 @@ void eb_av1_convolve_x_sr_avx2(const uint8_t *src, int32_t src_stride, uint8_t *
 
 // Loads and stores to do away with the tedium of casting the address
 // to the right type.
-static INLINE __m128i xx_load_128(const void *a) { return _mm_load_si128((const __m128i *)a); }
+static INLINE __m128i xx_load_128(const void *a) { return _mm_loadu_si128((const __m128i *)a); }
 
 static INLINE __m256i calc_mask_avx2(const __m256i mask_base, const __m256i s0, const __m256i s1) {
     const __m256i diff = _mm256_abs_epi16(_mm256_sub_epi16(s0, s1));

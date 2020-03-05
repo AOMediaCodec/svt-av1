@@ -216,7 +216,7 @@ typedef struct EbConfig {
     /****************************************
      * Local Warped Motion
      ****************************************/
-    EbBool enable_warped_motion;
+    int enable_warped_motion;
 
     /****************************************
      * Global Motion
@@ -224,9 +224,22 @@ typedef struct EbConfig {
     EbBool enable_global_motion;
 
     /****************************************
+     * CDEF Mode
+     * 0         OFF
+     * 1         1 step refinement
+     * 2         4 step refinement
+     * 3         8 step refinement
+     * 4         16 step refinement
+     * 5         64 step refinement
+    ****************************************/
+    int cdef_mode;
+
+    /****************************************
      * Restoration filtering
     ****************************************/
     int enable_restoration_filtering;
+    int sg_filter_mode;
+    int wn_filter_mode;
 
     /****************************************
      * class12
@@ -237,9 +250,21 @@ typedef struct EbConfig {
     ****************************************/
     int edge_skp_angle_intra;
     /****************************************
+     * intra angle delta
+    ****************************************/
+    int intra_angle_delta;
+    /****************************************
      * intra inter compoound
     ****************************************/
     int inter_intra_compound;
+    /****************************************
+     * paeth
+    ****************************************/
+    int enable_paeth;
+    /****************************************
+     * smooth
+    ****************************************/
+    int enable_smooth;
     /****************************************
      * motion field motion vector
     ****************************************/
@@ -248,10 +273,6 @@ typedef struct EbConfig {
      * redundant block
     ****************************************/
     int enable_redundant_blk;
-    /****************************************
-      * trellis quant coeff optimization
-     ****************************************/
-    int enable_trellis;
     /****************************************
       * spatial sse in full loop
      ****************************************/
@@ -268,10 +289,6 @@ typedef struct EbConfig {
       * new nearest comb injection
      ****************************************/
     int new_nearest_comb_inject;
-    /****************************************
-      * nx4 4xn parent motion vector injection
-     ****************************************/
-    int nx4_4xn_parent_mv_inject;
     /****************************************
       * prune unipred at me
      ****************************************/
@@ -313,6 +330,11 @@ typedef struct EbConfig {
      * Default is -1 (AUTO)  */
     int set_chroma_mode;
 
+    /* Disable chroma from luma (CFL)
+     *
+     * Default is -1 (auto) */
+    int disable_cfl_flag;
+
     /****************************************
      * OBMC
      ****************************************/
@@ -327,6 +349,12 @@ typedef struct EbConfig {
      * Filter intra prediction
      ****************************************/
     EbBool enable_filter_intra;
+
+    /****************************************
+     * Intra Edge Filter
+     ****************************************/
+    int enable_intra_edge_filter;
+
     /****************************************
      * ME Tools
      ****************************************/
@@ -390,6 +418,7 @@ typedef struct EbConfig {
      ****************************************/
 
     uint32_t screen_content_mode;
+    int intrabc_mode;
     uint32_t high_dynamic_range_input;
     EbBool   unrestricted_motion_vector;
 
@@ -453,10 +482,10 @@ typedef struct EbConfig {
     uint32_t sq_weight;
 
     // inter/intra class pruning costs before MD stage 1/2
-    uint64_t md_fast_cost_class_prune_th;
-    uint64_t md_fast_cost_cand_prune_th;
-    uint64_t md_full_cost_class_prune_th;
-    uint64_t md_full_cost_cand_prune_th;
+    uint64_t md_stage_1_class_prune_th;
+    uint64_t md_stage_1_cand_prune_th;
+    uint64_t md_stage_2_3_class_prune_th;
+    uint64_t md_stage_2_3_cand_prune_th;
 
     // prediction structure
     PredictionStructureConfigEntry pred_struct[1 << (MAX_HIERARCHICAL_LEVEL - 1)];

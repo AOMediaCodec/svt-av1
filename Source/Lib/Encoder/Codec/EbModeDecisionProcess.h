@@ -24,19 +24,27 @@ extern "C" {
 /**************************************
      * Defines
      **************************************/
+#if INFR_OPT
+#define MODE_DECISION_CANDIDATE_MAX_COUNT_Y 1855
+#define MODE_DECISION_CANDIDATE_MAX_COUNT \
+    (MODE_DECISION_CANDIDATE_MAX_COUNT_Y + 84)
+#else
 #define MODE_DECISION_CANDIDATE_MAX_COUNT 1855
+#endif
 #define DEPTH_ONE_STEP 21
 #define DEPTH_TWO_STEP 5
 #define DEPTH_THREE_STEP 1
-#define PREDICTIVE_ME_MAX_MVP_CANIDATES 4
-#define PREDICTIVE_ME_DEVIATION_TH 50
-#define FULL_PEL_REF_WINDOW_WIDTH 7
-#define FULL_PEL_REF_WINDOW_HEIGHT 5
-#define HALF_PEL_REF_WINDOW 3
-#define QUARTER_PEL_REF_WINDOW 3
-#define FULL_PEL_REF_WINDOW_WIDTH_EXTENDED 15
-#define FULL_PEL_REF_WINDOW_HEIGHT_EXTENDED 15
-#define EIGHT_PEL_REF_WINDOW 3
+#define PRED_ME_MAX_MVP_CANIDATES 4
+#define PRED_ME_DEVIATION_TH 50
+#define PRED_ME_FULL_PEL_SEARCH_WIDTH 7
+#define PRED_ME_FULL_PEL_SEARCH_HEIGHT 5
+#define PRED_ME_FULL_PEL_SEARCH_WIDTH_EXTENDED 15
+#define PRED_ME_FULL_PEL_SEARCH_HEIGHT_EXTENDED 15
+#define PRED_ME_HALF_PEL_REF_WINDOW 3
+#define PRED_ME_QUARTER_PEL_REF_WINDOW 3
+#define PRED_ME_EIGHT_PEL_REF_WINDOW 3
+
+#define REFINE_ME_MV_EIGHT_PEL_REF_WINDOW 3
 
 /**************************************
       * Macros
@@ -157,11 +165,16 @@ typedef struct ModeDecisionContext {
     // Lambda
     uint16_t qp;
     uint8_t  chroma_qp;
+#if NEW_MD_LAMBDA
+    uint32_t fast_lambda_md[2];
+    uint32_t full_lambda_md[2];
+#else
     uint32_t fast_lambda;
     uint32_t full_lambda;
     uint32_t fast_chroma_lambda;
     uint32_t full_chroma_lambda;
     uint32_t full_chroma_lambda_sao;
+#endif
 
     //  Context Variables---------------------------------
     SuperBlock *     sb_ptr;
@@ -255,7 +268,9 @@ typedef struct ModeDecisionContext {
     uint8_t              parent_sq_has_coeff[MAX_PARENT_SQ];
     uint8_t              parent_sq_pred_mode[MAX_PARENT_SQ];
     uint8_t              chroma_level;
-    Part                 nsq_table[NSQ_TAB_SIZE];
+#if MOVE_OPT
+    uint8_t              chroma_at_last_md_stage;
+#endif
     uint8_t              full_loop_escape;
     uint8_t              global_mv_injection;
 #if ENHANCED_ME_MV
@@ -271,6 +286,9 @@ typedef struct ModeDecisionContext {
     uint8_t              predictive_me_level;
     uint8_t              interpolation_filter_search_blk_size;
     uint8_t              redundant_blk;
+#if NICS_CLEANUP
+    uint8_t              nic_level;
+#endif
 #if COMP_SIMILAR
     uint8_t              similar_blk_avail;
     uint16_t             similar_blk_mds;
@@ -284,7 +302,7 @@ typedef struct ModeDecisionContext {
     uint16_t *           cfl_temp_luma_recon16bit;
     EbBool               spatial_sse_full_loop;
     EbBool               blk_skip_decision;
-    EbBool               trellis_quant_coeff_optimization;
+    EbBool               enable_rdoq;
 #if ENHANCED_ME_MV
     int16_t              sb_me_mv[BLOCK_MAX_COUNT_SB_128][2][4][2];
 #endif
@@ -313,7 +331,9 @@ typedef struct ModeDecisionContext {
     uint32_t md_stage_1_total_count;
     uint32_t md_stage_2_total_count;
     uint32_t md_stage_3_total_count;
-
+#if COMP_OPT
+    uint32_t md_stage_3_total_intra_count;
+#endif
     uint8_t combine_class12; // 1:class1 and 2 are combined.
 
     CandClass target_class;
@@ -341,10 +361,10 @@ typedef struct ModeDecisionContext {
     unsigned int source_variance; // input block variance
     unsigned int inter_inter_wedge_variance_th;
     uint64_t     md_exit_th;
-    uint64_t     md_fast_cost_cand_prune_th;
-    uint64_t     md_fast_cost_class_prune_th;
-    uint64_t     md_full_cost_cand_prune_th;
-    uint64_t     md_full_cost_class_prune_th;
+    uint64_t     md_stage_1_cand_prune_th;
+    uint64_t     md_stage_1_class_prune_th;
+    uint64_t     md_stage_2_3_cand_prune_th;
+    uint64_t     md_stage_2_3_class_prune_th;
     DECLARE_ALIGNED(16, uint8_t, obmc_buff_0[2 * 2 * MAX_MB_PLANE * MAX_SB_SQUARE]);
     DECLARE_ALIGNED(16, uint8_t, obmc_buff_1[2 * 2 * MAX_MB_PLANE * MAX_SB_SQUARE]);
     DECLARE_ALIGNED(16, uint8_t, obmc_buff_0_8b[2 * MAX_MB_PLANE * MAX_SB_SQUARE]);
@@ -368,15 +388,17 @@ typedef struct ModeDecisionContext {
     uint64_t     tx_weight;
     uint8_t      tx_search_reduced_set;
     uint8_t      interpolation_search_level;
-    EbBool       rdoq_quantize_fp;
     uint8_t      md_tx_size_search_mode;
     uint8_t      md_pic_obmc_mode;
+    uint8_t      md_enable_paeth;
+    uint8_t      md_enable_smooth;
     uint8_t      md_enable_inter_intra;
     uint8_t      md_filter_intra_mode;
+    uint8_t      md_intra_angle_delta;
     uint8_t      md_max_ref_count;
     EbBool       md_skip_mvp_generation;
-    int16_t      full_pel_ref_window_width_th;
-    int16_t      full_pel_ref_window_height_th;
+    int16_t      pred_me_full_pel_search_width;
+    int16_t      pred_me_full_pel_search_height;
 
     // Signal to control initial and final pass PD setting(s)
     PdPass pd_pass;
@@ -384,9 +406,15 @@ typedef struct ModeDecisionContext {
 } ModeDecisionContext;
 
 typedef void (*EbAv1LambdaAssignFunc)(uint32_t *fast_lambda, uint32_t *full_lambda,
+#if !NEW_MD_LAMBDA
                                       uint32_t *fast_chroma_lambda, uint32_t *full_chroma_lambda,
+#endif
                                       uint8_t bit_depth, uint16_t qp_index,
+#if OMARK_LAMBDA
+                                      EbBool multiply_lambda);
+#else
                                       EbBool hbd_mode_decision);
+#endif
 
 typedef void (*EbLambdaAssignFunc)(uint32_t *fast_lambda, uint32_t *full_lambda,
                                    uint32_t *fast_chroma_lambda, uint32_t *full_chroma_lambda,

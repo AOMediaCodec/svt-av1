@@ -426,20 +426,20 @@ void set_reference_cdef_strength(PictureControlSet *pcs_ptr) {
     switch (pcs_ptr->slice_type) {
     case I_SLICE:
         pcs_ptr->parent_pcs_ptr->use_ref_frame_cdef_strength = 0;
-        pcs_ptr->parent_pcs_ptr->cdf_ref_frame_strenght      = 0;
+        pcs_ptr->parent_pcs_ptr->cdf_ref_frame_strength      = 0;
         break;
     case B_SLICE:
         ref_obj_l0 = (EbReferenceObject *)pcs_ptr->ref_pic_ptr_array[REF_LIST_0][0]->object_ptr;
         ref_obj_l1 = (EbReferenceObject *)pcs_ptr->ref_pic_ptr_array[REF_LIST_1][0]->object_ptr;
         strength   = (ref_obj_l0->cdef_frame_strength + ref_obj_l1->cdef_frame_strength) / 2;
         pcs_ptr->parent_pcs_ptr->use_ref_frame_cdef_strength = 1;
-        pcs_ptr->parent_pcs_ptr->cdf_ref_frame_strenght      = strength;
+        pcs_ptr->parent_pcs_ptr->cdf_ref_frame_strength      = strength;
         break;
     case P_SLICE:
         ref_obj_l0 = (EbReferenceObject *)pcs_ptr->ref_pic_ptr_array[REF_LIST_0][0]->object_ptr;
         strength   = ref_obj_l0->cdef_frame_strength;
         pcs_ptr->parent_pcs_ptr->use_ref_frame_cdef_strength = 1;
-        pcs_ptr->parent_pcs_ptr->cdf_ref_frame_strenght      = strength;
+        pcs_ptr->parent_pcs_ptr->cdf_ref_frame_strength      = strength;
         break;
     default: SVT_LOG("CDEF: Not supported picture type"); break;
     }
@@ -663,23 +663,6 @@ void sb_forward_sq_blocks_to_md(SequenceControlSet *scs_ptr, PictureControlSet *
     pcs_ptr->parent_pcs_ptr->average_qp = (uint8_t)pcs_ptr->parent_pcs_ptr->picture_qp;
 }
 
-/******************************************************
-* Derive MD parameters
-******************************************************/
-void set_md_settings(SequenceControlSet *scs_ptr, PictureControlSet *pcs_ptr) {
-    // Initialize the homogeneous area threshold
-    // Set the MD Open Loop Flag
-    // HG - to clean up the intra_md_open_loop_flag derivation
-
-    pcs_ptr->intra_md_open_loop_flag = pcs_ptr->temporal_layer_index == 0 ? EB_FALSE : EB_TRUE;
-
-    if (pcs_ptr->parent_pcs_ptr->is_used_as_reference_flag == EB_TRUE &&
-        scs_ptr->input_resolution < INPUT_SIZE_4K_RANGE)
-        pcs_ptr->intra_md_open_loop_flag = EB_FALSE;
-
-    pcs_ptr->limit_intra             = EB_FALSE;
-    pcs_ptr->intra_md_open_loop_flag = EB_FALSE;
-}
 /******************************************************
 * Load the cost of the different partitioning method into a local array and derive sensitive picture flag
     Input   : the offline derived cost per search method, detection signals
@@ -1091,6 +1074,10 @@ EbErrorType signal_derivation_mode_decision_config_kernel_oq(
                       pcs_ptr->parent_pcs_ptr->temporal_layer_index == 0))
                         ? EB_TRUE
                         : EB_FALSE;
+
+    if (pcs_ptr->parent_pcs_ptr->scs_ptr->static_config.enable_warped_motion != DEFAULT)
+        enable_wm = (EbBool)pcs_ptr->parent_pcs_ptr->scs_ptr->static_config.enable_warped_motion;
+
     frm_hdr->allow_warped_motion =
         enable_wm &&
         !(frm_hdr->frame_type == KEY_FRAME || frm_hdr->frame_type == INTRA_ONLY_FRAME) &&
@@ -1124,6 +1111,9 @@ EbErrorType signal_derivation_mode_decision_config_kernel_oq(
     frm_hdr->is_motion_mode_switchable =
         frm_hdr->is_motion_mode_switchable || pcs_ptr->parent_pcs_ptr->pic_obmc_mode;
 
+#if PICT_SWITCH
+    pcs_ptr->hbd_mode_decision = scs_ptr->static_config.enable_hbd_mode_decision;
+#endif
     return return_error;
 }
 
@@ -1458,9 +1448,35 @@ void av1_setup_motion_field(Av1Common *cm, PictureControlSet *pcs_ptr) {
 
     if (ref_stamp >= 0) motion_field_projection(cm, pcs_ptr, LAST2_FRAME, 2);
 }
-/******************************************************
- * Mode Decision Configuration Kernel
- ******************************************************/
+
+/* Mode Decision Configuration Kernel */
+
+/*********************************************************************************
+*
+* @brief
+*  The Mode Decision Configuration Process involves a number of initialization steps,
+*  setting flags for a number of features, and determining the blocks to be considered
+*  in subsequent MD stages.
+*
+* @par Description:
+*  The Mode Decision Configuration Process involves a number of initialization steps,
+*  setting flags for a number of features, and determining the blocks to be considered
+*  in subsequent MD stages. Examples of flags that are set are the flags for filter intra,
+*  eighth-pel, OBMC and warped motion and flags for updating the cumulative density functions
+*  Examples of initializations include initializations for picture chroma QP offsets,
+*  CDEF strength, self-guided restoration filter parameters, quantization parameters,
+*  lambda arrays, mv and coefficient rate estimation arrays.
+*
+*  The set of blocks to be processed in subsequent MD stages is decided in this process as a
+*  function of the picture depth mode (pic_depth_mode).
+*
+* @param[in] Configurations
+*  Configuration flags that are to be set
+*
+* @param[out] Initializations
+*  Initializations for various flags and variables
+*
+********************************************************************************/
 void *mode_decision_configuration_kernel(void *input_ptr) {
     // Context & SCS & PCS
     EbThreadContext *                 thread_context_ptr = (EbThreadContext *)input_ptr;
@@ -1511,7 +1527,34 @@ void *mode_decision_configuration_kernel(void *input_ptr) {
         set_global_motion_field(pcs_ptr);
 
         eb_av1_qm_init(pcs_ptr->parent_pcs_ptr);
+#if QUANT_CLEANUP
+        Quants *const quants_bd = &pcs_ptr->parent_pcs_ptr->quants_bd;
+        Dequants *const deq_bd = &pcs_ptr->parent_pcs_ptr->deq_bd;
+        eb_av1_set_quantizer(
+            pcs_ptr->parent_pcs_ptr,
+            frm_hdr->quantization_params.base_q_idx);
+        eb_av1_build_quantizer(
+            (AomBitDepth)scs_ptr->static_config.encoder_bit_depth,
+            frm_hdr->quantization_params.delta_q_dc[AOM_PLANE_Y],
+            frm_hdr->quantization_params.delta_q_dc[AOM_PLANE_U],
+            frm_hdr->quantization_params.delta_q_ac[AOM_PLANE_U],
+            frm_hdr->quantization_params.delta_q_dc[AOM_PLANE_V],
+            frm_hdr->quantization_params.delta_q_ac[AOM_PLANE_V],
+            quants_bd,
+            deq_bd);
 
+        Quants *const quants_8bit = &pcs_ptr->parent_pcs_ptr->quants_8bit;
+        Dequants *const deq_8bit = &pcs_ptr->parent_pcs_ptr->deq_8bit;
+        eb_av1_build_quantizer(
+            AOM_BITS_8,
+            frm_hdr->quantization_params.delta_q_dc[AOM_PLANE_Y],
+            frm_hdr->quantization_params.delta_q_dc[AOM_PLANE_U],
+            frm_hdr->quantization_params.delta_q_ac[AOM_PLANE_U],
+            frm_hdr->quantization_params.delta_q_dc[AOM_PLANE_V],
+            frm_hdr->quantization_params.delta_q_ac[AOM_PLANE_V],
+            quants_8bit,
+            deq_8bit);
+#else
         Quants *const   quants   = &pcs_ptr->parent_pcs_ptr->quants;
         Dequants *const dequants = &pcs_ptr->parent_pcs_ptr->deq;
 
@@ -1536,6 +1579,7 @@ void *mode_decision_configuration_kernel(void *input_ptr) {
                                frm_hdr->quantization_params.delta_q_ac[AOM_PLANE_V],
                                quants_md,
                                dequants_md);
+#endif
 
         // Hsan: collapse spare code
         MdRateEstimationContext *md_rate_estimation_array;
@@ -1553,11 +1597,17 @@ void *mode_decision_configuration_kernel(void *input_ptr) {
         (*av1_lambda_assignment_function_table[pcs_ptr->parent_pcs_ptr->pred_structure])(
             &lambdasad_,
             &lambda_sse,
+#if !NEW_MD_LAMBDA
             &lambdasad_,
             &lambda_sse,
+#endif
             (uint8_t)pcs_ptr->parent_pcs_ptr->enhanced_picture_ptr->bit_depth,
             context_ptr->qp_index,
+#if OMARK_LAMBDA
+            EB_TRUE);
+#else
             pcs_ptr->hbd_mode_decision);
+#endif
         context_ptr->lambda      = (uint64_t)lambdasad_;
         md_rate_estimation_array = pcs_ptr->md_rate_estimation_array;
         // Reset MD rate Estimation table to initial values by copying from md_rate_estimation_array
@@ -1769,11 +1819,6 @@ void *mode_decision_configuration_kernel(void *input_ptr) {
             eb_av1_init3smotion_compensation(
                 &pcs_ptr->ss_cfg, pcs_ptr->parent_pcs_ptr->enhanced_picture_ptr->stride_y);
         }
-
-        // Derive MD parameters
-        set_md_settings( // HT Done
-            scs_ptr,
-            pcs_ptr);
 
         // Post the results to the MD processes
 #if TILES_PARALLEL

@@ -462,8 +462,6 @@ typedef struct PictureControlSet {
     EbBool adjust_min_qp_flag;
 
     EbEncMode enc_mode;
-    EbBool    intra_md_open_loop_flag;
-    EbBool    limit_intra;
 #if TILES_PARALLEL
     int32_t     cdef_preset[MAX_TILE_CNTS][4];
     WienerInfo  wiener_info[MAX_TILE_CNTS][MAX_MB_PLANE];
@@ -768,10 +766,17 @@ typedef struct PictureParentControlSet {
     // Global quant matrix tables
     const QmVal *giqmatrix[NUM_QM_LEVELS][3][TX_SIZES_ALL];
     const QmVal *gqmatrix[NUM_QM_LEVELS][3][TX_SIZES_ALL];
+#if QUANT_CLEANUP
+    Quants quants_bd; // follows input bit depth
+    Dequants deq_bd;  // follows input bit depth
+    Quants quants_8bit;  // 8bit
+    Dequants deq_8bit; // 8bit
+#else
     Quants       quants;
     Dequants     deq;
     Quants       quants_md;
     Dequants     deq_md;
+#endif
     int32_t      min_qmlevel;
     int32_t      max_qmlevel;
     // Encoder
@@ -835,7 +840,7 @@ typedef struct PictureParentControlSet {
     RestUnitSearchInfo *rusi_picture[3]; //for 3 planes
     int8_t              cdef_filter_mode;
     int32_t             cdef_frame_strength;
-    int32_t             cdf_ref_frame_strenght;
+    int32_t             cdf_ref_frame_strength;
     int32_t             use_ref_frame_cdef_strength;
     uint8_t             nsq_search_level;
     uint8_t             palette_mode;

@@ -926,21 +926,25 @@ EbErrorType signal_derivation_multi_processes_oq(
     //TODO: we can force all frames in GOP with the same detection status of leading I frame.
     if (pcs_ptr->slice_type == I_SLICE) {
         frm_hdr->allow_screen_content_tools = pcs_ptr->sc_content_detected;
-        if (pcs_ptr->enc_mode <= ENC_M5)
-            frm_hdr->allow_intrabc =  pcs_ptr->sc_content_detected;
-        else
-            frm_hdr->allow_intrabc =  0;
-
-        //IBC Modes:   0:Slow   1:Fast   2:Faster
-        if (pcs_ptr->enc_mode <= ENC_M5)
-            pcs_ptr->ibc_mode = 0;
-        else
-            pcs_ptr->ibc_mode = 1;
+        if (scs_ptr->static_config.intrabc_mode == DEFAULT) {
+            //IBC Modes:   0: OFF 1:Slow   2:Faster   3:Fastest
+            if (pcs_ptr->enc_mode <= ENC_M5) {
+                frm_hdr->allow_intrabc =  pcs_ptr->sc_content_detected;
+                pcs_ptr->ibc_mode = 1; // Slow
+            } else {
+                frm_hdr->allow_intrabc =  0;
+                pcs_ptr->ibc_mode = 2; // Faster
+            }
+        } else {
+            frm_hdr->allow_intrabc =  (uint8_t)(scs_ptr->static_config.intrabc_mode > 0);
+            pcs_ptr->ibc_mode = (uint8_t)scs_ptr->static_config.intrabc_mode;
+        }
     }
     else {
         //this will enable sc tools for P frames. hence change Bitstream even if palette mode is OFF
         frm_hdr->allow_screen_content_tools = pcs_ptr->sc_content_detected;
         frm_hdr->allow_intrabc = 0;
+        pcs_ptr->ibc_mode = 0; // OFF
     }
 
    /*Palette Modes:
@@ -979,6 +983,7 @@ EbErrorType signal_derivation_multi_processes_oq(
     }
     else
         pcs_ptr->loop_filter_mode = 0;
+
     // CDEF Level                                   Settings
     // 0                                            OFF
     // 1                                            1 step refinement
@@ -987,16 +992,19 @@ EbErrorType signal_derivation_multi_processes_oq(
     // 4                                            16 step refinement
     // 5                                            64 step refinement
     if (scs_ptr->seq_header.enable_cdef && frm_hdr->allow_intrabc == 0) {
-        if (sc_content_detected)
-            if (pcs_ptr->enc_mode <= ENC_M5)
-                pcs_ptr->cdef_filter_mode = 4;
+        if (scs_ptr->static_config.cdef_mode == DEFAULT) {
+            if (sc_content_detected)
+                if (pcs_ptr->enc_mode <= ENC_M5)
+                    pcs_ptr->cdef_filter_mode = 4;
+                else
+                    pcs_ptr->cdef_filter_mode = 0;
             else
-                pcs_ptr->cdef_filter_mode = 0;
-        else
-        if (pcs_ptr->enc_mode <= ENC_M7)
-            pcs_ptr->cdef_filter_mode = 5;
-        else
-            pcs_ptr->cdef_filter_mode = 2;
+                if (pcs_ptr->enc_mode <= ENC_M7)
+                    pcs_ptr->cdef_filter_mode = 5;
+                else
+                    pcs_ptr->cdef_filter_mode = 2;
+        } else
+            pcs_ptr->cdef_filter_mode = (int8_t)(scs_ptr->static_config.cdef_mode);
     }
     else
         pcs_ptr->cdef_filter_mode = 0;
@@ -1009,18 +1017,21 @@ EbErrorType signal_derivation_multi_processes_oq(
     // 4                                            16 step refinement
 
     Av1Common* cm = pcs_ptr->av1_cm;
-    if (sc_content_detected)
-        if (pcs_ptr->enc_mode <= ENC_M5)
+    if (scs_ptr->static_config.sg_filter_mode == DEFAULT) {
+        if (sc_content_detected)
+            if (pcs_ptr->enc_mode <= ENC_M5)
+                cm->sg_filter_mode = 4;
+            else
+                cm->sg_filter_mode = 0;
+        else if (pcs_ptr->enc_mode <= ENC_M2)
             cm->sg_filter_mode = 4;
+        else if (pcs_ptr->enc_mode <= ENC_M6)
+            cm->sg_filter_mode = 3;
         else
-            cm->sg_filter_mode = 0;
+            cm->sg_filter_mode = 1;
+    }
     else
-        if (pcs_ptr->enc_mode <= ENC_M2)
-        cm->sg_filter_mode = 4;
-    else if (pcs_ptr->enc_mode <= ENC_M6)
-        cm->sg_filter_mode = 3;
-    else
-        cm->sg_filter_mode = 1;
+        cm->sg_filter_mode = scs_ptr->static_config.sg_filter_mode;
 
     // WN Level                                     Settings
     // 0                                            OFF
@@ -1028,19 +1039,22 @@ EbErrorType signal_derivation_multi_processes_oq(
     // 2                                            5-Tap luma/ 5-Tap chroma
     // 3                                            7-Tap luma/ 5-Tap chroma
 
-    if (sc_content_detected)
-        if (pcs_ptr->enc_mode <= ENC_M5)
+    if (scs_ptr->static_config.wn_filter_mode == DEFAULT) {
+        if (sc_content_detected)
+            if (pcs_ptr->enc_mode <= ENC_M5)
+                cm->wn_filter_mode = 3;
+            else
+                cm->wn_filter_mode = 0;
+        else if (pcs_ptr->enc_mode <= ENC_M5)
             cm->wn_filter_mode = 3;
+        else if (pcs_ptr->enc_mode <= ENC_M7)
+            cm->wn_filter_mode = 2;
         else
             cm->wn_filter_mode = 0;
+    }
     else
+        cm->wn_filter_mode = scs_ptr->static_config.wn_filter_mode;
 
-    if (pcs_ptr->enc_mode <= ENC_M5)
-        cm->wn_filter_mode = 3;
-    else if (pcs_ptr->enc_mode <= ENC_M7)
-        cm->wn_filter_mode = 2;
-    else
-        cm->wn_filter_mode = 0;
     // Intra prediction modes                       Settings
     // 0                                            FULL
     // 1                                            LIGHT per block : disable_z2_prediction && disable_angle_refinement  for 64/32/4
@@ -2486,6 +2500,803 @@ static void  av1_generate_rps_info(
             //Layer1 toggle 3->4
             context_ptr->lay1_toggle = 1 - context_ptr->lay1_toggle;
         }
+#if MRP_31B_SUPPORT
+    } else if (pcs_ptr->hierarchical_levels == 5) {
+        uint8_t gop_i;
+        if (frm_hdr->frame_type == KEY_FRAME) {
+            set_key_frame_rps(pcs_ptr, context_ptr);
+            return;
+        }
+        //DPB: Loc7|Loc6|Loc5|Loc4|Loc3|Loc2|Loc1|Loc0
+        //Layer 0 : circular move 0-1
+        //Layer 1 : circular move 2-3
+        //Layer 2 : DPB Location 4
+        //Layer 3 : DPB Location 5
+        //Layer 4 : DPB Location 6
+        //Layer 5 : DPB Location 7
+
+        const uint8_t  base0_idx = context_ptr->lay0_toggle == 0 ? 1 : context_ptr->lay0_toggle == 1 ? 2 : 0;   //the oldest L0 picture in the DPB
+        const uint8_t  base1_idx = context_ptr->lay0_toggle == 0 ? 2 : context_ptr->lay0_toggle == 1 ? 0 : 1;   //the middle L0 picture in the DPB
+        const uint8_t  base2_idx = context_ptr->lay0_toggle == 0 ? 0 : context_ptr->lay0_toggle == 1 ? 1 : 2;   //the newest L0 picture in the DPB
+
+        const uint8_t  lay1_0_idx = context_ptr->lay1_toggle == 0 ? LAY1_OFF + 1 : LAY1_OFF + 0;   //the oldest L1 picture in the DPB
+        const uint8_t  lay1_1_idx = context_ptr->lay1_toggle == 0 ? LAY1_OFF + 0 : LAY1_OFF + 1;   //the newest L1 picture in the DPB
+        const uint8_t  lay2_idx = LAY2_OFF;   //the oldest L2 picture in the DPB
+        const uint8_t  lay3_idx = LAY3_OFF;    //the newest L3 picture in the DPB
+        const uint8_t  lay4_idx = LAY4_OFF;    //the newest L3 picture in the DPB
+
+        switch (pcs_ptr->temporal_layer_index) {
+        case 0:
+            //{32, 64, 96, 0},      // GOP Index 0 - Ref List 0
+            //{32, 0, 0, 0}       // GOP Index 0 - Ref List 1
+            av1_rps->ref_dpb_index[LAST] = base1_idx;
+            av1_rps->ref_dpb_index[LAST2] = base0_idx;
+            av1_rps->ref_dpb_index[LAST3] = base2_idx;
+            av1_rps->ref_dpb_index[GOLD] = av1_rps->ref_dpb_index[LAST];
+
+            av1_rps->ref_dpb_index[BWD] = base1_idx;
+            av1_rps->ref_dpb_index[ALT2] = av1_rps->ref_dpb_index[BWD];
+            av1_rps->ref_dpb_index[ALT] = av1_rps->ref_dpb_index[BWD];
+
+            gop_i = 0;
+            av1_rps->ref_poc_array[LAST] = get_ref_poc(context_ptr, pcs_ptr->picture_number, six_level_hierarchical_pred_struct[gop_i].ref_list0[0]);
+            av1_rps->ref_poc_array[LAST2] = get_ref_poc(context_ptr, pcs_ptr->picture_number, six_level_hierarchical_pred_struct[gop_i].ref_list0[1]);
+            av1_rps->ref_poc_array[LAST3] = get_ref_poc(context_ptr, pcs_ptr->picture_number, six_level_hierarchical_pred_struct[gop_i].ref_list0[2]);
+            av1_rps->ref_poc_array[GOLD] = av1_rps->ref_poc_array[LAST];
+
+            av1_rps->ref_poc_array[BWD] = get_ref_poc(context_ptr, pcs_ptr->picture_number, six_level_hierarchical_pred_struct[gop_i].ref_list1[0]);
+            av1_rps->ref_poc_array[ALT2] = av1_rps->ref_poc_array[BWD];
+            av1_rps->ref_poc_array[ALT] = av1_rps->ref_poc_array[BWD];
+
+            av1_rps->refresh_frame_mask = 1 << context_ptr->lay0_toggle;
+            break;
+
+        case 1:
+            //{16, 32, 48, 0},   // GOP Index 16 - Ref List 0
+            //{-16, 0, 0, 0}    // GOP Index 16 - Ref List 1
+            av1_rps->ref_dpb_index[LAST] = base1_idx;
+            av1_rps->ref_dpb_index[LAST2] = lay1_0_idx;
+            av1_rps->ref_dpb_index[LAST3] = base0_idx;
+            av1_rps->ref_dpb_index[GOLD] = av1_rps->ref_dpb_index[LAST];
+
+            av1_rps->ref_dpb_index[BWD] = base2_idx;
+            av1_rps->ref_dpb_index[ALT2] = av1_rps->ref_dpb_index[BWD];
+            av1_rps->ref_dpb_index[ALT] = av1_rps->ref_dpb_index[BWD];
+
+            gop_i = 16;
+            av1_rps->ref_poc_array[LAST] = get_ref_poc(context_ptr, pcs_ptr->picture_number, six_level_hierarchical_pred_struct[gop_i].ref_list0[0]);
+            av1_rps->ref_poc_array[LAST2] = get_ref_poc(context_ptr, pcs_ptr->picture_number, six_level_hierarchical_pred_struct[gop_i].ref_list0[1]);
+            av1_rps->ref_poc_array[LAST3] = get_ref_poc(context_ptr, pcs_ptr->picture_number, six_level_hierarchical_pred_struct[gop_i].ref_list0[2]);
+            av1_rps->ref_poc_array[GOLD] = av1_rps->ref_poc_array[LAST];
+
+            av1_rps->ref_poc_array[BWD] = get_ref_poc(context_ptr, pcs_ptr->picture_number, six_level_hierarchical_pred_struct[gop_i].ref_list1[0]);
+            av1_rps->ref_poc_array[ALT2] = av1_rps->ref_poc_array[BWD];
+            av1_rps->ref_poc_array[ALT] = av1_rps->ref_poc_array[BWD];
+            av1_rps->refresh_frame_mask = 1 << (LAY1_OFF + context_ptr->lay1_toggle);
+
+            break;
+
+        case 2:
+
+            if (picture_index == 7) {
+                //{8, 16, 24, 40}, // GOP Index 8 - Ref List 0
+                //{-8, -24, 0, 0} // GOP Index 8 - Ref List 1
+                av1_rps->ref_dpb_index[LAST] = base1_idx;
+                av1_rps->ref_dpb_index[LAST2] = lay2_idx;
+                av1_rps->ref_dpb_index[LAST3] = lay1_0_idx;
+                av1_rps->ref_dpb_index[GOLD] = base0_idx;
+
+                av1_rps->ref_dpb_index[BWD] = lay1_1_idx;
+                av1_rps->ref_dpb_index[ALT2] = base2_idx;
+                av1_rps->ref_dpb_index[ALT] = av1_rps->ref_dpb_index[BWD];
+                gop_i = 8;
+                av1_rps->ref_poc_array[LAST] = get_ref_poc(context_ptr, pcs_ptr->picture_number, six_level_hierarchical_pred_struct[gop_i].ref_list0[0]);
+                av1_rps->ref_poc_array[LAST2] = get_ref_poc(context_ptr, pcs_ptr->picture_number, six_level_hierarchical_pred_struct[gop_i].ref_list0[1]);
+                av1_rps->ref_poc_array[LAST3] = get_ref_poc(context_ptr, pcs_ptr->picture_number, six_level_hierarchical_pred_struct[gop_i].ref_list0[2]);
+                av1_rps->ref_poc_array[GOLD] = get_ref_poc(context_ptr, pcs_ptr->picture_number, six_level_hierarchical_pred_struct[gop_i].ref_list0[3]);
+
+                av1_rps->ref_poc_array[BWD] = get_ref_poc(context_ptr, pcs_ptr->picture_number, six_level_hierarchical_pred_struct[gop_i].ref_list1[0]);
+                av1_rps->ref_poc_array[ALT2] = get_ref_poc(context_ptr, pcs_ptr->picture_number, six_level_hierarchical_pred_struct[gop_i].ref_list1[1]);
+                av1_rps->ref_poc_array[ALT] = av1_rps->ref_poc_array[BWD];
+            }
+            else if (picture_index == 23) {
+                //{8, 16, 24, 0}    // GOP Index 24 - Ref List 0
+                //{-8, 0, 0, 0}     // GOP Index 24 - Ref List 1
+                av1_rps->ref_dpb_index[LAST] = lay1_1_idx;
+                av1_rps->ref_dpb_index[LAST2] = lay2_idx;
+                av1_rps->ref_dpb_index[LAST3] = base1_idx;
+                av1_rps->ref_dpb_index[GOLD] = av1_rps->ref_dpb_index[LAST];
+
+                av1_rps->ref_dpb_index[BWD] = base2_idx;
+                av1_rps->ref_dpb_index[ALT2] = av1_rps->ref_dpb_index[BWD];
+                av1_rps->ref_dpb_index[ALT] = av1_rps->ref_dpb_index[BWD];
+                gop_i = 24;
+                av1_rps->ref_poc_array[LAST] = get_ref_poc(context_ptr, pcs_ptr->picture_number, six_level_hierarchical_pred_struct[gop_i].ref_list0[0]);
+                av1_rps->ref_poc_array[LAST2] = get_ref_poc(context_ptr, pcs_ptr->picture_number, six_level_hierarchical_pred_struct[gop_i].ref_list0[1]);
+                av1_rps->ref_poc_array[LAST3] = get_ref_poc(context_ptr, pcs_ptr->picture_number, six_level_hierarchical_pred_struct[gop_i].ref_list0[2]);
+                av1_rps->ref_poc_array[GOLD] = av1_rps->ref_poc_array[LAST];
+
+                av1_rps->ref_poc_array[BWD] = get_ref_poc(context_ptr, pcs_ptr->picture_number, six_level_hierarchical_pred_struct[gop_i].ref_list1[0]);
+                av1_rps->ref_poc_array[ALT2] = av1_rps->ref_poc_array[BWD];
+                av1_rps->ref_poc_array[ALT] = av1_rps->ref_poc_array[BWD];
+            }
+            av1_rps->refresh_frame_mask = 1 << (LAY2_OFF);
+
+            break;
+
+        case 3:
+
+            if (picture_index == 3) {
+                //{4, 8, 20, 36}, // GOP Index 4 - Ref List 0
+                //{-4, -12, -28, 0} // GOP Index 4 - Ref List 1
+                av1_rps->ref_dpb_index[LAST] = base1_idx;
+                av1_rps->ref_dpb_index[LAST2] = lay3_idx;
+                av1_rps->ref_dpb_index[LAST3] = lay1_0_idx;
+                av1_rps->ref_dpb_index[GOLD] = base0_idx;
+                av1_rps->ref_dpb_index[BWD] = lay2_idx;
+                av1_rps->ref_dpb_index[ALT2] = lay1_1_idx;
+                av1_rps->ref_dpb_index[ALT] = base2_idx;
+                gop_i = 4;
+                av1_rps->ref_poc_array[LAST] = get_ref_poc(context_ptr, pcs_ptr->picture_number, six_level_hierarchical_pred_struct[gop_i].ref_list0[0]);
+                av1_rps->ref_poc_array[LAST2] = get_ref_poc(context_ptr, pcs_ptr->picture_number, six_level_hierarchical_pred_struct[gop_i].ref_list0[1]);
+                av1_rps->ref_poc_array[LAST3] = get_ref_poc(context_ptr, pcs_ptr->picture_number, six_level_hierarchical_pred_struct[gop_i].ref_list0[2]);
+                av1_rps->ref_poc_array[GOLD] = get_ref_poc(context_ptr, pcs_ptr->picture_number, six_level_hierarchical_pred_struct[gop_i].ref_list0[3]);
+
+                av1_rps->ref_poc_array[BWD] = get_ref_poc(context_ptr, pcs_ptr->picture_number, six_level_hierarchical_pred_struct[gop_i].ref_list1[0]);
+                av1_rps->ref_poc_array[ALT2] = get_ref_poc(context_ptr, pcs_ptr->picture_number, six_level_hierarchical_pred_struct[gop_i].ref_list1[1]);
+                av1_rps->ref_poc_array[ALT] = get_ref_poc(context_ptr, pcs_ptr->picture_number, six_level_hierarchical_pred_struct[gop_i].ref_list1[2]);
+            }
+            else if (picture_index == 11) {
+                //{4, 8, 12, 28}, // GOP Index 12 - Ref List 0
+                //{-4, -20, 0, 0} // GOP Index 12 - Ref List 1
+                av1_rps->ref_dpb_index[LAST] = lay2_idx;
+                av1_rps->ref_dpb_index[LAST2] = lay3_idx;
+                av1_rps->ref_dpb_index[LAST3] = base1_idx;
+                av1_rps->ref_dpb_index[GOLD] = lay1_0_idx;
+                av1_rps->ref_dpb_index[BWD] = lay1_1_idx;
+                av1_rps->ref_dpb_index[ALT2] = base2_idx;
+                av1_rps->ref_dpb_index[ALT] = av1_rps->ref_dpb_index[BWD];
+                gop_i = 12;
+                av1_rps->ref_poc_array[LAST] = get_ref_poc(context_ptr, pcs_ptr->picture_number, six_level_hierarchical_pred_struct[gop_i].ref_list0[0]);
+                av1_rps->ref_poc_array[LAST2] = get_ref_poc(context_ptr, pcs_ptr->picture_number, six_level_hierarchical_pred_struct[gop_i].ref_list0[1]);
+                av1_rps->ref_poc_array[LAST3] = get_ref_poc(context_ptr, pcs_ptr->picture_number, six_level_hierarchical_pred_struct[gop_i].ref_list0[2]);
+                av1_rps->ref_poc_array[GOLD] = get_ref_poc(context_ptr, pcs_ptr->picture_number, six_level_hierarchical_pred_struct[gop_i].ref_list0[3]);
+
+                av1_rps->ref_poc_array[BWD] = get_ref_poc(context_ptr, pcs_ptr->picture_number, six_level_hierarchical_pred_struct[gop_i].ref_list1[0]);
+                av1_rps->ref_poc_array[ALT2] = get_ref_poc(context_ptr, pcs_ptr->picture_number, six_level_hierarchical_pred_struct[gop_i].ref_list1[1]);
+                av1_rps->ref_poc_array[ALT] = av1_rps->ref_poc_array[BWD];
+            }
+            else if (picture_index == 19) {
+                //{4, 8, 20, 0}, // GOP Index 20 - Ref List 0
+                //{-4, -12, 0, 0} // GOP Index 20 - Ref List 1
+                av1_rps->ref_dpb_index[LAST] = lay1_1_idx;
+                av1_rps->ref_dpb_index[LAST2] = lay3_idx;
+                av1_rps->ref_dpb_index[LAST3] = base1_idx;
+                av1_rps->ref_dpb_index[GOLD] = av1_rps->ref_dpb_index[LAST];
+                av1_rps->ref_dpb_index[BWD] = lay2_idx;
+                av1_rps->ref_dpb_index[ALT2] = base2_idx;
+                av1_rps->ref_dpb_index[ALT] = av1_rps->ref_dpb_index[BWD];
+                gop_i = 20;
+                av1_rps->ref_poc_array[LAST] = get_ref_poc(context_ptr, pcs_ptr->picture_number, six_level_hierarchical_pred_struct[gop_i].ref_list0[0]);
+                av1_rps->ref_poc_array[LAST2] = get_ref_poc(context_ptr, pcs_ptr->picture_number, six_level_hierarchical_pred_struct[gop_i].ref_list0[1]);
+                av1_rps->ref_poc_array[LAST3] = get_ref_poc(context_ptr, pcs_ptr->picture_number, six_level_hierarchical_pred_struct[gop_i].ref_list0[2]);
+                av1_rps->ref_poc_array[GOLD] = av1_rps->ref_poc_array[LAST];
+
+                av1_rps->ref_poc_array[BWD] = get_ref_poc(context_ptr, pcs_ptr->picture_number, six_level_hierarchical_pred_struct[gop_i].ref_list1[0]);
+                av1_rps->ref_poc_array[ALT2] = get_ref_poc(context_ptr, pcs_ptr->picture_number, six_level_hierarchical_pred_struct[gop_i].ref_list1[1]);
+                av1_rps->ref_poc_array[ALT] = av1_rps->ref_poc_array[BWD];
+            }
+            else if (picture_index == 27) {
+                //{4, 8, 12, 28}, // GOP Index 28 - Ref List 0
+                //{-4, 0, 0, 0} // GOP Index 28 - Ref List 1
+                av1_rps->ref_dpb_index[LAST] = lay2_idx;
+                av1_rps->ref_dpb_index[LAST2] = lay3_idx;
+                av1_rps->ref_dpb_index[LAST3] = lay1_1_idx;
+                av1_rps->ref_dpb_index[GOLD] = base1_idx;
+
+                av1_rps->ref_dpb_index[BWD] = base2_idx;
+                av1_rps->ref_dpb_index[ALT2] = av1_rps->ref_dpb_index[BWD];
+                av1_rps->ref_dpb_index[ALT] = av1_rps->ref_dpb_index[BWD];
+                gop_i = 28;
+                av1_rps->ref_poc_array[LAST] = get_ref_poc(context_ptr, pcs_ptr->picture_number, six_level_hierarchical_pred_struct[gop_i].ref_list0[0]);
+                av1_rps->ref_poc_array[LAST2] = get_ref_poc(context_ptr, pcs_ptr->picture_number, six_level_hierarchical_pred_struct[gop_i].ref_list0[1]);
+                av1_rps->ref_poc_array[LAST3] = get_ref_poc(context_ptr, pcs_ptr->picture_number, six_level_hierarchical_pred_struct[gop_i].ref_list0[2]);
+                av1_rps->ref_poc_array[GOLD] = get_ref_poc(context_ptr, pcs_ptr->picture_number, six_level_hierarchical_pred_struct[gop_i].ref_list0[3]);
+
+                av1_rps->ref_poc_array[BWD] = get_ref_poc(context_ptr, pcs_ptr->picture_number, six_level_hierarchical_pred_struct[gop_i].ref_list1[0]);
+                av1_rps->ref_poc_array[ALT2] = av1_rps->ref_poc_array[BWD];
+                av1_rps->ref_poc_array[ALT] = av1_rps->ref_poc_array[BWD];
+            }
+            else
+                SVT_LOG("Error in GOp indexing\n");
+            av1_rps->refresh_frame_mask = 1 << (LAY3_OFF);
+            break;
+
+        case 4:
+            // update RPS for the overlay frame.
+            if (picture_index == 1) {
+                //{2, 4, 18, 0}, // GOP Index 2 - Ref List 0
+                //{-2, -6, -14, 0} // GOP Index 2 - Ref List 1
+                av1_rps->ref_dpb_index[LAST] = base1_idx;
+                av1_rps->ref_dpb_index[LAST2] = lay4_idx;
+                av1_rps->ref_dpb_index[LAST3] = lay1_0_idx;
+                av1_rps->ref_dpb_index[GOLD] = av1_rps->ref_dpb_index[LAST];
+                av1_rps->ref_dpb_index[BWD] = lay3_idx;
+                av1_rps->ref_dpb_index[ALT2] = lay2_idx;
+                av1_rps->ref_dpb_index[ALT] = lay1_1_idx;
+                gop_i = 2;
+                av1_rps->ref_poc_array[LAST] = get_ref_poc(context_ptr, pcs_ptr->picture_number, six_level_hierarchical_pred_struct[gop_i].ref_list0[0]);
+                av1_rps->ref_poc_array[LAST2] = get_ref_poc(context_ptr, pcs_ptr->picture_number, six_level_hierarchical_pred_struct[gop_i].ref_list0[1]);
+                av1_rps->ref_poc_array[LAST3] = get_ref_poc(context_ptr, pcs_ptr->picture_number, six_level_hierarchical_pred_struct[gop_i].ref_list0[2]);
+                av1_rps->ref_poc_array[GOLD] = av1_rps->ref_poc_array[LAST];
+
+                av1_rps->ref_poc_array[BWD] = get_ref_poc(context_ptr, pcs_ptr->picture_number, six_level_hierarchical_pred_struct[gop_i].ref_list1[0]);
+                av1_rps->ref_poc_array[ALT2] = get_ref_poc(context_ptr, pcs_ptr->picture_number, six_level_hierarchical_pred_struct[gop_i].ref_list1[1]);
+                av1_rps->ref_poc_array[ALT] = get_ref_poc(context_ptr, pcs_ptr->picture_number, six_level_hierarchical_pred_struct[gop_i].ref_list1[2]);
+            }
+            else if (picture_index == 5) {
+                //{2, 4, 6, 22}, // GOP Index 6 - Ref List 0
+                //{-2, -10, -26, 0} // GOP Index 6 - Ref List 1
+                av1_rps->ref_dpb_index[LAST] = lay3_idx;
+                av1_rps->ref_dpb_index[LAST2] = lay4_idx;
+                av1_rps->ref_dpb_index[LAST3] = base1_idx;
+                av1_rps->ref_dpb_index[GOLD] = lay1_0_idx;
+                av1_rps->ref_dpb_index[BWD] = lay2_idx;
+                av1_rps->ref_dpb_index[ALT2] = lay1_1_idx;
+                av1_rps->ref_dpb_index[ALT] = base2_idx;
+                gop_i = 6;
+                av1_rps->ref_poc_array[LAST] = get_ref_poc(context_ptr, pcs_ptr->picture_number, six_level_hierarchical_pred_struct[gop_i].ref_list0[0]);
+                av1_rps->ref_poc_array[LAST2] = get_ref_poc(context_ptr, pcs_ptr->picture_number, six_level_hierarchical_pred_struct[gop_i].ref_list0[1]);
+                av1_rps->ref_poc_array[LAST3] = get_ref_poc(context_ptr, pcs_ptr->picture_number, six_level_hierarchical_pred_struct[gop_i].ref_list0[2]);
+                av1_rps->ref_poc_array[GOLD] = get_ref_poc(context_ptr, pcs_ptr->picture_number, six_level_hierarchical_pred_struct[gop_i].ref_list0[3]);
+
+                av1_rps->ref_poc_array[BWD] = get_ref_poc(context_ptr, pcs_ptr->picture_number, six_level_hierarchical_pred_struct[gop_i].ref_list1[0]);
+                av1_rps->ref_poc_array[ALT2] = get_ref_poc(context_ptr, pcs_ptr->picture_number, six_level_hierarchical_pred_struct[gop_i].ref_list1[1]);
+                av1_rps->ref_poc_array[ALT] = get_ref_poc(context_ptr, pcs_ptr->picture_number, six_level_hierarchical_pred_struct[gop_i].ref_list1[2]);
+            }
+            else if (picture_index == 9) {
+                //{2, 4, 10, 26}, // GOP Index 10 - Ref List 0
+                //{-2, -6, -22, 0} // GOP Index 10 - Ref List 1
+                av1_rps->ref_dpb_index[LAST] = lay2_idx;
+                av1_rps->ref_dpb_index[LAST2] = lay4_idx;
+                av1_rps->ref_dpb_index[LAST3] = base1_idx;
+                av1_rps->ref_dpb_index[GOLD] = lay1_0_idx;
+                av1_rps->ref_dpb_index[BWD] = lay3_idx;
+                av1_rps->ref_dpb_index[ALT2] = lay1_1_idx;
+                av1_rps->ref_dpb_index[ALT] = base2_idx;
+                gop_i = 10;
+                av1_rps->ref_poc_array[LAST] = get_ref_poc(context_ptr, pcs_ptr->picture_number, six_level_hierarchical_pred_struct[gop_i].ref_list0[0]);
+                av1_rps->ref_poc_array[LAST2] = get_ref_poc(context_ptr, pcs_ptr->picture_number, six_level_hierarchical_pred_struct[gop_i].ref_list0[1]);
+                av1_rps->ref_poc_array[LAST3] = get_ref_poc(context_ptr, pcs_ptr->picture_number, six_level_hierarchical_pred_struct[gop_i].ref_list0[2]);
+                av1_rps->ref_poc_array[GOLD] = get_ref_poc(context_ptr, pcs_ptr->picture_number, six_level_hierarchical_pred_struct[gop_i].ref_list0[3]);
+
+                av1_rps->ref_poc_array[BWD] = get_ref_poc(context_ptr, pcs_ptr->picture_number, six_level_hierarchical_pred_struct[gop_i].ref_list1[0]);
+                av1_rps->ref_poc_array[ALT2] = get_ref_poc(context_ptr, pcs_ptr->picture_number, six_level_hierarchical_pred_struct[gop_i].ref_list1[1]);
+                av1_rps->ref_poc_array[ALT] = get_ref_poc(context_ptr, pcs_ptr->picture_number, six_level_hierarchical_pred_struct[gop_i].ref_list1[2]);
+            }
+            else if (picture_index == 13) {
+                //{2, 4, 6, 14}, // GOP Index 14 - Ref List 0
+                //{-2, -18, 0, 0} // GOP Index 14 - Ref List 1
+                av1_rps->ref_dpb_index[LAST] = lay3_idx;
+                av1_rps->ref_dpb_index[LAST2] = lay4_idx;
+                av1_rps->ref_dpb_index[LAST3] = lay2_idx;
+                av1_rps->ref_dpb_index[GOLD] = base1_idx;
+                av1_rps->ref_dpb_index[BWD] = lay1_1_idx;
+                av1_rps->ref_dpb_index[ALT2] = base2_idx;
+                av1_rps->ref_dpb_index[ALT] = av1_rps->ref_dpb_index[BWD];
+                gop_i = 14;
+                av1_rps->ref_poc_array[LAST] = get_ref_poc(context_ptr, pcs_ptr->picture_number, six_level_hierarchical_pred_struct[gop_i].ref_list0[0]);
+                av1_rps->ref_poc_array[LAST2] = get_ref_poc(context_ptr, pcs_ptr->picture_number, six_level_hierarchical_pred_struct[gop_i].ref_list0[1]);
+                av1_rps->ref_poc_array[LAST3] = get_ref_poc(context_ptr, pcs_ptr->picture_number, six_level_hierarchical_pred_struct[gop_i].ref_list0[2]);
+                av1_rps->ref_poc_array[GOLD] = get_ref_poc(context_ptr, pcs_ptr->picture_number, six_level_hierarchical_pred_struct[gop_i].ref_list0[3]);
+
+                av1_rps->ref_poc_array[BWD] = get_ref_poc(context_ptr, pcs_ptr->picture_number, six_level_hierarchical_pred_struct[gop_i].ref_list1[0]);
+                av1_rps->ref_poc_array[ALT2] = get_ref_poc(context_ptr, pcs_ptr->picture_number, six_level_hierarchical_pred_struct[gop_i].ref_list1[1]);
+                av1_rps->ref_poc_array[ALT] = av1_rps->ref_poc_array[BWD];
+            }
+            else if (picture_index == 17) {
+                //{2, 4, 18,  34}, // GOP Index 18 - Ref List 0
+                //{-2, -6, -14, 0} // GOP Index 18 - Ref List 1
+                av1_rps->ref_dpb_index[LAST] = lay1_1_idx;
+                av1_rps->ref_dpb_index[LAST2] = lay4_idx;
+                av1_rps->ref_dpb_index[LAST3] = base1_idx;
+                av1_rps->ref_dpb_index[GOLD] = lay1_0_idx;
+                av1_rps->ref_dpb_index[BWD] = lay3_idx;
+                av1_rps->ref_dpb_index[ALT2] = lay2_idx;
+                av1_rps->ref_dpb_index[ALT] = base2_idx;
+                gop_i = 18;
+                av1_rps->ref_poc_array[LAST] = get_ref_poc(context_ptr, pcs_ptr->picture_number, six_level_hierarchical_pred_struct[gop_i].ref_list0[0]);
+                av1_rps->ref_poc_array[LAST2] = get_ref_poc(context_ptr, pcs_ptr->picture_number, six_level_hierarchical_pred_struct[gop_i].ref_list0[1]);
+                av1_rps->ref_poc_array[LAST3] = get_ref_poc(context_ptr, pcs_ptr->picture_number, six_level_hierarchical_pred_struct[gop_i].ref_list0[2]);
+                av1_rps->ref_poc_array[GOLD] = get_ref_poc(context_ptr, pcs_ptr->picture_number, six_level_hierarchical_pred_struct[gop_i].ref_list0[3]);
+
+                av1_rps->ref_poc_array[BWD] = get_ref_poc(context_ptr, pcs_ptr->picture_number, six_level_hierarchical_pred_struct[gop_i].ref_list1[0]);
+                av1_rps->ref_poc_array[ALT2] = get_ref_poc(context_ptr, pcs_ptr->picture_number, six_level_hierarchical_pred_struct[gop_i].ref_list1[1]);
+                av1_rps->ref_poc_array[ALT] = get_ref_poc(context_ptr, pcs_ptr->picture_number, six_level_hierarchical_pred_struct[gop_i].ref_list1[2]);
+            }
+            else if (picture_index == 21) {
+                //{2, 4, 6, 22}, // GOP Index 22 - Ref List 0
+                //{-2, -10, 0, 0} // GOP Index 22 - Ref List 1
+                av1_rps->ref_dpb_index[LAST] = lay3_idx;
+                av1_rps->ref_dpb_index[LAST2] = lay4_idx;
+                av1_rps->ref_dpb_index[LAST3] = lay1_1_idx;
+                av1_rps->ref_dpb_index[GOLD] = base1_idx;
+                av1_rps->ref_dpb_index[BWD] = lay2_idx;
+                av1_rps->ref_dpb_index[ALT2] = base2_idx;
+                av1_rps->ref_dpb_index[ALT] = av1_rps->ref_dpb_index[BWD];
+                gop_i = 22;
+                av1_rps->ref_poc_array[LAST] = get_ref_poc(context_ptr, pcs_ptr->picture_number, six_level_hierarchical_pred_struct[gop_i].ref_list0[0]);
+                av1_rps->ref_poc_array[LAST2] = get_ref_poc(context_ptr, pcs_ptr->picture_number, six_level_hierarchical_pred_struct[gop_i].ref_list0[1]);
+                av1_rps->ref_poc_array[LAST3] = get_ref_poc(context_ptr, pcs_ptr->picture_number, six_level_hierarchical_pred_struct[gop_i].ref_list0[2]);
+                av1_rps->ref_poc_array[GOLD] = get_ref_poc(context_ptr, pcs_ptr->picture_number, six_level_hierarchical_pred_struct[gop_i].ref_list0[3]);
+
+                av1_rps->ref_poc_array[BWD] = get_ref_poc(context_ptr, pcs_ptr->picture_number, six_level_hierarchical_pred_struct[gop_i].ref_list1[0]);
+                av1_rps->ref_poc_array[ALT2] = get_ref_poc(context_ptr, pcs_ptr->picture_number, six_level_hierarchical_pred_struct[gop_i].ref_list1[1]);
+                av1_rps->ref_poc_array[ALT] = av1_rps->ref_poc_array[BWD];
+            }
+            else if (picture_index == 25) {
+                //{2, 4, 10, 26}, // GOP Index 26 - Ref List 0
+                //{-2, -6, 0, 0} // GOP Index 26 - Ref List 1
+                av1_rps->ref_dpb_index[LAST] = lay2_idx;
+                av1_rps->ref_dpb_index[LAST2] = lay4_idx;
+                av1_rps->ref_dpb_index[LAST3] = lay1_1_idx;
+                av1_rps->ref_dpb_index[GOLD] = base1_idx;
+                av1_rps->ref_dpb_index[BWD] = lay3_idx;
+                av1_rps->ref_dpb_index[ALT2] = base2_idx;
+                av1_rps->ref_dpb_index[ALT] = av1_rps->ref_dpb_index[BWD];
+                gop_i = 26;
+                av1_rps->ref_poc_array[LAST] = get_ref_poc(context_ptr, pcs_ptr->picture_number, six_level_hierarchical_pred_struct[gop_i].ref_list0[0]);
+                av1_rps->ref_poc_array[LAST2] = get_ref_poc(context_ptr, pcs_ptr->picture_number, six_level_hierarchical_pred_struct[gop_i].ref_list0[1]);
+                av1_rps->ref_poc_array[LAST3] = get_ref_poc(context_ptr, pcs_ptr->picture_number, six_level_hierarchical_pred_struct[gop_i].ref_list0[2]);
+                av1_rps->ref_poc_array[GOLD] = get_ref_poc(context_ptr, pcs_ptr->picture_number, six_level_hierarchical_pred_struct[gop_i].ref_list0[3]);
+
+                av1_rps->ref_poc_array[BWD] = get_ref_poc(context_ptr, pcs_ptr->picture_number, six_level_hierarchical_pred_struct[gop_i].ref_list1[0]);
+                av1_rps->ref_poc_array[ALT2] = get_ref_poc(context_ptr, pcs_ptr->picture_number, six_level_hierarchical_pred_struct[gop_i].ref_list1[1]);
+                av1_rps->ref_poc_array[ALT] = av1_rps->ref_poc_array[BWD];
+            }
+            else if (picture_index == 29) {
+                //{2, 4, 6, 14}, // GOP Index 30 - Ref List 0
+                //{-2, 0, 0, 0} // GOP Index 30 - Ref List 1
+                av1_rps->ref_dpb_index[LAST] = lay3_idx;
+                av1_rps->ref_dpb_index[LAST2] = lay4_idx;
+                av1_rps->ref_dpb_index[LAST3] = lay2_idx;
+                av1_rps->ref_dpb_index[GOLD] = lay1_1_idx;
+                av1_rps->ref_dpb_index[BWD] = base2_idx;
+                av1_rps->ref_dpb_index[ALT2] = av1_rps->ref_dpb_index[BWD];
+                av1_rps->ref_dpb_index[ALT] = av1_rps->ref_dpb_index[BWD];
+                gop_i = 30;
+                av1_rps->ref_poc_array[LAST] = get_ref_poc(context_ptr, pcs_ptr->picture_number, six_level_hierarchical_pred_struct[gop_i].ref_list0[0]);
+                av1_rps->ref_poc_array[LAST2] = get_ref_poc(context_ptr, pcs_ptr->picture_number, six_level_hierarchical_pred_struct[gop_i].ref_list0[1]);
+                av1_rps->ref_poc_array[LAST3] = get_ref_poc(context_ptr, pcs_ptr->picture_number, six_level_hierarchical_pred_struct[gop_i].ref_list0[2]);
+                av1_rps->ref_poc_array[GOLD] = get_ref_poc(context_ptr, pcs_ptr->picture_number, six_level_hierarchical_pred_struct[gop_i].ref_list0[3]);
+
+                av1_rps->ref_poc_array[BWD] = get_ref_poc(context_ptr, pcs_ptr->picture_number, six_level_hierarchical_pred_struct[gop_i].ref_list1[0]);
+                av1_rps->ref_poc_array[ALT2] = av1_rps->ref_poc_array[BWD];
+                av1_rps->ref_poc_array[ALT] = av1_rps->ref_poc_array[BWD];
+            }
+            else
+                SVT_LOG("Error in GOp indexing\n");
+            av1_rps->refresh_frame_mask = 1 << (LAY4_OFF);
+            break;
+
+        case 5:
+            // update RPS for the overlay frame.
+            if (pcs_ptr->is_overlay) {
+                //{ 0, 0, 0, 0}         // GOP Index 1 - Ref List 0
+                //{ 0, 0, 0, 0 }       // GOP Index 1 - Ref List 1
+                av1_rps->ref_dpb_index[LAST] = base1_idx;
+                av1_rps->ref_dpb_index[LAST2] = base1_idx;
+                av1_rps->ref_dpb_index[LAST3] = base1_idx;
+                av1_rps->ref_dpb_index[GOLD] = base1_idx;
+                av1_rps->ref_dpb_index[BWD] = base1_idx;
+                av1_rps->ref_dpb_index[ALT2] = base1_idx;
+                av1_rps->ref_dpb_index[ALT] = base1_idx;
+
+                av1_rps->ref_poc_array[LAST] = get_ref_poc(context_ptr, pcs_ptr->picture_number, 0);
+                av1_rps->ref_poc_array[LAST2] = get_ref_poc(context_ptr, pcs_ptr->picture_number, 0);
+                av1_rps->ref_poc_array[LAST3] = get_ref_poc(context_ptr, pcs_ptr->picture_number, 0);
+                av1_rps->ref_poc_array[GOLD] = get_ref_poc(context_ptr, pcs_ptr->picture_number, 0);
+                av1_rps->ref_poc_array[BWD] = get_ref_poc(context_ptr, pcs_ptr->picture_number, 0);
+                av1_rps->ref_poc_array[ALT2] = get_ref_poc(context_ptr, pcs_ptr->picture_number, 0);
+                av1_rps->ref_poc_array[ALT] = get_ref_poc(context_ptr, pcs_ptr->picture_number, 0);
+            } else {
+                if (picture_index == 0) {
+                    //{1, 17, 33, 0}, // GOP Index 1 - Ref List 0
+                    //{-1, -3, -7, 0} // GOP Index 1 - Ref List 1
+                    av1_rps->ref_dpb_index[LAST] = base1_idx;
+                    av1_rps->ref_dpb_index[LAST2] = lay1_0_idx;
+                    av1_rps->ref_dpb_index[LAST3] = base0_idx;
+                    av1_rps->ref_dpb_index[GOLD] = av1_rps->ref_dpb_index[LAST];
+                    av1_rps->ref_dpb_index[BWD] = lay4_idx;
+                    av1_rps->ref_dpb_index[ALT2] = lay3_idx;
+                    av1_rps->ref_dpb_index[ALT] = lay2_idx;
+                    gop_i = 1;
+                    av1_rps->ref_poc_array[LAST] = get_ref_poc(context_ptr, pcs_ptr->picture_number, six_level_hierarchical_pred_struct[gop_i].ref_list0[0]);
+                    av1_rps->ref_poc_array[LAST2] = get_ref_poc(context_ptr, pcs_ptr->picture_number, six_level_hierarchical_pred_struct[gop_i].ref_list0[1]);
+                    av1_rps->ref_poc_array[LAST3] = get_ref_poc(context_ptr, pcs_ptr->picture_number, six_level_hierarchical_pred_struct[gop_i].ref_list0[1]);
+                    av1_rps->ref_poc_array[GOLD] = av1_rps->ref_poc_array[LAST];
+
+                    av1_rps->ref_poc_array[BWD] = get_ref_poc(context_ptr, pcs_ptr->picture_number, six_level_hierarchical_pred_struct[gop_i].ref_list1[0]);
+                    av1_rps->ref_poc_array[ALT2] = get_ref_poc(context_ptr, pcs_ptr->picture_number, six_level_hierarchical_pred_struct[gop_i].ref_list1[1]);
+                    av1_rps->ref_poc_array[ALT] = get_ref_poc(context_ptr, pcs_ptr->picture_number, six_level_hierarchical_pred_struct[gop_i].ref_list1[2]);
+                }
+                else if (picture_index == 2) {
+                    //{1, 3, 19, 0}, // GOP Index 3 - Ref List 0
+                    //{-1, -5, -13, 0} // GOP Index 3 - Ref List 1
+                    av1_rps->ref_dpb_index[LAST] = lay4_idx;
+                    av1_rps->ref_dpb_index[LAST2] = base1_idx;
+                    av1_rps->ref_dpb_index[LAST3] = lay1_0_idx;
+                    av1_rps->ref_dpb_index[GOLD] = av1_rps->ref_dpb_index[LAST];
+                    av1_rps->ref_dpb_index[BWD] = lay3_idx;
+                    av1_rps->ref_dpb_index[ALT2] = lay2_idx;
+                    av1_rps->ref_dpb_index[ALT] = lay1_1_idx;
+                    gop_i = 3;
+                    av1_rps->ref_poc_array[LAST] = get_ref_poc(context_ptr, pcs_ptr->picture_number, six_level_hierarchical_pred_struct[gop_i].ref_list0[0]);
+                    av1_rps->ref_poc_array[LAST2] = get_ref_poc(context_ptr, pcs_ptr->picture_number, six_level_hierarchical_pred_struct[gop_i].ref_list0[1]);
+                    av1_rps->ref_poc_array[LAST3] = get_ref_poc(context_ptr, pcs_ptr->picture_number, six_level_hierarchical_pred_struct[gop_i].ref_list0[2]);
+                    av1_rps->ref_poc_array[GOLD] = av1_rps->ref_poc_array[LAST];
+
+                    av1_rps->ref_poc_array[BWD] = get_ref_poc(context_ptr, pcs_ptr->picture_number, six_level_hierarchical_pred_struct[gop_i].ref_list1[0]);
+                    av1_rps->ref_poc_array[ALT2] = get_ref_poc(context_ptr, pcs_ptr->picture_number, six_level_hierarchical_pred_struct[gop_i].ref_list1[1]);
+                    av1_rps->ref_poc_array[ALT] = get_ref_poc(context_ptr, pcs_ptr->picture_number, six_level_hierarchical_pred_struct[gop_i].ref_list1[2]);
+                }
+                else if (picture_index == 4) {
+                    //{1, 5, 21, 0}, // GOP Index 5 - Ref List 0
+                    //{-1, -3, -11, 0} // GOP Index 5 - Ref List 1
+                    av1_rps->ref_dpb_index[LAST] = lay3_idx;
+                    av1_rps->ref_dpb_index[LAST2] = base1_idx;
+                    av1_rps->ref_dpb_index[LAST3] = lay1_0_idx;
+                    av1_rps->ref_dpb_index[GOLD] = av1_rps->ref_dpb_index[LAST];
+                    av1_rps->ref_dpb_index[BWD] = lay4_idx;
+                    av1_rps->ref_dpb_index[ALT2] = lay2_idx;
+                    av1_rps->ref_dpb_index[ALT] = lay1_1_idx;
+                    gop_i = 5;
+                    av1_rps->ref_poc_array[LAST] = get_ref_poc(context_ptr, pcs_ptr->picture_number, six_level_hierarchical_pred_struct[gop_i].ref_list0[0]);
+                    av1_rps->ref_poc_array[LAST2] = get_ref_poc(context_ptr, pcs_ptr->picture_number, six_level_hierarchical_pred_struct[gop_i].ref_list0[1]);
+                    av1_rps->ref_poc_array[LAST3] = get_ref_poc(context_ptr, pcs_ptr->picture_number, six_level_hierarchical_pred_struct[gop_i].ref_list0[2]);
+                    av1_rps->ref_poc_array[GOLD] = av1_rps->ref_poc_array[LAST];
+
+                    av1_rps->ref_poc_array[BWD] = get_ref_poc(context_ptr, pcs_ptr->picture_number, six_level_hierarchical_pred_struct[gop_i].ref_list1[0]);
+                    av1_rps->ref_poc_array[ALT2] = get_ref_poc(context_ptr, pcs_ptr->picture_number, six_level_hierarchical_pred_struct[gop_i].ref_list1[1]);
+                    av1_rps->ref_poc_array[ALT] = get_ref_poc(context_ptr, pcs_ptr->picture_number, six_level_hierarchical_pred_struct[gop_i].ref_list1[2]);
+                }
+                else if (picture_index == 6) {
+                    //{1, 3, 7, 23}, // GOP Index 7 - Ref List 0
+                    //{-1, -9, -25, 0} // GOP Index 7 - Ref List 1
+                    av1_rps->ref_dpb_index[LAST] = lay4_idx;
+                    av1_rps->ref_dpb_index[LAST2] = lay3_idx;
+                    av1_rps->ref_dpb_index[LAST3] = base1_idx;
+                    av1_rps->ref_dpb_index[GOLD] = lay1_0_idx;
+                    av1_rps->ref_dpb_index[BWD] = lay2_idx;
+                    av1_rps->ref_dpb_index[ALT2] = lay1_1_idx;
+                    av1_rps->ref_dpb_index[ALT] = base2_idx;
+                    gop_i = 7;
+                    av1_rps->ref_poc_array[LAST] = get_ref_poc(context_ptr, pcs_ptr->picture_number, six_level_hierarchical_pred_struct[gop_i].ref_list0[0]);
+                    av1_rps->ref_poc_array[LAST2] = get_ref_poc(context_ptr, pcs_ptr->picture_number, six_level_hierarchical_pred_struct[gop_i].ref_list0[1]);
+                    av1_rps->ref_poc_array[LAST3] = get_ref_poc(context_ptr, pcs_ptr->picture_number, six_level_hierarchical_pred_struct[gop_i].ref_list0[2]);
+                    av1_rps->ref_poc_array[GOLD] = get_ref_poc(context_ptr, pcs_ptr->picture_number, six_level_hierarchical_pred_struct[gop_i].ref_list0[3]);
+
+                    av1_rps->ref_poc_array[BWD] = get_ref_poc(context_ptr, pcs_ptr->picture_number, six_level_hierarchical_pred_struct[gop_i].ref_list1[0]);
+                    av1_rps->ref_poc_array[ALT2] = get_ref_poc(context_ptr, pcs_ptr->picture_number, six_level_hierarchical_pred_struct[gop_i].ref_list1[1]);
+                    av1_rps->ref_poc_array[ALT] = get_ref_poc(context_ptr, pcs_ptr->picture_number, six_level_hierarchical_pred_struct[gop_i].ref_list1[2]);
+                }
+                else if (picture_index == 8) {
+                    //{1, 9, 25, 0}, // GOP Index 9 - Ref List 0
+                    //{-1, -3, -7, 0} // GOP Index 9 - Ref List 1
+                    av1_rps->ref_dpb_index[LAST] = lay2_idx;
+                    av1_rps->ref_dpb_index[LAST2] = base1_idx;
+                    av1_rps->ref_dpb_index[LAST3] = lay1_0_idx;
+                    av1_rps->ref_dpb_index[GOLD] = av1_rps->ref_dpb_index[LAST];
+                    av1_rps->ref_dpb_index[BWD] = lay4_idx;
+                    av1_rps->ref_dpb_index[ALT2] = lay3_idx;
+                    av1_rps->ref_dpb_index[ALT] = lay1_1_idx;
+                    gop_i = 9;
+                    av1_rps->ref_poc_array[LAST] = get_ref_poc(context_ptr, pcs_ptr->picture_number, six_level_hierarchical_pred_struct[gop_i].ref_list0[0]);
+                    av1_rps->ref_poc_array[LAST2] = get_ref_poc(context_ptr, pcs_ptr->picture_number, six_level_hierarchical_pred_struct[gop_i].ref_list0[1]);
+                    av1_rps->ref_poc_array[LAST3] = get_ref_poc(context_ptr, pcs_ptr->picture_number, six_level_hierarchical_pred_struct[gop_i].ref_list0[2]);
+                    av1_rps->ref_poc_array[GOLD] = av1_rps->ref_poc_array[LAST];
+
+                    av1_rps->ref_poc_array[BWD] = get_ref_poc(context_ptr, pcs_ptr->picture_number, six_level_hierarchical_pred_struct[gop_i].ref_list1[0]);
+                    av1_rps->ref_poc_array[ALT2] = get_ref_poc(context_ptr, pcs_ptr->picture_number, six_level_hierarchical_pred_struct[gop_i].ref_list1[1]);
+                    av1_rps->ref_poc_array[ALT] = get_ref_poc(context_ptr, pcs_ptr->picture_number, six_level_hierarchical_pred_struct[gop_i].ref_list1[2]);
+                }
+                else if (picture_index == 10) {
+                    //{1, 3, 11, 27}, // GOP Index 11 - Ref List 0
+                    //{-1, -5, -21, 0} // GOP Index 11 - Ref List 1
+                    av1_rps->ref_dpb_index[LAST] = lay4_idx;
+                    av1_rps->ref_dpb_index[LAST2] = lay2_idx;
+                    av1_rps->ref_dpb_index[LAST3] = base1_idx;
+                    av1_rps->ref_dpb_index[GOLD] = lay1_0_idx;
+                    av1_rps->ref_dpb_index[BWD] = lay3_idx;
+                    av1_rps->ref_dpb_index[ALT2] = lay1_1_idx;
+                    av1_rps->ref_dpb_index[ALT] = base2_idx;
+                    gop_i = 11;
+                    av1_rps->ref_poc_array[LAST] = get_ref_poc(context_ptr, pcs_ptr->picture_number, six_level_hierarchical_pred_struct[gop_i].ref_list0[0]);
+                    av1_rps->ref_poc_array[LAST2] = get_ref_poc(context_ptr, pcs_ptr->picture_number, six_level_hierarchical_pred_struct[gop_i].ref_list0[1]);
+                    av1_rps->ref_poc_array[LAST3] = get_ref_poc(context_ptr, pcs_ptr->picture_number, six_level_hierarchical_pred_struct[gop_i].ref_list0[2]);
+                    av1_rps->ref_poc_array[GOLD] = get_ref_poc(context_ptr, pcs_ptr->picture_number, six_level_hierarchical_pred_struct[gop_i].ref_list0[3]);
+
+                    av1_rps->ref_poc_array[BWD] = get_ref_poc(context_ptr, pcs_ptr->picture_number, six_level_hierarchical_pred_struct[gop_i].ref_list1[0]);
+                    av1_rps->ref_poc_array[ALT2] = get_ref_poc(context_ptr, pcs_ptr->picture_number, six_level_hierarchical_pred_struct[gop_i].ref_list1[1]);
+                    av1_rps->ref_poc_array[ALT] = get_ref_poc(context_ptr, pcs_ptr->picture_number, six_level_hierarchical_pred_struct[gop_i].ref_list1[2]);
+                }
+                else if (picture_index == 12) {
+                    //{1, 5, 13, 29}, // GOP Index 13 - Ref List 0
+                    //{-1, -3, -19, 0} // GOP Index 13 - Ref List 1
+                    av1_rps->ref_dpb_index[LAST] = lay3_idx;
+                    av1_rps->ref_dpb_index[LAST2] = lay2_idx;
+                    av1_rps->ref_dpb_index[LAST3] = base1_idx;
+                    av1_rps->ref_dpb_index[GOLD] = lay1_0_idx;
+                    av1_rps->ref_dpb_index[BWD] = lay4_idx;
+                    av1_rps->ref_dpb_index[ALT2] = lay1_1_idx;
+                    av1_rps->ref_dpb_index[ALT] = base2_idx;
+                    gop_i = 13;
+                    av1_rps->ref_poc_array[LAST] = get_ref_poc(context_ptr, pcs_ptr->picture_number, six_level_hierarchical_pred_struct[gop_i].ref_list0[0]);
+                    av1_rps->ref_poc_array[LAST2] = get_ref_poc(context_ptr, pcs_ptr->picture_number, six_level_hierarchical_pred_struct[gop_i].ref_list0[1]);
+                    av1_rps->ref_poc_array[LAST3] = get_ref_poc(context_ptr, pcs_ptr->picture_number, six_level_hierarchical_pred_struct[gop_i].ref_list0[2]);
+                    av1_rps->ref_poc_array[GOLD] = get_ref_poc(context_ptr, pcs_ptr->picture_number, six_level_hierarchical_pred_struct[gop_i].ref_list0[3]);
+
+                    av1_rps->ref_poc_array[BWD] = get_ref_poc(context_ptr, pcs_ptr->picture_number, six_level_hierarchical_pred_struct[gop_i].ref_list1[0]);
+                    av1_rps->ref_poc_array[ALT2] = get_ref_poc(context_ptr, pcs_ptr->picture_number, six_level_hierarchical_pred_struct[gop_i].ref_list1[1]);
+                    av1_rps->ref_poc_array[ALT] = get_ref_poc(context_ptr, pcs_ptr->picture_number, six_level_hierarchical_pred_struct[gop_i].ref_list1[2]);
+                }
+                else if (picture_index == 14) {
+                    //{1, 3, 7, 15}, // GOP Index 15 - Ref List 0
+                    //{-1, -17, 0, 0} // GOP Index 15 - Ref List 1
+                    av1_rps->ref_dpb_index[LAST] = lay4_idx;
+                    av1_rps->ref_dpb_index[LAST2] = lay3_idx;
+                    av1_rps->ref_dpb_index[LAST3] = lay2_idx;
+                    av1_rps->ref_dpb_index[GOLD] = base1_idx;
+                    av1_rps->ref_dpb_index[BWD] = lay1_1_idx;
+                    av1_rps->ref_dpb_index[ALT2] = base2_idx;
+                    av1_rps->ref_dpb_index[ALT] = av1_rps->ref_dpb_index[BWD];
+                    gop_i = 15;
+                    av1_rps->ref_poc_array[LAST] = get_ref_poc(context_ptr, pcs_ptr->picture_number, six_level_hierarchical_pred_struct[gop_i].ref_list0[0]);
+                    av1_rps->ref_poc_array[LAST2] = get_ref_poc(context_ptr, pcs_ptr->picture_number, six_level_hierarchical_pred_struct[gop_i].ref_list0[1]);
+                    av1_rps->ref_poc_array[LAST3] = get_ref_poc(context_ptr, pcs_ptr->picture_number, six_level_hierarchical_pred_struct[gop_i].ref_list0[2]);
+                    av1_rps->ref_poc_array[GOLD] = get_ref_poc(context_ptr, pcs_ptr->picture_number, six_level_hierarchical_pred_struct[gop_i].ref_list0[3]);
+
+                    av1_rps->ref_poc_array[BWD] = get_ref_poc(context_ptr, pcs_ptr->picture_number, six_level_hierarchical_pred_struct[gop_i].ref_list1[0]);
+                    av1_rps->ref_poc_array[ALT2] = get_ref_poc(context_ptr, pcs_ptr->picture_number, six_level_hierarchical_pred_struct[gop_i].ref_list1[1]);
+                    av1_rps->ref_poc_array[ALT] = av1_rps->ref_poc_array[BWD];
+                }
+                else if (picture_index == 16) {
+                    //{1, 17, 33, 0}, // GOP Index 17 - Ref List 0
+                    //{-1, -3, -7, 0} // GOP Index 17 - Ref List 1
+                    av1_rps->ref_dpb_index[LAST] = lay1_1_idx;
+                    av1_rps->ref_dpb_index[LAST2] = base1_idx;
+                    av1_rps->ref_dpb_index[LAST3] = lay1_0_idx;
+                    av1_rps->ref_dpb_index[GOLD] = av1_rps->ref_dpb_index[LAST];
+                    av1_rps->ref_dpb_index[BWD] = lay4_idx;
+                    av1_rps->ref_dpb_index[ALT2] = lay3_idx;
+                    av1_rps->ref_dpb_index[ALT] = lay2_idx;
+                    gop_i = 17;
+                    av1_rps->ref_poc_array[LAST] = get_ref_poc(context_ptr, pcs_ptr->picture_number, six_level_hierarchical_pred_struct[gop_i].ref_list0[0]);
+                    av1_rps->ref_poc_array[LAST2] = get_ref_poc(context_ptr, pcs_ptr->picture_number, six_level_hierarchical_pred_struct[gop_i].ref_list0[1]);
+                    av1_rps->ref_poc_array[LAST3] = get_ref_poc(context_ptr, pcs_ptr->picture_number, six_level_hierarchical_pred_struct[gop_i].ref_list0[2]);
+                    av1_rps->ref_poc_array[GOLD] = av1_rps->ref_poc_array[LAST];
+
+                    av1_rps->ref_poc_array[BWD] = get_ref_poc(context_ptr, pcs_ptr->picture_number, six_level_hierarchical_pred_struct[gop_i].ref_list1[0]);
+                    av1_rps->ref_poc_array[ALT2] = get_ref_poc(context_ptr, pcs_ptr->picture_number, six_level_hierarchical_pred_struct[gop_i].ref_list1[1]);
+                    av1_rps->ref_poc_array[ALT] = get_ref_poc(context_ptr, pcs_ptr->picture_number, six_level_hierarchical_pred_struct[gop_i].ref_list1[2]);
+                }
+                else if (picture_index == 18) {
+                    //{1, 3, 19, 35}, // GOP Index 19 - Ref List 0
+                    //{-1, -5, -13, 0} // GOP Index 19 - Ref List 1
+                    av1_rps->ref_dpb_index[LAST] = lay4_idx;
+                    av1_rps->ref_dpb_index[LAST2] = lay1_1_idx;
+                    av1_rps->ref_dpb_index[LAST3] = base1_idx;
+                    av1_rps->ref_dpb_index[GOLD] = lay1_0_idx;
+                    av1_rps->ref_dpb_index[BWD] = lay3_idx;
+                    av1_rps->ref_dpb_index[ALT2] = lay2_idx;
+                    av1_rps->ref_dpb_index[ALT] = base2_idx;
+                    gop_i = 19;
+                    av1_rps->ref_poc_array[LAST] = get_ref_poc(context_ptr, pcs_ptr->picture_number, six_level_hierarchical_pred_struct[gop_i].ref_list0[0]);
+                    av1_rps->ref_poc_array[LAST2] = get_ref_poc(context_ptr, pcs_ptr->picture_number, six_level_hierarchical_pred_struct[gop_i].ref_list0[1]);
+                    av1_rps->ref_poc_array[LAST3] = get_ref_poc(context_ptr, pcs_ptr->picture_number, six_level_hierarchical_pred_struct[gop_i].ref_list0[2]);
+                    av1_rps->ref_poc_array[GOLD] = get_ref_poc(context_ptr, pcs_ptr->picture_number, six_level_hierarchical_pred_struct[gop_i].ref_list0[3]);
+
+                    av1_rps->ref_poc_array[BWD] = get_ref_poc(context_ptr, pcs_ptr->picture_number, six_level_hierarchical_pred_struct[gop_i].ref_list1[0]);
+                    av1_rps->ref_poc_array[ALT2] = get_ref_poc(context_ptr, pcs_ptr->picture_number, six_level_hierarchical_pred_struct[gop_i].ref_list1[1]);
+                    av1_rps->ref_poc_array[ALT] = get_ref_poc(context_ptr, pcs_ptr->picture_number, six_level_hierarchical_pred_struct[gop_i].ref_list1[2]);
+                }
+                else if (picture_index == 20) {
+                    //{1, 5, 21, 37}, // GOP Index 21 - Ref List 0
+                    //{-1, -3, -11, 0} // GOP Index 21 - Ref List 1
+                    av1_rps->ref_dpb_index[LAST] = lay3_idx;
+                    av1_rps->ref_dpb_index[LAST2] = lay1_1_idx;
+                    av1_rps->ref_dpb_index[LAST3] = base1_idx;
+                    av1_rps->ref_dpb_index[GOLD] = lay1_0_idx;
+                    av1_rps->ref_dpb_index[BWD] = lay4_idx;
+                    av1_rps->ref_dpb_index[ALT2] = lay2_idx;
+                    av1_rps->ref_dpb_index[ALT] = base2_idx;
+                    gop_i = 21;
+                    av1_rps->ref_poc_array[LAST] = get_ref_poc(context_ptr, pcs_ptr->picture_number, six_level_hierarchical_pred_struct[gop_i].ref_list0[0]);
+                    av1_rps->ref_poc_array[LAST2] = get_ref_poc(context_ptr, pcs_ptr->picture_number, six_level_hierarchical_pred_struct[gop_i].ref_list0[1]);
+                    av1_rps->ref_poc_array[LAST3] = get_ref_poc(context_ptr, pcs_ptr->picture_number, six_level_hierarchical_pred_struct[gop_i].ref_list0[2]);
+                    av1_rps->ref_poc_array[GOLD] = get_ref_poc(context_ptr, pcs_ptr->picture_number, six_level_hierarchical_pred_struct[gop_i].ref_list0[3]);
+
+                    av1_rps->ref_poc_array[BWD] = get_ref_poc(context_ptr, pcs_ptr->picture_number, six_level_hierarchical_pred_struct[gop_i].ref_list1[0]);
+                    av1_rps->ref_poc_array[ALT2] = get_ref_poc(context_ptr, pcs_ptr->picture_number, six_level_hierarchical_pred_struct[gop_i].ref_list1[1]);
+                    av1_rps->ref_poc_array[ALT] = get_ref_poc(context_ptr, pcs_ptr->picture_number, six_level_hierarchical_pred_struct[gop_i].ref_list1[2]);
+                }
+                else if (picture_index == 22) {
+                    //{1, 3, 7, 23}, // GOP Index 23 - Ref List 0
+                    //{-1, -9, 0, 0} // GOP Index 23 - Ref List 1
+                    av1_rps->ref_dpb_index[LAST] = lay4_idx;
+                    av1_rps->ref_dpb_index[LAST2] = lay3_idx;
+                    av1_rps->ref_dpb_index[LAST3] = lay1_1_idx;
+                    av1_rps->ref_dpb_index[GOLD] = base1_idx;
+                    av1_rps->ref_dpb_index[BWD] = lay2_idx;
+                    av1_rps->ref_dpb_index[ALT2] = base2_idx;
+                    av1_rps->ref_dpb_index[ALT] = av1_rps->ref_dpb_index[BWD];
+                    gop_i = 23;
+                    av1_rps->ref_poc_array[LAST] = get_ref_poc(context_ptr, pcs_ptr->picture_number, six_level_hierarchical_pred_struct[gop_i].ref_list0[0]);
+                    av1_rps->ref_poc_array[LAST2] = get_ref_poc(context_ptr, pcs_ptr->picture_number, six_level_hierarchical_pred_struct[gop_i].ref_list0[1]);
+                    av1_rps->ref_poc_array[LAST3] = get_ref_poc(context_ptr, pcs_ptr->picture_number, six_level_hierarchical_pred_struct[gop_i].ref_list0[2]);
+                    av1_rps->ref_poc_array[GOLD] = get_ref_poc(context_ptr, pcs_ptr->picture_number, six_level_hierarchical_pred_struct[gop_i].ref_list0[3]);
+
+                    av1_rps->ref_poc_array[BWD] = get_ref_poc(context_ptr, pcs_ptr->picture_number, six_level_hierarchical_pred_struct[gop_i].ref_list1[0]);
+                    av1_rps->ref_poc_array[ALT2] = get_ref_poc(context_ptr, pcs_ptr->picture_number, six_level_hierarchical_pred_struct[gop_i].ref_list1[1]);
+                    av1_rps->ref_poc_array[ALT] = av1_rps->ref_poc_array[BWD];
+                }
+                else if (picture_index == 24) {
+                    //{1, 9, 25, 0}, // GOP Index 25 - Ref List 0
+                    //{-1, -3, -7, 0} // GOP Index 25 - Ref List 1
+                    av1_rps->ref_dpb_index[LAST] = lay2_idx;
+                    av1_rps->ref_dpb_index[LAST2] = lay1_1_idx;
+                    av1_rps->ref_dpb_index[LAST3] = base1_idx;
+                    av1_rps->ref_dpb_index[GOLD] = av1_rps->ref_dpb_index[LAST];
+                    av1_rps->ref_dpb_index[BWD] = lay4_idx;
+                    av1_rps->ref_dpb_index[ALT2] = lay3_idx;
+                    av1_rps->ref_dpb_index[ALT] = base2_idx;
+                    gop_i = 25;
+                    av1_rps->ref_poc_array[LAST] = get_ref_poc(context_ptr, pcs_ptr->picture_number, six_level_hierarchical_pred_struct[gop_i].ref_list0[0]);
+                    av1_rps->ref_poc_array[LAST2] = get_ref_poc(context_ptr, pcs_ptr->picture_number, six_level_hierarchical_pred_struct[gop_i].ref_list0[1]);
+                    av1_rps->ref_poc_array[LAST3] = get_ref_poc(context_ptr, pcs_ptr->picture_number, six_level_hierarchical_pred_struct[gop_i].ref_list0[2]);
+                    av1_rps->ref_poc_array[GOLD] = av1_rps->ref_poc_array[LAST];
+
+                    av1_rps->ref_poc_array[BWD] = get_ref_poc(context_ptr, pcs_ptr->picture_number, six_level_hierarchical_pred_struct[gop_i].ref_list1[0]);
+                    av1_rps->ref_poc_array[ALT2] = get_ref_poc(context_ptr, pcs_ptr->picture_number, six_level_hierarchical_pred_struct[gop_i].ref_list1[1]);
+                    av1_rps->ref_poc_array[ALT] = get_ref_poc(context_ptr, pcs_ptr->picture_number, six_level_hierarchical_pred_struct[gop_i].ref_list1[2]);
+                }
+                else if (picture_index == 26) {
+                    //{1, 3, 11, 27}, // GOP Index 27 - Ref List 0
+                    //{-1, -5, 0, 0} // GOP Index 27 - Ref List 1
+                    av1_rps->ref_dpb_index[LAST] = lay4_idx;
+                    av1_rps->ref_dpb_index[LAST2] = lay2_idx;
+                    av1_rps->ref_dpb_index[LAST3] = lay1_1_idx;
+                    av1_rps->ref_dpb_index[GOLD] = base1_idx;
+                    av1_rps->ref_dpb_index[BWD] = lay3_idx;
+                    av1_rps->ref_dpb_index[ALT2] = base2_idx;
+                    av1_rps->ref_dpb_index[ALT] = av1_rps->ref_dpb_index[BWD];
+                    gop_i = 27;
+                    av1_rps->ref_poc_array[LAST] = get_ref_poc(context_ptr, pcs_ptr->picture_number, six_level_hierarchical_pred_struct[gop_i].ref_list0[0]);
+                    av1_rps->ref_poc_array[LAST2] = get_ref_poc(context_ptr, pcs_ptr->picture_number, six_level_hierarchical_pred_struct[gop_i].ref_list0[1]);
+                    av1_rps->ref_poc_array[LAST3] = get_ref_poc(context_ptr, pcs_ptr->picture_number, six_level_hierarchical_pred_struct[gop_i].ref_list0[2]);
+                    av1_rps->ref_poc_array[GOLD] = get_ref_poc(context_ptr, pcs_ptr->picture_number, six_level_hierarchical_pred_struct[gop_i].ref_list0[3]);
+
+                    av1_rps->ref_poc_array[BWD] = get_ref_poc(context_ptr, pcs_ptr->picture_number, six_level_hierarchical_pred_struct[gop_i].ref_list1[0]);
+                    av1_rps->ref_poc_array[ALT2] = get_ref_poc(context_ptr, pcs_ptr->picture_number, six_level_hierarchical_pred_struct[gop_i].ref_list1[1]);
+                    av1_rps->ref_poc_array[ALT] = av1_rps->ref_poc_array[BWD];
+                }
+                else if (picture_index == 28) {
+                    //{1, 5, 13, 29}, // GOP Index 29 - Ref List 0
+                    //{-1, -3, 0, 0} // GOP Index 29 - Ref List 1
+                    av1_rps->ref_dpb_index[LAST] = lay3_idx;
+                    av1_rps->ref_dpb_index[LAST2] = lay2_idx;
+                    av1_rps->ref_dpb_index[LAST3] = lay1_1_idx;
+                    av1_rps->ref_dpb_index[GOLD] = base1_idx;
+                    av1_rps->ref_dpb_index[BWD] = lay4_idx;
+                    av1_rps->ref_dpb_index[ALT2] = base2_idx;
+                    av1_rps->ref_dpb_index[ALT] = av1_rps->ref_dpb_index[BWD];
+                    gop_i = 29;
+                    av1_rps->ref_poc_array[LAST] = get_ref_poc(context_ptr, pcs_ptr->picture_number, six_level_hierarchical_pred_struct[gop_i].ref_list0[0]);
+                    av1_rps->ref_poc_array[LAST2] = get_ref_poc(context_ptr, pcs_ptr->picture_number, six_level_hierarchical_pred_struct[gop_i].ref_list0[1]);
+                    av1_rps->ref_poc_array[LAST3] = get_ref_poc(context_ptr, pcs_ptr->picture_number, six_level_hierarchical_pred_struct[gop_i].ref_list0[2]);
+                    av1_rps->ref_poc_array[GOLD] = get_ref_poc(context_ptr, pcs_ptr->picture_number, six_level_hierarchical_pred_struct[gop_i].ref_list0[3]);
+
+                    av1_rps->ref_poc_array[BWD] = get_ref_poc(context_ptr, pcs_ptr->picture_number, six_level_hierarchical_pred_struct[gop_i].ref_list1[0]);
+                    av1_rps->ref_poc_array[ALT2] = get_ref_poc(context_ptr, pcs_ptr->picture_number, six_level_hierarchical_pred_struct[gop_i].ref_list1[1]);
+                    av1_rps->ref_poc_array[ALT] = av1_rps->ref_poc_array[BWD];
+                }
+                else if (picture_index == 30) {
+                    //{1, 3, 7, 15}, // GOP Index 31 - Ref List 0
+                    //{-1, 0, 0, 0} // GOP Index 31 - Ref List 1
+                    av1_rps->ref_dpb_index[LAST] = lay4_idx;
+                    av1_rps->ref_dpb_index[LAST2] = lay3_idx;
+                    av1_rps->ref_dpb_index[LAST3] = lay2_idx;
+                    av1_rps->ref_dpb_index[GOLD] = lay1_1_idx;
+                    av1_rps->ref_dpb_index[BWD] = base2_idx;
+                    av1_rps->ref_dpb_index[ALT2] = av1_rps->ref_dpb_index[BWD];
+                    av1_rps->ref_dpb_index[ALT] = av1_rps->ref_dpb_index[BWD];
+                    gop_i = 31;
+                    av1_rps->ref_poc_array[LAST] = get_ref_poc(context_ptr, pcs_ptr->picture_number, six_level_hierarchical_pred_struct[gop_i].ref_list0[0]);
+                    av1_rps->ref_poc_array[LAST2] = get_ref_poc(context_ptr, pcs_ptr->picture_number, six_level_hierarchical_pred_struct[gop_i].ref_list0[1]);
+                    av1_rps->ref_poc_array[LAST3] = get_ref_poc(context_ptr, pcs_ptr->picture_number, six_level_hierarchical_pred_struct[gop_i].ref_list0[2]);
+                    av1_rps->ref_poc_array[GOLD] = get_ref_poc(context_ptr, pcs_ptr->picture_number, six_level_hierarchical_pred_struct[gop_i].ref_list0[3]);
+
+                    av1_rps->ref_poc_array[BWD] = get_ref_poc(context_ptr, pcs_ptr->picture_number, six_level_hierarchical_pred_struct[gop_i].ref_list1[0]);
+                    av1_rps->ref_poc_array[ALT2] = av1_rps->ref_poc_array[BWD];
+                    av1_rps->ref_poc_array[ALT] = av1_rps->ref_poc_array[BWD];
+                }
+                else
+                    SVT_LOG("Error in GOp indexing\n");
+            }
+
+            av1_rps->refresh_frame_mask = 0;
+            break;
+
+        default:
+            SVT_LOG("Error: unexpected picture mini Gop number\n");
+            break;
+        }
+
+
+        prune_refs(pred_position_ptr, av1_rps);
+
+        if (!set_frame_display_params(pcs_ptr, context_ptr, mini_gop_index)) {
+            if (pcs_ptr->is_used_as_reference_flag && (picture_index % 8 != 0)) {
+                frm_hdr->show_frame = EB_FALSE;
+                pcs_ptr->has_show_existing = EB_FALSE;
+            } else {
+                frm_hdr->show_frame = EB_TRUE;
+                pcs_ptr->has_show_existing = EB_TRUE;
+
+                if (picture_index == 0)
+                    frm_hdr->show_existing_frame = lay4_idx;
+                else if (picture_index == 2)
+                    frm_hdr->show_existing_frame = lay3_idx;
+                else if (picture_index == 4)
+                    frm_hdr->show_existing_frame = lay4_idx;
+                else if (picture_index == 6)
+                    frm_hdr->show_existing_frame = lay2_idx;
+                else if (picture_index == 8)
+                    frm_hdr->show_existing_frame = lay4_idx;
+                else if (picture_index == 10)
+                    frm_hdr->show_existing_frame = lay3_idx;
+                else if (picture_index == 12)
+                    frm_hdr->show_existing_frame = lay4_idx;
+                else if (picture_index == 14)
+                    frm_hdr->show_existing_frame = lay1_1_idx;
+                else if (picture_index == 16)
+                    frm_hdr->show_existing_frame = lay4_idx;
+                else if (picture_index == 18)
+                    frm_hdr->show_existing_frame = lay3_idx;
+                else if (picture_index == 20)
+                    frm_hdr->show_existing_frame = lay4_idx;
+                else if (picture_index == 22)
+                    frm_hdr->show_existing_frame = lay2_idx;
+                else if (picture_index == 24)
+                    frm_hdr->show_existing_frame = lay4_idx;
+                else if (picture_index == 26)
+                    frm_hdr->show_existing_frame = lay3_idx;
+                else if (picture_index == 28)
+                    frm_hdr->show_existing_frame = lay4_idx;
+                else if (picture_index == 30)
+                    frm_hdr->show_existing_frame = base2_idx;
+                else
+                    SVT_LOG("Error in GOP indexing for hierarchical level %d\n", pcs_ptr->hierarchical_levels);
+            }
+        }
+
+        //last pic in MiniGop: Base layer toggling
+        //mini GOP toggling since last Key Frame.
+        //a regular I keeps the toggling process and does not reset the toggle.  K-0-1-0-1-0-K-0-1-0-1-K-0-1.....
+        //whoever needs a miniGOP Level toggling, this is the time
+        if (((picture_index == (context_ptr->mini_gop_end_index[mini_gop_index]) &&
+                        !pcs_ptr->is_overlay &&
+                        scs_ptr->static_config.pred_structure == EB_PRED_RANDOM_ACCESS)) ||
+                ((scs_ptr->static_config.pred_structure == EB_PRED_LOW_DELAY_P ||
+                  scs_ptr->static_config.pred_structure == EB_PRED_LOW_DELAY_B) &&
+                 (pcs_ptr->temporal_layer_index == 0))) {
+
+            //Layer0 toggle 0->1
+            context_ptr->lay0_toggle = circ_inc(3, 1, context_ptr->lay0_toggle);
+            //Layer1 toggle 2->3
+            context_ptr->lay1_toggle = 1 - context_ptr->lay1_toggle;
+        }
+#else
     } else if (pcs_ptr->hierarchical_levels == 5) {
         uint8_t gop_i = 0;
 
@@ -2711,6 +3522,7 @@ static void  av1_generate_rps_info(
             context_ptr->lay0_toggle = circ_inc(3, 1, context_ptr->lay0_toggle);
         }
 
+#endif
     }else {
         SVT_LOG("Error: Not supported GOP structure!");
         exit(0);
@@ -3269,99 +4081,106 @@ static __inline uint32_t compute_luma_sad_between_center_and_target_frame(
     return ahd;
 }
 
+/* Picture Decision Kernel */
+
 /***************************************************************************************************
- * Picture Decision Kernel
- *
- * Notes on the Picture Decision:
- *
- * The Picture Decision process performs multi-picture level decisions, including setting of the prediction structure,
- * setting the picture type and scene change detection.
- *
- * Inputs:
- * Input Picture
- *   -Input Picture Data
- *
- *  Outputs:
- *   -Picture Control Set with fully available PA Reference List
- *
- *  For Low Delay Sequences, pictures are started into the encoder pipeline immediately.
- *
- *  For Random Access Sequences, pictures are held for up to a PredictionStructurePeriod
- *    in order to determine if a Scene Change or Intra Frame is forthcoming. Either of
- *    those events (and additionally a End of Sequence Flag) will change the expected
- *    prediction structure.
- *
- *  Below is an example worksheet for how Intra Flags and Scene Change Flags interact
- *    together to affect the prediction structure.
- *
- *  The base prediction structure for this example is a 3-Level Hierarchical Random Access,
- *    Single Reference Prediction Structure:
- *
- *        b   b
- *       / \ / \
- *      /   b   \
- *     /   / \   \
- *    I-----------b
- *
- *  From this base structure, the following RPS positions are derived:
- *
- *    p   p       b   b       p   p
- *     \   \     / \ / \     /   /
- *      P   \   /   b   \   /   P
- *       \   \ /   / \   \ /   /
- *        ----I-----------b----
- *
- *    L L L   I  [ Normal ]   T T T
- *    2 1 0   n               0 1 2
- *            t
- *            r
- *            a
- *
- *  The RPS is composed of Leading Picture [L2-L0], Intra (CRA), Base/Normal Pictures,
- *    and Trailing Pictures [T0-t2]. Generally speaking, Leading Pictures are useful
- *    for handling scene changes without adding extraneous I-pictures and the Trailing
- *    pictures are useful for terminating GOPs.
- *
- *  Here is a table of possible combinations of pictures needed to handle intra and
- *    scene changes happening in quick succession.
- *
- *        Distance to scene change ------------>
- *
- *                  0              1                 2                3+
- *   I
- *   n
- *   t   0        I   I           n/a               n/a              n/a
- *   r
- *   a              p              p
- *                   \            /
- *   P   1        I   I          I   I              n/a              n/a
- *   e
- *   r               p                               p
- *   i                \                             /
- *   o            p    \         p   p             /   p
- *   d             \    \       /     \           /   /
- *       2     I    -----I     I       I         I----    I          n/a
- *   |
- *   |            p   p           p   p            p   p            p   p
- *   |             \   \         /     \          /     \          /   /
- *   |              P   \       /   p   \        /   p   \        /   P
- *   |               \   \     /     \   \      /   /     \      /   /
- *   V   3+   I       ----I   I       ----I    I----       I    I----       I
- *
- *   The table is interpreted as follows:
- *
- *   If there are no SCs or Intras encountered for a PredPeriod, then the normal
- *     prediction structure is applied.
- *
- *   If there is an intra in the PredPeriod, then one of the above combinations of
- *     Leading and Trailing pictures is used.  If there is no scene change, the last
- *     valid column consisting of Trailing Pictures only is used.  However, if there
- *     is an upcoming scene change before the next intra, then one of the above patterns
- *     is used. In the case of End of Sequence flags, only the last valid column of Trailing
- *     Pictures is used. The intention here is that any combination of Intra Flag and Scene
- *     Change flag can be coded.
- *
- ***************************************************************************************************/
+*
+* @brief
+*  The Picture Decision process performs multi-picture level decisions, including setting of the prediction structure,
+*  setting the picture type and performing scene change detection.
+*
+* @par Description:
+*  Since the prior Picture Analysis process stage is multithreaded, inputs to the Picture Decision Process can arrive
+*  out-of-display-order, so a reordering queue is used to enforce processing of pictures in display order. The algorithms
+*  employed in the Picture Decision process are dependent on prior pictures’ statistics, so the order in which pictures are
+*  processed must be strictly enforced. Additionally, the Picture Decision process uses the reorder queue to hold input pictures
+*  until they can be started into the Motion Estimation process while following the proper prediction structure.
+*
+* @param[in] Pictures
+*  The Picture Decision Process takes images spontaneously as they arive and perform multi-picture level decisions,
+*  including setting of the picture structure, setting the picture type and scene change detection.
+*
+* @param[out] Picture Control Set
+*  Picture Control Set with fully available Picture Analysis Reference List
+*
+* @remarks
+*  For Low Delay Sequences, pictures are started into the encoder pipeline immediately.
+*
+*  For Random Access Sequences, pictures are held for up to a PredictionStructurePeriod
+*    in order to determine if a Scene Change or Intra Frame is forthcoming. Either of
+*    those events (and additionally a End of Sequence Flag) will change the expected
+*    prediction structure.
+*
+*  Below is an example worksheet for how Intra Flags and Scene Change Flags interact
+*    together to affect the prediction structure.
+*
+*  The base prediction structure for this example is a 3-Level Hierarchical Random Access,
+*    Single Reference Prediction Structure:
+*
+*        b   b
+*       / \ / \
+*      /   b   \
+*     /   / \   \
+*    I-----------b
+*
+*  From this base structure, the following RPS positions are derived:
+*
+*    p   p       b   b       p   p
+*     \   \     / \ / \     /   /
+*      P   \   /   b   \   /   P
+*       \   \ /   / \   \ /   /
+*        ----I-----------b----
+*
+*    L L L   I  [ Normal ]   T T T
+*    2 1 0   n               0 1 2
+*            t
+*            r
+*            a
+*
+*  The RPS is composed of Leading Picture [L2-L0], Intra (CRA), Base/Normal Pictures,
+*    and Trailing Pictures [T0-t2]. Generally speaking, Leading Pictures are useful
+*    for handling scene changes without adding extraneous I-pictures and the Trailing
+*    pictures are useful for terminating GOPs.
+*
+*  Here is a table of possible combinations of pictures needed to handle intra and
+*    scene changes happening in quick succession.
+*
+*        Distance to scene change ------------>
+*
+*                  0              1                 2                3+
+*   I
+*   n
+*   t   0        I   I           n/a               n/a              n/a
+*   r
+*   a              p              p
+*                   \            /
+*   P   1        I   I          I   I              n/a              n/a
+*   e
+*   r               p                               p
+*   i                \                             /
+*   o            p    \         p   p             /   p
+*   d             \    \       /     \           /   /
+*       2     I    -----I     I       I         I----    I          n/a
+*   |
+*   |            p   p           p   p            p   p            p   p
+*   |             \   \         /     \          /     \          /   /
+*   |              P   \       /   p   \        /   p   \        /   P
+*   |               \   \     /     \   \      /   /     \      /   /
+*   V   3+   I       ----I   I       ----I    I----       I    I----       I
+*
+*   The table is interpreted as follows:
+*
+*   If there are no SCs or Intras encountered for a PredPeriod, then the normal
+*     prediction structure is applied.
+*
+*   If there is an intra in the PredPeriod, then one of the above combinations of
+*     Leading and Trailing pictures is used.  If there is no scene change, the last
+*     valid column consisting of Trailing Pictures only is used.  However, if there
+*     is an upcoming scene change before the next intra, then one of the above patterns
+*     is used. In the case of End of Sequence flags, only the last valid column of Trailing
+*     Pictures is used. The intention here is that any combination of Intra Flag and Scene
+*     Change flag can be coded.
+***************************************************************************************************/
 void* picture_decision_kernel(void *input_ptr)
 {
     EbThreadContext               *thread_context_ptr = (EbThreadContext*)input_ptr;

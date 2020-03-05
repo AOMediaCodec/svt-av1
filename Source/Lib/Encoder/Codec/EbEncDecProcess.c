@@ -249,11 +249,17 @@ static void reset_enc_dec(EncDecContext *context_ptr, PictureControlSet *pcs_ptr
     (*av1_lambda_assignment_function_table[pcs_ptr->parent_pcs_ptr->pred_structure])(
         &context_ptr->fast_lambda,
         &context_ptr->full_lambda,
+#if !NEW_MD_LAMBDA
         &context_ptr->fast_chroma_lambda,
         &context_ptr->full_chroma_lambda,
+#endif
         (uint8_t)pcs_ptr->parent_pcs_ptr->enhanced_picture_ptr->bit_depth,
         context_ptr->qp_index,
+#if OMARK_HBD0_ED && OMARK_LAMBDA
+        EB_TRUE);
+#else
         context_ptr->md_context->hbd_mode_decision);
+#endif
     // Reset MD rate Estimation table to initial values by copying from md_rate_estimation_array
     if (context_ptr->is_md_rate_estimation_ptr_owner) {
         EB_FREE(context_ptr->md_rate_estimation_ptr);
@@ -303,11 +309,17 @@ static void enc_dec_configure_sb(EncDecContext *context_ptr, SuperBlock *sb_ptr,
     (*av1_lambda_assignment_function_table[pcs_ptr->parent_pcs_ptr->pred_structure])(
         &context_ptr->fast_lambda,
         &context_ptr->full_lambda,
+#if !NEW_MD_LAMBDA
         &context_ptr->fast_chroma_lambda,
         &context_ptr->full_chroma_lambda,
+#endif
         (uint8_t)pcs_ptr->parent_pcs_ptr->enhanced_picture_ptr->bit_depth,
         context_ptr->qp_index,
+#if OMARK_HBD0_ED && OMARK_LAMBDA
+        EB_TRUE);
+#else
         context_ptr->md_context->hbd_mode_decision);
+#endif
 
     return;
 }
@@ -1421,7 +1433,13 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(SequenceControlSet * scs_ptr,
 
     } else // use specified level
         context_ptr->chroma_level = scs_ptr->static_config.set_chroma_mode;
-
+#if MOVE_OPT
+    // Chroma independent modes search
+    // Level                Settings
+    // 0                    post first md_stage
+    // 1                    post last md_stage
+    context_ptr->chroma_at_last_md_stage = (context_ptr->chroma_level == CHROMA_MODE_0) /*&& (pcs_ptr->enc_mode == ENC_M1)*/ ? 1 : 0;
+#endif
     // Set the full loop escape level
     // Level                Settings
     // 0                    Off
@@ -1741,24 +1759,24 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(SequenceControlSet * scs_ptr,
     else
         context_ptr->blk_skip_decision = EB_FALSE;
 
-    // Derive Trellis Quant Coeff Optimization Flag
+    // Derive enable_rdoqFlag
     if (context_ptr->pd_pass == PD_PASS_0)
-        context_ptr->trellis_quant_coeff_optimization = EB_FALSE;
+        context_ptr->enable_rdoq = EB_FALSE;
     else if (context_ptr->pd_pass == PD_PASS_1)
-        context_ptr->trellis_quant_coeff_optimization = EB_FALSE;
-    else if (scs_ptr->static_config.enable_trellis == DEFAULT)
+        context_ptr->enable_rdoq = EB_FALSE;
+    else if (scs_ptr->static_config.enable_rdoq == DEFAULT)
         if (pcs_ptr->parent_pcs_ptr->sc_content_detected)
             if (pcs_ptr->enc_mode <= ENC_M2)
-                context_ptr->trellis_quant_coeff_optimization = EB_TRUE;
+                context_ptr->enable_rdoq = EB_TRUE;
             else
-                context_ptr->trellis_quant_coeff_optimization = EB_FALSE;
+                context_ptr->enable_rdoq = EB_FALSE;
         else if (pcs_ptr->enc_mode <= ENC_M2)
-            context_ptr->trellis_quant_coeff_optimization = EB_TRUE;
+            context_ptr->enable_rdoq = EB_TRUE;
         else
-            context_ptr->trellis_quant_coeff_optimization = EB_FALSE;
+            context_ptr->enable_rdoq = EB_FALSE;
 
     else
-        context_ptr->trellis_quant_coeff_optimization = scs_ptr->static_config.enable_trellis;
+        context_ptr->enable_rdoq = scs_ptr->static_config.enable_rdoq;
 
     // Derive redundant block
     if (context_ptr->pd_pass == PD_PASS_0)
@@ -1826,66 +1844,66 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(SequenceControlSet * scs_ptr,
     else
         context_ptr->md_exit_th = (pcs_ptr->parent_pcs_ptr->sc_content_detected) ? 10 : 18;
 
-    // md_fast_cost_cand_prune_th (for single candidate removal per class)
-    // Remove candidate if deviation to the best is higher than md_fast_cost_cand_prune_th
+    // md_stage_1_cand_prune_th (for single candidate removal per class)
+    // Remove candidate if deviation to the best is higher than md_stage_1_cand_prune_th
     if (context_ptr->pd_pass == PD_PASS_0)
-        context_ptr->md_fast_cost_cand_prune_th = (uint64_t)~0;
+        context_ptr->md_stage_1_cand_prune_th = (uint64_t)~0;
     else if (context_ptr->pd_pass == PD_PASS_1)
-        context_ptr->md_fast_cost_cand_prune_th = 75;
+        context_ptr->md_stage_1_cand_prune_th = 75;
     else if (MR_MODE ||
              (pcs_ptr->enc_mode == ENC_M0 && (pcs_ptr->parent_pcs_ptr->sc_content_detected == 0)) ||
              scs_ptr->input_resolution == INPUT_SIZE_576p_RANGE_OR_LOWER)
-        context_ptr->md_fast_cost_cand_prune_th = (uint64_t)~0;
+        context_ptr->md_stage_1_cand_prune_th = (uint64_t)~0;
     else if (pcs_ptr->enc_mode <= ENC_M4)
-        context_ptr->md_fast_cost_cand_prune_th = scs_ptr->static_config.md_fast_cost_cand_prune_th;
+        context_ptr->md_stage_1_cand_prune_th = scs_ptr->static_config.md_stage_1_cand_prune_th;
     else
-        context_ptr->md_fast_cost_cand_prune_th = (uint64_t)~0;
+        context_ptr->md_stage_1_cand_prune_th = (uint64_t)~0;
 
-    // md_fast_cost_class_prune_th (for class removal)
+    // md_stage_1_class_prune_th (for class removal)
     // Remove class if deviation to the best higher than TH_C
     if (context_ptr->pd_pass == PD_PASS_0)
-        context_ptr->md_fast_cost_class_prune_th = (uint64_t)~0;
+        context_ptr->md_stage_1_class_prune_th = (uint64_t)~0;
     else if (context_ptr->pd_pass == PD_PASS_1)
-        context_ptr->md_fast_cost_class_prune_th = 100;
+        context_ptr->md_stage_1_class_prune_th = 100;
     else if (MR_MODE ||
              (pcs_ptr->enc_mode == ENC_M0 && (pcs_ptr->parent_pcs_ptr->sc_content_detected == 0)) ||
              scs_ptr->input_resolution == INPUT_SIZE_576p_RANGE_OR_LOWER)
-        context_ptr->md_fast_cost_class_prune_th = (uint64_t)~0;
+        context_ptr->md_stage_1_class_prune_th = (uint64_t)~0;
     else if (pcs_ptr->enc_mode <= ENC_M4)
-        context_ptr->md_fast_cost_class_prune_th = scs_ptr->static_config.md_fast_cost_class_prune_th;
+        context_ptr->md_stage_1_class_prune_th = scs_ptr->static_config.md_stage_1_class_prune_th;
     else
-        context_ptr->md_fast_cost_class_prune_th = (uint64_t)~0;
+        context_ptr->md_stage_1_class_prune_th = (uint64_t)~0;
 
-    // md_full_cost_cand_prune_th (for single candidate removal per class)
-    // Remove candidate if deviation to the best is higher than md_full_cost_cand_prune_th
+    // md_stage_2_3_cand_prune_th (for single candidate removal per class)
+    // Remove candidate if deviation to the best is higher than md_stage_2_3_cand_prune_th
     if (context_ptr->pd_pass == PD_PASS_0)
-        context_ptr->md_full_cost_cand_prune_th = (uint64_t)~0;
+        context_ptr->md_stage_2_3_cand_prune_th = (uint64_t)~0;
     else if (context_ptr->pd_pass == PD_PASS_1)
-        context_ptr->md_full_cost_cand_prune_th =
+        context_ptr->md_stage_2_3_cand_prune_th =
             scs_ptr->input_resolution <= INPUT_SIZE_1080i_RANGE ? 5 : 3;
     else if (MR_MODE || pcs_ptr->parent_pcs_ptr->sc_content_detected || pcs_ptr->enc_mode <= ENC_M0)
-        context_ptr->md_full_cost_cand_prune_th = (uint64_t)~0;
+        context_ptr->md_stage_2_3_cand_prune_th = (uint64_t)~0;
     else if (pcs_ptr->enc_mode <= ENC_M2)
-        context_ptr->md_full_cost_cand_prune_th =
+        context_ptr->md_stage_2_3_cand_prune_th =
             scs_ptr->input_resolution <= INPUT_SIZE_1080i_RANGE ? 15 : 12;
     else if (pcs_ptr->enc_mode <= ENC_M4)
-        context_ptr->md_full_cost_cand_prune_th =
+        context_ptr->md_stage_2_3_cand_prune_th =
             scs_ptr->input_resolution <= INPUT_SIZE_1080i_RANGE ? 5 : 3;
     else
-        context_ptr->md_full_cost_cand_prune_th = (uint64_t)~0;
+        context_ptr->md_stage_2_3_cand_prune_th = (uint64_t)~0;
 
-    // md_full_cost_class_prune_th (for class removal)
-    // Remove class if deviation to the best is higher than md_full_cost_class_prune_th
+    // md_stage_2_3_class_prune_th (for class removal)
+    // Remove class if deviation to the best is higher than md_stage_2_3_class_prune_th
     if (context_ptr->pd_pass == PD_PASS_0)
-        context_ptr->md_full_cost_class_prune_th = (uint64_t)~0;
+        context_ptr->md_stage_2_3_class_prune_th = (uint64_t)~0;
     else if (context_ptr->pd_pass == PD_PASS_1)
-        context_ptr->md_full_cost_class_prune_th = 25;
+        context_ptr->md_stage_2_3_class_prune_th = 25;
     else if (MR_MODE)
-        context_ptr->md_full_cost_class_prune_th = (uint64_t)~0;
+        context_ptr->md_stage_2_3_class_prune_th = (uint64_t)~0;
     else if (pcs_ptr->enc_mode <= ENC_M4)
-        context_ptr->md_full_cost_class_prune_th = scs_ptr->static_config.md_full_cost_class_prune_th;
+        context_ptr->md_stage_2_3_class_prune_th = scs_ptr->static_config.md_stage_2_3_class_prune_th;
     else // to be tested for m5-m8
-        context_ptr->md_full_cost_class_prune_th = (uint64_t)~0;
+        context_ptr->md_stage_2_3_class_prune_th = (uint64_t)~0;
 
     // Weighting (expressed as a percentage) applied to
     // square shape costs for determining if a and b
@@ -1913,20 +1931,20 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(SequenceControlSet * scs_ptr,
 
     // Set pred ME full search area
     if (context_ptr->pd_pass == PD_PASS_0) {
-        context_ptr->full_pel_ref_window_width_th  = FULL_PEL_REF_WINDOW_WIDTH;
-        context_ptr->full_pel_ref_window_height_th = FULL_PEL_REF_WINDOW_HEIGHT;
+        context_ptr->pred_me_full_pel_search_width  = PRED_ME_FULL_PEL_SEARCH_WIDTH;
+        context_ptr->pred_me_full_pel_search_height = PRED_ME_FULL_PEL_SEARCH_HEIGHT;
     } else if (context_ptr->pd_pass == PD_PASS_1) {
-        context_ptr->full_pel_ref_window_width_th  = FULL_PEL_REF_WINDOW_WIDTH;
-        context_ptr->full_pel_ref_window_height_th = FULL_PEL_REF_WINDOW_HEIGHT;
+        context_ptr->pred_me_full_pel_search_width  = PRED_ME_FULL_PEL_SEARCH_WIDTH;
+        context_ptr->pred_me_full_pel_search_height = PRED_ME_FULL_PEL_SEARCH_HEIGHT;
     } else {
-        context_ptr->full_pel_ref_window_width_th =
+        context_ptr->pred_me_full_pel_search_width =
             (pcs_ptr->parent_pcs_ptr->sc_content_detected == 0 && pcs_ptr->enc_mode == ENC_M0)
-                ? FULL_PEL_REF_WINDOW_WIDTH_EXTENDED
-                : FULL_PEL_REF_WINDOW_WIDTH;
-        context_ptr->full_pel_ref_window_height_th =
+                ? PRED_ME_FULL_PEL_SEARCH_WIDTH_EXTENDED
+                : PRED_ME_FULL_PEL_SEARCH_WIDTH;
+        context_ptr->pred_me_full_pel_search_height =
             (pcs_ptr->parent_pcs_ptr->sc_content_detected == 0 && pcs_ptr->enc_mode == ENC_M0)
-                ? FULL_PEL_REF_WINDOW_HEIGHT_EXTENDED
-                : FULL_PEL_REF_WINDOW_HEIGHT;
+                ? PRED_ME_FULL_PEL_SEARCH_HEIGHT_EXTENDED
+                : PRED_ME_FULL_PEL_SEARCH_HEIGHT;
     }
 #if COMP_SIMILAR
     //comp_similar_mode
@@ -1969,14 +1987,6 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(SequenceControlSet * scs_ptr,
     else
         context_ptr->coeff_based_nsq_cand_reduction = EB_TRUE;
 
-    // Set rdoq_quantize_fp @ MD
-    if (context_ptr->pd_pass == PD_PASS_0)
-        context_ptr->rdoq_quantize_fp = EB_FALSE;
-    else if (context_ptr->pd_pass == PD_PASS_1)
-        context_ptr->rdoq_quantize_fp = EB_FALSE;
-    else
-        context_ptr->rdoq_quantize_fp = (pcs_ptr->enc_mode <= ENC_M7) ? EB_TRUE : EB_FALSE;
-
     // Set pic_obmc_mode @ MD
     if (context_ptr->pd_pass == PD_PASS_0)
         context_ptr->md_pic_obmc_mode = 0;
@@ -1992,6 +2002,36 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(SequenceControlSet * scs_ptr,
         context_ptr->md_enable_inter_intra = 0;
     else
         context_ptr->md_enable_inter_intra = pcs_ptr->parent_pcs_ptr->enable_inter_intra;
+
+    // Set intra_angle_delta @ MD
+    if (context_ptr->pd_pass == PD_PASS_0)
+        context_ptr->md_intra_angle_delta = 0;
+    else if (context_ptr->pd_pass == PD_PASS_1)
+        context_ptr->md_intra_angle_delta = 0;
+    else if (scs_ptr->static_config.intra_angle_delta == DEFAULT)
+        context_ptr->md_intra_angle_delta = 1;
+    else
+        context_ptr->md_intra_angle_delta = scs_ptr->static_config.intra_angle_delta;
+
+    // Set enable_paeth @ MD
+    if (context_ptr->pd_pass == PD_PASS_0)
+        context_ptr->md_enable_paeth = 1;
+    else if (context_ptr->pd_pass == PD_PASS_1)
+        context_ptr->md_enable_paeth = 1;
+    else if (pcs_ptr->parent_pcs_ptr->scs_ptr->static_config.enable_paeth == DEFAULT)
+            context_ptr->md_enable_paeth = 1;
+    else
+        context_ptr->md_enable_paeth = (uint8_t)pcs_ptr->parent_pcs_ptr->scs_ptr->static_config.enable_paeth;
+
+    // Set enable_smooth @ MD
+    if (context_ptr->pd_pass == PD_PASS_0)
+        context_ptr->md_enable_smooth = 1;
+    else if (context_ptr->pd_pass == PD_PASS_1)
+        context_ptr->md_enable_smooth = 1;
+    else if (pcs_ptr->parent_pcs_ptr->scs_ptr->static_config.enable_smooth == DEFAULT)
+            context_ptr->md_enable_smooth = 1;
+    else
+        context_ptr->md_enable_smooth = (uint8_t)pcs_ptr->parent_pcs_ptr->scs_ptr->static_config.enable_smooth;
 
     // Set md_atb_mode @ MD
     if (context_ptr->pd_pass == PD_PASS_0)
@@ -2066,7 +2106,26 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(SequenceControlSet * scs_ptr,
     else
         context_ptr->perform_me_mv_1_8_pel_ref = (pcs_ptr->parent_pcs_ptr->frm_hdr.allow_high_precision_mv);
 #endif
-
+#if NICS_CLEANUP
+    // Set nic_level for PD2 only
+    // nic_level        nic scale factor
+    // 0                1
+    // 1                3/4
+    // 2                2/3
+    // 3                1/2
+    if (pcs_ptr->parent_pcs_ptr->sc_content_detected)
+        if (pcs_ptr->enc_mode <= ENC_M1)
+            context_ptr->nic_level = 1;
+        else
+            context_ptr->nic_level = 2;
+    else
+        if (pcs_ptr->enc_mode <= ENC_M0)
+            context_ptr->nic_level = 1;
+        else if (pcs_ptr->enc_mode <= ENC_M1)
+            context_ptr->nic_level = 2;
+        else
+            context_ptr->nic_level = 3;
+#endif
     return return_error;
 }
 void copy_neighbour_arrays(PictureControlSet *pcs_ptr, ModeDecisionContext *context_ptr,
@@ -2592,9 +2651,44 @@ static void perform_pred_depth_refinement(SequenceControlSet *scs_ptr, PictureCo
     }
 }
 
-/******************************************************
- * EncDec Kernel
- ******************************************************/
+/* EncDec (Encode Decode) Kernel */
+/*********************************************************************************
+*
+* @brief
+*  The EncDec process contains both the mode decision and the encode pass engines
+*  of the encoder. The mode decision encapsulates multiple partitioning decision (PD) stages
+*  and multiple mode decision (MD) stages. At the end of the last mode decision stage,
+*  the winning partition and modes combinations per block get reconstructed in the encode pass
+*  operation which is part of the common section between the encoder and the decoder
+*  Common encoder and decoder tasks such as Intra Prediction, Motion Compensated Prediction,
+*  Transform, Quantization are performed in this process.
+*
+* @par Description:
+*  The EncDec process operates on an SB basis.
+*  The EncDec process takes as input the Motion Vector XY pairs candidates
+*  and corresponding distortion estimates from the Motion Estimation process,
+*  and the picture-level QP from the Rate Control process. All inputs are passed
+*  through the picture structures: PictureControlSet and SequenceControlSet.
+*  local structures of type EncDecContext and ModeDecisionContext contain all parameters
+*  and results corresponding to the SuperBlock being processed.
+*  each of the context structures is local to on thread and thus there's no risk of
+*  affecting (changing) other SBs data in the process.
+*
+* @param[in] Vector
+*  Motion Vector XY pairs from Motion Estimation process
+*
+* @param[in] Distortion Estimates
+*  Distortion estimates from Motion Estimation process
+*
+* @param[in] Picture QP
+*  Picture Quantization Parameter from Rate Control process
+*
+* @param[out] Blocks
+*  The encode pass takes the selected partitioning and coding modes as input from mode decision for each
+*  superblock and produces quantized transfrom coefficients for the residuals and the appropriate syntax
+*  elements to be sent to the entropy coding engine
+*
+********************************************************************************/
 void *enc_dec_kernel(void *input_ptr) {
     // Context & SCS & PCS
     EbThreadContext *   thread_context_ptr = (EbThreadContext *)input_ptr;

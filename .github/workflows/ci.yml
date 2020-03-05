@@ -222,7 +222,7 @@ jobs:
           make TestVectors
           popd
       - name: Run unit tests shard
-        run: env SVT_AV1_TEST_VECTOR_PATH="./test/vectors" GTEST_TOTAL_SHARDS=8 GTEST_SHARD_INDEX=${{ matrix.index }} ./Bin/Release/SvtAv1E2ETests
+        run: env SVT_AV1_TEST_VECTOR_PATH="./test/vectors" GTEST_TOTAL_SHARDS=8 GTEST_SHARD_INDEX=${{ matrix.index }} ./Bin/Release/SvtAv1E2ETests --gtest_filter=-*DummySrcTest*
 
   gstreamer-patch:
     runs-on: [ubuntu-18.04]

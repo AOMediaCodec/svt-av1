@@ -292,22 +292,22 @@ static INLINE void load_buffer_8x8(const int16_t *input, __m256i *in, int32_t st
     __m128i temp[8];
     if (!flipud) {
         temp[0] = _mm_loadu_si128((const __m128i *)(input + 0 * stride));
-        temp[1] = _mm_load_si128((const __m128i *)(input + 1 * stride));
-        temp[2] = _mm_load_si128((const __m128i *)(input + 2 * stride));
-        temp[3] = _mm_load_si128((const __m128i *)(input + 3 * stride));
-        temp[4] = _mm_load_si128((const __m128i *)(input + 4 * stride));
-        temp[5] = _mm_load_si128((const __m128i *)(input + 5 * stride));
-        temp[6] = _mm_load_si128((const __m128i *)(input + 6 * stride));
-        temp[7] = _mm_load_si128((const __m128i *)(input + 7 * stride));
+        temp[1] = _mm_loadu_si128((const __m128i *)(input + 1 * stride));
+        temp[2] = _mm_loadu_si128((const __m128i *)(input + 2 * stride));
+        temp[3] = _mm_loadu_si128((const __m128i *)(input + 3 * stride));
+        temp[4] = _mm_loadu_si128((const __m128i *)(input + 4 * stride));
+        temp[5] = _mm_loadu_si128((const __m128i *)(input + 5 * stride));
+        temp[6] = _mm_loadu_si128((const __m128i *)(input + 6 * stride));
+        temp[7] = _mm_loadu_si128((const __m128i *)(input + 7 * stride));
     } else {
-        temp[0] = _mm_load_si128((const __m128i *)(input + 7 * stride));
-        temp[1] = _mm_load_si128((const __m128i *)(input + 6 * stride));
-        temp[2] = _mm_load_si128((const __m128i *)(input + 5 * stride));
-        temp[3] = _mm_load_si128((const __m128i *)(input + 4 * stride));
-        temp[4] = _mm_load_si128((const __m128i *)(input + 3 * stride));
-        temp[5] = _mm_load_si128((const __m128i *)(input + 2 * stride));
-        temp[6] = _mm_load_si128((const __m128i *)(input + 1 * stride));
-        temp[7] = _mm_load_si128((const __m128i *)(input + 0 * stride));
+        temp[0] = _mm_loadu_si128((const __m128i *)(input + 7 * stride));
+        temp[1] = _mm_loadu_si128((const __m128i *)(input + 6 * stride));
+        temp[2] = _mm_loadu_si128((const __m128i *)(input + 5 * stride));
+        temp[3] = _mm_loadu_si128((const __m128i *)(input + 4 * stride));
+        temp[4] = _mm_loadu_si128((const __m128i *)(input + 3 * stride));
+        temp[5] = _mm_loadu_si128((const __m128i *)(input + 2 * stride));
+        temp[6] = _mm_loadu_si128((const __m128i *)(input + 1 * stride));
+        temp[7] = _mm_loadu_si128((const __m128i *)(input + 0 * stride));
     }
 
     if (fliplr) {
@@ -1011,10 +1011,10 @@ static void fidtx16x16_avx2(const __m256i *in, __m256i *out, int8_t bit, int32_t
 static INLINE void write_buffer_16x16(const __m256i *res, int32_t *output) {
     int32_t fact = -1, index = -1;
     for (int32_t i = 0; i < 8; i++) {
-        _mm256_store_si256((__m256i *)(output + (++fact) * 16), res[++index]);
-        _mm256_store_si256((__m256i *)(output + (fact)*16 + 8), res[++index]);
-        _mm256_store_si256((__m256i *)(output + (++fact) * 16), res[++index]);
-        _mm256_store_si256((__m256i *)(output + (fact)*16 + 8), res[++index]);
+        _mm256_storeu_si256((__m256i *)(output + (++fact) * 16), res[++index]);
+        _mm256_storeu_si256((__m256i *)(output + (fact)*16 + 8), res[++index]);
+        _mm256_storeu_si256((__m256i *)(output + (++fact) * 16), res[++index]);
+        _mm256_storeu_si256((__m256i *)(output + (fact)*16 + 8), res[++index]);
     }
 }
 
@@ -4009,9 +4009,9 @@ static INLINE void load_buffer_32x32_avx2(const int16_t *input, __m256i *output,
 
     for (i = 0; i < 32; ++i) {
         temp[0] = _mm_loadu_si128((const __m128i *)(input + 0 * 8));
-        temp[1] = _mm_load_si128((const __m128i *)(input + 1 * 8));
-        temp[2] = _mm_load_si128((const __m128i *)(input + 2 * 8));
-        temp[3] = _mm_load_si128((const __m128i *)(input + 3 * 8));
+        temp[1] = _mm_loadu_si128((const __m128i *)(input + 1 * 8));
+        temp[2] = _mm_loadu_si128((const __m128i *)(input + 2 * 8));
+        temp[3] = _mm_loadu_si128((const __m128i *)(input + 3 * 8));
 
         output[0] = _mm256_cvtepi16_epi32(temp[0]);
         output[1] = _mm256_cvtepi16_epi32(temp[1]);
@@ -4139,14 +4139,14 @@ static INLINE void load_buffer_32_avx2(const int16_t *input, __m256i *in, int32_
     __m128i temp[4];
     if (!flipud) {
         temp[0] = _mm_loadu_si128((const __m128i *)(input + 0 * stride));
-        temp[1] = _mm_load_si128((const __m128i *)(input + 1 * stride));
-        temp[2] = _mm_load_si128((const __m128i *)(input + 2 * stride));
-        temp[3] = _mm_load_si128((const __m128i *)(input + 3 * stride));
+        temp[1] = _mm_loadu_si128((const __m128i *)(input + 1 * stride));
+        temp[2] = _mm_loadu_si128((const __m128i *)(input + 2 * stride));
+        temp[3] = _mm_loadu_si128((const __m128i *)(input + 3 * stride));
     } else {
-        temp[0] = _mm_load_si128((const __m128i *)(input + 3 * stride));
-        temp[1] = _mm_load_si128((const __m128i *)(input + 2 * stride));
-        temp[2] = _mm_load_si128((const __m128i *)(input + 1 * stride));
-        temp[3] = _mm_load_si128((const __m128i *)(input + 0 * stride));
+        temp[0] = _mm_loadu_si128((const __m128i *)(input + 3 * stride));
+        temp[1] = _mm_loadu_si128((const __m128i *)(input + 2 * stride));
+        temp[2] = _mm_loadu_si128((const __m128i *)(input + 1 * stride));
+        temp[3] = _mm_loadu_si128((const __m128i *)(input + 0 * stride));
     }
 
     if (fliplr) {
@@ -4172,10 +4172,10 @@ static INLINE void load_buffer_16_avx2(const int16_t *input, __m256i *in, int32_
     __m128i temp[2];
     if (!flipud) {
         temp[0] = _mm_loadu_si128((const __m128i *)(input + 0 * stride));
-        temp[1] = _mm_load_si128((const __m128i *)(input + 1 * stride));
+        temp[1] = _mm_loadu_si128((const __m128i *)(input + 1 * stride));
     } else {
-        temp[0] = _mm_load_si128((const __m128i *)(input + 1 * stride));
-        temp[1] = _mm_load_si128((const __m128i *)(input + 0 * stride));
+        temp[0] = _mm_loadu_si128((const __m128i *)(input + 1 * stride));
+        temp[1] = _mm_loadu_si128((const __m128i *)(input + 0 * stride));
     }
 
     if (fliplr) {

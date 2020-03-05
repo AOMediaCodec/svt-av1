@@ -69,10 +69,10 @@ void compressed_packmsb_avx2_intrin(uint8_t *in8_bit_buffer, uint32_t in8_stride
             out_s0_s15  = _mm256_inserti128_si256(concat2, _mm256_castsi256_si128(concat3), 1);
             out_s16_s31 = _mm256_inserti128_si256(concat3, _mm256_extracti128_si256(concat2, 1), 0);
 
-            _mm256_store_si256((__m256i *)out16_bit_buffer, out0_15);
-            _mm256_store_si256((__m256i *)(out16_bit_buffer + 16), out16_31);
-            _mm256_store_si256((__m256i *)(out16_bit_buffer + out_stride), out_s0_s15);
-            _mm256_store_si256((__m256i *)(out16_bit_buffer + out_stride + 16), out_s16_s31);
+            _mm256_storeu_si256((__m256i *)out16_bit_buffer, out0_15);
+            _mm256_storeu_si256((__m256i *)(out16_bit_buffer + 16), out16_31);
+            _mm256_storeu_si256((__m256i *)(out16_bit_buffer + out_stride), out_s0_s15);
+            _mm256_storeu_si256((__m256i *)(out16_bit_buffer + out_stride + 16), out_s16_s31);
 
             in8_bit_buffer += in8_stride << 1;
             inn_bit_buffer += inn_stride << 1;
@@ -126,10 +126,10 @@ void compressed_packmsb_avx2_intrin(uint8_t *in8_bit_buffer, uint32_t in8_stride
             out32_47  = _mm256_inserti128_si256(concat2, _mm256_castsi256_si128(concat3), 1);
             out_48_63 = _mm256_inserti128_si256(concat3, _mm256_extracti128_si256(concat2, 1), 0);
 
-            _mm256_store_si256((__m256i *)out16_bit_buffer, out_0_15);
-            _mm256_store_si256((__m256i *)(out16_bit_buffer + 16), out16_31);
-            _mm256_store_si256((__m256i *)(out16_bit_buffer + 32), out32_47);
-            _mm256_store_si256((__m256i *)(out16_bit_buffer + 48), out_48_63);
+            _mm256_storeu_si256((__m256i *)out16_bit_buffer, out_0_15);
+            _mm256_storeu_si256((__m256i *)(out16_bit_buffer + 16), out16_31);
+            _mm256_storeu_si256((__m256i *)(out16_bit_buffer + 32), out32_47);
+            _mm256_storeu_si256((__m256i *)(out16_bit_buffer + 48), out_48_63);
 
             in8_bit_buffer += in8_stride;
             inn_bit_buffer += inn_stride;
@@ -369,10 +369,10 @@ void eb_enc_msb_pack2d_avx2_intrin_al(uint8_t *in8_bit_buffer, uint32_t in8_stri
             out_s0_s15  = _mm256_inserti128_si256(concat2, _mm256_castsi256_si128(concat3), 1);
             out_s16_s31 = _mm256_inserti128_si256(concat3, _mm256_extracti128_si256(concat2, 1), 0);
 
-            _mm256_store_si256((__m256i *)out16_bit_buffer, out0_15);
-            _mm256_store_si256((__m256i *)(out16_bit_buffer + 16), out16_31);
-            _mm256_store_si256((__m256i *)(out16_bit_buffer + out_stride), out_s0_s15);
-            _mm256_store_si256((__m256i *)(out16_bit_buffer + out_stride + 16), out_s16_s31);
+            _mm256_storeu_si256((__m256i *)out16_bit_buffer, out0_15);
+            _mm256_storeu_si256((__m256i *)(out16_bit_buffer + 16), out16_31);
+            _mm256_storeu_si256((__m256i *)(out16_bit_buffer + out_stride), out_s0_s15);
+            _mm256_storeu_si256((__m256i *)(out16_bit_buffer + out_stride + 16), out_s16_s31);
 
             in8_bit_buffer += in8_stride << 1;
             //inn_bit_buffer += inn_stride << 1;
@@ -417,15 +417,15 @@ void eb_enc_msb_pack2d_avx2_intrin_al(uint8_t *in8_bit_buffer, uint32_t in8_stri
             out_s32_s47 = _mm256_inserti128_si256(concat6, _mm256_castsi256_si128(concat7), 1);
             out_s48_s63 = _mm256_inserti128_si256(concat7, _mm256_extracti128_si256(concat6, 1), 0);
 
-            _mm256_store_si256((__m256i *)out16_bit_buffer, out_0_15);
-            _mm256_store_si256((__m256i *)(out16_bit_buffer + 16), out16_31);
-            _mm256_store_si256((__m256i *)(out16_bit_buffer + 32), out32_47);
-            _mm256_store_si256((__m256i *)(out16_bit_buffer + 48), out_48_63);
+            _mm256_storeu_si256((__m256i *)out16_bit_buffer, out_0_15);
+            _mm256_storeu_si256((__m256i *)(out16_bit_buffer + 16), out16_31);
+            _mm256_storeu_si256((__m256i *)(out16_bit_buffer + 32), out32_47);
+            _mm256_storeu_si256((__m256i *)(out16_bit_buffer + 48), out_48_63);
 
-            _mm256_store_si256((__m256i *)(out16_bit_buffer + out_stride), out_s0_s15);
-            _mm256_store_si256((__m256i *)(out16_bit_buffer + out_stride + 16), out_s16_s31);
-            _mm256_store_si256((__m256i *)(out16_bit_buffer + out_stride + 32), out_s32_s47);
-            _mm256_store_si256((__m256i *)(out16_bit_buffer + out_stride + 48), out_s48_s63);
+            _mm256_storeu_si256((__m256i *)(out16_bit_buffer + out_stride), out_s0_s15);
+            _mm256_storeu_si256((__m256i *)(out16_bit_buffer + out_stride + 16), out_s16_s31);
+            _mm256_storeu_si256((__m256i *)(out16_bit_buffer + out_stride + 32), out_s32_s47);
+            _mm256_storeu_si256((__m256i *)(out16_bit_buffer + out_stride + 48), out_s48_s63);
 
             in8_bit_buffer += in8_stride << 1;
             //inn_bit_buffer += inn_stride << 1;
@@ -633,7 +633,7 @@ void unpack_avg_avx2_intrin(uint16_t *ref16_l0, uint32_t ref_l0_stride, uint16_t
             //AVG
             avg8_0_u8 = _mm_avg_epu8(out8_0_u8_l0, out8_0_u8_l1);
 #if ALSTORE
-            _mm_store_si128((__m128i *)dst_ptr, avg8_0_u8);
+            _mm_storeu_si128((__m128i *)dst_ptr, avg8_0_u8);
 #else
             _mm_storeu_si128((__m128i *)dst_ptr, avg8_0_u8);
 #endif
@@ -661,7 +661,7 @@ void unpack_avg_avx2_intrin(uint16_t *ref16_l0, uint32_t ref_l0_stride, uint16_t
             //AVG
             avg8_2_u8 = _mm_avg_epu8(out8_2_u8_l0, out8_2_u8_l1);
 #if ALSTORE
-            _mm_store_si128((__m128i *)(dst_ptr + dst_stride), avg8_2_u8);
+            _mm_storeu_si128((__m128i *)(dst_ptr + dst_stride), avg8_2_u8);
 #else
             _mm_storeu_si128((__m128i *)(dst_ptr + dst_stride), avg8_2_u8);
 #endif
@@ -762,8 +762,8 @@ void unpack_avg_avx2_intrin(uint16_t *ref16_l0, uint32_t ref_l0_stride, uint16_t
             avg8_0_u8 = _mm_avg_epu8(out8_0_u8_l0, out8_0_u8_l1);
             avg8_1_u8 = _mm_avg_epu8(out8_1_u8_l0, out8_1_u8_l1);
 #if ALSTORE
-            _mm_store_si128((__m128i *)dst_ptr, avg8_0_u8);
-            _mm_store_si128((__m128i *)(dst_ptr + 16), avg8_1_u8);
+            _mm_storeu_si128((__m128i *)dst_ptr, avg8_0_u8);
+            _mm_storeu_si128((__m128i *)(dst_ptr + 16), avg8_1_u8);
 #else
             _mm_storeu_si128((__m128i *)dst_ptr, avg8_0_u8);
             _mm_storeu_si128((__m128i *)(dst_ptr + 16), avg8_1_u8);
@@ -801,8 +801,8 @@ void unpack_avg_avx2_intrin(uint16_t *ref16_l0, uint32_t ref_l0_stride, uint16_t
             avg8_2_u8 = _mm_avg_epu8(out8_2_u8_l0, out8_2_u8_l1);
             avg8_3_u8 = _mm_avg_epu8(out8_3_u8_l0, out8_3_u8_l1);
 #if ALSTORE
-            _mm_store_si128((__m128i *)(dst_ptr + dst_stride), avg8_2_u8);
-            _mm_store_si128((__m128i *)(dst_ptr + dst_stride + 16), avg8_3_u8);
+            _mm_storeu_si128((__m128i *)(dst_ptr + dst_stride), avg8_2_u8);
+            _mm_storeu_si128((__m128i *)(dst_ptr + dst_stride + 16), avg8_3_u8);
 #else
             _mm_storeu_si128((__m128i *)(dst_ptr + dst_stride), avg8_2_u8);
             _mm_storeu_si128((__m128i *)(dst_ptr + dst_stride + 16), avg8_3_u8);
@@ -903,10 +903,10 @@ void unpack_avg_avx2_intrin(uint16_t *ref16_l0, uint32_t ref_l0_stride, uint16_t
             avg8_2_u8 = _mm_avg_epu8(out8_2_u8_l0, out8_2_u8_l1);
             avg8_3_u8 = _mm_avg_epu8(out8_3_u8_l0, out8_3_u8_l1);
 #if ALSTORE
-            _mm_store_si128((__m128i *)dst_ptr, avg8_0_u8);
-            _mm_store_si128((__m128i *)(dst_ptr + 16), avg8_1_u8);
-            _mm_store_si128((__m128i *)(dst_ptr + 32), avg8_2_u8);
-            _mm_store_si128((__m128i *)(dst_ptr + 48), avg8_3_u8);
+            _mm_storeu_si128((__m128i *)dst_ptr, avg8_0_u8);
+            _mm_storeu_si128((__m128i *)(dst_ptr + 16), avg8_1_u8);
+            _mm_storeu_si128((__m128i *)(dst_ptr + 32), avg8_2_u8);
+            _mm_storeu_si128((__m128i *)(dst_ptr + 48), avg8_3_u8);
 #else
             _mm_storeu_si128((__m128i *)dst_ptr, avg8_0_u8);
             _mm_storeu_si128((__m128i *)(dst_ptr + 16), avg8_1_u8);
@@ -1031,7 +1031,7 @@ void unpack_avg_safe_sub_avx2_intrin(uint16_t *ref16_l0, uint32_t ref_l0_stride,
             //AVG
             avg8_0_u8 = _mm_avg_epu8(out8_0_u8_l0, out8_0_u8_l1);
 
-            _mm_store_si128((__m128i *)dst_ptr, avg8_0_u8);
+            _mm_storeu_si128((__m128i *)dst_ptr, avg8_0_u8);
 
             //--------
             //Line Two
@@ -1056,7 +1056,7 @@ void unpack_avg_safe_sub_avx2_intrin(uint16_t *ref16_l0, uint32_t ref_l0_stride,
             //AVG
             avg8_2_u8 = _mm_avg_epu8(out8_2_u8_l0, out8_2_u8_l1);
 
-            _mm_store_si128((__m128i *)(dst_ptr + dst_stride), avg8_2_u8);
+            _mm_storeu_si128((__m128i *)(dst_ptr + dst_stride), avg8_2_u8);
 
             dst_ptr += 2 * dst_stride;
             ref16_l0 += 2 * ref_l0_stride;
@@ -1079,7 +1079,7 @@ void unpack_avg_safe_sub_avx2_intrin(uint16_t *ref16_l0, uint32_t ref_l0_stride,
                 _mm_packus_epi16(_mm_srli_epi16(in_pixel0, 2), _mm_srli_epi16(in_pixel1, 2));
             //AVG
             avg8_0_u8 = _mm_avg_epu8(out8_0_u8_l0, out8_0_u8_l1);
-            _mm_store_si128((__m128i *)dst_ptr, avg8_0_u8);
+            _mm_storeu_si128((__m128i *)dst_ptr, avg8_0_u8);
         }
     } else if (width == 32) {
         __m256i in_val_16b_0, in_val_16b_1;
