@@ -144,10 +144,7 @@ static int32_t equation_system_init(AomEquationSystem *eqns, int32_t n) {
     eqns->n = n;
     if (!eqns->A || !eqns->b || !eqns->x) {
         SVT_ERROR("Failed to allocate system of equations of size %d\n", n);
-        free(eqns->A);
-        free(eqns->b);
-        free(eqns->x);
-        memset(eqns, 0, sizeof(*eqns));
+        equation_system_free(eqns);
         return 0;
     }
     equation_system_clear(eqns);
