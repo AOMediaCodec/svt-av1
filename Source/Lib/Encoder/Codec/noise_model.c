@@ -118,9 +118,12 @@ static INLINE double get_noise_var(const uint8_t *data, const uint8_t *denoised,
 static void equation_system_free(AomEquationSystem *eqns) {
     if (!eqns) return;
     free(eqns->A);
+    eqns->A = NULL;
     free(eqns->b);
+    eqns->b = NULL;
     free(eqns->x);
-    memset(eqns, 0, sizeof(*eqns));
+    eqns->x = NULL;
+    eqns->n = 0;
 }
 
 static void equation_system_clear(AomEquationSystem *eqns) {
