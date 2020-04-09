@@ -76,15 +76,13 @@ EbHandle eb_create_thread(void *thread_function(void *), void *thread_context) {
 
         if (ret != 0) {
             if (ret == EPERM) {
-                pthread_cancel(*((pthread_t *)thread_handle));
-                free(thread_handle);
-
-                thread_handle = (pthread_t *)malloc(sizeof(pthread_t));
-                if (thread_handle != NULL) {
-                    pthread_create((pthread_t *)thread_handle, // Thread handle
-                                   (const pthread_attr_t *)NULL, // attributes
-                                   thread_function, // function to be run by new thread
-                                   thread_context);
+                ret = pthread_create((pthread_t *)thread_handle, // Thread handle
+                               		 (const pthread_attr_t *)NULL, // attributes
+                               		 thread_function, // function to be run by new thread
+                               		 thread_context);
+                if (ret != 0) {
+                	free(thread_handle);
+                	thread_handle = NULL;
                 }
             }
         }
