@@ -1900,11 +1900,6 @@ static const EbWarpedMotionParams default_warp_params = {
 //**********************************************************************************************************************//
 //**********************************************************************************************************************//
 
-#define YBITS_THSHLD                        50
-#define YDC_THSHLD                          5
-#define M6_YBITS_THSHLD                     80
-#define M6_YDC_THSHLD                       10
-
 #ifdef _WIN32
 #define NOINLINE                __declspec ( noinline )
 #define FORCE_INLINE            __forceinline
@@ -1913,33 +1908,9 @@ static const EbWarpedMotionParams default_warp_params = {
 #define FORCE_INLINE            __attribute__((always_inline))
 #endif
 
-#define EB_STRINGIZE( L )       #L
-#define EB_MAKESTRING( M, L )   M( L )
-#define $Line                   EB_MAKESTRING( EB_STRINGIZE, __LINE__ )
-#define EB_SRC_LINE             __FILE__ "(" $Line ") : message "
-
 // ***************************** Definitions *****************************
-#define PM_DC_TRSHLD1                       10 // The threshold for DC to disable masking for DC
 
 #define MAX_BITS_PER_FRAME            8000000
-#define VAR_BASED_STAT_AREA_THRSLHD         (32*32)
-
-#define ANTI_TRAILING_VAR_THRSLD         1000
-#define MAX_VAR_BIAS               100
-#define MEAN_DIFF_THRSHOLD         10
-#define VAR_DIFF_THRSHOLD          10
-
-#define HME_BIAS_X_THRSHLD1       64
-#define HME_BIAS_Y_THRSHLD1       64
-#define HME_BIAS_X_THRSHLD2       32
-#define HME_BIAS_Y_THRSHLD2       32
-
-#define ASPECT_RATIO_4_3    13           // Limit Ration to detect VGA resolutiosn
-#define ASPECT_RATIO_16_9   17           // Limit Ration to detect UHD,1080p,720p ... or similar resolutions
-
-#define ASPECT_RATIO_CLASS_0  0           // 4:3 aspect ratios
-#define ASPECT_RATIO_CLASS_1  1           // 16:9 aspect ratios
-#define ASPECT_RATIO_CLASS_2  2           // Other aspect ratios
 
 #define SC_FRAMES_TO_IGNORE     1000 // The speed control algorith starts after SC_FRAMES_TO_IGNORE number frames.
 #define SC_FRAMES_INTERVAL_SPEED      60 // The speed control Interval To Check the speed
@@ -1947,69 +1918,10 @@ static const EbWarpedMotionParams default_warp_params = {
 #define SC_FRAMES_INTERVAL_T2        180 // The speed control Interval Threshold2
 #define SC_FRAMES_INTERVAL_T3        120 // The speed control Interval Threshold3
 
-#define SC_SPEED_T2             1250 // speed level thershold. If speed is higher than target speed x SC_SPEED_T2, a slower mode is selected (+25% x 1000 (for precision))
-#define SC_SPEED_T1              750 // speed level thershold. If speed is less than target speed x SC_SPEED_T1, a fast mode is selected (-25% x 1000 (for precision))
-#define EB_CMPLX_CLASS           uint8_t
-#define CMPLX_LOW                0
-#define CMPLX_MEDIUM             1
-#define CMPLX_HIGH               2
-#define CMPLX_VHIGH              3
-#define CMPLX_NOISE              4
-#define EB_NORMAL_LATENCY        0
-#define EB_LOW_LATENCY           1
-
-// CLEAN_BASIS_FUNCTIONS
-#define CLEAN_BASIS_FUNCTIONS_VAR_TRSHLD 10
-#define CLEAN_BASIS_FUNCTIONS_NZCOEF_TRSHLD0 10
-#define CLEAN_BASIS_FUNCTIONS_NZCOEF_TRSHLD1 15
-#define CLEAN_BASIS_FUNCTIONS_NZCOEF_TRSHLD2 20
-// Anti-contouring
-#define C3_TRSHLF_N                                    45
-#define C3_TRSHLF_D                                    10
-#define C4_TRSHLF_N                                    35
-#define C4_TRSHLF_D                                    10
-
-#define C1_TRSHLF_4K_N                                45
-#define C1_TRSHLF_4K_D                                10
-#define C2_TRSHLF_4K_N                                35
-#define C2_TRSHLF_4K_D                                10
-
-#define AC_ENERGY_BASED_4K_ANTI_CONTOURING_QP_DELTA     3
-#define AC_ENERGY_BASED_4K_ANTI_CONTOURING_MIN_QP       22
-
-#define C1_TRSHLF_N       1
-#define C1_TRSHLF_D       1
-#define C2_TRSHLF_N       16
-#define C2_TRSHLF_D       10
-
-#define CHANGE_LAMBDA_FOR_AURA   0x01
-#define RESTRICT_CUS_AND_MODIFY_COST  0x02
-
-#define ANTI_CONTOURING_TH_0     16 * 16
-#define ANTI_CONTOURING_TH_1     32 * 32
-#define ANTI_CONTOURING_TH_2 2 * 32 * 32
-
-#define ANTI_CONTOURING_DELTA_QP_0  -3
-#define ANTI_CONTOURING_DELTA_QP_1  -9
-#define ANTI_CONTOURING_DELTA_QP_2  -11
-
-#define AC_ENERGY_BASED_ANTI_CONTOURING_QP_DELTA 11
-#define AC_ENERGY_BASED_ANTI_CONTOURING_MIN_QP 20
-#define ANTI_CONTOURING_LUMA_T1                40
-#define ANTI_CONTOURING_LUMA_T2                180
-
-#define VAR_BASED_DETAIL_PRESERVATION_SELECTOR_THRSLHD         (64*64)
-
 #define LAST_BWD_FRAME     8
 #define LAST_ALT_FRAME    16
 
 #define MAX_NUM_TOKENS          200
-
-#define LAD_DISABLE                       0
-#define INIT_RC_OPT_G1                    1
-#define INIT_RC_OPT_G2                    1
-#define HIST_OPT                          2 // 1 is intrinsic, 2 is C
-#define ENABLE_8x8                        0
 
 #define    Log2f                              Log2f_SSE2
 
@@ -2030,8 +1942,6 @@ static const EbWarpedMotionParams default_warp_params = {
 #define ASSERT(exp) ((void)sizeof(exp))
 #endif
 
-#define    INTERPOLATION_NEED  4
-#define    BUFF_PITCH          (INTERPOLATION_NEED*2+64)
 #define    ME_FILTER_TAP       4
 #define    SUB_SAD_SEARCH      0
 #define    FULL_SAD_SEARCH     1
@@ -2332,12 +2242,6 @@ typedef struct EbMemoryMapEntry
 // Rate Control
 #define THRESHOLD1QPINCREASE     1
 #define THRESHOLD2QPINCREASE     2
-#define EB_IOS_POINT            uint8_t
-#define OIS_VERY_FAST_MODE       0
-#define OIS_FAST_MODE            1
-#define OIS_MEDUIM_MODE          2
-#define OIS_COMPLEX_MODE         3
-#define OIS_VERY_COMPLEX_MODE    4
 // Display Total Memory at the end of the memory allocations
 #define DISPLAY_MEMORY                              0
 
@@ -2425,10 +2329,6 @@ SVT_LOG("Total Library Memory: %.2lf KB\n\n",*total_lib_memory/(double)1024);
 SVT_LOG("Total Number of Mallocs in App: %d\n", app_malloc_count); \
 SVT_LOG("Total App Memory: %.2lf KB\n\n",*total_app_memory/(double)1024);
 
-#define RSIZE_MAX_MEM      ( 256UL << 20 )     /* 256MB */
-
-#define EXPORT_SYMBOL(sym)
-
 #ifndef _ERRNO_T_DEFINED
 #define _ERRNO_T_DEFINED
 typedef int32_t errno_t;
@@ -2514,26 +2414,14 @@ typedef enum DownSamplingMethod
 } DownSamplingMethod;
 
 //***Segments***
-#define EB_SEGMENT_MIN_COUNT                        1
-#define EB_SEGMENT_MAX_COUNT                        64
 #define CU_MAX_COUNT                                85
 
-#define EB_EVENT_MAX_COUNT                          20
-
 #define MAX_INTRA_REFERENCE_SAMPLES                 (BLOCK_SIZE_64 << 2) + 1
-
-#define MAX_INTRA_MODES                             35
 
 #define _MVXT(mv) ( (int16_t)((mv) &  0xFFFF) )
 #define _MVYT(mv) ( (int16_t)((mv) >> 16    ) )
 
 //***MCP***
-#define MaxChromaFilterTag          4
-#define MaxVerticalLumaFliterTag    8
-#define MaxHorizontalLumaFliterTag  8
-
-#define MCPXPaddingOffset           16                                    // to be modified
-#define MCPYPaddingOffset           16                                    // to be modified
 
 #define InternalBitDepth            8                                     // to be modified
 #define MAX_Sample_Value            ((1 << InternalBitDepth) - 1)
@@ -2579,11 +2467,6 @@ typedef enum DownSamplingMethod
 *********************************************************/
 #define Shift1       InternalBitDepthIncrement
 #define MinusOffset1 (1 << (IF_Negative_Offset + InternalBitDepthIncrement))
-#if (InternalBitDepthIncrement == 0)
-#define ChromaMinusOffset1 0
-#else
-#define ChromaMinusOffset1 MinusOffset1
-#endif
 
 /*********************************************************
 * used for neither the first time nor the last time interpolation filter
