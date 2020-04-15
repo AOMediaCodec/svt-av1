@@ -1958,14 +1958,6 @@ static const EbWarpedMotionParams default_warp_params = {
 #define EB_NORMAL_LATENCY        0
 #define EB_LOW_LATENCY           1
 
-typedef enum EbBitFieldMasks
-{
-    BITMASK_0 = 1,
-    BITMASK_1 = 2,
-    BITMASK_2 = 4,
-    BITMASK_3 = 8
-} EbBitFieldMasks;
-
 // CLEAN_BASIS_FUNCTIONS
 #define CLEAN_BASIS_FUNCTIONS_VAR_TRSHLD 10
 #define CLEAN_BASIS_FUNCTIONS_NZCOEF_TRSHLD0 10
