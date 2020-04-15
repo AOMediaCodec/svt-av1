@@ -2274,8 +2274,6 @@ extern    uint32_t                   app_malloc_count;
     pointer = (type)malloc(n_elements); \
     EB_ADD_APP_MEM(pointer, n_elements, pointer_class, app_malloc_count, return_type);
 
-#define ALVALUE 64
-
 #define EB_CREATE_SEMAPHORE(pointer, initial_count, max_count) \
     do { \
         pointer = eb_create_semaphore(initial_count, max_count); \
