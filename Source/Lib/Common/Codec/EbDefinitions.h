@@ -2681,12 +2681,6 @@ static const uint8_t intra_area_th_class_1[MAX_HIERARCHICAL_LEVEL][MAX_TEMPORAL_
 #define CHROMA_MODE_2  2 // Chroma blind @ MD + CFL @ EP
 #define CHROMA_MODE_3  3 // Chroma blind @ MD + no CFL @ EP
 
-typedef enum EbCleanUpMode
-{
-    CLEAN_UP_MODE_0 = 0,
-    CLEAN_UP_MODE_1 = 1
-} EbCleanUpMode;
-
 typedef enum EbSaoMode
 {
     SAO_MODE_0 = 0,
