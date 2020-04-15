@@ -707,7 +707,7 @@ void *entropy_coding_kernel(void *input_ptr) {
                             for (ref_idx = 0; ref_idx < pcs_ptr->parent_pcs_ptr->ref_list0_count;
                                  ++ref_idx) {
                                 if (scs_ptr->use_output_stat_file && tile_cnt == 1 &&
-                                    pcs_ptr->ref_pic_ptr_array[0][ref_idx] != EB_NULL &&
+                                    pcs_ptr->ref_pic_ptr_array[0][ref_idx] != NULL &&
                                     pcs_ptr->ref_pic_ptr_array[0][ref_idx]->live_count == 1)
                                     write_stat_to_file(
                                         scs_ptr,
@@ -717,7 +717,7 @@ void *entropy_coding_kernel(void *input_ptr) {
                                         ((EbReferenceObject *)pcs_ptr->ref_pic_ptr_array[0][ref_idx]
                                              ->object_ptr)
                                             ->ref_poc);
-                                if (pcs_ptr->ref_pic_ptr_array[0][ref_idx] != EB_NULL) {
+                                if (pcs_ptr->ref_pic_ptr_array[0][ref_idx] != NULL) {
                                     eb_release_object(pcs_ptr->ref_pic_ptr_array[0][ref_idx]);
                                 }
                             }
@@ -726,7 +726,7 @@ void *entropy_coding_kernel(void *input_ptr) {
                             for (ref_idx = 0; ref_idx < pcs_ptr->parent_pcs_ptr->ref_list1_count;
                                  ++ref_idx) {
                                 if (scs_ptr->use_output_stat_file && tile_cnt == 1 &&
-                                    pcs_ptr->ref_pic_ptr_array[1][ref_idx] != EB_NULL &&
+                                    pcs_ptr->ref_pic_ptr_array[1][ref_idx] != NULL &&
                                     pcs_ptr->ref_pic_ptr_array[1][ref_idx]->live_count == 1)
                                     write_stat_to_file(
                                         scs_ptr,
@@ -736,7 +736,7 @@ void *entropy_coding_kernel(void *input_ptr) {
                                         ((EbReferenceObject *)pcs_ptr->ref_pic_ptr_array[1][ref_idx]
                                              ->object_ptr)
                                             ->ref_poc);
-                                if (pcs_ptr->ref_pic_ptr_array[1][ref_idx] != EB_NULL)
+                                if (pcs_ptr->ref_pic_ptr_array[1][ref_idx] != NULL)
                                     eb_release_object(pcs_ptr->ref_pic_ptr_array[1][ref_idx]);
                             }
 
@@ -842,7 +842,7 @@ void *entropy_coding_kernel(void *input_ptr) {
                         for (ref_idx = 0; ref_idx < pcs_ptr->parent_pcs_ptr->ref_list0_count;
                              ++ref_idx) {
                             if (scs_ptr->use_output_stat_file &&
-                                pcs_ptr->ref_pic_ptr_array[0][ref_idx] != EB_NULL &&
+                                pcs_ptr->ref_pic_ptr_array[0][ref_idx] != NULL &&
                                 pcs_ptr->ref_pic_ptr_array[0][ref_idx]->live_count == 1)
                                 write_stat_to_file(
                                     scs_ptr,
@@ -852,7 +852,7 @@ void *entropy_coding_kernel(void *input_ptr) {
                                     ((EbReferenceObject *)pcs_ptr->ref_pic_ptr_array[0][ref_idx]
                                          ->object_ptr)
                                         ->ref_poc);
-                            if (pcs_ptr->ref_pic_ptr_array[0][ref_idx] != EB_NULL) {
+                            if (pcs_ptr->ref_pic_ptr_array[0][ref_idx] != NULL) {
                                 eb_release_object(pcs_ptr->ref_pic_ptr_array[0][ref_idx]);
                             }
                         }
@@ -861,7 +861,7 @@ void *entropy_coding_kernel(void *input_ptr) {
                         for (ref_idx = 0; ref_idx < pcs_ptr->parent_pcs_ptr->ref_list1_count;
                              ++ref_idx) {
                             if (scs_ptr->use_output_stat_file &&
-                                pcs_ptr->ref_pic_ptr_array[1][ref_idx] != EB_NULL &&
+                                pcs_ptr->ref_pic_ptr_array[1][ref_idx] != NULL &&
                                 pcs_ptr->ref_pic_ptr_array[1][ref_idx]->live_count == 1)
                                 write_stat_to_file(
                                     scs_ptr,
@@ -871,7 +871,7 @@ void *entropy_coding_kernel(void *input_ptr) {
                                     ((EbReferenceObject *)pcs_ptr->ref_pic_ptr_array[1][ref_idx]
                                          ->object_ptr)
                                         ->ref_poc);
-                            if (pcs_ptr->ref_pic_ptr_array[1][ref_idx] != EB_NULL)
+                            if (pcs_ptr->ref_pic_ptr_array[1][ref_idx] != NULL)
                                 eb_release_object(pcs_ptr->ref_pic_ptr_array[1][ref_idx]);
                         }
 
@@ -974,13 +974,13 @@ void *entropy_coding_kernel(void *input_ptr) {
 
                 // Release the List 0 Reference Pictures
                 for (ref_idx = 0; ref_idx < pcs_ptr->parent_pcs_ptr->ref_list0_count; ++ref_idx) {
-                    if (pcs_ptr->ref_pic_ptr_array[0][ref_idx] != EB_NULL)
+                    if (pcs_ptr->ref_pic_ptr_array[0][ref_idx] != NULL)
                         eb_release_object(pcs_ptr->ref_pic_ptr_array[0][ref_idx]);
                 }
 
                 // Release the List 1 Reference Pictures
                 for (ref_idx = 0; ref_idx < pcs_ptr->parent_pcs_ptr->ref_list1_count; ++ref_idx) {
-                    if (pcs_ptr->ref_pic_ptr_array[1][ref_idx] != EB_NULL)
+                    if (pcs_ptr->ref_pic_ptr_array[1][ref_idx] != NULL)
                         eb_release_object(pcs_ptr->ref_pic_ptr_array[1][ref_idx]);
                 }
 
@@ -1004,5 +1004,5 @@ void *entropy_coding_kernel(void *input_ptr) {
 #endif
     }
 
-    return EB_NULL;
+    return NULL;
 }
