@@ -2136,12 +2136,6 @@ typedef enum EbTuSize
 #define EB_FRAME_CARAC_3           3
 #define EB_FRAME_CARAC_4           4
 
-static const uint8_t qp_offset_weight[3][4] = { // [Slice Type][QP Offset Weight Level]
-    { 9, 8, 7, 6 },
-    { 9, 8, 7, 6 },
-    { 10, 9, 8, 7 }
-};
-
 #define  MAX_PAL_CAND   14
 typedef struct {
     // Value of base colors for Y, U, and V
