@@ -2033,11 +2033,6 @@ typedef uint8_t EbModeType;
 
 #define INVALID_MODE 0xFFu
 
-/** INTRA_4x4 offsets
-*/
-static const uint8_t intra_4x4_offset_x[4] = { 0, 4, 0, 4 };
-static const uint8_t intra_4x4_offset_y[4] = { 0, 0, 4, 4 };
-
 /** The EbPartMode type is used to describe the CU partition size.
 */
 typedef uint8_t EbPartMode;
