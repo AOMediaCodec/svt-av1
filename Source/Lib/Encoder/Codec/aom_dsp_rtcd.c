@@ -62,10 +62,6 @@
     } while (0)
 #endif
 
-void setup_rtcd_non8(CPU_FLAGS flags) {
-    (void) flags;
-    eb_av1_wiener_convolve_add_src = eb_av1_wiener_convolve_add_src_c;
-}
 void setup_rtcd_internal(CPU_FLAGS flags) {
     /** Should be done during library initialization,
         but for safe limiting cpu flags again. */
