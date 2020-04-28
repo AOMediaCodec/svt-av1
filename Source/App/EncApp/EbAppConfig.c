@@ -2782,7 +2782,6 @@ EbErrorType read_command_line(int32_t argc, char *const argv[], EbConfig **confi
     /***************************************************************************************************/
     /**************************************   Verify configuration parameters   ************************/
     /***************************************************************************************************/
-
     // Verify the config values
     if (return_error == 0) {
         return_error = EB_ErrorBadParameter;
