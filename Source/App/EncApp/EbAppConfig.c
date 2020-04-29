@@ -2017,8 +2017,7 @@ uint32_t get_help(int32_t argc, char *const argv[]) {
         char *      token_options_format = "\t%-5s\t%-25s\t%-25s\n";
         const char *empty_string         = "";
         fprintf(stderr,
-                "\n%-25s\n",
-                "Usage: SvtAv1EncApp <options> -b dst_filename -i src_filename");
+                "Usage: SvtAv1EncApp <options> -b dst_filename -i src_filename\n");
         fprintf(stderr, "\n%-25s\n", "Options:");
         while (config_entry_options[++options_token_index].token != NULL) {
             uint32_t check = check_long(
