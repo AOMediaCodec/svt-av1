@@ -82,7 +82,7 @@ void        dec_sync_all_threads(EbDecHandle *dec_handle_ptr);
 EbErrorType decode_multiple_obu(EbDecHandle *dec_handle_ptr, uint8_t **data, size_t data_size,
                                 uint32_t is_annexb);
 
-void switch_to_real_time() {
+static void dec_switch_to_real_time() {
 #ifndef _WIN32
 
     struct sched_param schedParam = {.sched_priority = 99};
@@ -467,7 +467,7 @@ static EbErrorType init_svt_av1_decoder_handle(EbComponentType *hComponent) {
     SVT_LOG("LIB Build date: %s %s\n", __DATE__, __TIME__);
     SVT_LOG("-------------------------------------------\n");
 
-    switch_to_real_time();
+    dec_switch_to_real_time();
 
     // Set Component Size & Version
     svt_dec_component->size = sizeof(EbComponentType);
