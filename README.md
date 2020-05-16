@@ -69,7 +69,7 @@ The SVT-AV1 Encoder library supports the x86 architecture
     - run `build.bat <2019|2017|2015>` [This will generate the .sln files and build the project]
 
 - __Binaries Location__
-  - Binaries can be found under `<repo dir>/Bin/Release` or `<repo dir>/Bin/Debug`, depending on whether Debug or Release were selected in the build mode.
+  - Binaries can be found under `Build/linux/Bin` or `Build\Bin\{Debug,Release}` (with MSVC, depending if Debug or Release build).
 
 - __Installation__
 
@@ -91,7 +91,7 @@ The SVT-AV1 Encoder library supports the x86 architecture
   - `./build.sh <release | debug>`
 
 - __Sample Binaries location__
-  - Binaries can be found under `Bin/Release` and/or `Bin/Debug`
+  - Binaries can be found under `Bin`
 
 - __Installation__
 
