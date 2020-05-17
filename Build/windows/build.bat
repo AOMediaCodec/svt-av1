@@ -11,11 +11,10 @@ if NOT -%1-==-- call :args %*
 if exist CMakeCache.txt del /f /s /q CMakeCache.txt 1>nul
 if exist CMakeFiles rmdir /s /q CMakeFiles 1>nul
 if NOT "%GENERATOR%"=="" set GENERATOR=-G"%GENERATOR%"
-if NOT "%unittest%"=="" set "cmake_eflags=%cmake_eflags% -DBUILD_TESTING=ON"
 if "%vs%"=="2019" (
-    cmake ../.. %GENERATOR% -A x64 -DCMAKE_INSTALL_PREFIX=%SYSTEMDRIVE%\svt-encoders -DCMAKE_CONFIGURATION_TYPES="Debug;Release" %cmake_eflags%
+    cmake ../.. %GENERATOR% -A x64 -DCMAKE_INSTALL_PREFIX=%SYSTEMDRIVE%\svt-encoders -DCMAKE_CONFIGURATION_TYPES="Debug;Release" %static% %unittest% %cmake_eflags%
 ) else (
-    cmake ../.. %GENERATOR% -DCMAKE_INSTALL_PREFIX=%SYSTEMDRIVE%\svt-encoders -DCMAKE_CONFIGURATION_TYPES="Debug;Release" %cmake_eflags%
+    cmake ../.. %GENERATOR% -DCMAKE_INSTALL_PREFIX=%SYSTEMDRIVE%\svt-encoders -DCMAKE_CONFIGURATION_TYPES="Debug;Release" %static% %unittest% %cmake_eflags%
 )
 
 if "%build%"=="y" (
@@ -108,7 +107,15 @@ if -%1-==-- (
     shift
 ) else if /I "%1"=="test" (
     echo Building unit tests
-    set "unittest=y"
+    set "unittest=-DBUILD_TESTING=ON"
+    shift
+) else if /I "%1"=="static" (
+    echo Building static
+    set "static=-DBUILD_SHARED_LIBS=OFF"
+    shift
+) else if /I "%1"=="shared" (
+    echo Building shared
+    set "static=-DBUILD_SHARED_LIBS=ON"
     shift
 ) else if /I "%1"=="nobuild" (
     echo Building files
@@ -119,6 +126,6 @@ goto :args
 
 :help
     echo Batch file to build SVT-AV1 on Windows
-    echo Usage: generate.bat 2019^|2017^|2015^|clean [release|debug] [nobuild] [test]
+    echo Usage: build.bat [2019^|2017^|2015^|clean] [release^|debug] [nobuild] [test] [shared^|static]
     exit
 goto :EOF
