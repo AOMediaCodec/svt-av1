@@ -92,6 +92,7 @@ endif()
 if(X86)
     add_library(SvtAv1Enc
         ${all_files}
+        SvtAv1Enc.def
         $<TARGET_OBJECTS:COMMON_CODEC>
         $<TARGET_OBJECTS:FASTFEAT>
         $<TARGET_OBJECTS:COMMON_C_DEFAULT>
@@ -111,6 +112,7 @@ if(X86)
 else()
     add_library(SvtAv1Enc
         ${all_files}
+        SvtAv1Enc.def
         $<TARGET_OBJECTS:COMMON_CODEC>
         $<TARGET_OBJECTS:FASTFEAT>
         $<TARGET_OBJECTS:COMMON_C_DEFAULT>

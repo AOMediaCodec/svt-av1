@@ -17,7 +17,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif // __cplusplus
-EB_API EbErrorType eb_get_sequence_info(const uint8_t *obu_data, size_t size,
+EbErrorType eb_get_sequence_info(const uint8_t *obu_data, size_t size,
                                         SeqHeader *sequence_info);
 #ifdef __cplusplus
 }
