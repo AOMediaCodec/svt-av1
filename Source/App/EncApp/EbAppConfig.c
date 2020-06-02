@@ -803,9 +803,9 @@ ConfigEntry config_entry_global_options[] = {
     "The combinational use of --unpin with --lp results in memory reduction while allowing the execution to work on any of the cores and not restrict it to specific cores \n"
     "--unpin is overwritten to 0 when --ss is set to 0 or 1. ( 0: OFF [default] ,1: ON) \n"
     "Example: 72 core machine: \n"
-    "72 cores x -- lp 1 -- unpin 1 \n"
-    "36 cores x -- lp 2 -- unpin 1 \n"
-    "18 cores x -- lp 4 -- unpin 1 ",
+    "72 jobs x -- lp 1 -- unpin 1 \n"
+    "36 jobs x -- lp 2 -- unpin 1 \n"
+    "18 jobs x -- lp 4 -- unpin 1 ",
      set_unpin_execution},
     {SINGLE_INPUT, TARGET_SOCKET, "Specify  which socket the encoder runs on"
     "--unpin is overwritten to 0 when --ss is set to 0 or 1",

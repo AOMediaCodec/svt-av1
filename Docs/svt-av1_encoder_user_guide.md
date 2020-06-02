@@ -290,11 +290,11 @@ so -lp 4 with -unpin 0 would restrict the encoder to work on cpu0-3 and reduce t
 
 Example: 72 core machine:
 
-72 cores x --lp 1 --unpin 1 (In order to maximize the CPU utilization 72 jobs are run simultaneously with each job utilitizing 1 core without being pined to a specific core)
+72 jobs x --lp 1 --unpin 1 (In order to maximize the CPU utilization 72 jobs are run simultaneously with each job utilitizing 1 core without being pined to a specific core)
 
-36 cores x --lp 2 --unpin 1
+36 jobs x --lp 2 --unpin 1
 
-18 cores x --lp 4 --unpin 1
+18 jobs x --lp 4 --unpin 1
 
 (`-ss`) and (`-unpin 1`) is not a valid combination.(`-unpin`) is overwritten to 0 when (`-ss`) is used.
 ## Legal Disclaimer
