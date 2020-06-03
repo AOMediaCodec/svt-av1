@@ -10,7 +10,8 @@ We welcome community contributions to the SVT-AV1 Encoder. Thank you for your ti
 - Perform smoke tests and ensure they pass
 - Submit a pull request for review to the maintainer
 
-## Pull request process:
+## Pull request process
+
 - Authors should use a valid email account when committing.
 - Make clear and concise commits (1 commit per 1 feature or issue)
 - Authors are responsible for breaking down the PR into sensible commits (with proper commit messages)
