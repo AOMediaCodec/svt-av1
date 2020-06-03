@@ -14,6 +14,11 @@ Fixes #999
 
 
 # Performance impact
+<!--
+Type an x in the box that is relevant to your PR. Make sure to mention in what way in the description
+Example
+- [x] memory
+--->
 - [ ] quality
 - [ ] memory
 - [ ] speed
@@ -24,7 +29,8 @@ Fixes #999
 # Test set
 - [ ] obj-1-fast
 - [ ] other
+- [ ] N/A
 
 # Squash and merge (Allow maintainer to squash and merge when PR is ready)
-[ ] Allow the maintainer to squash and merge when PR is ready to create a 1-commit to the master branch. The maintainer will be able to fix typos / combine commit messages to create a more readable 1-commit message or use whatever is stated in the 'Description' section
-[ ] I will clean up my commits and the maintainer shall use 'rebase and merge' to the master branch
+- [ ] Allow the maintainer to squash and merge when PR is ready to create a 1-commit to the master branch. The maintainer will be able to fix typos / combine commit messages to create a more readable 1-commit message or use whatever is stated in the 'Description' section
+- [ ] I will clean up my commits and the maintainer shall use 'rebase and merge' to the master branch
