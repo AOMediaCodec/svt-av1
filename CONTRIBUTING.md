@@ -11,8 +11,9 @@ We welcome community contributions to the SVT-AV1 Encoder. Thank you for your ti
 - Submit a pull request for review to the maintainer
 
 ## Pull request process:
-
-- Make commits concise and to the point (1 feature / issue = 1 commit )
-- Authors would be responsible for breaking down the PR into commits that make sense (with proper commit messages)
-- Use rebase and merge for all PRs to make sure that all commits are carried over to the master
-- Maintainers would only use squash and merge with the permission of the authors.
+- Authors should use a valid email account when committing.
+- Make clear and concise commits (1 commit per 1 feature or issue)
+- Authors are responsible for breaking down the PR into sensible commits (with proper commit messages)
+- Avoid using force push when addressing comments and review items.
+- Maintainers shall use 'rebase and merge' to make sure all commits can apply cleanly onto the master branch
+- Maintainers shall only use 'squash and merge' with the permission of the authors.
