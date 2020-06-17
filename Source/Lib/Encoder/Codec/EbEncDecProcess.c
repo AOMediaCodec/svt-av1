@@ -1720,9 +1720,9 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(SequenceControlSet * scs_ptr,
     else {
         if (context_ptr->tx_search_level == TX_SEARCH_ENC_DEC)
             context_ptr->tx_weight = MAX_MODE_COST;
-        else if (pcs_ptr->parent_pcs_ptr->sc_content_detected && pcs_ptr->enc_mode <= ENC_M0)
+        else if (pcs_ptr->parent_pcs_ptr->sc_content_detected && pcs_ptr->enc_mode == ENC_M0)
             context_ptr->tx_weight = FC_SKIP_TX_SR_TH025;
-        else if (pcs_ptr->enc_mode <= ENC_M0)
+        else if (pcs_ptr->enc_mode == ENC_M0)
             context_ptr->tx_weight = MAX_MODE_COST;
         else if (pcs_ptr->enc_mode <= ENC_M1 && !(pcs_ptr->parent_pcs_ptr->sc_content_detected))
             context_ptr->tx_weight = FC_SKIP_TX_SR_TH025;
@@ -1866,7 +1866,7 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(SequenceControlSet * scs_ptr,
     else if (scs_ptr->static_config.new_nearest_comb_inject == DEFAULT)
         if (pcs_ptr->parent_pcs_ptr->sc_content_detected)
                 context_ptr->new_nearest_near_comb_injection = 0;
-        else if (pcs_ptr->enc_mode <= ENC_M0)
+        else if (pcs_ptr->enc_mode == ENC_M0)
             context_ptr->new_nearest_near_comb_injection = 1;
         else
             context_ptr->new_nearest_near_comb_injection = 0;
@@ -1878,15 +1878,8 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(SequenceControlSet * scs_ptr,
     // 0                    OFF
     // 1                    On
     FrameHeader *frm_hdr = &pcs_ptr->parent_pcs_ptr->frm_hdr;
-    if(frm_hdr->allow_warped_motion)
-        if (context_ptr->pd_pass == PD_PASS_0)
-            context_ptr->warped_motion_injection = 0;
-        else if (context_ptr->pd_pass == PD_PASS_1)
-            context_ptr->warped_motion_injection = 1;
-        else
-            context_ptr->warped_motion_injection = 1;
-    else
-        context_ptr->warped_motion_injection = 0;
+    context_ptr->warped_motion_injection = frm_hdr->allow_warped_motion &&
+        context_ptr->pd_pass != PD_PASS_0;
     // Set unipred3x3 injection
     // Level                Settings
     // 0                    OFF
@@ -1947,7 +1940,7 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(SequenceControlSet * scs_ptr,
                     context_ptr->predictive_me_level = 1;
                 else
                     context_ptr->predictive_me_level = 0;
-            else if (pcs_ptr->enc_mode <= ENC_M0)
+            else if (pcs_ptr->enc_mode == ENC_M0)
                 context_ptr->predictive_me_level = 6;
             else if (pcs_ptr->enc_mode <= ENC_M2)
                 context_ptr->predictive_me_level = 5;
@@ -2155,7 +2148,7 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(SequenceControlSet * scs_ptr,
         context_ptr->md_exit_th = 18;
     else if (MR_MODE)
         context_ptr->md_exit_th = 0;
-     else if (pcs_ptr->enc_mode <= ENC_M0 || (pcs_ptr->enc_mode <= ENC_M1 && pcs_ptr->parent_pcs_ptr->sc_content_detected))
+     else if (pcs_ptr->enc_mode == ENC_M0 || (pcs_ptr->enc_mode <= ENC_M1 && pcs_ptr->parent_pcs_ptr->sc_content_detected))
         context_ptr->md_exit_th = 0;
     else
         context_ptr->md_exit_th = 18;
@@ -2174,11 +2167,6 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(SequenceControlSet * scs_ptr,
 
     // md_stage_1_class_prune_th (for class removal)
     // Remove class if deviation to the best higher than TH_C
-    if (context_ptr->pd_pass == PD_PASS_0)
-        context_ptr->md_stage_1_class_prune_th = (uint64_t)~0;
-    else if (context_ptr->pd_pass == PD_PASS_1)
-        context_ptr->md_stage_1_class_prune_th = 100;
-
     if (pcs_ptr->enc_mode <= ENC_M1 || pcs_ptr->parent_pcs_ptr->sc_content_detected)
         context_ptr->md_stage_1_class_prune_th = (uint64_t)~0;
     else
@@ -2218,13 +2206,9 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(SequenceControlSet * scs_ptr,
     // skip HA and HB if h_cost > (weighted sq_cost)
     // skip VA and VB if v_cost > (weighted sq_cost)
 
-    if (context_ptr->pd_pass == PD_PASS_0)
-        context_ptr->sq_weight = (uint32_t)~0;
-    else if (context_ptr->pd_pass == PD_PASS_1)
-        context_ptr->sq_weight = 100;
     if (MR_MODE)
         context_ptr->sq_weight = scs_ptr->static_config.sq_weight + 15;
-    else if (pcs_ptr->enc_mode <= ENC_M0 ||
+    else if (pcs_ptr->enc_mode == ENC_M0 ||
         (pcs_ptr->enc_mode <= ENC_M1 && !(pcs_ptr->parent_pcs_ptr->sc_content_detected)))
         context_ptr->sq_weight = scs_ptr->static_config.sq_weight + 5;
     else
@@ -2270,9 +2254,9 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(SequenceControlSet * scs_ptr,
             context_ptr->pred_me_full_pel_search_height = PRED_ME_FULL_PEL_REF_WINDOW_HEIGHT_7;
         }
         else {
-            context_ptr->pred_me_full_pel_search_width = pcs_ptr->enc_mode <= ENC_M0 ?
+            context_ptr->pred_me_full_pel_search_width = pcs_ptr->enc_mode == ENC_M0 ?
                 PRED_ME_FULL_PEL_REF_WINDOW_WIDTH_15 : PRED_ME_FULL_PEL_REF_WINDOW_WIDTH_7;
-            context_ptr->pred_me_full_pel_search_height = pcs_ptr->enc_mode <= ENC_M0 ?
+            context_ptr->pred_me_full_pel_search_height = pcs_ptr->enc_mode == ENC_M0 ?
                 PRED_ME_FULL_PEL_REF_WINDOW_HEIGHT_15 : PRED_ME_FULL_PEL_REF_WINDOW_HEIGHT_5;
         }
     }
