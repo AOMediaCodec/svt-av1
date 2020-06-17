@@ -213,10 +213,6 @@ static void reset_enc_dec(EncDecContext *context_ptr, PictureControlSet *pcs_ptr
     uint16_t picture_qp   = pcs_ptr->picture_qp;
     uint16_t tile_group_idx = context_ptr->tile_group_index;
     context_ptr->qp = picture_qp;
-    context_ptr->qp_index =
-        pcs_ptr->parent_pcs_ptr->frm_hdr.delta_q_params.delta_q_present
-            ? (uint8_t)quantizer_to_qindex[context_ptr->qp]
-            : (uint8_t)pcs_ptr->parent_pcs_ptr->frm_hdr.quantization_params.base_q_idx;
     // Asuming cb and cr offset to be the same for chroma QP in both slice and pps for lambda computation
 
     context_ptr->chroma_qp = (uint8_t)context_ptr->qp;
