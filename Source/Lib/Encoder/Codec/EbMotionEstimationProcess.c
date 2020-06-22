@@ -175,7 +175,7 @@ void *set_me_hme_params_oq(MeContext *me_context_ptr, PictureParentControlSet *p
 
     me_context_ptr->update_hme_search_center_flag = 1;
 
-    if (input_resolution <= INPUT_SIZE_576p_RANGE_OR_LOWER)
+    if (input_resolution == INPUT_SIZE_576p_RANGE_OR_LOWER)
         me_context_ptr->update_hme_search_center_flag = 0;
 
     return NULL;
