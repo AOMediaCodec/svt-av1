@@ -527,9 +527,6 @@ EbErrorType compute_decimated_zz_sad(MotionEstimationContext_t *context_ptr, Pic
             sb_index            = x_sb_index + y_sb_index * pcs_ptr->picture_sb_width;
             SbParams *sb_params = &pcs_ptr->sb_params_array[sb_index];
 
-            sb_width  = sb_params->width;
-            sb_height = sb_params->height;
-
             sb_origin_x = sb_params->origin_x;
             sb_origin_y = sb_params->origin_y;
 
