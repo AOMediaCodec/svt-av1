@@ -233,7 +233,7 @@ EbErrorType signal_derivation_me_kernel_oq(SequenceControlSet *       scs_ptr,
             context_ptr->me_context_ptr->use_subpel_flag = 1;
     else
         context_ptr->me_context_ptr->use_subpel_flag = scs_ptr->static_config.enable_subpel;
-    if (enc_mode <= ENC_M0) {
+    if (enc_mode == ENC_M0) {
         context_ptr->me_context_ptr->half_pel_mode =
             (sc_content_detected) ? REFINEMENT_HP_MODE : EX_HP_MODE;
     }else if (enc_mode <= ENC_M2) {
@@ -353,7 +353,7 @@ void *tf_set_me_hme_params_oq(MeContext *me_context_ptr, PictureParentControlSet
 
     me_context_ptr->update_hme_search_center_flag = 1;
 
-    if (input_resolution <= INPUT_SIZE_576p_RANGE_OR_LOWER)
+    if (input_resolution == INPUT_SIZE_576p_RANGE_OR_LOWER)
         me_context_ptr->update_hme_search_center_flag = 0;
 
     return NULL;
@@ -406,7 +406,7 @@ EbErrorType tf_signal_derivation_me_kernel_oq(SequenceControlSet *       scs_ptr
             context_ptr->me_context_ptr->use_subpel_flag = 1;
     else
         context_ptr->me_context_ptr->use_subpel_flag = scs_ptr->static_config.enable_subpel;
-    if (enc_mode <= ENC_M0) {
+    if (enc_mode == ENC_M0) {
         context_ptr->me_context_ptr->half_pel_mode =
             (sc_content_detected) ? REFINEMENT_HP_MODE : EX_HP_MODE;
     }else if (enc_mode <= ENC_M1) {
