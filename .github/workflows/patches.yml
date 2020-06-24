@@ -21,7 +21,7 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - os: ubuntu-18.04
+          - os: ubuntu-20.04
             CC: gcc
             CXX: g++
           - os: macos-10.15
@@ -43,7 +43,7 @@ jobs:
           key: ${{ runner.os }}-ffmpeg-${{ hashFiles('**/*.c') }}
           restore-keys: ${{ runner.os }}-ffmpeg-
       - name: Install dependencies (ubuntu)
-        if: matrix.os == 'ubuntu-18.04'
+        if: matrix.os == 'ubuntu-20.04'
         run: |
           sudo apt-get update &&
           sudo apt-get install -y yasm cmake ccache
@@ -91,7 +91,7 @@ jobs:
         run: ffmpeg -i akiyo_cif.y4m -c:v libsvt_av1 akiyo.webm
 
   gstreamer-patch:
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-20.04
     env:
       CC: ccache gcc
       CXX: ccache g++
