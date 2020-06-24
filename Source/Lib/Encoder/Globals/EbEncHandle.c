@@ -415,12 +415,8 @@ EbErrorType load_default_buffer_configuration_settings(
         (((scs_ptr->max_input_luma_width + 32) / BLOCK_SIZE_64) < 10) ? 1 : 10;
     if ((core_count != SINGLE_CORE_COUNT) && (core_count < (CONS_CORE_COUNT >> 2)))
     {
-        //check on tiles to be removed when crash is fixed
-        if ((scs_ptr->static_config.tile_rows == 0) && (scs_ptr->static_config.tile_columns == 0))
-        {
-            enc_dec_seg_h = MAX(1, enc_dec_seg_h / 2);
-            enc_dec_seg_w = MAX(1, enc_dec_seg_w / 2);
-        }
+        enc_dec_seg_h = MAX(1, enc_dec_seg_h / 2);
+        enc_dec_seg_w = MAX(1, enc_dec_seg_w / 2);
         me_seg_h = MAX(1, me_seg_h / 2);
         me_seg_w = MAX(1, me_seg_w / 2);
     }
