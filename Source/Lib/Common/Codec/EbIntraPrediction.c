@@ -682,7 +682,7 @@ static uint8_t has_bl_32x8[8] = {
 static uint8_t has_bl_16x64[2] = { 0, 0 };
 static uint8_t has_bl_64x16[2] = { 42, 42 };
 
-const uint8_t *const has_bl_tables[BlockSizeS_ALL] = {
+static const uint8_t *const has_bl_tables[BlockSizeS_ALL] = {
     // 4X4
     has_bl_4x4,
     // 4X8,         8X4,         8X8
