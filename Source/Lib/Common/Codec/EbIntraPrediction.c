@@ -2499,7 +2499,6 @@ void highbd_filter_intra_predictor(uint16_t *dst, ptrdiff_t stride,
     TxSize tx_size, const uint16_t *above, const uint16_t *left,
     int mode, int bd)
 {
-    int r, c;
     uint16_t buffer[33][33];
     const int bw = tx_size_wide[tx_size];
     const int bh = tx_size_high[tx_size];
@@ -2507,14 +2506,14 @@ void highbd_filter_intra_predictor(uint16_t *dst, ptrdiff_t stride,
     assert(bw <= 32 && bh <= 32);
 
     // The initialization is just for silencing Jenkins static analysis warnings
-    for (r = 0; r < bh + 1; ++r)
+    for (int r = 0; r < bh + 1; ++r)
         memset(buffer[r], 0, (bw + 1) * sizeof(buffer[0][0]));
 
-    for (r = 0; r < bh; ++r) buffer[r + 1][0] = left[r];
+    for (int r = 0; r < bh; ++r) buffer[r + 1][0] = left[r];
     eb_memcpy(buffer[0], &above[-1], (bw + 1) * sizeof(buffer[0][0]));
 
-    for (r = 1; r < bh + 1; r += 2)
-        for (c = 1; c < bw + 1; c += 4) {
+    for (int r = 1; r < bh + 1; r += 2)
+        for (int c = 1; c < bw + 1; c += 4) {
             const uint16_t p0 = buffer[r - 1][c - 1];
             const uint16_t p1 = buffer[r - 1][c];
             const uint16_t p2 = buffer[r - 1][c + 1];
@@ -2522,7 +2521,7 @@ void highbd_filter_intra_predictor(uint16_t *dst, ptrdiff_t stride,
             const uint16_t p4 = buffer[r - 1][c + 3];
             const uint16_t p5 = buffer[r][c - 1];
             const uint16_t p6 = buffer[r + 1][c - 1];
-            for (int k = 0; k < 8; ++k) {
+            for (unsigned k = 0; k < 8; ++k) {
                 int r_offset = k >> 2;
                 int c_offset = k & 0x03;
                 buffer[r + r_offset][c + c_offset] =
@@ -2539,7 +2538,7 @@ void highbd_filter_intra_predictor(uint16_t *dst, ptrdiff_t stride,
             }
         }
 
-    for (r = 0; r < bh; ++r) {
+    for (int r = 0; r < bh; ++r) {
         eb_memcpy(dst, &buffer[r + 1][1], bw * sizeof(dst[0]));
         dst += stride;
     }
