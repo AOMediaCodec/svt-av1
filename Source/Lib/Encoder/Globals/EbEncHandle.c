@@ -2136,8 +2136,11 @@ void copy_api_from_app(
     // Intra Edge Filter
     scs_ptr->static_config.enable_intra_edge_filter = ((EbSvtAv1EncConfiguration*)config_struct)->enable_intra_edge_filter;
 
-    // Picture based rate estimation
-    scs_ptr->static_config.pic_based_rate_est = ((EbSvtAv1EncConfiguration*)config_struct)->pic_based_rate_est;
+    // Picture based rate estimation, only active with lp 1
+    if(((EbSvtAv1EncConfiguration*)config_struct)->logical_processors > 1)
+        scs_ptr->static_config.pic_based_rate_est = 0;
+    else
+        scs_ptr->static_config.pic_based_rate_est = ((EbSvtAv1EncConfiguration*)config_struct)->pic_based_rate_est;
 
     // ME Tools
     scs_ptr->static_config.use_default_me_hme = ((EbSvtAv1EncConfiguration*)config_struct)->use_default_me_hme;
