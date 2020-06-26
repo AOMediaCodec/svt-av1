@@ -895,7 +895,7 @@ void setup_ref_mv_list(PictureControlSet *pcs_ptr, const Av1Common *cm, const Ma
             }
 
             // Build up the compound mv predictor
-            IntMv comp_list[MAX_MV_REF_CANDIDATES][2];
+            IntMv comp_list[MAX_MV_REF_CANDIDATES + 1][2];
 
             for (int32_t idx = 0; idx < 2; ++idx) {
                 int32_t comp_idx = 0;
