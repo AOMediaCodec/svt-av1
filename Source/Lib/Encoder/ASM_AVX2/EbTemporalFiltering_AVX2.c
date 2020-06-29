@@ -141,7 +141,7 @@ static void apply_temporal_filter_planewise(
     if (plane > PLANE_TYPE_Y) assert(chroma_sq_error != NULL);
 
     uint32_t acc_5x5_sse[BH][BW];
-    const double h = decay_control * (0.7 + log(sigma + 1.0));
+    const double h = decay_control * (0.7 + log1p(sigma));
     uint16_t *frame_sse =
         (plane == PLANE_TYPE_Y) ? luma_sq_error : chroma_sq_error;
 
@@ -386,7 +386,7 @@ static void apply_temporal_filter_planewise_hbd(const uint16_t *frame1, const un
         assert(chroma_sq_error != NULL);
 
     uint32_t     acc_5x5_sse[BH][BW];
-    const double h         = decay_control * (0.7 + log(sigma + 1.0));
+    const double h         = decay_control * (0.7 + log1p(sigma));
     uint32_t *   frame_sse = (plane == PLANE_TYPE_Y) ? luma_sq_error : chroma_sq_error;
 
     if (block_width == 32) {
