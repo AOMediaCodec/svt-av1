@@ -2419,38 +2419,17 @@ int32_t eb_av1_get_comp_reference_type_context(uint32_t blk_origin_x, uint32_t b
             //const MvReferenceFrame frfa = above_mbmi->ref_frame[0];
             //const MvReferenceFrame frfl = left_mbmi->ref_frame[0];
 
-            if (a_sg && l_sg) { // single/single
+            if (a_sg && l_sg) // single/single
                 pred_context =
                     1 +
                     2 * (!((inter_pred_dir_neighbor_array
                                 ->top_array[mode_type_top_neighbor_index] == UNI_PRED_LIST_1) ^
                            (inter_pred_dir_neighbor_array
                                 ->left_array[mode_type_left_neighbor_index] == UNI_PRED_LIST_1)));
-            } else if (l_sg || a_sg) { // single/comp
-                const int32_t uni_rfc = a_sg ? 0 /*has_uni_comp_refs(left_mbmi) */
-                                             : 0 /*has_uni_comp_refs(above_mbmi)*/;
-
-                if (!uni_rfc) // comp bidir
-                    pred_context = 1;
-                else // comp unidir
-                    pred_context =
-                        3 +
-                        (!((inter_pred_dir_neighbor_array
-                                ->top_array[mode_type_top_neighbor_index] == UNI_PRED_LIST_1) ^
-                           (inter_pred_dir_neighbor_array
-                                ->left_array[mode_type_left_neighbor_index] == UNI_PRED_LIST_1)));
-            } else { // comp/comp
-                const int32_t a_uni_rfc = 0; // has_uni_comp_refs(above_mbmi);
-                const int32_t l_uni_rfc = 0; // has_uni_comp_refs(left_mbmi);
-                pred_context            = 0;
-
-                if (!a_uni_rfc && !l_uni_rfc) // bidir/bidir
-                    pred_context = 0;
-                else if (!a_uni_rfc || !l_uni_rfc) // unidir/bidir
-                    pred_context = 2;
-                else // unidir/unidir
-                    pred_context = 3 + (!(0 ^ 0));
-            }
+            else if (l_sg || a_sg) // single/comp
+                pred_context = 1;
+            else // comp/comp
+                pred_context = 0;
         }
     } else if (mode_type_neighbor_array->left_array[mode_type_left_neighbor_index] !=
                (uint8_t)INVALID_MODE) { // one edge available
