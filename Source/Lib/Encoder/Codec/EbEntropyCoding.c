@@ -4369,26 +4369,13 @@ EbErrorType encode_sps_av1(Bitstream *bitstream_ptr, SequenceControlSet *scs_ptr
 * encode_td_av1
 **************************************************/
 EbErrorType encode_td_av1(uint8_t *output_bitstream_ptr) {
-    EbErrorType return_error = EB_ErrorNone;
-    //OutputBitstreamUnit   *output_bitstream_ptr = (OutputBitstreamUnit*)bitstream_ptr->output_bitstream_ptr;
     assert(output_bitstream_ptr != NULL);
 
-    uint8_t *data = output_bitstream_ptr;
-
     // move data and insert OBU_TD preceded by optional 4 byte size
-    uint32_t       obu_header_size   = 1;
-    const uint32_t obu_payload_size  = 0;
-    const size_t   length_field_size = eb_aom_uleb_size_in_bytes(obu_payload_size);
-
-    obu_header_size = write_obu_header(OBU_TEMPORAL_DELIMITER, 0, data);
-
     // OBUs are preceded/succeeded by an unsigned leb128 coded integer.
-    if (write_uleb_obu_size(obu_header_size, obu_payload_size, data) != AOM_CODEC_OK)
-        //return AOM_CODEC_ERROR;
-        data += obu_header_size + obu_payload_size + length_field_size;
-    output_bitstream_ptr = data;
-
-    return return_error;
+    write_uleb_obu_size(
+        write_obu_header(OBU_TEMPORAL_DELIMITER, 0, output_bitstream_ptr), 0, output_bitstream_ptr);
+    return EB_ErrorNone;
 }
 static void av1_write_delta_q_index(FRAME_CONTEXT *frame_context, int32_t delta_qindex,
                                     AomWriter *w) {
