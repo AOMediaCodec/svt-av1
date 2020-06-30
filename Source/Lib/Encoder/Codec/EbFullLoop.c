@@ -1778,25 +1778,23 @@ int32_t av1_quantize_inv_quantize(
 
     if (perform_rdoq && *eob != 0) {
         // Perform rdoq
-        if (*eob != 0) {
-            eb_av1_optimize_b(md_context,
-                              txb_skip_context,
-                              dc_sign_context,
-                              (TranLow *)coeff,
-                              coeff_stride,
-                              n_coeffs,
-                              &candidate_plane,
-                              quant_coeff,
-                              (TranLow *)recon_coeff,
-                              eob,
-                              scan_order,
-                              &qparam,
-                              txsize,
-                              tx_type,
-                              is_inter,
-                              lambda,
-                              (component_type == COMPONENT_LUMA) ? 0 : 1);
-        }
+        eb_av1_optimize_b(md_context,
+                          txb_skip_context,
+                          dc_sign_context,
+                          (TranLow *)coeff,
+                          coeff_stride,
+                          n_coeffs,
+                          &candidate_plane,
+                          quant_coeff,
+                          (TranLow *)recon_coeff,
+                          eob,
+                          scan_order,
+                          &qparam,
+                          txsize,
+                          tx_type,
+                          is_inter,
+                          lambda,
+                          (component_type == COMPONENT_LUMA) ? 0 : 1);
     }
 
     *count_non_zero_coeffs = *eob;
