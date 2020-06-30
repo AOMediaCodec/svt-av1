@@ -1117,7 +1117,7 @@ static EbErrorType av1_encode_coeff_1d(PictureControlSet *   pcs_ptr,
                 uint8_t dc_sign_level_coeff = (uint8_t)cul_level_cb;
                 neighbor_array_unit_mode_write(
                     cb_dc_sign_level_coeff_neighbor_array,
-                    (uint8_t *)&dc_sign_level_coeff,
+                    &dc_sign_level_coeff,
                     ROUND_UV(blk_origin_x +
                              blk_geom->tx_org_x[is_inter][blk_ptr->tx_depth][txb_itr] -
                              blk_geom->origin_x) >>
@@ -1129,15 +1129,11 @@ static EbErrorType av1_encode_coeff_1d(PictureControlSet *   pcs_ptr,
                     blk_geom->tx_width_uv[blk_ptr->tx_depth][txb_itr],
                     blk_geom->tx_height_uv[blk_ptr->tx_depth][txb_itr],
                     NEIGHBOR_ARRAY_UNIT_TOP_AND_LEFT_ONLY_MASK);
-            }
-
-            if (blk_geom->has_uv)
-            // Update the cr DC Sign Level Coeff Neighbor Array
-            {
-                uint8_t dc_sign_level_coeff = (uint8_t)cul_level_cr;
+                // Update the cr DC Sign Level Coeff Neighbor Array
+                dc_sign_level_coeff = (uint8_t)cul_level_cr;
                 neighbor_array_unit_mode_write(
                     cr_dc_sign_level_coeff_neighbor_array,
-                    (uint8_t *)&dc_sign_level_coeff,
+                    &dc_sign_level_coeff,
                     ROUND_UV(blk_origin_x +
                              blk_geom->tx_org_x[is_inter][blk_ptr->tx_depth][txb_itr] -
                              blk_geom->origin_x) >>
@@ -1149,14 +1145,13 @@ static EbErrorType av1_encode_coeff_1d(PictureControlSet *   pcs_ptr,
                     blk_geom->tx_width_uv[blk_ptr->tx_depth][txb_itr],
                     blk_geom->tx_height_uv[blk_ptr->tx_depth][txb_itr],
                     NEIGHBOR_ARRAY_UNIT_TOP_AND_LEFT_ONLY_MASK);
+                context_ptr->coded_area_sb_uv += blk_geom->tx_width_uv[blk_ptr->tx_depth][txb_itr] *
+                    blk_geom->tx_height_uv[blk_ptr->tx_depth][txb_itr];
             }
 
             context_ptr->coded_area_sb += blk_geom->tx_width[blk_ptr->tx_depth][txb_itr] *
                                           blk_geom->tx_height[blk_ptr->tx_depth][txb_itr];
 
-            if (blk_geom->has_uv)
-                context_ptr->coded_area_sb_uv += blk_geom->tx_width_uv[blk_ptr->tx_depth][txb_itr] *
-                                                 blk_geom->tx_height_uv[blk_ptr->tx_depth][txb_itr];
         }
     }
     return return_error;
