@@ -5276,7 +5276,6 @@ void sad_loop_kernel_avx2_hme_l0_intrin(
                 ref += src_stride_raw;
             }
         } else {
-            __m256i ss9, ss10;
             for (i = 0; i < search_area_height; i++) {
                 for (j = 0; j <= search_area_width - 8; j += 8) {
                     p_src = src;
@@ -8594,10 +8593,10 @@ void ext_eight_sad_calculation_32x32_64x64_avx2(uint32_t  p_sad16x16[16][8],
     const __m256i sad32_d = _mm256_add_epi32(tmp6, tmp7);
     _mm256_storeu_si256((__m256i *)p_sad32x32[3], sad32_d);
 
-    DECLARE_ALIGNED(32, uint32_t, sad64x64[8]);
+    DECLARE_ALIGNED(32, uint32_t, p_sad64x64[8]);
     const __m256i tmp8     = _mm256_add_epi32(sad32_a, sad32_b);
     const __m256i tmp9     = _mm256_add_epi32(sad32_c, sad32_d);
-    *((__m256i *)sad64x64) = _mm256_add_epi32(tmp8, tmp9);
+    *((__m256i *)p_sad64x64) = _mm256_add_epi32(tmp8, tmp9);
 
     DECLARE_ALIGNED(32, uint32_t, computed_idx[8]);
     __m256i search_idx_avx2 = _mm256_setr_epi32(0, 4, 8, 12, 16, 20, 24, 28);
@@ -8611,7 +8610,7 @@ void ext_eight_sad_calculation_32x32_64x64_avx2(uint32_t  p_sad16x16[16][8],
     avx2_find_min_pos(sad32_b, si_b);
     avx2_find_min_pos(sad32_c, si_c);
     avx2_find_min_pos(sad32_d, si_d);
-    avx2_find_min_pos(*(__m256i *)sad64x64, si_e);
+    avx2_find_min_pos(*(__m256i *)p_sad64x64, si_e);
 
     if (p_sad32x32[0][si_a] < p_best_sad_32x32[0]) {
         p_best_sad_32x32[0] = p_sad32x32[0][si_a];
@@ -8633,8 +8632,8 @@ void ext_eight_sad_calculation_32x32_64x64_avx2(uint32_t  p_sad16x16[16][8],
         p_best_mv32x32[3]   = computed_idx[si_d];
     }
 
-    if (sad64x64[si_e] < p_best_sad_64x64[0]) {
-        p_best_sad_64x64[0] = sad64x64[si_e];
+    if (p_sad64x64[si_e] < p_best_sad_64x64[0]) {
+        p_best_sad_64x64[0] = p_sad64x64[si_e];
         p_best_mv64x64[0]   = computed_idx[si_e];
     }
 }
