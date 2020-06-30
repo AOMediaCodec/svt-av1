@@ -4675,28 +4675,24 @@ EbErrorType ec_update_neighbors(PictureControlSet *pcs_ptr, EntropyCodingContext
                                        blk_geom->bheight,
                                        NEIGHBOR_ARRAY_UNIT_TOP_AND_LEFT_ONLY_MASK);
 
-        if (blk_geom->has_uv)
+        if (blk_geom->has_uv) {
             neighbor_array_unit_mode_write(cb_dc_sign_level_coeff_neighbor_array,
-                                           (uint8_t *)&dc_sign_level_coeff,
+                                           &dc_sign_level_coeff,
                                            ((blk_origin_x >> 3) << 3) >> 1,
                                            ((blk_origin_y >> 3) << 3) >> 1,
                                            blk_geom->bwidth_uv,
                                            blk_geom->bheight_uv,
                                            NEIGHBOR_ARRAY_UNIT_TOP_AND_LEFT_ONLY_MASK);
-
-        if (blk_geom->has_uv)
             neighbor_array_unit_mode_write(cr_dc_sign_level_coeff_neighbor_array,
-                                           (uint8_t *)&dc_sign_level_coeff,
+                                           &dc_sign_level_coeff,
                                            ((blk_origin_x >> 3) << 3) >> 1,
                                            ((blk_origin_y >> 3) << 3) >> 1,
                                            blk_geom->bwidth_uv,
                                            blk_geom->bheight_uv,
                                            NEIGHBOR_ARRAY_UNIT_TOP_AND_LEFT_ONLY_MASK);
-
-        context_ptr->coded_area_sb += blk_geom->bwidth * blk_geom->bheight;
-
-        if (blk_geom->has_uv)
             context_ptr->coded_area_sb_uv += blk_geom->bwidth_uv * blk_geom->bheight_uv;
+        }
+        context_ptr->coded_area_sb += blk_geom->bwidth * blk_geom->bheight;
     }
 
     // Update the Inter Pred Type Neighbor Array
