@@ -3895,11 +3895,10 @@ static void write_uncompressed_header_obu(SequenceControlSet *     scs_ptr /*Av1
         //        "Frame dimensions are larger than the maximum values");
         //}
 
-        int32_t frame_size_override_flag = 0;
         /*        (pcs_ptr->frame_type == S_FRAME) ? 1
         : (cm->width != cm->seq_params.max_frame_width ||
         cm->height != cm->seq_params.max_frame_height);*/
-        if (frm_hdr->frame_type != S_FRAME) eb_aom_wb_write_bit(wb, frame_size_override_flag);
+        if (frm_hdr->frame_type != S_FRAME) eb_aom_wb_write_bit(wb, 0);
 
         if (scs_ptr->seq_header.order_hint_info.enable_order_hint)
             eb_aom_wb_write_literal(wb,
@@ -3909,7 +3908,7 @@ static void write_uncompressed_header_obu(SequenceControlSet *     scs_ptr /*Av1
         if (!frm_hdr->error_resilient_mode && !frame_is_intra_only(pcs_ptr))
             eb_aom_wb_write_literal(wb, frm_hdr->primary_ref_frame, PRIMARY_REF_BITS);
     }
-    int32_t frame_size_override_flag = 0;
+    const int32_t frame_size_override_flag = 0;
     if (frm_hdr->frame_type == KEY_FRAME) {
         if (!frm_hdr->show_frame)
             eb_aom_wb_write_literal(wb, pcs_ptr->av1_ref_signal.refresh_frame_mask, REF_FRAMES);
@@ -4007,11 +4006,7 @@ static void write_uncompressed_header_obu(SequenceControlSet *     scs_ptr /*Av1
                 }
             }
 
-            if (!frm_hdr->error_resilient_mode && frame_size_override_flag) {
-                SVT_LOG("ERROR[AN]: frame_size_override_flag not supported yet\n");
-                //write_frame_size_with_refs(pcs_ptr, wb);
-            } else
-                write_frame_size(pcs_ptr, frame_size_override_flag, wb);
+            write_frame_size(pcs_ptr, frame_size_override_flag, wb);
             if (frm_hdr->force_integer_mv)
                 frm_hdr->allow_high_precision_mv = 0;
             else
