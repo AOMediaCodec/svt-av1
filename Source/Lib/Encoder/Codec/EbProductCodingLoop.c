@@ -5668,18 +5668,17 @@ EbErrorType signal_derivation_block(PictureControlSet *pcs, ModeDecisionContext 
 /****************************************************
 * generate the the size in pixel for partition code
 ****************************************************/
-uint8_t get_part_side(PartitionContextType part) {
+static uint8_t get_part_side(PartitionContextType part) {
     switch (part) {
-    case 31: return 4; break;
-    case 30: return 8; break;
-    case 28: return 16; break;
-    case 24: return 32; break;
-    case 16: return 64; break;
-    case 0: return 128; break;
+    case 31: return 4;
+    case 30: return 8;
+    case 28: return 16;
+    case 24: return 32;
+    case 16: return 64;
+    case 0: return 128;
     default:
-        return 255;
         SVT_LOG("error: non supported partition!!\n");
-        break;
+        return 255;
     }
 }
 /****************************************************
