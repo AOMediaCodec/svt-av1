@@ -1960,7 +1960,7 @@ static EbErrorType verify_settings(EbConfig *config, uint32_t channel_number) {
         return_error = EB_ErrorBadParameter;
     }
     // Check that the injector frame_rate is non-zero
-    if (config->injector_frame_rate <= 0 && config->injector) {
+    if (!config->injector_frame_rate && config->injector) {
         fprintf(config->error_log_file,
                 "Error Instance %u: The injector frame rate should be greater than 0 fps \n",
                 channel_number + 1);
