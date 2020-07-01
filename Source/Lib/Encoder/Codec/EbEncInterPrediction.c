@@ -701,27 +701,34 @@ static void pick_interinter_seg(PictureControlSet *     picture_control_set_ptr,
     DIFFWTD_MASK_TYPE cur_mask_type;
     int64_t           best_rd        = INT64_MAX;
     DIFFWTD_MASK_TYPE best_mask_type = 0;
+    // cppcheck-suppress unassignedVariable
     DECLARE_ALIGNED(16, uint8_t, seg_mask0[2 * MAX_SB_SQUARE]);
+    // cppcheck-suppress unassignedVariable
     DECLARE_ALIGNED(16, uint8_t, seg_mask1[2 * MAX_SB_SQUARE]);
-    uint8_t *tmp_mask[2] = {seg_mask0, seg_mask1};
 
     const int bd_round = 0;
     // try each mask type and its inverse
     for (cur_mask_type = 0; cur_mask_type < DIFFWTD_MASK_TYPES; cur_mask_type++) {
+        uint8_t *const temp_mask = cur_mask_type ? seg_mask1 : seg_mask0;
         // build mask and inverse
         if (hbd_mode_decision)
             eb_av1_build_compound_diffwtd_mask_highbd(
-                    tmp_mask[cur_mask_type], cur_mask_type, p0, bw, p1, bw, bh, bw, EB_10BIT);
+                    temp_mask, cur_mask_type, p0, bw, p1, bw, bh, bw, EB_10BIT);
         else
             eb_av1_build_compound_diffwtd_mask(
-                    tmp_mask[cur_mask_type], cur_mask_type, p0, bw, p1, bw, bh, bw);
+                    temp_mask, cur_mask_type, p0, bw, p1, bw, bh, bw);
         // compute rd for mask
-        uint64_t sse = eb_av1_wedge_sse_from_residuals(residual1, diff10, tmp_mask[cur_mask_type], N);
+        const uint64_t sse = eb_av1_wedge_sse_from_residuals(
+            residual1, diff10, temp_mask, N);
 
-        sse = ROUND_POWER_OF_TWO(sse, bd_round);
-
-        model_rd_with_curvfit(
-                picture_control_set_ptr, bsize, sse, N, &rate, &dist, context_ptr, full_lambda);
+        model_rd_with_curvfit(picture_control_set_ptr,
+                              bsize,
+                              ROUND_POWER_OF_TWO(sse, bd_round),
+                              N,
+                              &rate,
+                              &dist,
+                              context_ptr,
+                              full_lambda);
 
         const int64_t rd0 = RDCOST(full_lambda, rate, dist);
 
