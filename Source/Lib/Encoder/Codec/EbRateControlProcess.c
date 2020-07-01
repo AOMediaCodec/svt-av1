@@ -4071,18 +4071,19 @@ enum {
 #define ME_SAD_LOW_THRESHOLD2 25 // Low sad_ threshold2 for me distortion (low)
 #define ME_SAD_HIGH_THRESHOLD 80 // High sad_ threshold2 for me distortion (high)
 
-#define ASSIGN_MINQ_TABLE(bit_depth, name)                       \
-    do {                                                         \
-        switch (bit_depth) {                                     \
-        case AOM_BITS_8: name = name##_8; break;                 \
-        case AOM_BITS_10: name = name##_10; break;               \
-        case AOM_BITS_12: name = name##_12; break;               \
-        default:                                                 \
-            assert(0 &&                                          \
-                   "bit_depth should be AOM_BITS_8, AOM_BITS_10" \
-                   " or AOM_BITS_12");                           \
-            name = NULL;                                         \
-        }                                                        \
+#define ASSIGN_MINQ_TABLE(bit_depth, name)                   \
+    do {                                                     \
+        name = NULL;                                         \
+        switch (bit_depth) {                                 \
+        case AOM_BITS_10: name = name##_10; break;           \
+        case AOM_BITS_12: name = name##_12; break;           \
+        case AOM_BITS_8: name = name##_8; break;             \
+        }                                                    \
+        assert(name &&                                       \
+               "bit_depth should be AOM_BITS_8, AOM_BITS_10" \
+               " or AOM_BITS_12");                           \
+        if (!name)                                           \
+            name = name##_8;                                 \
     } while (0)
 static int kf_low_motion_minq_cqp_8[QINDEX_RANGE] = {
     0,    0,    0,    0,
