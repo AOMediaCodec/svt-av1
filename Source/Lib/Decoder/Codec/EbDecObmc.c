@@ -198,8 +198,7 @@ static INLINE void dec_build_prediction_by_above_pred(
     int                  mi_x, mi_y;
     uint8_t *            tmp_recon_buf;
     int32_t              tmp_recon_stride;
-    BlockModeInfo        bakup_abv_mbmi = *above_mbmi;
-    backup_pi->mi                       = &bakup_abv_mbmi;
+    backup_pi->mi                       = above_mbmi;
     av1_modify_neighbor_predictor_for_obmc(backup_pi->mi);
 
     const int num_refs = 1 + has_second_ref(backup_pi->mi);
