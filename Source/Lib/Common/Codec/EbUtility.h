@@ -145,18 +145,8 @@ extern uint64_t log2f_64(uint64_t x);
      * MACROS
      ****************************/
 
-#ifdef _MSC_VER
 #define MULTI_LINE_MACRO_BEGIN do {
-#define MULTI_LINE_MACRO_END                                  \
-    __pragma(warning(push)) __pragma(warning(disable : 4127)) \
-    }                                                         \
-    while (0) __pragma(warning(pop))
-#else
-#define MULTI_LINE_MACRO_BEGIN do {
-#define MULTI_LINE_MACRO_END \
-    }                        \
-    while (0)
-#endif
+#define MULTI_LINE_MACRO_END } while (0)
 
 //**************************************************
 // MACROS
