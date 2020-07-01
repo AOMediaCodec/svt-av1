@@ -1419,15 +1419,14 @@ static INLINE void update_coeff_eob_fast(uint16_t *eob, int shift, const int16_t
         const int rc         = scan[i];
         const int qcoeff     = qcoeff_ptr[rc];
         const int coeff      = coeff_ptr[rc];
-        const int coeff_sign = (coeff >> 31);
+        const int coeff_sign = -(coeff < 0);
         int64_t   abs_coeff  = (coeff ^ coeff_sign) - coeff_sign;
         if (((abs_coeff << (1 + shift)) < zbin[rc != 0]) || (qcoeff == 0)) {
             eob_out--;
             qcoeff_ptr[rc]  = 0;
             dqcoeff_ptr[rc] = 0;
-        } else {
+        } else
             break;
-        }
     }
     *eob = eob_out;
 }
