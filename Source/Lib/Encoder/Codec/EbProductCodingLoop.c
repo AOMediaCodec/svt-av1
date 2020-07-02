@@ -4339,7 +4339,7 @@ static INLINE int txfm_partition_context(TXFM_CONTEXT *above_ctx, TXFM_CONTEXT *
     int           category = TXFM_PARTITION_CONTEXTS;
 
     // dummy return, not used by others.
-    if (tx_size <= TX_4X4)
+    if (tx_size == TX_4X4)
         return 0;
 
     TxSize max_tx_size = get_sqr_tx_size(AOMMAX(block_size_wide[bsize], block_size_high[bsize]));
