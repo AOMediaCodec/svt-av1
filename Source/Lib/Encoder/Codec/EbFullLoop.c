@@ -1072,9 +1072,8 @@ static INLINE int get_coeff_cost_general(int is_last, int ci, TranLow abs_qc, in
     return cost;
 }
 static INLINE int64_t get_coeff_dist(TranLow tcoeff, TranLow dqcoeff, int shift) {
-    const int64_t diff  = (tcoeff - dqcoeff) * (1 << shift);
-    const int64_t error = diff * diff;
-    return error;
+    const int64_t diff = ((int64_t)tcoeff - dqcoeff) * (int64_t)(1lu << shift);
+    return diff * diff;
 }
 static INLINE void get_qc_dqc_low(TranLow abs_qc, int sign, int dqv, int shift, TranLow *qc_low,
                                   TranLow *dqc_low) {
