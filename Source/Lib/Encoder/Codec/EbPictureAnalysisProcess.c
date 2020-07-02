@@ -85,7 +85,7 @@ EbErrorType picture_analysis_context_ctor(EbThreadContext *  thread_context_ptr,
         desc.max_width          = scs_ptr->max_input_luma_width;
         desc.max_height         = scs_ptr->max_input_luma_height;
         desc.bit_depth          = EB_8BIT;
-        desc.buffer_enable_mask = PICTURE_BUFFER_DESC_Y_FLAG;
+
         //denoised
         // If 420/422, re-use luma for chroma
         // If 444, re-use luma for Cr
