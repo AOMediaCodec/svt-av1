@@ -1150,10 +1150,8 @@ static int32_t search_filter_level(
             }
             // If value is significantly better than previous best, bias added against
             // raising filter value
-            if (ss_err[filt_high] < (best_err - bias)) {
-                best_err  = ss_err[filt_high];
+            if (ss_err[filt_high] < (best_err - bias))
                 filt_best = filt_high;
-            }
         }
     } else {
         while (filter_step > 0) {
