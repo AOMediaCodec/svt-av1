@@ -1143,7 +1143,7 @@ void svt_av1_apply_temporal_filter_planewise_c(
                 }
             }
             // Control factor for non-local mean approach.
-            double r = (double)decay_control * (0.7 + log(noise_levels[0] + 1.0));
+            double r = (double)decay_control * (0.7 + log1p(noise_levels[0]));
 
             double scaled_diff =
                 AOMMAX(-(double)(sum_square_diff / num_ref_pixels) / (2 * r * r), -15.0);
@@ -1186,13 +1186,13 @@ void svt_av1_apply_temporal_filter_planewise_c(
                 }
 
                 m = (i >> ss_y) * uv_pre_stride + (j >> ss_x);
-                r = (double)decay_control * (0.7 + log(noise_levels[1] + 1.0));
+                r = (double)decay_control * (0.7 + log1p(noise_levels[1]));
                 scaled_diff =
                     AOMMAX(-(double)(u_sum_square_diff / num_ref_pixels) / (2 * r * r), -15.0);
                 adjusted_weight = (int)(exp(scaled_diff) * TF_PLANEWISE_FILTER_WEIGHT_SCALE);
                 u_count[m] += adjusted_weight;
                 u_accum[m] += adjusted_weight * u_pixel_value;
-                r = (double)decay_control * (0.7 + log(noise_levels[2] + 1.0));
+                r = (double)decay_control * (0.7 + log1p(noise_levels[2]));
 
                 scaled_diff =
                     AOMMAX(-(double)(v_sum_square_diff / num_ref_pixels) / (2 * r * r), -15.0);
@@ -1267,7 +1267,7 @@ void svt_av1_apply_temporal_filter_planewise_hbd_c(
                 }
             }
             // Control factor for non-local mean approach.
-            double r = (double)decay_control * (0.7 + log(noise_levels[0] + 1.0));
+            double r = (double)decay_control * (0.7 + log1p(noise_levels[0]));
 
             // Scale down the difference for high bit depth input.
             sum_square_diff >>= 4;
@@ -1312,7 +1312,7 @@ void svt_av1_apply_temporal_filter_planewise_hbd_c(
                 }
 
                 m = (i >> ss_y) * uv_pre_stride + (j >> ss_x);
-                r = (double)decay_control * (0.7 + log(noise_levels[1] + 1.0));
+                r = (double)decay_control * (0.7 + log1p(noise_levels[1]));
                 // Scale down the difference for high bit depth input.
                 u_sum_square_diff >>= 4;
                 v_sum_square_diff >>= 4;
@@ -1321,7 +1321,7 @@ void svt_av1_apply_temporal_filter_planewise_hbd_c(
                 adjusted_weight = (int)(exp(scaled_diff) * TF_PLANEWISE_FILTER_WEIGHT_SCALE);
                 u_count[m] += adjusted_weight;
                 u_accum[m] += adjusted_weight * u_pixel_value;
-                r = (double)decay_control * (0.7 + log(noise_levels[2] + 1.0));
+                r = (double)decay_control * (0.7 + log1p(noise_levels[2]));
 
                 scaled_diff =
                     AOMMAX(-(double)(v_sum_square_diff / num_ref_pixels) / (2 * r * r), -15.0);
