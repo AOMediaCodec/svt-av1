@@ -4169,9 +4169,8 @@ EbErrorType av1_inter_prediction(
     //for this case: only uniPred is allowed.
 
     int32_t sub8x8_inter = 0;
-    if (perform_chroma && (blk_geom->has_uv && (blk_geom->bwidth == 4 || blk_geom->bheight == 4)))
-
-    {
+    if (perform_chroma && blk_geom->has_uv && (blk_geom->bwidth == 4 || blk_geom->bheight == 4) &&
+        picture_control_set_ptr) {
         //CHKN setup input param
 
         int32_t bw = blk_geom->bwidth_uv;
@@ -4285,7 +4284,6 @@ EbErrorType av1_inter_prediction(
                     EbPictureBufferDesc *ref_pic = get_ref_pic_buffer(picture_control_set_ptr, is16bit,
                                                                       list_idx, ref_idx);
 
-                    assert(picture_control_set_ptr!=NULL);
                     const struct ScaleFactors *const sf = use_intrabc ? &sf_identity : &(scale_factors[list_idx][ref_idx]);
 
                     // Cb
@@ -4576,7 +4574,7 @@ EbErrorType av1_inter_prediction(
         uint32_t ss_y = 0;
 
         /*ScaleFactor*/
-        const struct ScaleFactors *const sf = use_intrabc || picture_control_set_ptr == NULL ?
+        const struct ScaleFactors *const sf = use_intrabc ?
                                                 &sf_identity :
                                                 &ref1_scale_factors;
 
@@ -5038,23 +5036,13 @@ EbErrorType av1_inter_prediction(
     }
 
     if (motion_mode == OBMC_CAUSAL) {
-        uint8_t *tmp_obmc_bufs[2];
-
+        // cppcheck-suppress unassignedVariable
         DECLARE_ALIGNED(16, uint8_t, obmc_buff_0[2 * MAX_MB_PLANE * MAX_SB_SQUARE]);
+        // cppcheck-suppress unassignedVariable
         DECLARE_ALIGNED(16, uint8_t, obmc_buff_1[2 * MAX_MB_PLANE * MAX_SB_SQUARE]);
-        tmp_obmc_bufs[0] = obmc_buff_0;
-        tmp_obmc_bufs[1] = obmc_buff_1;
-
         uint8_t *dst_buf1[MAX_MB_PLANE], *dst_buf2[MAX_MB_PLANE];
         int      dst_stride1[MAX_MB_PLANE] = {MAX_SB_SIZE, MAX_SB_SIZE, MAX_SB_SIZE};
         int      dst_stride2[MAX_MB_PLANE] = {MAX_SB_SIZE, MAX_SB_SIZE, MAX_SB_SIZE};
-
-        dst_buf1[0] = tmp_obmc_bufs[0];
-        dst_buf1[1] = tmp_obmc_bufs[0] + (MAX_SB_SQUARE << is16bit);
-        dst_buf1[2] = tmp_obmc_bufs[0] + (MAX_SB_SQUARE * 2 << is16bit);
-        dst_buf2[0] = tmp_obmc_bufs[1];
-        dst_buf2[1] = tmp_obmc_bufs[1] + (MAX_SB_SQUARE << is16bit);
-        dst_buf2[2] = tmp_obmc_bufs[1] + (MAX_SB_SQUARE * 2 << is16bit);
 
         int mi_row = pu_origin_y >> 2;
         int mi_col = pu_origin_x >> 2;
@@ -5067,6 +5055,12 @@ EbErrorType av1_inter_prediction(
             dst_buf2[1] = md_context->obmc_buff_1 + (MAX_SB_SQUARE << is16bit);
             dst_buf2[2] = md_context->obmc_buff_1 + (MAX_SB_SQUARE * 2 << is16bit);
         } else {
+            dst_buf1[0] = obmc_buff_0;
+            dst_buf1[1] = obmc_buff_0 + (MAX_SB_SQUARE << is16bit);
+            dst_buf1[2] = obmc_buff_0 + (MAX_SB_SQUARE * 2 << is16bit);
+            dst_buf2[0] = obmc_buff_1;
+            dst_buf2[1] = obmc_buff_1 + (MAX_SB_SQUARE << is16bit);
+            dst_buf2[2] = obmc_buff_1 + (MAX_SB_SQUARE * 2 << is16bit);
             build_prediction_by_above_preds(
                     perform_chroma,
                     blk_geom->bsize, picture_control_set_ptr, blk_ptr->av1xd, mi_row, mi_col, dst_buf1,
