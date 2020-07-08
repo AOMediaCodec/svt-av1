@@ -4972,7 +4972,7 @@ static void sb_qp_derivation_two_pass(PictureControlSet *pcs_ptr) {
     uint32_t            sb_addr;
 
     pcs_ptr->parent_pcs_ptr->average_qp = 0;
-    if (scs_ptr->use_input_stat_file && pcs_ptr->temporal_layer_index <= 0)
+    if (scs_ptr->use_input_stat_file && pcs_ptr->temporal_layer_index == 0)
         pcs_ptr->parent_pcs_ptr->frm_hdr.delta_q_params.delta_q_present = 1;
     else
         pcs_ptr->parent_pcs_ptr->frm_hdr.delta_q_params.delta_q_present = 0;
