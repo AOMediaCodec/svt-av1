@@ -1756,7 +1756,7 @@ static void check_mt_support(EbDecHandle *dec_handle_ptr) {
             }
             EbMemoryMapEntry *tmp_memory_entry = memory_entry;
             memory_entry = (EbMemoryMapEntry *)tmp_memory_entry->prev_entry;
-            if (tmp_memory_entry) free(tmp_memory_entry);
+            free(tmp_memory_entry);
         } while (memory_entry != memory_map_start_address && memory_entry);
         if (previous_entry != NULL)
             previous_entry->prev_entry = memory_map_start_address;
