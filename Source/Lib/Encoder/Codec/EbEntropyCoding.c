@@ -125,9 +125,9 @@ void cabac_ctor(CabacEncodeContext *cabacEncContextPtr) {
 
 static INLINE int32_t does_level_match(int32_t width, int32_t height, double fps, int32_t lvl_width,
                                        int32_t lvl_height, double lvl_fps, int32_t lvl_dim_mult) {
-    const int64_t lvl_luma_pels           = lvl_width * lvl_height;
+    const int64_t lvl_luma_pels           = (int64_t)lvl_width * lvl_height;
     const double  lvl_display_sample_rate = lvl_luma_pels * lvl_fps;
-    const int64_t luma_pels               = width * height;
+    const int64_t luma_pels               = (int64_t)width * height;
     const double  display_sample_rate     = luma_pels * fps;
     return luma_pels <= lvl_luma_pels && display_sample_rate <= lvl_display_sample_rate &&
            width <= lvl_width * lvl_dim_mult && height <= lvl_height * lvl_dim_mult;
