@@ -1151,11 +1151,8 @@ EbErrorType signal_derivation_multi_processes_oq(
         // GM_FULL                                    Exhaustive search mode.
         // GM_DOWN                                    Downsampled resolution with a downsampling factor of 2 in each dimension
         // GM_TRAN_ONLY                               Translation only using ME MV.
-        if (pcs_ptr->enc_mode <= ENC_M0 ||
-        (pcs_ptr->enc_mode <= ENC_M1 && pcs_ptr->sc_content_detected))
-            pcs_ptr->gm_level = GM_FULL;
-        else
-            pcs_ptr->gm_level = GM_DOWN;
+        pcs_ptr->gm_level = (pcs_ptr->enc_mode == ENC_M0 ||
+        (pcs_ptr->enc_mode <= ENC_M1 && pcs_ptr->sc_content_detected)) ?GM_FULL : GM_DOWN;
         //Exit TX size search when all coefficients are zero
         // 0: OFF
         // 1: ON
