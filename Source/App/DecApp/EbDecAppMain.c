@@ -23,7 +23,7 @@
 
 int init_pic_buffer(EbSvtIOFormat *pic_buffer, CliInput *cli, EbSvtAv1DecConfiguration *config) {
     /* FilmGrain module req. even dim. for internal operation */
-    pic_buffer->y_stride = cli->width & 1 ? cli->width + 1 : cli->width;
+    pic_buffer->y_stride = (cli->width & 1) ? cli->width + 1 : cli->width;
     switch (cli->fmt) {
     case EB_YUV400:
         pic_buffer->cb_stride = INT32_MAX;
