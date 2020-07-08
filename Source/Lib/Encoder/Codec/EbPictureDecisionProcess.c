@@ -100,12 +100,6 @@ uint64_t  get_ref_poc(PictureDecisionContext *context, uint64_t curr_picture_num
     return ref_poc;
 }
 
-typedef struct {
-    MvReferenceFrame ref_type;
-    int used;
-    uint64_t poc;
-} RefFrameInfo;
-
 MvReferenceFrame svt_get_ref_frame_type(uint8_t list, uint8_t ref_idx);
 
 static INLINE int get_relative_dist(const OrderHintInfo *oh, int a, int b) {
@@ -127,7 +121,10 @@ void eb_av1_setup_skip_mode_allowed(PictureParentControlSet  *parent_pcs_ptr) {
 
     FrameHeader *frm_hdr = &parent_pcs_ptr->frm_hdr;
 
-    RefFrameInfo ref_frame_arr_single[7];
+    struct RefFrameInfo {
+        int used;
+        uint64_t poc;
+    } ref_frame_arr_single[7];
 
     for (uint8_t i = 0; i < 7; ++i)
         ref_frame_arr_single[i].used = 1;
