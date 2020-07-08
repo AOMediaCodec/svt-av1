@@ -4132,7 +4132,6 @@ void* picture_decision_kernel(void *input_ptr)
         in_results_ptr = (PictureAnalysisResults*)in_results_wrapper_ptr->object_ptr;
         pcs_ptr = (PictureParentControlSet*)in_results_ptr->pcs_wrapper_ptr->object_ptr;
         scs_ptr = (SequenceControlSet*)pcs_ptr->scs_wrapper_ptr->object_ptr;
-        frm_hdr = &pcs_ptr->frm_hdr;
         encode_context_ptr = (EncodeContext*)scs_ptr->encode_context_ptr;
         loop_count++;
 
@@ -4195,7 +4194,6 @@ void* picture_decision_kernel(void *input_ptr)
             }
 
             pcs_ptr = (PictureParentControlSet*)queue_entry_ptr->parent_pcs_wrapper_ptr->object_ptr;
-            frm_hdr = &pcs_ptr->frm_hdr;
             pcs_ptr->fade_out_from_black = 0;
 
             pcs_ptr->fade_in_to_black = 0;
@@ -4227,7 +4225,6 @@ void* picture_decision_kernel(void *input_ptr)
 
                 // Setup the PCS & SCS
                 pcs_ptr = (PictureParentControlSet*)encode_context_ptr->pre_assignment_buffer[encode_context_ptr->pre_assignment_buffer_count]->object_ptr;
-                frm_hdr = &pcs_ptr->frm_hdr;
                 // Set the POC Number
                 pcs_ptr->picture_number = (encode_context_ptr->current_input_poc + 1) /*& ((1 << scs_ptr->bits_for_picture_order_count)-1)*/;
                 encode_context_ptr->current_input_poc = pcs_ptr->picture_number;
@@ -4755,9 +4752,6 @@ void* picture_decision_kernel(void *input_ptr)
                                 if (!pcs_ptr->is_overlay) {
                                     input_entry_ptr->list0_ptr = &pred_position_ptr->ref_list0;
                                     input_entry_ptr->list1_ptr = &pred_position_ptr->ref_list1;
-                                }
-                                if (!pcs_ptr->is_overlay)
-                                {
                                     // Copy the Dependent Lists
                                     // *Note - we are removing any leading picture dependencies for now
                                     input_entry_ptr->list0.list_count = 0;
