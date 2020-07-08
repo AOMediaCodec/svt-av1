@@ -633,29 +633,27 @@ svt_av1_dec_deinit(EbComponentType *svt_dec_component) {
         if (svt_dec_memory_map) {
             // Loop through the ptr table and free all malloc'd pointers per channel
             EbMemoryMapEntry *memory_entry = svt_dec_memory_map;
-            if (memory_entry) {
-                do {
-                    switch (memory_entry->ptr_type) {
-                    case EB_N_PTR: free(memory_entry->ptr); break;
-                    case EB_A_PTR:
+            do {
+                switch (memory_entry->ptr_type) {
+                case EB_N_PTR: free(memory_entry->ptr); break;
+                case EB_A_PTR:
 #ifdef _WIN32
-                        _aligned_free(memory_entry->ptr);
+                    _aligned_free(memory_entry->ptr);
 #else
-                        free(memory_entry->ptr);
+                    free(memory_entry->ptr);
 #endif
-                        break;
-                    case EB_SEMAPHORE: eb_destroy_semaphore(memory_entry->ptr); break;
-                    case EB_THREAD: eb_destroy_thread(memory_entry->ptr); break;
-                    case EB_MUTEX: eb_destroy_mutex(memory_entry->ptr); break;
-                    default: return_error = EB_ErrorMax; break;
-                    }
-                    EbMemoryMapEntry *tmp_memory_entry = memory_entry;
-                    memory_entry = (EbMemoryMapEntry *)tmp_memory_entry->prev_entry;
-                    if (tmp_memory_entry) free(tmp_memory_entry);
-                } while (memory_entry != dec_handle_ptr->memory_map_init_address && memory_entry);
-                if (dec_handle_ptr->memory_map_init_address)
-                    free(dec_handle_ptr->memory_map_init_address);
-            }
+                    break;
+                case EB_SEMAPHORE: eb_destroy_semaphore(memory_entry->ptr); break;
+                case EB_THREAD: eb_destroy_thread(memory_entry->ptr); break;
+                case EB_MUTEX: eb_destroy_mutex(memory_entry->ptr); break;
+                default: return_error = EB_ErrorMax; break;
+                }
+                EbMemoryMapEntry *tmp_memory_entry = memory_entry;
+                memory_entry = (EbMemoryMapEntry *)tmp_memory_entry->prev_entry;
+                free(tmp_memory_entry);
+            } while (memory_entry != dec_handle_ptr->memory_map_init_address && memory_entry);
+            if (dec_handle_ptr->memory_map_init_address)
+                free(dec_handle_ptr->memory_map_init_address);
         }
     }
     return return_error;
