@@ -4382,7 +4382,7 @@ static INLINE TxType av1_get_tx_type(BlockSize sb_type, int32_t is_inter, Predic
                                      const MacroBlockD *xd, int32_t blk_row, int32_t blk_col,
                                      TxSize tx_size, int32_t reduced_tx_set) {
     UNUSED(sb_type);
-    UNUSED(*xd);
+    UNUSED(xd);
     UNUSED(blk_row);
     UNUSED(blk_col);
 
