@@ -4859,7 +4859,6 @@ static void write_palette_mode_info(PictureParentControlSet *ppcs, FRAME_CONTEXT
                                     AomWriter *w) {
     const uint32_t intra_luma_mode         = blk_ptr->pred_mode;
     uint32_t       intra_chroma_mode       = blk_ptr->prediction_unit_array->intra_chroma_mode;
-    const int      num_planes              = 3; // av1_num_planes(cm);
     const PaletteModeInfo *const pmi       = &blk_ptr->palette_info.pmi;
     const int                    bsize_ctx = av1_get_palette_bsize_ctx(bsize);
     assert(bsize_ctx >= 0);
@@ -4875,19 +4874,12 @@ static void write_palette_mode_info(PictureParentControlSet *ppcs, FRAME_CONTEXT
         }
     }
 
-    const int uv_dc_pred = num_planes > 1 && intra_chroma_mode == UV_DC_PRED &&
+    const int uv_dc_pred = intra_chroma_mode == UV_DC_PRED &&
                            is_chroma_reference(mi_row, mi_col, bsize, 1, 1);
     if (uv_dc_pred) {
-        const int n = 0; // pmi->palette_size[1];
         assert(pmi->palette_size[1] == 0); //remove when chroma is on
         const int palette_uv_mode_ctx = (pmi->palette_size[0] > 0);
-        aom_write_symbol(w, n > 0, ec_ctx->palette_uv_mode_cdf[palette_uv_mode_ctx], 2);
-        if (n > 0) {
-            /*           aom_write_symbol(w, n - PALETTE_MIN_SIZE,
-                           xd->tile_ctx->palette_uv_size_cdf[bsize_ctx],
-                           PALETTE_SIZES);
-                       write_palette_colors_uv(xd, pmi, cm->seq_params.bit_depth, w);*/
-        }
+        aom_write_symbol(w, 0, ec_ctx->palette_uv_mode_cdf[palette_uv_mode_ctx], 2);
     }
 }
 void eb_av1_encode_dv(AomWriter *w, const MV *mv, const MV *ref, NmvContext *mvctx) {
