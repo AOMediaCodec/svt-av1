@@ -820,14 +820,10 @@ static EbErrorType eb_enc_handle_ctor(
     EbEncHandle *enc_handle_ptr,
     EbComponentType * ebHandlePtr)
 {
-    EbErrorType return_error = EB_ErrorNone;
-
     enc_handle_ptr->dctor = eb_enc_handle_dctor;
 
-    return_error = init_thread_management_params();
+    init_thread_management_params();
 
-    if (return_error == EB_ErrorInsufficientResources)
-        return EB_ErrorInsufficientResources;
     enc_handle_ptr->encode_instance_total_count                           = EB_EncodeInstancesTotalCount;
     enc_handle_ptr->compute_segments_total_count_array                    = EB_ComputeSegmentInitCount;
     // Config Set Count
