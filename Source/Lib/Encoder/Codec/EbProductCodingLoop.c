@@ -1348,12 +1348,12 @@ void set_md_stage_counts(PictureControlSet *pcs_ptr, ModeDecisionContext *contex
                 1);
         }
 
-        if ((pcs_ptr->enc_mode <= ENC_M0 && !(pcs_ptr->parent_pcs_ptr->sc_content_detected)) ||
-            ((pcs_ptr->enc_mode <= ENC_M0 ||
+        if ((pcs_ptr->enc_mode == ENC_M0 && !(pcs_ptr->parent_pcs_ptr->sc_content_detected)) ||
+            ((pcs_ptr->enc_mode == ENC_M0 ||
               (pcs_ptr->enc_mode <= ENC_M1 && pcs_ptr->parent_pcs_ptr->sc_content_detected)) &&
              context_ptr->blk_geom->shape == PART_N)) {
-            uint8_t mult_factor_num   = 5;
-            uint8_t mult_factor_denum = 4;
+            uint8_t mult_factor_num;
+            uint8_t mult_factor_denum;
             for (uint8_t i = 0; i < CAND_CLASS_TOTAL; ++i) {
                 if (i == CAND_CLASS_0 || i == CAND_CLASS_6 || i == CAND_CLASS_7) {
                     // INTRA scaling
@@ -1400,7 +1400,7 @@ void set_md_stage_counts(PictureControlSet *pcs_ptr, ModeDecisionContext *contex
             ////DIVIDE
             uint8_t division_factor_num   = 1;
             uint8_t division_factor_denum = 1;
-            if (pcs_ptr->enc_mode <= ENC_M0) {
+            if (pcs_ptr->enc_mode == ENC_M0) {
                 division_factor_num   = 1;
                 division_factor_denum = 1;
             } else if (pcs_ptr->enc_mode <= ENC_M1) {
@@ -1427,7 +1427,7 @@ void set_md_stage_counts(PictureControlSet *pcs_ptr, ModeDecisionContext *contex
             ////DIVIDE
             uint8_t division_factor_num   = 1;
             uint8_t division_factor_denum = 1;
-            if (pcs_ptr->enc_mode <= ENC_M0) {
+            if (pcs_ptr->enc_mode == ENC_M0) {
                 division_factor_num   = 1;
                 division_factor_denum = 1;
             } else if (pcs_ptr->enc_mode <= ENC_M1) {
