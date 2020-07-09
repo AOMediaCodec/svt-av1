@@ -539,7 +539,7 @@ static EbErrorType copy_frame_buffer(SequenceControlSet *scs_ptr, uint8_t *dst, 
                        chroma_stride * input_row_index),
                       chroma_width);
         }
-    } else if (is_16bit_input && config->compressed_ten_bit_format == 1) {
+    } else if (config->compressed_ten_bit_format == 1) {
         {
             uint32_t luma_buffer_offset =
                 (dst_picture_ptr->stride_y * scs_ptr->top_padding + scs_ptr->left_padding);
