@@ -537,9 +537,6 @@ void determine_compound_mode(PictureControlSet *pcs_ptr, ModeDecisionContext *co
         candidatePtr->comp_group_idx = 1;
         candidatePtr->compound_idx   = 1;
         search_compound_diff_wedge(pcs_ptr, context_ptr, candidatePtr);
-
-        candidatePtr->interinter_comp.wedge_index = candidatePtr->interinter_comp.wedge_index;
-        candidatePtr->interinter_comp.wedge_sign  = candidatePtr->interinter_comp.wedge_sign;
     } else {
         SVT_LOG("ERROR: not used comp type\n");
     }
