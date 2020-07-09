@@ -1020,7 +1020,7 @@ static void finalize_sym_filter(int32_t wiener_win, int32_t *f, InterpKernel fi)
     const int32_t wiener_halfwin = (wiener_win >> 1);
 
     for (i = 0; i < wiener_halfwin; ++i) {
-        const int64_t dividend = f[i] * WIENER_FILT_STEP;
+        const int64_t dividend = (int64_t)f[i] * WIENER_FILT_STEP;
         const int64_t divisor  = WIENER_TAP_SCALE_FACTOR;
         // Perform this division with proper rounding rather than truncation
         if (dividend < 0)
