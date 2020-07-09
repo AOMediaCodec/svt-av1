@@ -9499,7 +9499,6 @@ void integer_search_sb(
     uint32_t list_index;
     uint8_t ref_pic_index;
     uint8_t num_of_ref_pic_to_search;
-    EbPaReferenceObject *reference_object; // input parameter, reference Object Ptr
     // Final ME Search Center
     int16_t x_search_center = 0;
     int16_t y_search_center = 0;
@@ -9511,32 +9510,19 @@ void integer_search_sb(
     // Uni-Prediction motion estimation loop
     // List Loop
     for (list_index = REF_LIST_0; list_index <= num_of_list_to_search; ++list_index) {
-        if (context_ptr->me_alt_ref == EB_TRUE) {
-            num_of_ref_pic_to_search = 1;
-        } else {
-            num_of_ref_pic_to_search = (pcs_ptr->slice_type == P_SLICE)
+        num_of_ref_pic_to_search = context_ptr->me_alt_ref == EB_TRUE
+            ? 1
+            : pcs_ptr->slice_type == P_SLICE
                 ? pcs_ptr->ref_list0_count_try
-                : (list_index == REF_LIST_0) ? pcs_ptr->ref_list0_count_try
-                : pcs_ptr->ref_list1_count_try;
-
-            reference_object =
-                (EbPaReferenceObject *)pcs_ptr->ref_pa_pic_ptr_array[0][0]->object_ptr;
-        }
-
+                : list_index == REF_LIST_0 ? pcs_ptr->ref_list0_count_try
+                                           : pcs_ptr->ref_list1_count_try;
         // Ref Picture Loop
         for (ref_pic_index = 0; ref_pic_index < num_of_ref_pic_to_search; ++ref_pic_index) {
-            if (context_ptr->me_alt_ref == EB_TRUE) {
-                reference_object = (EbPaReferenceObject *)context_ptr->alt_ref_reference_ptr;
-            } else {
-                if (num_of_list_to_search) {
-                    reference_object =
-                        (EbPaReferenceObject *)pcs_ptr->ref_pa_pic_ptr_array[1][0]->object_ptr;
-                }
-
-                reference_object =
-                    (EbPaReferenceObject *)pcs_ptr->ref_pa_pic_ptr_array[list_index][ref_pic_index]
-                        ->object_ptr;
-            }
+            // input parameter, reference Object Ptr
+            EbPaReferenceObject *reference_object = context_ptr->me_alt_ref == EB_TRUE
+                ? (EbPaReferenceObject *)context_ptr->alt_ref_reference_ptr
+                : (EbPaReferenceObject *)pcs_ptr->ref_pa_pic_ptr_array[list_index][ref_pic_index]
+                      ->object_ptr;
 
             ref_pic_ptr = (EbPictureBufferDesc *)reference_object->input_padded_picture_ptr;
             // Get hme results
