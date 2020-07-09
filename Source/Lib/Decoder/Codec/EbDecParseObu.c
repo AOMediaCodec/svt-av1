@@ -132,7 +132,7 @@ void read_timing_info(Bitstrm *bs, EbTimingInfo *timing_info) {
     PRINT("num_units_in_display_tick", timing_info->num_units_in_display_tick);
     timing_info->time_scale = dec_get_bits(bs, 32);
     PRINT("time_scale", timing_info->time_scale);
-    if (timing_info->num_units_in_display_tick <= 0 || timing_info->time_scale <= 0)
+    if (!timing_info->num_units_in_display_tick || !timing_info->time_scale)
         return; // EB_DecUnsupportedBitstream;
     timing_info->equal_picture_interval = dec_get_bits(bs, 1);
     PRINT("equal_picture_interval", timing_info->equal_picture_interval);
