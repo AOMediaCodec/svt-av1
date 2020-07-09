@@ -2872,14 +2872,11 @@ void av1_cost_calc_cfl(PictureControlSet *pcs_ptr, ModeDecisionCandidateBuffer *
     uint32_t               count_non_zero_coeffs[3][MAX_NUM_OF_TU_PER_CU];
     uint64_t               cb_full_distortion[DIST_CALC_TOTAL];
     uint64_t               cr_full_distortion[DIST_CALC_TOTAL];
-    uint64_t               cb_coeff_bits = 0;
-    uint64_t               cr_coeff_bits = 0;
     uint32_t               chroma_width  = context_ptr->blk_geom->bwidth_uv;
     uint32_t               chroma_height = context_ptr->blk_geom->bheight_uv;
     // FullLoop and TU search
-    int32_t  alpha_q3;
     uint16_t cb_qp = context_ptr->qp;
-    uint16_t cr_qp = context_ptr->qp;
+    uint16_t cr_qp = cb_qp;
 
     full_distortion[DIST_CALC_RESIDUAL]   = 0;
     full_distortion[DIST_CALC_PREDICTION] = 0;
@@ -2892,12 +2889,12 @@ void av1_cost_calc_cfl(PictureControlSet *pcs_ptr, ModeDecisionCandidateBuffer *
         cr_full_distortion[DIST_CALC_RESIDUAL]   = 0;
         cb_full_distortion[DIST_CALC_PREDICTION] = 0;
         cr_full_distortion[DIST_CALC_PREDICTION] = 0;
-        cb_coeff_bits                            = 0;
-        cr_coeff_bits                            = 0;
-        alpha_q3                                 = (check_dc) ? 0
-                              : cfl_idx_to_alpha(candidate_ptr->cfl_alpha_idx,
-                                                 candidate_ptr->cfl_alpha_signs,
-                                                 CFL_PRED_U); // once for U, once for V
+        uint64_t cb_coeff_bits                   = 0;
+        uint64_t cr_coeff_bits                   = 0;
+        int32_t  alpha_q3                        = (check_dc) ? 0
+                                      : cfl_idx_to_alpha(candidate_ptr->cfl_alpha_idx,
+                                                         candidate_ptr->cfl_alpha_signs,
+                                                         CFL_PRED_U); // once for U, once for V
         assert(chroma_width * CFL_BUF_LINE + chroma_height <= CFL_BUF_SQUARE);
 
         if (!context_ptr->hbd_mode_decision) {
@@ -2976,12 +2973,12 @@ void av1_cost_calc_cfl(PictureControlSet *pcs_ptr, ModeDecisionCandidateBuffer *
         cb_full_distortion[DIST_CALC_PREDICTION] = 0;
         cr_full_distortion[DIST_CALC_PREDICTION] = 0;
 
-        cb_coeff_bits = 0;
-        cr_coeff_bits = 0;
-        alpha_q3      = (check_dc) ? 0
-                              : cfl_idx_to_alpha(candidate_ptr->cfl_alpha_idx,
-                                                 candidate_ptr->cfl_alpha_signs,
-                                                 CFL_PRED_V); // once for U, once for V
+        uint64_t cb_coeff_bits = 0;
+        uint64_t cr_coeff_bits = 0;
+        int32_t  alpha_q3      = check_dc ? 0
+                                    : cfl_idx_to_alpha(candidate_ptr->cfl_alpha_idx,
+                                                       candidate_ptr->cfl_alpha_signs,
+                                                       CFL_PRED_V); // once for U, once for V
         assert(chroma_width * CFL_BUF_LINE + chroma_height <= CFL_BUF_SQUARE);
 
         if (!context_ptr->hbd_mode_decision) {
