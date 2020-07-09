@@ -401,45 +401,50 @@ uint8_t get_filtered_types(uint8_t *ptr, uint32_t stride, uint8_t filter_type) {
 
     uint32_t a = 0;
 
-    if (filter_type == 0) {
+    switch (filter_type) {
+    case 0:
         //Luma
         a = (p[1] + p[0 + stride] + 4 * p[1 + stride] + p[2 + stride] + p[1 + 2 * stride]) / 8;
-    } else if (filter_type == 1) {
+        break;
+    case 1:
         a = (2 * p[1] + 2 * p[0 + stride] + 4 * p[1 + stride] + 2 * p[2 + stride] +
              2 * p[1 + 2 * stride]);
-
         a = (((uint32_t)((a * 2730) >> 14) + 1) >> 1) & 0xFFFF;
-
         //fixed point version of a=a/12 to mimic x86 instruction _mm256_mulhrs_epi16;
         //a= (a*2730)>>15;
-    } else if (filter_type == 2) {
+        break;
+    case 2:
         a = (4 * p[1] + 4 * p[0 + stride] + 4 * p[1 + stride] + 4 * p[2 + stride] +
              4 * p[1 + 2 * stride]) /
             20;
-    } else if (filter_type == 3) {
+        break;
+    case 3:
         a = (1 * p[0] + 1 * p[1] + 1 * p[2] + 1 * p[0 + stride] + 4 * p[1 + stride] +
              1 * p[2 + stride] + 1 * p[0 + 2 * stride] + 1 * p[1 + 2 * stride] +
              1 * p[2 + 2 * stride]) /
             12;
-    } else if (filter_type == 4) {
+        break;
+    case 4:
         //gaussian matrix(Chroma)
         a = (1 * p[0] + 2 * p[1] + 1 * p[2] + 2 * p[0 + stride] + 4 * p[1 + stride] +
              2 * p[2 + stride] + 1 * p[0 + 2 * stride] + 2 * p[1 + 2 * stride] +
              1 * p[2 + 2 * stride]) /
             16;
-    } else if (filter_type == 5) {
+        break;
+    case 5:
         a = (2 * p[0] + 2 * p[1] + 2 * p[2] + 2 * p[0 + stride] + 4 * p[1 + stride] +
              2 * p[2 + stride] + 2 * p[0 + 2 * stride] + 2 * p[1 + 2 * stride] +
              2 * p[2 + 2 * stride]) /
             20;
-    } else if (filter_type == 6) {
+        break;
+    case 6:
         a = (4 * p[0] + 4 * p[1] + 4 * p[2] + 4 * p[0 + stride] + 4 * p[1 + stride] +
              4 * p[2 + stride] + 4 * p[0 + 2 * stride] + 4 * p[1 + 2 * stride] +
              4 * p[2 + 2 * stride]) /
             36;
     }
 
-    return (uint8_t)CLIP3EQ(0, 255, a);
+    return (uint8_t)(a >= 255 ? 255 : a); // CLIP3EQ(0, 255, a)
 }
 
 EbErrorType zero_out_chroma_block_mean(
