@@ -428,14 +428,12 @@ EbErrorType preload_frames_info_ram(EbConfig *config) {
  * Initialize Core & Component
  ***********************************/
 EbErrorType init_encoder(EbConfig *config, EbAppContext *callback_data, uint32_t instance_idx) {
-    EbErrorType return_error = EB_ErrorNone;
-
     // Allocate a memory table hosting all allocated pointers
     allocate_memory_table(instance_idx);
 
     ///************************* LIBRARY INIT [START] *********************///
     // STEP 1: Call the library to construct a Component Handle
-    return_error = svt_av1_enc_init_handle(
+    EbErrorType return_error = svt_av1_enc_init_handle(
         &callback_data->svt_encoder_handle, callback_data, &callback_data->eb_enc_parameters);
 
     if (return_error != EB_ErrorNone) return return_error;
@@ -471,7 +469,6 @@ EbErrorType init_encoder(EbConfig *config, EbAppContext *callback_data, uint32_t
         preload_frames_info_ram(config);
     } else
         config->sequence_buffer = 0;
-    if (return_error != EB_ErrorNone) return return_error;
     ///********************** APPLICATION INIT [END] ******************////////
 
     return return_error;
