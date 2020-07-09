@@ -728,7 +728,6 @@ void *resource_coordination_kernel(void *input_ptr) {
     EbObjectWrapper *input_picture_wrapper_ptr;
     EbObjectWrapper *reference_picture_wrapper_ptr;
 
-    uint32_t instance_index;
     EbBool   end_of_sequence_flag = EB_FALSE;
 
     uint32_t         input_size           = 0;
@@ -736,13 +735,12 @@ void *resource_coordination_kernel(void *input_ptr) {
 
     for (;;) {
         // Tie instance_index to zero for now...
-        instance_index = 0;
+        uint32_t instance_index = 0;
 
         // Get the Next svt Input Buffer [BLOCKING]
         EB_GET_FULL_OBJECT(context_ptr->input_buffer_fifo_ptr, &eb_input_wrapper_ptr);
 
         eb_input_ptr = (EbBufferHeaderType *)eb_input_wrapper_ptr->object_ptr;
-        scs_ptr      = context_ptr->scs_instance_array[instance_index]->scs_ptr;
 
         // If config changes occured since the last picture began encoding, then
         //   prepare a new scs_ptr containing the new changes and update the state
@@ -750,34 +748,25 @@ void *resource_coordination_kernel(void *input_ptr) {
         eb_block_on_mutex(context_ptr->scs_instance_array[instance_index]->config_mutex);
         if (context_ptr->scs_instance_array[instance_index]->encode_context_ptr->initial_picture) {
             // Update picture width, picture height, cropping right offset, cropping bottom offset, and conformance windows
-            if (context_ptr->scs_instance_array[instance_index]
-                    ->encode_context_ptr->initial_picture)
+            context_ptr->scs_instance_array[instance_index]->scs_ptr->seq_header.max_frame_width =
+                context_ptr->scs_instance_array[instance_index]->scs_ptr->max_input_luma_width;
+            context_ptr->scs_instance_array[instance_index]->scs_ptr->seq_header.max_frame_height =
+                context_ptr->scs_instance_array[instance_index]->scs_ptr->max_input_luma_height;
+            context_ptr->scs_instance_array[instance_index]->scs_ptr->chroma_width =
+                (context_ptr->scs_instance_array[instance_index]->scs_ptr->max_input_luma_width >>
+                 1);
+            context_ptr->scs_instance_array[instance_index]->scs_ptr->chroma_height =
+                (context_ptr->scs_instance_array[instance_index]->scs_ptr->max_input_luma_height >>
+                 1);
 
-            {
+            context_ptr->scs_instance_array[instance_index]->scs_ptr->pad_right =
+                context_ptr->scs_instance_array[instance_index]->scs_ptr->max_input_pad_right;
+            context_ptr->scs_instance_array[instance_index]->scs_ptr->pad_bottom =
+                context_ptr->scs_instance_array[instance_index]->scs_ptr->max_input_pad_bottom;
+            input_size = context_ptr->scs_instance_array[instance_index]
+                             ->scs_ptr->seq_header.max_frame_width *
                 context_ptr->scs_instance_array[instance_index]
-                    ->scs_ptr->seq_header.max_frame_width =
-                    context_ptr->scs_instance_array[instance_index]->scs_ptr->max_input_luma_width;
-                context_ptr->scs_instance_array[instance_index]
-                    ->scs_ptr->seq_header.max_frame_height =
-                    context_ptr->scs_instance_array[instance_index]->scs_ptr->max_input_luma_height;
-                context_ptr->scs_instance_array[instance_index]->scs_ptr->chroma_width =
-                    (context_ptr->scs_instance_array[instance_index]
-                         ->scs_ptr->max_input_luma_width >>
-                     1);
-                context_ptr->scs_instance_array[instance_index]->scs_ptr->chroma_height =
-                    (context_ptr->scs_instance_array[instance_index]
-                         ->scs_ptr->max_input_luma_height >>
-                     1);
-
-                context_ptr->scs_instance_array[instance_index]->scs_ptr->pad_right =
-                    context_ptr->scs_instance_array[instance_index]->scs_ptr->max_input_pad_right;
-                context_ptr->scs_instance_array[instance_index]->scs_ptr->pad_bottom =
-                    context_ptr->scs_instance_array[instance_index]->scs_ptr->max_input_pad_bottom;
-                input_size = context_ptr->scs_instance_array[instance_index]
-                                 ->scs_ptr->seq_header.max_frame_width *
-                             context_ptr->scs_instance_array[instance_index]
-                                 ->scs_ptr->seq_header.max_frame_height;
-            }
+                    ->scs_ptr->seq_header.max_frame_height;
 
             // Copy previous Active SequenceControlSetPtr to a place holder
             prev_scs_wrapper_ptr = context_ptr->sequence_control_set_active_array[instance_index];
@@ -1006,7 +995,6 @@ void *resource_coordination_kernel(void *input_ptr) {
                 if (pcs_ptr->input_ptr->qp > MAX_QP_VALUE) {
                     SVT_LOG("SVT [WARNING]: INPUT QP OUTSIDE OF RANGE\n");
                     pcs_ptr->qp_on_the_fly = EB_FALSE;
-                    pcs_ptr->picture_qp    = (uint8_t)scs_ptr->static_config.qp;
                 }
                 pcs_ptr->picture_qp = (uint8_t)pcs_ptr->input_ptr->qp;
             } else {
