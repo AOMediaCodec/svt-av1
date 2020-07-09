@@ -638,7 +638,7 @@ static int32_t qp_read_from_file = 0;
 int32_t get_next_qp_from_qp_file(EbConfig *config) {
     uint8_t *line;
     int32_t  qp       = 0;
-    uint32_t readsize = 0, eof = 0;
+    uint32_t readsize = 0;
     EB_APP_MALLOC(uint8_t *, line, 8, EB_N_PTR, EB_ErrorInsufficientResources);
     memset(line, 0, 8);
     readsize = (uint32_t)fread(line, 1, 2, config->qp_file);
@@ -666,12 +666,8 @@ int32_t get_next_qp_from_qp_file(EbConfig *config) {
             if (readsize != 1) break;
         } while (line[0] != '\n');
 
-        if (eof != 0)
-            // end of file
-            qp = -1;
-        else
-            // skip line
-            qp = 0;
+        // skip line
+        qp = 0;
     } else if (readsize == 2) {
         qp = strtol((const char *)line, NULL, 0);
         do {
@@ -686,11 +682,9 @@ int32_t get_next_qp_from_qp_file(EbConfig *config) {
 }
 
 void read_input_frames(EbConfig *config, uint8_t is_16bit, EbBufferHeaderType *header_ptr) {
-    uint64_t       read_size;
     const uint32_t input_padded_width  = config->input_padded_width;
     const uint32_t input_padded_height = config->input_padded_height;
     FILE *         input_file          = config->input_file;
-    uint8_t *      eb_input_ptr;
     EbSvtIOFormat *input_ptr = (EbSvtIOFormat *)header_ptr->p_buffer;
 
     const uint8_t color_format  = config->encoder_color_format;
@@ -701,6 +695,7 @@ void read_input_frames(EbConfig *config, uint8_t is_16bit, EbBufferHeaderType *h
     input_ptr->cb_stride = input_padded_width >> subsampling_x;
 
     if (config->buffered_input == -1) {
+        uint64_t read_size;
         if (is_16bit == 0 || (is_16bit == 1 && config->compressed_ten_bit_format == 0)) {
             read_size = (uint64_t)SIZE_OF_ONE_FRAME_IN_BYTES(
                 input_padded_width, input_padded_height, color_format, is_16bit);
@@ -710,7 +705,7 @@ void read_input_frames(EbConfig *config, uint8_t is_16bit, EbBufferHeaderType *h
             if (config->y4m_input == EB_TRUE) read_y4m_frame_delimiter(config);
             uint64_t luma_read_size = (uint64_t)input_padded_width * input_padded_height
                                       << is_16bit;
-            eb_input_ptr = input_ptr->luma;
+            uint8_t *eb_input_ptr = input_ptr->luma;
             if (!config->y4m_input && config->processed_frame_count == 0 &&
                 (config->input_file == stdin || config->input_file_is_fifo)) {
                 /* 9 bytes were already buffered during the the YUV4MPEG2 header probe */
@@ -767,7 +762,7 @@ void read_input_frames(EbConfig *config, uint8_t is_16bit, EbBufferHeaderType *h
                 (uint32_t)fread(input_ptr->cr_ext, 1, nbit_chroma_read_size, input_file);
 
             read_size = luma_read_size + nbit_luma_read_size +
-                        2 * (chroma_read_size + nbit_chroma_read_size);
+                2 * (chroma_read_size + nbit_chroma_read_size);
 
             if (read_size != header_ptr->n_filled_len) {
                 fseek(input_file, 0, SEEK_SET);
@@ -808,7 +803,7 @@ void read_input_frames(EbConfig *config, uint8_t is_16bit, EbBufferHeaderType *h
             const size_t luma_2bit_size   = luma_8bit_size / 4; //4-2bit pixels into 1 byte
             const size_t chroma_2bit_size = luma_2bit_size >> (3 - color_format);
 
-            EbSvtIOFormat *input_ptr = (EbSvtIOFormat *)header_ptr->p_buffer;
+            input_ptr = (EbSvtIOFormat *)header_ptr->p_buffer;
             input_ptr->y_stride      = input_padded_width;
             input_ptr->cr_stride     = input_padded_width >> subsampling_x;
             input_ptr->cb_stride     = input_padded_width >> subsampling_x;
@@ -839,7 +834,7 @@ void read_input_frames(EbConfig *config, uint8_t is_16bit, EbBufferHeaderType *h
             const size_t luma_size   = (input_padded_width * input_padded_height) << is_16bit;
             const size_t chroma_size = luma_size >> (3 - color_format);
 
-            EbSvtIOFormat *input_ptr = (EbSvtIOFormat *)header_ptr->p_buffer;
+            input_ptr = (EbSvtIOFormat *)header_ptr->p_buffer;
 
             input_ptr->y_stride  = input_padded_width;
             input_ptr->cr_stride = input_padded_width >> subsampling_x;
