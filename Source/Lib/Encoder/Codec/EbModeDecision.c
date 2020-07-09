@@ -894,9 +894,7 @@ void unipred_3x3_candidates_injection(const SequenceControlSet *scs_ptr, Picture
                          context_ptr, to_inject_mv_x, to_inject_mv_y, to_inject_ref_type) ==
                          EB_FALSE)) {
                     uint8_t inter_type;
-                    uint8_t is_ii_allowed =
-                        0; //svt_is_interintra_allowed(pcs_ptr->parent_pcs_ptr->enable_inter_intra, bsize, NEWMV, rf);
-                    uint8_t tot_inter_types = is_ii_allowed ? II_COUNT : 1;
+                    const uint8_t tot_inter_types = 1;
                     //uint8_t is_obmc_allowed =  obmc_motion_mode_allowed(pcs_ptr, context_ptr->blk_ptr, bsize, rf[0], rf[1], NEWMV) == OBMC_CAUSAL;
                     //tot_inter_types = is_obmc_allowed ? tot_inter_types+1 : tot_inter_types;
 
@@ -949,24 +947,6 @@ void unipred_3x3_candidates_injection(const SequenceControlSet *scs_ptr, Picture
                         if (inter_type == 0) {
                             cand_array[cand_total_cnt].is_interintra_used = 0;
                             cand_array[cand_total_cnt].motion_mode        = SIMPLE_TRANSLATION;
-                        } else {
-                            if (is_ii_allowed) {
-                                if (inter_type == 1) {
-                                    inter_intra_search(
-                                        pcs_ptr, context_ptr, &cand_array[cand_total_cnt]);
-                                    cand_array[cand_total_cnt].is_interintra_used   = 1;
-                                    cand_array[cand_total_cnt].use_wedge_interintra = 1;
-                                } else if (inter_type == 2) {
-                                    cand_array[cand_total_cnt].is_interintra_used = 1;
-                                    cand_array[cand_total_cnt].interintra_mode =
-                                        cand_array[cand_total_cnt - 1].interintra_mode;
-                                    cand_array[cand_total_cnt].use_wedge_interintra = 0;
-                                }
-                            }
-                            //if (is_obmc_allowed && inter_type == tot_inter_types - 1) {
-                            //    cand_array[cand_total_cnt].is_interintra_used = 0;
-                            //    cand_array[cand_total_cnt].motion_mode = OBMC_CAUSAL;
-                            //}
                         }
 
                         INCRMENT_CAND_TOTAL_COUNT(cand_total_cnt);
@@ -1040,8 +1020,7 @@ void unipred_3x3_candidates_injection(const SequenceControlSet *scs_ptr, Picture
                              context_ptr, to_inject_mv_x, to_inject_mv_y, to_inject_ref_type) ==
                              EB_FALSE)) {
                         uint8_t inter_type;
-                        uint8_t is_ii_allowed   = 0;
-                        uint8_t tot_inter_types = is_ii_allowed ? II_COUNT : 1;
+                        const uint8_t tot_inter_types = 1;
                         for (inter_type = 0; inter_type < tot_inter_types; inter_type++) {
                             cand_array[cand_total_cnt].type                    = INTER_MODE;
                             cand_array[cand_total_cnt].distortion_ready        = 0;
@@ -1088,24 +1067,6 @@ void unipred_3x3_candidates_injection(const SequenceControlSet *scs_ptr, Picture
                             if (inter_type == 0) {
                                 cand_array[cand_total_cnt].is_interintra_used = 0;
                                 cand_array[cand_total_cnt].motion_mode        = SIMPLE_TRANSLATION;
-                            } else {
-                                if (is_ii_allowed) {
-                                    if (inter_type == 1) {
-                                        inter_intra_search(
-                                            pcs_ptr, context_ptr, &cand_array[cand_total_cnt]);
-                                        cand_array[cand_total_cnt].is_interintra_used   = 1;
-                                        cand_array[cand_total_cnt].use_wedge_interintra = 1;
-                                    } else if (inter_type == 2) {
-                                        cand_array[cand_total_cnt].is_interintra_used = 1;
-                                        cand_array[cand_total_cnt].interintra_mode =
-                                            cand_array[cand_total_cnt - 1].interintra_mode;
-                                        cand_array[cand_total_cnt].use_wedge_interintra = 0;
-                                    }
-                                }
-                                //if (is_obmc_allowed && inter_type == tot_inter_types - 1) {
-                                //    cand_array[cand_total_cnt].is_interintra_used = 0;
-                                //    cand_array[cand_total_cnt].motion_mode = OBMC_CAUSAL;
-                                //}
                             }
 
                             INCRMENT_CAND_TOTAL_COUNT(cand_total_cnt);
