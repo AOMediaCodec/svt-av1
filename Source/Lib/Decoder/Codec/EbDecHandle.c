@@ -422,7 +422,6 @@ EbErrorType eb_svt_dec_set_default_parameter(EbSvtAv1DecConfiguration *config_pt
     config_ptr->max_bit_depth      = EB_EIGHT_BIT;
     config_ptr->is_16bit_pipeline = 0;
     config_ptr->max_color_format   = EB_YUV420;
-    config_ptr->threads            = 1;
 
     // Application Specific parameters
     config_ptr->channel_id           = 0;
