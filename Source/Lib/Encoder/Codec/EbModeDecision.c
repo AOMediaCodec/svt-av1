@@ -3390,11 +3390,8 @@ void inject_new_candidates(const SequenceControlSet *  scs_ptr,
                                     get_wedge_params_bits(context_ptr->blk_geom->bsize) == 0)
                                 continue;
                             // If two predictors are very similar, skip wedge compound mode search
-                            if (context_ptr->variance_ready)
-                                if (context_ptr->prediction_mse < 8 ||
-                                    (!have_newmv_in_inter_mode(NEW_NEWMV) &&
-                                     context_ptr->prediction_mse < 64))
-                                    continue;
+                            if (context_ptr->variance_ready && context_ptr->prediction_mse < 8)
+                                continue;
                             cand_array[cand_total_cnt].type = INTER_MODE;
 
                             cand_array[cand_total_cnt].distortion_ready = 0;
