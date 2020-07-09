@@ -575,10 +575,6 @@ uint64_t av1_intra_fast_cost(BlkStruct *blk_ptr, ModeDecisionCandidate *candidat
     FrameHeader *frm_hdr = &pcs_ptr->parent_pcs_ptr->frm_hdr;
     if (av1_allow_intrabc(&pcs_ptr->parent_pcs_ptr->frm_hdr, pcs_ptr->parent_pcs_ptr->slice_type)
         && candidate_ptr->use_intrabc) {
-        uint64_t luma_sad         = (LUMA_WEIGHT * luma_distortion) << AV1_COST_PRECISION;
-        uint64_t chromasad_       = chroma_distortion << AV1_COST_PRECISION;
-        uint64_t total_distortion = luma_sad + chromasad_;
-
         uint64_t rate = 0;
 
         EbReflist ref_list_idx = 0;
@@ -608,13 +604,12 @@ uint64_t av1_intra_fast_cost(BlkStruct *blk_ptr, ModeDecisionCandidate *candidat
         candidate_ptr->fast_luma_rate   = rate;
         candidate_ptr->fast_chroma_rate = 0;
 
-        luma_sad         = (LUMA_WEIGHT * luma_distortion) << AV1_COST_PRECISION;
-        chromasad_       = chroma_distortion << AV1_COST_PRECISION;
-        total_distortion = luma_sad + chromasad_;
+        uint64_t luma_sad         = (LUMA_WEIGHT * luma_distortion) << AV1_COST_PRECISION;
+        uint64_t chromasad_       = chroma_distortion << AV1_COST_PRECISION;
+        uint64_t total_distortion = luma_sad + chromasad_;
 
         return (RDCOST(lambda, rate, total_distortion));
     } else {
-        EbBool is_monochrome_flag = EB_FALSE; // NM - is_monochrome_flag is harcoded to false.
         EbBool is_cfl_allowed     = (blk_geom->bwidth <= 32 && blk_geom->bheight <= 32) ? 1 : 0;
 
         SequenceControlSet *scs_ptr = (SequenceControlSet*)pcs_ptr->scs_wrapper_ptr->object_ptr;
@@ -622,8 +617,6 @@ uint64_t av1_intra_fast_cost(BlkStruct *blk_ptr, ModeDecisionCandidate *candidat
             // if is_cfl_allowed == 0 then it doesn't matter what cli says otherwise change it to cli
             is_cfl_allowed = (EbBool)!scs_ptr->static_config.disable_cfl_flag;
 
-        uint8_t sub_sampling_x = 1; // NM - subsampling_x is harcoded to 1 for 420 chroma sampling.
-        uint8_t sub_sampling_y = 1; // NM - subsampling_y is harcoded to 1 for 420 chroma sampling.
         // In fast loop CFL alphas are not know yet. The chroma mode bits are calculated based on DC Mode, and if CFL is the winner compared to CFL, ChromaBits are updated
         uint32_t chroma_mode = candidate_ptr->intra_chroma_mode == UV_CFL_PRED
                                    ? UV_DC_PRED
@@ -726,8 +719,11 @@ uint64_t av1_intra_fast_cost(BlkStruct *blk_ptr, ModeDecisionCandidate *candidat
             }
         }
         if (blk_geom->has_uv) {
-            if (!is_monochrome_flag &&
-                is_chroma_reference(
+            // NM - subsampling_x is harcoded to 1 for 420 chroma sampling.
+            const uint8_t sub_sampling_x = 1;
+            // NM - subsampling_y is harcoded to 1 for 420 chroma sampling.
+            const uint8_t sub_sampling_y = 1;
+            if (is_chroma_reference(
                     miRow, miCol, blk_geom->bsize, sub_sampling_x, sub_sampling_y)) {
                 // Estimate luma nominal intra mode bits
                 intra_chroma_mode_bits_num =
