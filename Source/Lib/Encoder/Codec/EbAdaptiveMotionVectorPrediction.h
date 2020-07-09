@@ -75,8 +75,8 @@ void eb_av1_find_best_ref_mvs_from_stack(int          allow_hp,
                                          IntMv *nearest_mv, IntMv *near_mv, int is_integer);
 int  av1_is_dv_valid(const MV dv, const MacroBlockD *xd, int mi_row, int mi_col, BlockSize bsize,
                      int mib_size_log2);
-int  is_inside_tile_boundary(TileInfo *tile, int16_t mvx, int16_t mvy, int mi_col, int mi_row,
-                             BlockSize bsize);
+int  is_inside_tile_boundary(const TileInfo *const tile, int16_t mvx, int16_t mvy, int mi_col,
+                             int mi_row, BlockSize bsize);
 
 IntMv gm_get_motion_vector_enc(const EbWarpedMotionParams *gm, int32_t allow_hp, BlockSize bsize,
                                int32_t mi_col, int32_t mi_row, int32_t is_integer);

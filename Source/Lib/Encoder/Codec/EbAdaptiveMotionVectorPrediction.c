@@ -2048,7 +2048,7 @@ int av1_is_dv_valid(const MV dv, const MacroBlockD *xd, int mi_row, int mi_col, 
     return 1;
 }
 
-int is_inside_tile_boundary(TileInfo *tile, int16_t mvx, int16_t mvy, int mi_col, int mi_row,
+int is_inside_tile_boundary(const TileInfo *const tile, int16_t mvx, int16_t mvy, int mi_col, int mi_row,
                             BlockSize bsize) {
     const int bw             = block_size_wide[bsize];
     const int bh             = block_size_high[bsize];
