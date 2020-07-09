@@ -10590,31 +10590,20 @@ EbErrorType motion_estimate_sb(
     uint32_t sb_height = (input_ptr->height - sb_origin_y) < BLOCK_SIZE_64
                              ? input_ptr->height - sb_origin_y
                              : BLOCK_SIZE_64;
-    uint32_t pu_index;
 
     uint32_t max_number_of_pus_per_sb = pcs_ptr->max_number_of_pus_per_sb;
 
     uint32_t             num_of_list_to_search;
     uint32_t             list_index;
-    uint8_t              cand_index               = 0;
     uint8_t              total_me_candidate_index = 0;
-    EbPaReferenceObject *reference_object; // input parameter, reference Object Ptr
 
-    uint8_t  ref_pic_index;
     uint8_t  num_of_ref_pic_to_search;
-    uint8_t  candidate_index      = 0;
-    uint32_t next_candidate_index = 0;
 
     MePredUnit *         me_candidate;
-    EbPictureBufferDesc *ref_pic_ptr;
-    uint64_t i;
     EbBool enable_half_pel_32x32 = EB_FALSE;
     EbBool enable_half_pel_16x16 = EB_FALSE;
     EbBool enable_half_pel_8x8   = EB_FALSE;
     EbBool enable_quarter_pel    = EB_FALSE;
-    EbBool one_quadrant_hme      = EB_FALSE;
-
-    one_quadrant_hme = scs_ptr->input_resolution < INPUT_SIZE_4K_RANGE ? 0 : one_quadrant_hme;
 
     num_of_list_to_search =
         (pcs_ptr->slice_type == P_SLICE) ? (uint32_t)REF_LIST_0 : (uint32_t)REF_LIST_1;
@@ -10672,36 +10661,14 @@ EbErrorType motion_estimate_sb(
     // Uni-Prediction motion estimation loop
     // List Loop
     for (list_index = REF_LIST_0; list_index <= num_of_list_to_search; ++list_index) {
-        if (context_ptr->me_alt_ref == EB_TRUE) {
-            num_of_ref_pic_to_search = 1;
-        } else {
-            num_of_ref_pic_to_search = (pcs_ptr->slice_type == P_SLICE)
+        num_of_ref_pic_to_search = context_ptr->me_alt_ref == EB_TRUE
+            ? 1
+            : pcs_ptr->slice_type == P_SLICE
                 ? pcs_ptr->ref_list0_count_try
-                : (list_index == REF_LIST_0) ? pcs_ptr->ref_list0_count_try
-                : pcs_ptr->ref_list1_count_try;
-
-            reference_object =
-                (EbPaReferenceObject *)pcs_ptr->ref_pa_pic_ptr_array[0][0]->object_ptr;
-        }
-
+                : list_index == REF_LIST_0 ? pcs_ptr->ref_list0_count_try
+                                           : pcs_ptr->ref_list1_count_try;
         // Ref Picture Loop
-        for (ref_pic_index = 0; ref_pic_index < num_of_ref_pic_to_search; ++ref_pic_index) {
-            if (context_ptr->me_alt_ref == EB_TRUE) {
-                reference_object = (EbPaReferenceObject *)context_ptr->alt_ref_reference_ptr;
-            } else {
-                if (num_of_list_to_search) {
-                    reference_object =
-                        (EbPaReferenceObject *)pcs_ptr->ref_pa_pic_ptr_array[1][0]->object_ptr;
-                }
-
-                reference_object =
-                    (EbPaReferenceObject *)pcs_ptr->ref_pa_pic_ptr_array[list_index][ref_pic_index]
-                        ->object_ptr;
-            }
-
-            ref_pic_ptr = (EbPictureBufferDesc *)reference_object->input_padded_picture_ptr;
-            if (ref_pic_ptr == NULL)
-                printf("ERR NULL POINTER");
+        for (uint8_t ref_pic_index = 0; ref_pic_index < num_of_ref_pic_to_search; ++ref_pic_index) {
             if (context_ptr->hme_results[list_index][ref_pic_index].do_ref == 0)
                 continue;  //so will not get ME results for those references. what will happen next, shall we just fill in max sads?
                            //we can also make the ME small and shut subpel
@@ -11083,8 +11050,8 @@ EbErrorType motion_estimate_sb(
 
     if (context_ptr->me_alt_ref == EB_FALSE) {
         // Bi-Prediction motion estimation loop
-        for (pu_index = 0; pu_index < max_number_of_pus_per_sb; ++pu_index) {
-            cand_index = 0;
+        for (uint32_t pu_index = 0; pu_index < max_number_of_pus_per_sb; ++pu_index) {
+            uint8_t cand_index = 0;
 
             uint32_t n_idx;
 
@@ -11120,7 +11087,8 @@ EbErrorType motion_estimate_sb(
                     : pcs_ptr->ref_list1_count_try;
 
                 // Ref Picture Loop
-                for (ref_pic_index = 0; ref_pic_index < num_of_ref_pic_to_search; ++ref_pic_index) {
+                for (uint8_t ref_pic_index = 0; ref_pic_index < num_of_ref_pic_to_search;
+                     ++ref_pic_index) {
                     //ME was skipped, so do not add this Unipred candidate
                     if (context_ptr->hme_results[list_index][ref_pic_index].do_ref == 0)
                         continue;
@@ -11141,9 +11109,9 @@ EbErrorType motion_estimate_sb(
             uint8_t ref_type_table[7];
             if (pcs_ptr->prune_unipred_at_me) {
                 // Sorting of the ME candidates
-                for (candidate_index = 0; candidate_index < total_me_candidate_index - 1;
+                for (uint8_t candidate_index = 0; candidate_index < total_me_candidate_index - 1;
                      ++candidate_index) {
-                    for (next_candidate_index = candidate_index + 1;
+                    for (uint8_t next_candidate_index = candidate_index + 1;
                          next_candidate_index < total_me_candidate_index;
                          ++next_candidate_index) {
                         if (context_ptr->me_candidate[candidate_index].pu[pu_index].distortion >
@@ -11156,7 +11124,7 @@ EbErrorType motion_estimate_sb(
                         }
                     }
                 }
-                for (candidate_index = 0; candidate_index < total_me_candidate_index;
+                for (uint8_t candidate_index = 0; candidate_index < total_me_candidate_index;
                      ++candidate_index) {
                     me_candidate = &(context_ptr->me_candidate[candidate_index].pu[pu_index]);
 
@@ -11181,9 +11149,9 @@ EbErrorType motion_estimate_sb(
             }
 
             // Sorting of the ME candidates
-            for (candidate_index = 0; candidate_index < total_me_candidate_index - 1;
+            for (uint8_t candidate_index = 0; candidate_index < total_me_candidate_index - 1;
                  ++candidate_index) {
-                for (next_candidate_index = candidate_index + 1;
+                for (uint8_t next_candidate_index = candidate_index + 1;
                      next_candidate_index < total_me_candidate_index;
                      ++next_candidate_index) {
                     if (context_ptr->me_candidate[candidate_index].pu[pu_index].distortion >
@@ -11196,7 +11164,6 @@ EbErrorType motion_estimate_sb(
             }
 
             MeSbResults *me_pu_result                        = pcs_ptr->me_results[sb_index];
-            me_pu_result->total_me_candidate_index[pu_index] = total_me_candidate_index;
             me_pu_result->total_me_candidate_index[pu_index] =
                 MIN(total_me_candidate_index, ME_RES_CAND_MRP_MODE_0);
             // Assining the ME candidates to the me Results buffer
@@ -11222,7 +11189,8 @@ EbErrorType motion_estimate_sb(
                     : pcs_ptr->ref_list1_count_try;
 
                 // Ref Picture Loop
-                for (ref_pic_index = 0; ref_pic_index < num_of_ref_pic_to_search; ++ref_pic_index) {
+                for (uint8_t ref_pic_index = 0; ref_pic_index < num_of_ref_pic_to_search;
+                     ++ref_pic_index) {
                     pcs_ptr->me_results[sb_index]
                         ->me_mv_array[pu_index][((list_index && scs_ptr->mrp_mode == 0)
                                                      ? 4
@@ -11242,7 +11210,7 @@ EbErrorType motion_estimate_sb(
             // Compute the sum of the distortion of all 16 16x16 (best) blocks
             // in the SB
             pcs_ptr->rc_me_distortion[sb_index] = 0;
-            for (i = 0; i < 16; i++) {
+            for (int i = 0; i < 16; i++) {
                 me_candidate = &(context_ptr->me_candidate[0].pu[5 + i]);
                 pcs_ptr->rc_me_distortion[sb_index] +=
                     me_candidate->distortion;
