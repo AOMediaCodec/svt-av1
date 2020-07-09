@@ -378,133 +378,102 @@ void inter_intra_search(PictureControlSet *pcs_ptr, ModeDecisionContext *context
     assert(is_interintra_wedge_used(
         context_ptr->blk_geom->bsize)); //if not I need to add nowedge path!!
 
-    int64_t        rd                 = INT64_MAX;
     int64_t        best_interintra_rd = INT64_MAX;
-    int            rmode              = 0, rate_sum;
+    int            rate_sum;
     int64_t        dist_sum;
     int            tmp_rate_mv              = 0;
     InterIntraMode best_interintra_mode     = INTERINTRA_MODES;
-    int8_t         enable_smooth_interintra = 1;
-    //if (cpi->oxcf.enable_smooth_interintra &&
-    //!cpi->sf.disable_smooth_interintra) {
-    if (enable_smooth_interintra) {
-        int j = 0;
-        if (/*cpi->sf.reuse_inter_intra_mode == 0 ||*/
-            best_interintra_mode == INTERINTRA_MODES) {
-            for (j = 0; j < INTERINTRA_MODES; ++j) {
-                //if ((!cpi->oxcf.enable_smooth_intra || cpi->sf.disable_smooth_intra) &&
-                //    (InterIntraMode)j == II_SMOOTH_PRED)
-                //  continue;
-                InterIntraMode interintra_mode = (InterIntraMode)j;
-                //rmode = interintra_mode_cost[mbmi->interintra_mode];
-                const int bsize_group = size_group_lookup[context_ptr->blk_geom->bsize];
-                rmode                 = candidate_ptr->md_rate_estimation_ptr
-                            ->inter_intra_mode_fac_bits[bsize_group][interintra_mode];
-                //av1_combine_interintra(xd, bsize, 0, tmp_buf, bw, intrapred, bw);
-                if (context_ptr->hbd_mode_decision)
-                    combine_interintra_highbd(
-                        interintra_mode, //mode,
-                        0, //use_wedge_interintra,
-                        0, //candidate_ptr->interintra_wedge_index,
-                        0, //int wedge_sign,
-                        context_ptr->blk_geom->bsize,
-                        context_ptr->blk_geom->bsize, // plane_bsize,
-                        ii_pred_buf,
-                        bwidth, /*uint8_t *comppred, int compstride,*/
-                        tmp_buf,
-                        bwidth, /*const uint8_t *interpred, int interstride,*/
-                        context_ptr->intrapred_buf[j],
-                        bwidth /*const uint8_t *intrapred,   int intrastride*/,
-                        bit_depth);
-                else
+    for (int j = 0; j < INTERINTRA_MODES; ++j) {
+        //if ((!cpi->oxcf.enable_smooth_intra || cpi->sf.disable_smooth_intra) &&
+        //    (InterIntraMode)j == II_SMOOTH_PRED)
+        //  continue;
+        InterIntraMode interintra_mode = (InterIntraMode)j;
+        //rmode = interintra_mode_cost[mbmi->interintra_mode];
+        const int bsize_group = size_group_lookup[context_ptr->blk_geom->bsize];
+        const int rmode       = candidate_ptr->md_rate_estimation_ptr
+                              ->inter_intra_mode_fac_bits[bsize_group][interintra_mode];
+        //av1_combine_interintra(xd, bsize, 0, tmp_buf, bw, intrapred, bw);
+        if (context_ptr->hbd_mode_decision)
+            combine_interintra_highbd(interintra_mode, //mode,
+                                      0, //use_wedge_interintra,
+                                      0, //candidate_ptr->interintra_wedge_index,
+                                      0, //int wedge_sign,
+                                      context_ptr->blk_geom->bsize,
+                                      context_ptr->blk_geom->bsize, // plane_bsize,
+                                      ii_pred_buf,
+                                      bwidth, /*uint8_t *comppred, int compstride,*/
+                                      tmp_buf,
+                                      bwidth, /*const uint8_t *interpred, int interstride,*/
+                                      context_ptr->intrapred_buf[j],
+                                      bwidth /*const uint8_t *intrapred,   int intrastride*/,
+                                      bit_depth);
+        else
 
-                    combine_interintra(interintra_mode, //mode,
-                                       0, //use_wedge_interintra,
-                                       0, //candidate_ptr->interintra_wedge_index,
-                                       0, //int wedge_sign,
-                                       context_ptr->blk_geom->bsize,
-                                       context_ptr->blk_geom->bsize, // plane_bsize,
-                                       ii_pred_buf,
-                                       bwidth, /*uint8_t *comppred, int compstride,*/
-                                       tmp_buf,
-                                       bwidth, /*const uint8_t *interpred, int interstride,*/
-                                       context_ptr->intrapred_buf[j],
-                                       bwidth /*const uint8_t *intrapred,   int intrastride*/);
+            combine_interintra(interintra_mode, //mode,
+                               0, //use_wedge_interintra,
+                               0, //candidate_ptr->interintra_wedge_index,
+                               0, //int wedge_sign,
+                               context_ptr->blk_geom->bsize,
+                               context_ptr->blk_geom->bsize, // plane_bsize,
+                               ii_pred_buf,
+                               bwidth, /*uint8_t *comppred, int compstride,*/
+                               tmp_buf,
+                               bwidth, /*const uint8_t *interpred, int interstride,*/
+                               context_ptr->intrapred_buf[j],
+                               bwidth /*const uint8_t *intrapred,   int intrastride*/);
 
-                //model_rd_sb_fn[MODELRD_TYPE_INTERINTRA](
-                //    cpi, bsize, x, xd, 0, 0, mi_row, mi_col, &rate_sum, &dist_sum,
-                //    &tmp_skip_txfm_sb, &tmp_skip_sse_sb, NULL, NULL, NULL);
-                if (context_ptr->hbd_mode_decision) {
-                    model_rd_for_sb_with_curvfit(pcs_ptr,
-                                                 context_ptr,
-                                                 context_ptr->blk_geom->bsize,
-                                                 bwidth,
-                                                 bheight,
-                                                 (uint8_t *)src_buf_hbd,
-                                                 src_pic->stride_y,
-                                                 ii_pred_buf,
-                                                 bwidth,
-                                                 0,
-                                                 0,
-                                                 0,
-                                                 0,
-                                                 &rate_sum,
-                                                 &dist_sum,
-                                                 NULL,
-                                                 NULL,
-                                                 NULL);
-                } else {
-                    model_rd_for_sb_with_curvfit(pcs_ptr,
-                                                 context_ptr,
-                                                 context_ptr->blk_geom->bsize,
-                                                 bwidth,
-                                                 bheight,
-                                                 src_buf,
-                                                 src_pic->stride_y,
-                                                 ii_pred_buf,
-                                                 bwidth,
-                                                 0,
-                                                 0,
-                                                 0,
-                                                 0,
-                                                 &rate_sum,
-                                                 &dist_sum,
-                                                 NULL,
-                                                 NULL,
-                                                 NULL);
-                }
-                // rd = RDCOST(x->rdmult, tmp_rate_mv + rate_sum + rmode, dist_sum);
-                rd = RDCOST(full_lambda, tmp_rate_mv + rate_sum + rmode, dist_sum);
+        //model_rd_sb_fn[MODELRD_TYPE_INTERINTRA](
+        //    cpi, bsize, x, xd, 0, 0, mi_row, mi_col, &rate_sum, &dist_sum,
+        //    &tmp_skip_txfm_sb, &tmp_skip_sse_sb, NULL, NULL, NULL);
+        model_rd_for_sb_with_curvfit(
+            pcs_ptr,
+            context_ptr,
+            context_ptr->blk_geom->bsize,
+            bwidth,
+            bheight,
+            context_ptr->hbd_mode_decision ? (uint8_t *)src_buf_hbd : src_buf,
+            src_pic->stride_y,
+            ii_pred_buf,
+            bwidth,
+            0,
+            0,
+            0,
+            0,
+            &rate_sum,
+            &dist_sum,
+            NULL,
+            NULL,
+            NULL);
+        // rd = RDCOST(x->rdmult, tmp_rate_mv + rate_sum + rmode, dist_sum);
+        int64_t rd = RDCOST(full_lambda, tmp_rate_mv + rate_sum + rmode, dist_sum);
 
-                if (rd < best_interintra_rd) {
-                    best_interintra_rd             = rd;
-                    candidate_ptr->interintra_mode = best_interintra_mode = interintra_mode;
-                }
-            }
-
-            /* best_interintra_rd_wedge =
-                 pick_interintra_wedge(cpi, x, bsize, intrapred_, tmp_buf_);*/
-
-            //CHKN need to re-do intra pred using the winner, or have a separate intra serch for wedge
-
-            pick_interintra_wedge(candidate_ptr,
-                                  pcs_ptr,
-                                  context_ptr,
-                                  context_ptr->blk_geom->bsize,
-                                  context_ptr->intrapred_buf[best_interintra_mode],
-                                  tmp_buf,
-                                  context_ptr->hbd_mode_decision ? (uint8_t *)src_buf_hbd : src_buf,
-                                  src_pic->stride_y,
-                                  &candidate_ptr->interintra_wedge_index);
-
-            //if (best_interintra_rd_wedge < best_interintra_rd) {
-
-            //candidate_ptr->use_wedge_interintra = 1;
-            //candidate_ptr->ii_wedge_sign = 0;
-            //}
-            //args->inter_intra_mode[mbmi->ref_frame[0]] = best_interintra_mode;
+        if (rd < best_interintra_rd) {
+            best_interintra_rd             = rd;
+            candidate_ptr->interintra_mode = best_interintra_mode = interintra_mode;
         }
     }
+
+    /* best_interintra_rd_wedge =
+            pick_interintra_wedge(cpi, x, bsize, intrapred_, tmp_buf_);*/
+
+    //CHKN need to re-do intra pred using the winner, or have a separate intra serch for wedge
+
+    pick_interintra_wedge(candidate_ptr,
+                          pcs_ptr,
+                          context_ptr,
+                          context_ptr->blk_geom->bsize,
+                          context_ptr->intrapred_buf[best_interintra_mode],
+                          tmp_buf,
+                          context_ptr->hbd_mode_decision ? (uint8_t *)src_buf_hbd : src_buf,
+                          src_pic->stride_y,
+                          &candidate_ptr->interintra_wedge_index);
+
+    //if (best_interintra_rd_wedge < best_interintra_rd) {
+
+    //candidate_ptr->use_wedge_interintra = 1;
+    //candidate_ptr->ii_wedge_sign = 0;
+    //}
+    //args->inter_intra_mode[mbmi->ref_frame[0]] = best_interintra_mode;
     // Enable wedge search if source variance and edge strength are above the thresholds.
 }
 
