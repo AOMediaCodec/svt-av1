@@ -164,9 +164,7 @@ void rate_control_layer_reset(RateControlLayerContext *rate_control_layer_ptr,
                               uint32_t picture_area_in_pixel, EbBool was_used) {
     SequenceControlSet *scs_ptr = (SequenceControlSet *)pcs_ptr->scs_wrapper_ptr->object_ptr;
     uint32_t            slice_num;
-    uint32_t            temporal_layer_index;
     uint64_t            total_frame_in_interval;
-    uint64_t            sum_bits_per_sw = 0;
 
     rate_control_layer_ptr->target_bit_rate =
         pcs_ptr->parent_pcs_ptr->target_bit_rate *
@@ -180,8 +178,9 @@ void rate_control_layer_reset(RateControlLayerContext *rate_control_layer_ptr,
 
     if (scs_ptr->static_config.look_ahead_distance != 0 && scs_ptr->intra_period_length != -1) {
         if (pcs_ptr->picture_number % ((scs_ptr->intra_period_length + 1)) == 0) {
+            uint64_t sum_bits_per_sw = 0;
             total_frame_in_interval = 0;
-            for (temporal_layer_index = 0; temporal_layer_index < EB_MAX_TEMPORAL_LAYERS;
+            for (uint32_t temporal_layer_index = 0; temporal_layer_index < EB_MAX_TEMPORAL_LAYERS;
                  temporal_layer_index++) {
                 rate_control_context_ptr->frames_in_interval[temporal_layer_index] =
                     pcs_ptr->parent_pcs_ptr->frames_in_interval[temporal_layer_index];
@@ -291,7 +290,6 @@ void rate_control_layer_reset(RateControlLayerContext *rate_control_layer_ptr,
                 picture_area_in_pixel / CCOEFF_INIT_FACT;
             // These are for handling Pred structure 2, when for higher temporal layer, frames can arrive in different orders
             // They should be modifed in a way that gets these from previous layers
-            rate_control_layer_ptr->previous_frame_qp                        = 32;
             rate_control_layer_ptr->previous_frame_bit_actual                = 1200;
             rate_control_layer_ptr->previous_framequantized_coeff_bit_actual = 1000;
             rate_control_layer_ptr->previous_frame_distortion_me             = 10000000;
