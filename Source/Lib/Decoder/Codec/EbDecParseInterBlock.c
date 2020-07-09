@@ -21,13 +21,6 @@
 typedef const int (*ColorCost)[PALETTE_SIZES][PALETTE_COLOR_INDEX_CONTEXTS][PALETTE_COLORS];
 typedef AomCdfProb (*MapCdf)[PALETTE_SIZES][PALETTE_COLOR_INDEX_CONTEXTS];
 
-typedef struct {
-    int       rows;
-    int       n_colors;
-    int       plane_width;
-    int       plane_height;
-} Av1ColorMapParam;
-
 #define MAX_COLOR_CONTEXT_HASH 8
 #define NUM_PALETTE_NEIGHBORS 3 // left, top-left and top.
 #define COLOR_MAP_STRIDE 128 // worst case
