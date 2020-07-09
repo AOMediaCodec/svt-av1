@@ -395,8 +395,6 @@ EbErrorType load_default_buffer_configuration_settings(
 
     uint32_t input_pic = (uint32_t)return_ppcs;
     scs_ptr->input_buffer_fifo_init_count = input_pic + SCD_LAD + scs_ptr->static_config.look_ahead_distance;
-    scs_ptr->output_stream_buffer_fifo_init_count =
-        scs_ptr->input_buffer_fifo_init_count + 4;
     uint32_t enc_dec_seg_h = (core_count == SINGLE_CORE_COUNT) ? 1 :
         (scs_ptr->static_config.super_block_size == 128) ?
         ((scs_ptr->max_input_luma_height + 64) / 128) :
