@@ -517,13 +517,12 @@ void svt_make_inter_predictor(PartitionInfo *part_info, int32_t ref, void *src, 
     assert(IMPLIES(is_intrabc, !do_warp));
 
     if (do_warp) {
-        const EbWarpedMotionParams *wm_params = &default_warp_params;
-
         const EbWarpedMotionParams *const wm_global =
             &part_info->ps_global_motion[mi->ref_frame[ref]];
         const EbWarpedMotionParams *const wm_local = &part_info->local_warp_params;
 
-        wm_params = (mi->motion_mode == WARPED_CAUSAL) ? wm_local : wm_global;
+        const EbWarpedMotionParams *wm_params = mi->motion_mode == WARPED_CAUSAL ? wm_local
+                                                                                 : wm_global;
 
         eb_av1_warp_plane((EbWarpedMotionParams *)wm_params,
                           highbd,
