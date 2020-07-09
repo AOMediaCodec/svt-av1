@@ -5076,7 +5076,7 @@ void full_loop_core(PictureControlSet *pcs_ptr, SuperBlock *sb_ptr, BlkStruct *b
 
     // FullLoop and TU search
     uint16_t cb_qp = context_ptr->qp;
-    uint16_t cr_qp = context_ptr->qp;
+    uint16_t cr_qp = cb_qp;
     if (context_ptr->md_staging_skip_full_chroma == EB_FALSE) {
         if (context_ptr->blk_geom->has_uv && context_ptr->chroma_level <= CHROMA_MODE_1) {
             //Cb Residual
