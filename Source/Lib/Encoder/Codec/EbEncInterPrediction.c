@@ -5928,12 +5928,8 @@ EbErrorType av1_inter_prediction_16bit_pipeline(
     }
 
     if (motion_mode == OBMC_CAUSAL) {
-        uint8_t *tmp_obmc_bufs[2];
-
-        DECLARE_ALIGNED(16, uint8_t, obmc_buff_0[2 * MAX_MB_PLANE * MAX_SB_SQUARE]);
-        DECLARE_ALIGNED(16, uint8_t, obmc_buff_1[2 * MAX_MB_PLANE * MAX_SB_SQUARE]);
-        tmp_obmc_bufs[0] = obmc_buff_0;
-        tmp_obmc_bufs[1] = obmc_buff_1;
+        DECLARE_ALIGNED(16, uint8_t, obmc_buff_0[4 * MAX_MB_PLANE * MAX_SB_SQUARE]) = {0};
+        uint8_t *tmp_obmc_bufs[2] = {obmc_buff_0, obmc_buff_0 + 2 * MAX_MB_PLANE * MAX_SB_SQUARE};
 
         uint8_t *dst_buf1[MAX_MB_PLANE], *dst_buf2[MAX_MB_PLANE];
         int      dst_stride1[MAX_MB_PLANE] = { MAX_SB_SIZE, MAX_SB_SIZE, MAX_SB_SIZE };
