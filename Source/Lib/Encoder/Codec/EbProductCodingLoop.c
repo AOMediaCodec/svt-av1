@@ -4608,8 +4608,6 @@ void init_tx_candidate_buffer(ModeDecisionCandidateBuffer *candidate_buffer,
         eb_memcpy(context_ptr->candidate_buffer_tx_depth_2->candidate_ptr,
                candidate_buffer->candidate_ptr,
                sizeof(ModeDecisionCandidate));
-    }
-    if (end_tx_depth) {
         if (context_ptr->hbd_mode_decision) {
             // Copy pred to tx_depth_1 candidate_buffer
             {
