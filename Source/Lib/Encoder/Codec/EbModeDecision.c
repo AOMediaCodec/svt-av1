@@ -2820,7 +2820,6 @@ static INLINE void setup_pred_plane(struct Buf2D *dst, BlockSize bsize, uint8_t 
 }
 void eb_av1_setup_pred_block(BlockSize sb_type, struct Buf2D dst[MAX_MB_PLANE],
                              const Yv12BufferConfig *src, int mi_row, int mi_col) {
-    int i;
 
     dst[0].buf    = src->y_buffer;
     dst[0].stride = src->y_stride;
@@ -2828,13 +2827,12 @@ void eb_av1_setup_pred_block(BlockSize sb_type, struct Buf2D dst[MAX_MB_PLANE],
     dst[2].buf    = src->v_buffer;
     dst[1].stride = dst[2].stride = src->uv_stride;
 
-    i = 0;
-    setup_pred_plane(dst + i,
+    setup_pred_plane(dst,
                      sb_type,
-                     dst[i].buf,
-                     i ? src->uv_crop_width : src->y_crop_width,
-                     i ? src->uv_crop_height : src->y_crop_height,
-                     dst[i].stride,
+                     dst[0].buf,
+                     src->y_crop_width,
+                     src->y_crop_height,
+                     dst[0].stride,
                      mi_row,
                      mi_col,
                      0,
