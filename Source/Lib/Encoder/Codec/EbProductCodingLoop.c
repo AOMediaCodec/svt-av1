@@ -6969,7 +6969,6 @@ EB_EXTERN EbErrorType mode_decision_sb(SequenceControlSet *scs_ptr, PictureContr
 
     //printf("sb_origin_x = %d, sb_origin_y = %d\n", sb_origin_x, sb_origin_y);
 
-    uint32_t                     blk_index;
     ModeDecisionCandidateBuffer *bestcandidate_buffers[5];
     // Pre Intra Search
     uint32_t                   leaf_count      = mdcResultTbPtr->leaf_count;
@@ -7129,9 +7128,8 @@ EB_EXTERN EbErrorType mode_decision_sb(SequenceControlSet *scs_ptr, PictureContr
     }
 
     //CU Loop
-    blk_index = 0; //index over mdc array
+    uint32_t blk_index = 0; //index over mdc array
 
-    uint32_t blk_idx_mds                       = 0;
     uint32_t d1_blocks_accumlated              = 0;
     int      skip_next_nsq                     = 0;
     int      skip_next_sq                      = 0;
@@ -7149,9 +7147,8 @@ EB_EXTERN EbErrorType mode_decision_sb(SequenceControlSet *scs_ptr, PictureContr
                                            MAX_CU_COST};
     Part     nsq_shape_table[NUMBER_OF_SHAPES] = {
         PART_N, PART_H, PART_V, PART_HA, PART_HB, PART_VA, PART_VB, PART_H4, PART_V4, PART_S};
-    uint8_t skip_next_depth = 0;
     do {
-        blk_idx_mds = leaf_data_array[blk_index].mds_idx;
+        uint32_t blk_idx_mds = leaf_data_array[blk_index].mds_idx;
 
         const BlockGeom *blk_geom = context_ptr->blk_geom = get_blk_geom_mds(blk_idx_mds);
         BlkStruct *      blk_ptr = context_ptr->blk_ptr = &context_ptr->md_blk_arr_nsq[blk_idx_mds];
@@ -7297,31 +7294,29 @@ EB_EXTERN EbErrorType mode_decision_sb(SequenceControlSet *scs_ptr, PictureContr
             // Initialize tx_depth
             blk_ptr->tx_depth = 0;
             if (blk_geom->quadi > 0 && d1_block_itr == 0 && !skip_next_sq) {
-                uint32_t            blk_mds           = context_ptr->blk_geom->sqi_mds;
                 uint64_t            parent_depth_cost = 0, current_depth_cost = 0;
-                SequenceControlSet *scs_ptr = (SequenceControlSet *)
-                                                  pcs_ptr->scs_wrapper_ptr->object_ptr;
-                uint32_t parent_depth_idx_mds = blk_mds;
+                SequenceControlSet *scs_pointer = (SequenceControlSet *)
+                                                      pcs_ptr->scs_wrapper_ptr->object_ptr;
 
                 // from a given child index, derive the index of the parent
-                parent_depth_idx_mds =
+                uint32_t parent_depth_idx_mds =
                     (context_ptr->blk_geom->sqi_mds -
                      (context_ptr->blk_geom->quadi - 3) *
-                         ns_depth_offset[scs_ptr->seq_header.sb_size == BLOCK_128X128]
+                         ns_depth_offset[scs_pointer->seq_header.sb_size == BLOCK_128X128]
                                         [context_ptr->blk_geom->depth]) -
-                    parent_depth_offset[scs_ptr->seq_header.sb_size == BLOCK_128X128]
+                    parent_depth_offset[scs_pointer->seq_header.sb_size == BLOCK_128X128]
                                        [blk_geom->depth];
 
                 if (pcs_ptr->slice_type == I_SLICE && parent_depth_idx_mds == 0 &&
-                    scs_ptr->seq_header.sb_size == BLOCK_128X128)
+                    scs_pointer->seq_header.sb_size == BLOCK_128X128)
                     parent_depth_cost = MAX_MODE_COST;
                 else
                     compute_depth_costs_md_skip(
                         context_ptr,
-                        scs_ptr,
+                        scs_pointer,
                         pcs_ptr->parent_pcs_ptr,
                         parent_depth_idx_mds,
-                        ns_depth_offset[scs_ptr->seq_header.sb_size == BLOCK_128X128]
+                        ns_depth_offset[scs_pointer->seq_header.sb_size == BLOCK_128X128]
                                        [context_ptr->blk_geom->depth],
                         &parent_depth_cost,
                         &current_depth_cost);
@@ -7340,7 +7335,7 @@ EB_EXTERN EbErrorType mode_decision_sb(SequenceControlSet *scs_ptr, PictureContr
                              context_ptr->md_exit_th / context_ptr->blk_geom->quadi / 100)) {
                     skip_next_sq              = 1;
                     next_non_skip_blk_idx_mds = parent_depth_idx_mds +
-                        ns_depth_offset[scs_ptr->seq_header.sb_size == BLOCK_128X128]
+                        ns_depth_offset[scs_pointer->seq_header.sb_size == BLOCK_128X128]
                                        [context_ptr->blk_geom->depth - 1];
                 } else
                     skip_next_sq = 0;
@@ -7351,7 +7346,7 @@ EB_EXTERN EbErrorType mode_decision_sb(SequenceControlSet *scs_ptr, PictureContr
 
             uint8_t sq_weight_based_nsq_skip = update_skip_nsq_shapes(
                 scs_ptr, pcs_ptr, context_ptr);
-            skip_next_depth = context_ptr->blk_ptr->do_not_process_block;
+            uint8_t skip_next_depth = context_ptr->blk_ptr->do_not_process_block;
             if (pcs_ptr->parent_pcs_ptr->sb_geom[sb_addr].block_is_allowed[blk_ptr->mds_idx] &&
                 !skip_next_nsq && !skip_next_sq && !sq_weight_based_nsq_skip && !skip_next_depth) {
 
@@ -7445,7 +7440,6 @@ EB_EXTERN EbErrorType mode_decision_sb(SequenceControlSet *scs_ptr, PictureContr
                     if (context_ptr->pd_pass > PD_PASS_1) {
                         uint64_t sq_cost       = nsq_cost[0]; // sq cost
                         uint64_t best_nsq_cost = MAX_CU_COST;
-                        skip_next_depth        = 0;
                         // Derive best nsq cost
                         for (i = 1; i < NUMBER_OF_SHAPES; ++i)
                             if (nsq_cost[i] < best_nsq_cost)
