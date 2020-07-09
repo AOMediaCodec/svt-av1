@@ -101,8 +101,8 @@ static INLINE const uint8_t *get_buf_from_mv(const struct Buf2D *buf, const MV *
 }
 
 void eb_av1_set_mv_search_range(MvLimits *mv_limits, const MV *mv) {
-    int col_min = (mv->col >> 3) - MAX_FULL_PEL_VAL + (mv->col & 7 ? 1 : 0);
-    int row_min = (mv->row >> 3) - MAX_FULL_PEL_VAL + (mv->row & 7 ? 1 : 0);
+    int col_min = (mv->col >> 3) - MAX_FULL_PEL_VAL + !!(mv->col & 7);
+    int row_min = (mv->row >> 3) - MAX_FULL_PEL_VAL + !!(mv->row & 7);
     int col_max = (mv->col >> 3) + MAX_FULL_PEL_VAL;
     int row_max = (mv->row >> 3) + MAX_FULL_PEL_VAL;
 
