@@ -2757,7 +2757,7 @@ static void open_loop_me_get_search_point_results_block(
     uint32_t search_position_tl_index = search_region_index;
     uint32_t search_position_index;
     uint32_t block_index;
-    uint32_t src_next_16x16_offset = (BLOCK_SIZE_64 << 4);
+    uint32_t src_next_16x16_offset;
     // uint32_t ref_next_16x16_offset = (ref_pic_ptr->stride_y << 4); // NADER
     uint32_t  ref_next_16x16_offset = (ref_luma_stride << 4);
     uint32_t  curr_mv_1             = (((uint16_t)y_search_index) << 18);
@@ -3110,7 +3110,7 @@ static void get_search_point_results(
     uint32_t search_position_index;
     uint32_t block_index;
 
-    uint32_t src_next_16x16_offset = (BLOCK_SIZE_64 << 4);
+    uint32_t src_next_16x16_offset;
     // uint32_t ref_next_16x16_offset = (ref_pic_ptr->stride_y << 4); // NADER
     uint32_t ref_next_16x16_offset = (ref_luma_stride << 4);
 
