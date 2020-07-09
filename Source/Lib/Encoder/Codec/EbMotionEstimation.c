@@ -3391,7 +3391,7 @@ static void get_eight_horizontal_search_point_results_all_85_pus(
     uint32_t search_position_index;
     uint32_t block_index;
 
-    uint32_t src_next_16x16_offset = (BLOCK_SIZE_64 << 4);
+    uint32_t src_next_16x16_offset;
     uint32_t ref_next_16x16_offset = (ref_luma_stride << 4);
 
     uint32_t curr_mv_y = (((uint16_t)y_search_index) << 18);
