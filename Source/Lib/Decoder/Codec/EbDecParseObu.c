@@ -2267,8 +2267,7 @@ EbErrorType read_tile_group_obu(Bitstrm *bs, EbDecHandle *dec_handle_ptr, TilesI
     DecMtFrameData *dec_mt_frame_data =
         &dec_handle_ptr->master_frame_buf.cur_frame_bufs[0].dec_mt_frame_data;
 
-    int      num_tiles, tg_start, tg_end, tile_bits, tile_start_and_end_present_flag = 0;
-    size_t   tile_size;
+    int      num_tiles, tg_start, tg_end, tile_start_and_end_present_flag = 0;
     uint32_t start_position, end_position, header_bytes;
     num_tiles = tiles_info->tile_cols * tiles_info->tile_rows;
 
@@ -2293,7 +2292,7 @@ EbErrorType read_tile_group_obu(Bitstrm *bs, EbDecHandle *dec_handle_ptr, TilesI
         tg_start = 0;
         tg_end   = num_tiles - 1;
     } else {
-        tile_bits = tiles_info->tile_cols_log2 + tiles_info->tile_rows_log2;
+        uint8_t tile_bits = tiles_info->tile_cols_log2 + tiles_info->tile_rows_log2;
         tg_start  = dec_get_bits(bs, tile_bits);
         tg_end    = dec_get_bits(bs, tile_bits);
     }
@@ -2434,6 +2433,7 @@ EbErrorType read_tile_group_obu(Bitstrm *bs, EbDecHandle *dec_handle_ptr, TilesI
         parse_ctxt->parse_left_nbr4x4_ctxt  = &master_parse_ctxt->parse_left_nbr4x4_ctxt[0];
 
         for (int tile_num = tg_start; tile_num <= tg_end; tile_num++) {
+            size_t tile_size;
             if (tile_num == tg_end)
                 tile_size = obu_header->payload_size;
             else {
@@ -2448,8 +2448,6 @@ EbErrorType read_tile_group_obu(Bitstrm *bs, EbDecHandle *dec_handle_ptr, TilesI
 
             start_parse_tile(dec_handle_ptr, parse_ctxt, tiles_info, tile_num, is_mt);
             dec_bits_init(bs, (get_bitsteam_buf(bs) + tile_size), obu_header->payload_size);
-
-            if (status != EB_ErrorNone) return status;
         }
     }
 
@@ -2494,9 +2492,8 @@ EbErrorType read_tile_group_obu(Bitstrm *bs, EbDecHandle *dec_handle_ptr, TilesI
 
     if (is_mt) {
         if (do_upscale) svt_av1_queue_lr_jobs(dec_handle_ptr);
-        DecMtFrameData *dec_mt_frame_data =
-            &dec_handle_ptr->master_frame_buf.cur_frame_bufs[0].dec_mt_frame_data;
-        dec_mt_frame_data->start_lr_frame = EB_TRUE;
+        dec_handle_ptr->master_frame_buf.cur_frame_bufs[0].dec_mt_frame_data.start_lr_frame =
+            EB_TRUE;
         eb_post_semaphore(dec_handle_ptr->thread_semaphore);
         for (uint32_t lib_thrd = 0; lib_thrd < num_threads - 1; lib_thrd++)
             eb_post_semaphore(dec_handle_ptr->thread_ctxt_pa[lib_thrd].thread_semaphore);
