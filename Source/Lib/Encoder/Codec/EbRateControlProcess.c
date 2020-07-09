@@ -4714,9 +4714,8 @@ static int adaptive_qindex_calc_two_pass(PictureControlSet *pcs_ptr, RATE_CONTRO
     int                 active_worst_quality = qindex;
     rc->arf_q                                = 0;
     int q;
-    int is_src_frame_alt_ref, refresh_golden_frame, refresh_alt_ref_frame, is_intrl_arf_boost,
+    int refresh_golden_frame, refresh_alt_ref_frame, is_intrl_arf_boost,
         rf_level, update_type;
-    is_src_frame_alt_ref  = 0;
     refresh_golden_frame  = frame_is_intra_only(pcs_ptr->parent_pcs_ptr) ? 1 : 0;
     refresh_alt_ref_frame = (pcs_ptr->parent_pcs_ptr->temporal_layer_index == 0) ? 1 : 0;
     is_intrl_arf_boost    = (pcs_ptr->parent_pcs_ptr->temporal_layer_index > 0 &&
@@ -4743,7 +4742,6 @@ static int adaptive_qindex_calc_two_pass(PictureControlSet *pcs_ptr, RATE_CONTRO
     if (pcs_ptr->slice_type == B_SLICE)
         rc->arf_q = MAX(rc->arf_q, ((pcs_ptr->ref_pic_qp_array[1][0] << 2) + 2));
     uint64_t referenced_area_avg = pcs_ptr->parent_pcs_ptr->referenced_area_avg;
-    uint64_t referenced_area_max = 64;
 
     if (frame_is_intra_only(pcs_ptr->parent_pcs_ptr)) {
         // Not forced keyframe.
@@ -4751,7 +4749,7 @@ static int adaptive_qindex_calc_two_pass(PictureControlSet *pcs_ptr, RATE_CONTRO
         double q_val;
         rc->worst_quality   = MAXQ;
         rc->best_quality    = MINQ;
-        referenced_area_max = MAX_REF_AREA_I;
+        const int referenced_area_max = MAX_REF_AREA_I;
 
         if (referenced_area_avg <= 16) referenced_area_avg = 0;
         // cross multiplication to derive kf_boost from referenced area; kf_boost range is [kf_low,kf_high], and referenced range [0,referenced_area_max]
@@ -4768,15 +4766,13 @@ static int adaptive_qindex_calc_two_pass(PictureControlSet *pcs_ptr, RATE_CONTRO
         // on active_best_quality.
         q_val = eb_av1_convert_qindex_to_q(active_best_quality, bit_depth);
         active_best_quality += eb_av1_compute_qdelta(q_val, q_val * q_adj_factor, bit_depth);
-    } else if (!is_src_frame_alt_ref &&
-               (refresh_golden_frame || is_intrl_arf_boost || refresh_alt_ref_frame)) {
-        referenced_area_max = scs_ptr->input_resolution < 2
-                                  ? MAX_REF_AREA_NONI_LOW_RES
-                                  : ((int)referenced_area_avg -
-                                         (int)pcs_ptr->ref_pic_referenced_area_avg_array[0][0] >=
-                                     REF_AREA_DIF_THRESHOLD)
-                                        ? MAX_REF_AREA_NONI_LOW_RES
-                                        : MAX_REF_AREA_NONI;
+    } else if (refresh_golden_frame || is_intrl_arf_boost || refresh_alt_ref_frame) {
+        const int referenced_area_max = scs_ptr->input_resolution < 2
+            ? MAX_REF_AREA_NONI_LOW_RES
+            : referenced_area_avg - pcs_ptr->ref_pic_referenced_area_avg_array[0][0] >=
+               (unsigned)REF_AREA_DIF_THRESHOLD
+                ? MAX_REF_AREA_NONI_LOW_RES
+                : MAX_REF_AREA_NONI;
 
         // Clip the complexity of highly complex pictures to maximum.
         if (pcs_ptr->parent_pcs_ptr->qp_scaling_average_complexity > HIGH_QPS_COMP_THRESHOLD)
