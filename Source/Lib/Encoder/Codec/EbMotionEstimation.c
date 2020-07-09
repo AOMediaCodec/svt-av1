@@ -9243,8 +9243,8 @@ static void hme_mv_center_check(EbPictureBufferDesc *ref_pic_ptr, MeContext *con
     |------------D-------------|
     */
     uint32_t search_region_index;
-    int16_t  search_center_x = *xsc;
-    int16_t  search_center_y = *ysc;
+    int16_t  search_center_x;
+    int16_t  search_center_y;
     uint64_t best_cost;
     uint64_t direct_mv_cost = 0xFFFFFFFFFFFFF;
     uint8_t  sparce_scale   = 1;
