@@ -1981,20 +1981,16 @@ void inject_new_nearest_new_comb_candidates(const SequenceControlSet *  scs_ptr,
                                             struct ModeDecisionContext *context_ptr,
                                             PictureControlSet *pcs_ptr, MvReferenceFrame ref_pair,
                                             uint32_t *candTotCnt) {
-    uint8_t                inj_mv;
     uint32_t               cand_idx   = *candTotCnt;
     ModeDecisionCandidate *cand_array = context_ptr->fast_candidate_array;
     MacroBlockD *          xd         = context_ptr->blk_ptr->av1xd;
     IntMv                  nearestmv[2], nearmv[2], ref_mv[2];
-    uint8_t                drli, max_drl_index;
-    int                    inside_tile = 1;
     int                    umv0tile    = (scs_ptr->static_config.unrestricted_motion_vector == 0);
     uint32_t               mi_row      = context_ptr->blk_origin_y >> MI_SIZE_LOG2;
     uint32_t               mi_col      = context_ptr->blk_origin_x >> MI_SIZE_LOG2;
 
     MvReferenceFrame rf[2];
     av1_set_ref_frame(rf, ref_pair);
-    MD_COMP_TYPE cur_type; //N_NR N_NRST
     BlockSize    bsize          = context_ptr->blk_geom->bsize; // bloc size
     MD_COMP_TYPE tot_comp_types = (bsize >= BLOCK_8X8 && bsize <= BLOCK_32X32)
                                       ? context_ptr->compound_types_to_try
@@ -2031,42 +2027,39 @@ void inject_new_nearest_new_comb_candidates(const SequenceControlSet *  scs_ptr,
                 int16_t to_inject_mv_y_l1 =
                     context_ptr->sb_me_mv[context_ptr->blk_geom->blkidx_mds][get_list_idx(rf[1])]
                     [ref_idx_1][1];
-                inj_mv = context_ptr->injected_mv_count_bipred == 0 ||
-                         mrp_is_already_injected_mv_bipred(context_ptr,
-                                                           to_inject_mv_x_l0,
-                                                           to_inject_mv_y_l0,
-                                                           to_inject_mv_x_l1,
-                                                           to_inject_mv_y_l1,
-                                                           ref_pair) == EB_FALSE;
-
-                if (umv0tile) {
-                    inside_tile = is_inside_tile_boundary(&(xd->tile),
-                                                          to_inject_mv_x_l0,
-                                                          to_inject_mv_y_l0,
-                                                          mi_col,
-                                                          mi_row,
-                                                          context_ptr->blk_geom->bsize) &&
-                                  is_inside_tile_boundary(&(xd->tile),
-                                                          to_inject_mv_x_l1,
-                                                          to_inject_mv_y_l1,
-                                                          mi_col,
-                                                          mi_row,
-                                                          context_ptr->blk_geom->bsize);
-                }
+                int inj_mv = context_ptr->injected_mv_count_bipred == 0 ||
+                    mrp_is_already_injected_mv_bipred(context_ptr,
+                                                      to_inject_mv_x_l0,
+                                                      to_inject_mv_y_l0,
+                                                      to_inject_mv_x_l1,
+                                                      to_inject_mv_y_l1,
+                                                      ref_pair) == EB_FALSE;
+                int inside_tile = umv0tile
+                    ? is_inside_tile_boundary(&(xd->tile),
+                                              to_inject_mv_x_l0,
+                                              to_inject_mv_y_l0,
+                                              mi_col,
+                                              mi_row,
+                                              context_ptr->blk_geom->bsize) &&
+                        is_inside_tile_boundary(&(xd->tile),
+                                                to_inject_mv_x_l1,
+                                                to_inject_mv_y_l1,
+                                                mi_col,
+                                                mi_row,
+                                                context_ptr->blk_geom->bsize)
+                    : 1;
                 inj_mv = inj_mv && inside_tile;
                 inj_mv = inj_mv && is_me_data_present(context_ptr, me_results, get_list_idx(rf[1]), ref_idx_1);
                 if (inj_mv) {
                     context_ptr->variance_ready = 0;
-                    for (cur_type = MD_COMP_AVG; cur_type <= tot_comp_types; cur_type++) {
+                    for (MD_COMP_TYPE cur_type = MD_COMP_AVG; cur_type <= tot_comp_types;
+                         cur_type++) {
                         if (cur_type == MD_COMP_WEDGE &&
                                 get_wedge_params_bits(context_ptr->blk_geom->bsize) == 0)
                             continue;
                         // If two predictors are very similar, skip wedge compound mode search
-                        if (context_ptr->variance_ready)
-                            if (context_ptr->prediction_mse < 8 ||
-                                (!have_newmv_in_inter_mode(NEAREST_NEWMV) &&
-                                 context_ptr->prediction_mse < 64))
-                                continue;
+                        if (context_ptr->variance_ready && context_ptr->prediction_mse < 8)
+                            continue;
                         cand_array[cand_idx].type               = INTER_MODE;
                         cand_array[cand_idx].inter_mode         = NEAREST_NEWMV;
                         cand_array[cand_idx].pred_mode          = NEAREST_NEWMV;
@@ -2144,42 +2137,41 @@ void inject_new_nearest_new_comb_candidates(const SequenceControlSet *  scs_ptr,
                         .ed_ref_mv_stack[ref_pair][0]
                         .comp_mv.as_mv.row;
 
-                inj_mv = context_ptr->injected_mv_count_bipred == 0 ||
-                         mrp_is_already_injected_mv_bipred(context_ptr,
-                                                           to_inject_mv_x_l0,
-                                                           to_inject_mv_y_l0,
-                                                           to_inject_mv_x_l1,
-                                                           to_inject_mv_y_l1,
-                                                           ref_pair) == EB_FALSE;
+                int inj_mv = context_ptr->injected_mv_count_bipred == 0 ||
+                    mrp_is_already_injected_mv_bipred(context_ptr,
+                                                      to_inject_mv_x_l0,
+                                                      to_inject_mv_y_l0,
+                                                      to_inject_mv_x_l1,
+                                                      to_inject_mv_y_l1,
+                                                      ref_pair) == EB_FALSE;
 
-                if (umv0tile) {
-                    inside_tile = is_inside_tile_boundary(&(xd->tile),
-                                                          to_inject_mv_x_l0,
-                                                          to_inject_mv_y_l0,
-                                                          mi_col,
-                                                          mi_row,
-                                                          context_ptr->blk_geom->bsize) &&
-                                  is_inside_tile_boundary(&(xd->tile),
-                                                          to_inject_mv_x_l1,
-                                                          to_inject_mv_y_l1,
-                                                          mi_col,
-                                                          mi_row,
-                                                          context_ptr->blk_geom->bsize);
-                }
+                int inside_tile = umv0tile
+                    ? is_inside_tile_boundary(&(xd->tile),
+                                              to_inject_mv_x_l0,
+                                              to_inject_mv_y_l0,
+                                              mi_col,
+                                              mi_row,
+                                              context_ptr->blk_geom->bsize) &&
+                        is_inside_tile_boundary(&(xd->tile),
+                                                to_inject_mv_x_l1,
+                                                to_inject_mv_y_l1,
+                                                mi_col,
+                                                mi_row,
+                                                context_ptr->blk_geom->bsize)
+                    : 1;
+
                 inj_mv = inj_mv && inside_tile;
                 inj_mv = inj_mv && is_me_data_present(context_ptr, me_results, 0, ref_idx_0);
                 if (inj_mv) {
                     context_ptr->variance_ready = 0;
-                    for (cur_type = MD_COMP_AVG; cur_type <= tot_comp_types; cur_type++) {
+                    for (MD_COMP_TYPE cur_type = MD_COMP_AVG; cur_type <= tot_comp_types;
+                         cur_type++) {
                         if (cur_type == MD_COMP_WEDGE &&
                                 get_wedge_params_bits(context_ptr->blk_geom->bsize) == 0)
                             continue;
                         // If two predictors are very similar, skip wedge compound mode search
-                        if (context_ptr->variance_ready)
-                            if (context_ptr->prediction_mse < 8 ||
-                                (!have_newmv_in_inter_mode(NEW_NEARESTMV) &&
-                                 context_ptr->prediction_mse < 64))
-                                continue;
+                        if (context_ptr->variance_ready && context_ptr->prediction_mse < 8)
+                            continue;
                         cand_array[cand_idx].type                    = INTER_MODE;
                         cand_array[cand_idx].inter_mode              = NEW_NEARESTMV;
                         cand_array[cand_idx].pred_mode               = NEW_NEARESTMV;
@@ -2237,9 +2229,9 @@ void inject_new_nearest_new_comb_candidates(const SequenceControlSet *  scs_ptr,
             }
             //NEW_NEARMV
             {
-                max_drl_index = get_max_drl_index(xd->ref_mv_count[ref_pair], NEW_NEARMV);
+                uint8_t max_drl_index = get_max_drl_index(xd->ref_mv_count[ref_pair], NEW_NEARMV);
 
-                for (drli = 0; drli < max_drl_index; drli++) {
+                for (uint8_t drli = 0; drli < max_drl_index; drli++) {
                     get_av1_mv_pred_drl(context_ptr,
                                         context_ptr->blk_ptr,
                                         ref_pair,
@@ -2263,23 +2255,21 @@ void inject_new_nearest_new_comb_candidates(const SequenceControlSet *  scs_ptr,
                     int16_t to_inject_mv_x_l1 = nearmv[1].as_mv.col;
                     int16_t to_inject_mv_y_l1 = nearmv[1].as_mv.row;
 
-                    inj_mv = context_ptr->injected_mv_count_bipred == 0 ||
-                             mrp_is_already_injected_mv_bipred(context_ptr,
-                                                               to_inject_mv_x_l0,
-                                                               to_inject_mv_y_l0,
-                                                               to_inject_mv_x_l1,
-                                                               to_inject_mv_y_l1,
-                                                               ref_pair) == EB_FALSE;
+                    int inj_mv = context_ptr->injected_mv_count_bipred == 0 ||
+                        mrp_is_already_injected_mv_bipred(context_ptr,
+                                                          to_inject_mv_x_l0,
+                                                          to_inject_mv_y_l0,
+                                                          to_inject_mv_x_l1,
+                                                          to_inject_mv_y_l1,
+                                                          ref_pair) == EB_FALSE;
                     inj_mv = inj_mv && is_me_data_present(context_ptr, me_results, 0, ref_idx_0);
                     if (inj_mv) {
                         context_ptr->variance_ready = 0;
-                        for (cur_type = MD_COMP_AVG; cur_type <= tot_comp_types; cur_type++) {
+                        for (MD_COMP_TYPE cur_type = MD_COMP_AVG; cur_type <= tot_comp_types;
+                             cur_type++) {
                             // If two predictors are very similar, skip wedge compound mode search
-                            if (context_ptr->variance_ready)
-                                if (context_ptr->prediction_mse < 8 ||
-                                    (!have_newmv_in_inter_mode(NEW_NEARMV) &&
-                                     context_ptr->prediction_mse < 64))
-                                    continue;
+                            if (context_ptr->variance_ready && context_ptr->prediction_mse < 8)
+                                continue;
 
                             cand_array[cand_idx].type               = INTER_MODE;
                             cand_array[cand_idx].inter_mode         = NEW_NEARMV;
@@ -2337,9 +2327,9 @@ void inject_new_nearest_new_comb_candidates(const SequenceControlSet *  scs_ptr,
             }
             //NEAR_NEWMV
             {
-                max_drl_index = get_max_drl_index(xd->ref_mv_count[ref_pair], NEAR_NEWMV);
+                uint8_t max_drl_index = get_max_drl_index(xd->ref_mv_count[ref_pair], NEAR_NEWMV);
 
-                for (drli = 0; drli < max_drl_index; drli++) {
+                for (uint8_t drli = 0; drli < max_drl_index; drli++) {
                     get_av1_mv_pred_drl(context_ptr,
                                         context_ptr->blk_ptr,
                                         ref_pair,
@@ -2362,23 +2352,21 @@ void inject_new_nearest_new_comb_candidates(const SequenceControlSet *  scs_ptr,
                     int16_t to_inject_mv_y_l1 =
                         context_ptr->sb_me_mv[context_ptr->blk_geom->blkidx_mds]
                         [get_list_idx(rf[1])][ref_idx_1][1];
-                    inj_mv = context_ptr->injected_mv_count_bipred == 0 ||
-                             mrp_is_already_injected_mv_bipred(context_ptr,
-                                                               to_inject_mv_x_l0,
-                                                               to_inject_mv_y_l0,
-                                                               to_inject_mv_x_l1,
-                                                               to_inject_mv_y_l1,
-                                                               ref_pair) == EB_FALSE;
+                    int inj_mv = context_ptr->injected_mv_count_bipred == 0 ||
+                        mrp_is_already_injected_mv_bipred(context_ptr,
+                                                          to_inject_mv_x_l0,
+                                                          to_inject_mv_y_l0,
+                                                          to_inject_mv_x_l1,
+                                                          to_inject_mv_y_l1,
+                                                          ref_pair) == EB_FALSE;
                     inj_mv = inj_mv && is_me_data_present(context_ptr, me_results, get_list_idx(rf[1]), ref_idx_1);
                     if (inj_mv) {
                         context_ptr->variance_ready = 0;
-                        for (cur_type = MD_COMP_AVG; cur_type <= tot_comp_types; cur_type++) {
+                        for (MD_COMP_TYPE cur_type = MD_COMP_AVG; cur_type <= tot_comp_types;
+                             cur_type++) {
                             // If two predictors are very similar, skip wedge compound mode search
-                            if (context_ptr->variance_ready)
-                                if (context_ptr->prediction_mse < 8 ||
-                                    (!have_newmv_in_inter_mode(NEAR_NEWMV) &&
-                                     context_ptr->prediction_mse < 64))
-                                    continue;
+                            if (context_ptr->variance_ready && context_ptr->prediction_mse < 8)
+                                continue;
 
                             cand_array[cand_idx].type               = INTER_MODE;
                             cand_array[cand_idx].inter_mode         = NEAR_NEWMV;
