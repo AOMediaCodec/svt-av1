@@ -316,12 +316,11 @@ int32_t set_parent_pcs(EbSvtAv1EncConfiguration*   config, uint32_t core_count, 
         uint32_t fps            = (uint32_t)((config->frame_rate > 1000) ?
                         config->frame_rate >> 16 :
                         config->frame_rate);
-        uint32_t ppcs_count     = fps;
         uint32_t min_ppcs_count = (2 << config->hierarchical_levels) + 1; // min picture count to start encoding
         fps        = fps > 120 ? 120   : fps;
         fps        = fps < 24  ? 24    : fps;
 
-        ppcs_count = MAX(min_ppcs_count, fps);
+        uint32_t ppcs_count = MAX(min_ppcs_count, fps);
         if (core_count <= SINGLE_CORE_COUNT)
             ppcs_count = min_ppcs_count;
         else{
