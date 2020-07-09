@@ -3250,12 +3250,8 @@ void frame_level_rc_input_picture_cvbr(PictureControlSet *pcs_ptr, SequenceContr
 void frame_level_rc_feedback_picture_cvbr(PictureParentControlSet *parentpicture_control_set_ptr,
                                           SequenceControlSet *     scs_ptr,
                                           RateControlContext *     context_ptr) {
-    RateControlLayerContext *        rate_control_layer_temp_ptr;
     RateControlIntervalParamContext *rate_control_param_ptr;
     RateControlLayerContext *        rate_control_layer_ptr;
-    // SB Loop variables
-    uint32_t slice_num;
-    uint64_t previous_frame_bit_actual;
 
     if (scs_ptr->intra_period_length == -1)
         rate_control_param_ptr = context_ptr->rate_control_param_queue[0];
@@ -3278,11 +3274,8 @@ void frame_level_rc_feedback_picture_cvbr(PictureParentControlSet *parentpicture
         rate_control_param_ptr
             ->rate_control_layer_array[parentpicture_control_set_ptr->temporal_layer_index];
 
-    rate_control_layer_ptr->max_qp = 0;
-
     rate_control_layer_ptr->feedback_arrived = EB_TRUE;
-    rate_control_layer_ptr->max_qp =
-        MAX(rate_control_layer_ptr->max_qp, parentpicture_control_set_ptr->picture_qp);
+    rate_control_layer_ptr->max_qp           = parentpicture_control_set_ptr->picture_qp;
 
     rate_control_layer_ptr->previous_frame_qp = parentpicture_control_set_ptr->picture_qp;
     rate_control_layer_ptr->previous_frame_bit_actual =
@@ -3397,7 +3390,7 @@ void frame_level_rc_feedback_picture_cvbr(PictureParentControlSet *parentpicture
             rate_control_layer_ptr->frame_same_distortion_min_qp_count = 0;
 
         rate_control_layer_ptr->previous_ec_bits = previous_frame_ec_bits;
-        previous_frame_bit_actual                = parentpicture_control_set_ptr->total_num_bits;
+        const uint64_t previous_frame_bit_actual = parentpicture_control_set_ptr->total_num_bits;
         if (parentpicture_control_set_ptr->first_frame_in_temporal_layer)
             rate_control_layer_ptr->dif_total_and_ec_bits =
                 (previous_frame_bit_actual - previous_frame_ec_bits);
@@ -3410,9 +3403,6 @@ void frame_level_rc_feedback_picture_cvbr(PictureParentControlSet *parentpicture
         if (parentpicture_control_set_ptr->picture_number == rate_control_param_ptr->first_poc &&
             (parentpicture_control_set_ptr->slice_type == I_SLICE) &&
             scs_ptr->static_config.intra_period_length != -1) {
-            uint32_t temporal_layer_idex;
-            uint64_t target_bit_rate;
-            uint64_t channel_bit_rate;
             uint64_t sum_bits_per_sw = 0;
 #if ADAPTIVE_PERCENTAGE
             if (scs_ptr->static_config.look_ahead_distance != 0) {
@@ -3428,19 +3418,18 @@ void frame_level_rc_feedback_picture_cvbr(PictureParentControlSet *parentpicture
 #endif
 
             if (scs_ptr->static_config.look_ahead_distance != 0 &&
-                scs_ptr->intra_period_length != -1) {
-                for (temporal_layer_idex = 0; temporal_layer_idex < EB_MAX_TEMPORAL_LAYERS;
+                scs_ptr->intra_period_length != -1)
+                for (int temporal_layer_idex = 0; temporal_layer_idex < EB_MAX_TEMPORAL_LAYERS;
                      temporal_layer_idex++)
                     sum_bits_per_sw +=
                         parentpicture_control_set_ptr->bits_per_sw_per_layer[temporal_layer_idex];
-            }
 
-            for (temporal_layer_idex = 0; temporal_layer_idex < EB_MAX_TEMPORAL_LAYERS;
+            for (int temporal_layer_idex = 0; temporal_layer_idex < EB_MAX_TEMPORAL_LAYERS;
                  temporal_layer_idex++) {
-                rate_control_layer_temp_ptr =
+                RateControlLayerContext *rate_control_layer_temp_ptr =
                     rate_control_param_ptr->rate_control_layer_array[temporal_layer_idex];
 
-                target_bit_rate =
+                uint64_t target_bit_rate =
                     (uint64_t)((int64_t)parentpicture_control_set_ptr->target_bit_rate -
                                MIN((int64_t)parentpicture_control_set_ptr->target_bit_rate * 3 / 4,
                                    (int64_t)(parentpicture_control_set_ptr->total_num_bits *
@@ -3467,25 +3456,22 @@ void frame_level_rc_feedback_picture_cvbr(PictureParentControlSet *parentpicture
                 }
 #endif
                 // update this based on temporal layers
-                if (temporal_layer_idex == 0)
-                    channel_bit_rate =
-                        (((target_bit_rate << (2 * RC_PRECISION)) /
-                          MAX(1,
-                              rate_control_layer_temp_ptr->frame_rate -
-                                  (1 * context_ptr->frame_rate /
-                                   (scs_ptr->static_config.intra_period_length + 1)))) +
-                         RC_PRECISION_OFFSET) >>
+                uint64_t channel_bit_rate = !temporal_layer_idex
+                    ? (((target_bit_rate << (2 * RC_PRECISION)) /
+                        MAX(1,
+                            rate_control_layer_temp_ptr->frame_rate -
+                                (1 * context_ptr->frame_rate /
+                                 (scs_ptr->static_config.intra_period_length + 1)))) +
+                       RC_PRECISION_OFFSET) >>
+                        RC_PRECISION
+                    : (((target_bit_rate << (2 * RC_PRECISION)) /
+                        rate_control_layer_temp_ptr->frame_rate) +
+                       RC_PRECISION_OFFSET) >>
                         RC_PRECISION;
-                else
-                    channel_bit_rate = (((target_bit_rate << (2 * RC_PRECISION)) /
-                                         rate_control_layer_temp_ptr->frame_rate) +
-                                        RC_PRECISION_OFFSET) >>
-                                       RC_PRECISION;
                 channel_bit_rate = (uint64_t)MAX((int64_t)1, (int64_t)channel_bit_rate);
                 rate_control_layer_temp_ptr->ec_bit_constraint = channel_bit_rate;
 
-                slice_num = 1;
-                rate_control_layer_temp_ptr->ec_bit_constraint -= SLICE_HEADER_BITS_NUM * slice_num;
+                rate_control_layer_temp_ptr->ec_bit_constraint -= SLICE_HEADER_BITS_NUM;
 
                 rate_control_layer_temp_ptr->previous_bit_constraint = channel_bit_rate;
                 rate_control_layer_temp_ptr->bit_constraint          = channel_bit_rate;
@@ -3569,7 +3555,6 @@ void frame_level_rc_feedback_picture_cvbr(PictureParentControlSet *parentpicture
                 (rate_control_param_ptr->last_poc - rate_control_param_ptr->first_poc + 1) &&
             scs_ptr->intra_period_length != -1) {
             uint32_t temporal_index;
-            int64_t  extra_bits;
             rate_control_param_ptr->first_poc +=
                 PARALLEL_GOP_MAX_NUMBER * (uint32_t)(scs_ptr->intra_period_length + 1);
             rate_control_param_ptr->last_poc +=
@@ -3587,11 +3572,7 @@ void frame_level_rc_feedback_picture_cvbr(PictureParentControlSet *parentpicture
                 rate_control_param_ptr->rate_control_layer_array[temporal_index]->feedback_arrived =
                     EB_FALSE;
             }
-            extra_bits = ((int64_t)context_ptr->virtual_buffer_size >> 1) -
-                         (int64_t)rate_control_param_ptr->virtual_buffer_level;
-
             rate_control_param_ptr->virtual_buffer_level = context_ptr->virtual_buffer_size >> 1;
-            context_ptr->extra_bits += extra_bits;
         }
         context_ptr->extra_bits = 0;
     }
