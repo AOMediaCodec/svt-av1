@@ -23,12 +23,6 @@
 int av1_is_dv_valid(const MV dv, const MacroBlockD *xd, int mi_row, int mi_col, BlockSize bsize,
                     int mib_size_log2);
 
-typedef struct dist_wtd_comp_params {
-    int use_dist_wtd_comp_avg;
-    int fwd_offset;
-    int bck_offset;
-} DIST_WTD_COMP_PARAMS;
-
 int eb_av1_refining_search_sad(IntraBcContext *x, MV *ref_mv, int error_per_bit, int search_range,
                                const AomVarianceFnPtr *fn_ptr, const MV *center_mv);
 
