@@ -3487,7 +3487,6 @@ void inject_predictive_me_candidates(
     uint32_t               cand_total_cnt  = (*candidate_total_cnt);
     BlockSize              bsize           = context_ptr->blk_geom->bsize; // bloc size
 
-    MD_COMP_TYPE cur_type; //BIP 3x3 MiSize >= BLOCK_8X8 && MiSize <= BLOCK_32X32)
     MD_COMP_TYPE tot_comp_types = (bsize >= BLOCK_8X8 && bsize <= BLOCK_32X32)
                                       ? context_ptr->compound_types_to_try
                                       : context_ptr->compound_types_to_try == MD_COMP_WEDGE
@@ -3511,18 +3510,14 @@ void inject_predictive_me_candidates(
                     mrp_is_already_injected_mv_l0(
                         context_ptr, to_inject_mv_x, to_inject_mv_y, to_inject_ref_type) ==
                         EB_FALSE) {
-                    uint8_t inter_type;
-                    uint8_t is_ii_allowed =
-                        0; // svt_is_interintra_allowed(pcs_ptr->parent_pcs_ptr->enable_inter_intra, bsize, NEWMV, rf);
-                    uint8_t tot_inter_types = is_ii_allowed ? II_COUNT : 1;
-                    uint8_t is_obmc_allowed = obmc_motion_mode_allowed(pcs_ptr,
-                                                                       context_ptr,
-                                                                       bsize,
-                                                                       to_inject_ref_type,
-                                                                       -1,
-                                                                       NEWMV) == OBMC_CAUSAL;
-                    tot_inter_types = is_obmc_allowed ? tot_inter_types + 1 : tot_inter_types;
-                    for (inter_type = 0; inter_type < tot_inter_types; inter_type++) {
+                    const uint8_t is_obmc_allowed = obmc_motion_mode_allowed(pcs_ptr,
+                                                                             context_ptr,
+                                                                             bsize,
+                                                                             to_inject_ref_type,
+                                                                             -1,
+                                                                             NEWMV) == OBMC_CAUSAL;
+                    const uint8_t tot_inter_types = is_obmc_allowed ? 2 : 1;
+                    for (uint8_t inter_type = 0; inter_type < tot_inter_types; inter_type++) {
                         cand_array[cand_total_cnt].type                    = INTER_MODE;
                         cand_array[cand_total_cnt].distortion_ready        = 0;
                         cand_array[cand_total_cnt].use_intrabc             = 0;
@@ -3606,18 +3601,12 @@ void inject_predictive_me_candidates(
                         mrp_is_already_injected_mv_l1(
                             context_ptr, to_inject_mv_x, to_inject_mv_y, to_inject_ref_type) ==
                             EB_FALSE) {
-                        uint8_t inter_type;
-                        uint8_t is_ii_allowed =
-                            0; // svt_is_interintra_allowed(pcs_ptr->parent_pcs_ptr->enable_inter_intra, bsize, NEWMV, rf);
-                        uint8_t tot_inter_types = is_ii_allowed ? II_COUNT : 1;
-                        uint8_t is_obmc_allowed = obmc_motion_mode_allowed(pcs_ptr,
-                                                                           context_ptr,
-                                                                           bsize,
-                                                                           to_inject_ref_type,
-                                                                           -1,
-                                                                           NEWMV) == OBMC_CAUSAL;
-                        tot_inter_types = is_obmc_allowed ? tot_inter_types + 1 : tot_inter_types;
-                        for (inter_type = 0; inter_type < tot_inter_types; inter_type++) {
+                        const uint8_t is_obmc_allowed =
+                            obmc_motion_mode_allowed(
+                                pcs_ptr, context_ptr, bsize, to_inject_ref_type, -1, NEWMV) ==
+                            OBMC_CAUSAL;
+                        const uint8_t tot_inter_types = is_obmc_allowed ? 2 : 1;
+                        for (uint8_t inter_type = 0; inter_type < tot_inter_types; inter_type++) {
                             cand_array[cand_total_cnt].type                    = INTER_MODE;
                             cand_array[cand_total_cnt].distortion_ready        = 0;
                             cand_array[cand_total_cnt].use_intrabc             = 0;
@@ -3692,12 +3681,10 @@ void inject_predictive_me_candidates(
                 NEW_NEWMV
             ************* */
     if (allow_bipred) {
-        uint8_t ref_pic_index_l0;
-        uint8_t ref_pic_index_l1;
         {
             // Ref Picture Loop
-            for (ref_pic_index_l0 = 0; ref_pic_index_l0 < 4; ++ref_pic_index_l0) {
-                for (ref_pic_index_l1 = 0; ref_pic_index_l1 < 4; ++ref_pic_index_l1) {
+            for (int ref_pic_index_l0 = 0; ref_pic_index_l0 < 4; ++ref_pic_index_l0) {
+                for (int ref_pic_index_l1 = 0; ref_pic_index_l1 < 4; ++ref_pic_index_l1) {
                     if (context_ptr->valid_refined_mv[REF_LIST_0][ref_pic_index_l0] &&
                         context_ptr->valid_refined_mv[REF_LIST_1][ref_pic_index_l1]) {
                         int16_t to_inject_mv_x_l0 =
@@ -3720,13 +3707,11 @@ void inject_predictive_me_candidates(
                                                               to_inject_mv_y_l1,
                                                               to_inject_ref_type) == EB_FALSE) {
                             context_ptr->variance_ready = 0;
-                            for (cur_type = MD_COMP_AVG; cur_type <= tot_comp_types; cur_type++) {
+                            for (MD_COMP_TYPE cur_type = MD_COMP_AVG; cur_type <= tot_comp_types;
+                                 cur_type++) {
                                 // If two predictors are very similar, skip wedge compound mode search
-                                if (context_ptr->variance_ready)
-                                    if (context_ptr->prediction_mse < 8 ||
-                                        (!have_newmv_in_inter_mode(NEW_NEWMV) &&
-                                         context_ptr->prediction_mse < 64))
-                                        continue;
+                                if (context_ptr->variance_ready && context_ptr->prediction_mse < 8)
+                                    continue;
 
                                 cand_array[cand_total_cnt].type             = INTER_MODE;
                                 cand_array[cand_total_cnt].distortion_ready = 0;
