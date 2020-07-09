@@ -319,8 +319,7 @@ void speed_buffer_control(ResourceCoordinationContext *context_ptr,
 
         // if no change in the encoder mode and buffer is low enough and level is not increasing, switch to a slower encoder mode
         // If previous ChangeCond was the same, double the threshold2
-        if (encoder_mode_delta == 0 &&
-            scs_ptr->encode_context_ptr->sc_frame_in >
+        if (scs_ptr->encode_context_ptr->sc_frame_in >
                 context_ptr->previous_mode_change_frame_in + buffer_threshold_2 &&
             (context_ptr->prev_change_cond != 8 ||
              scs_ptr->encode_context_ptr->sc_frame_in >
