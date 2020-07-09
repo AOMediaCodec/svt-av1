@@ -1067,30 +1067,6 @@ uint64_t estimate_ref_frames_num_bits(PictureControlSet *    pcs_ptr,
                 ref_rate_b = candidate_ptr->md_rate_estimation_ptr
                                  ->comp_ref_type_fac_bits[context][comp_ref_type];
 
-                if (comp_ref_type == UNIDIR_COMP_REFERENCE) {
-                    SVT_LOG("ERROR[AN]: UNIDIR_COMP_REFERENCE not supported\n");
-                    //const int32_t bit = mbmi->block_mi.ref_frame[0] == BWDREF_FRAME;
-                    //WRITE_REF_BIT(bit, uni_comp_ref_p);
-
-                    //if (!bit) {
-                    //    assert(mbmi->block_mi.ref_frame[0] == LAST_FRAME);
-                    //    const int32_t bit1 = mbmi->block_mi.ref_frame[1] == LAST3_FRAME ||
-                    //        mbmi->block_mi.ref_frame[1] == GOLDEN_FRAME;
-                    //    WRITE_REF_BIT(bit1, uni_comp_ref_p1);
-                    //    if (bit1) {
-                    //        const int32_t bit2 = mbmi->block_mi.ref_frame[1] == GOLDEN_FRAME;
-                    //        WRITE_REF_BIT(bit2, uni_comp_ref_p2);
-                    //    }
-                    //}
-                    //else {
-                    //    assert(mbmi->block_mi.ref_frame[1] == ALTREF_FRAME);
-                    //}
-
-                    //return;
-                }
-
-                assert(comp_ref_type == BIDIR_COMP_REFERENCE);
-
                 const int32_t bit = (ref_type[0] == GOLDEN_FRAME || ref_type[0] == LAST3_FRAME);
 
                 context = eb_av1_get_pred_context_comp_ref_p(blk_ptr->av1xd);
