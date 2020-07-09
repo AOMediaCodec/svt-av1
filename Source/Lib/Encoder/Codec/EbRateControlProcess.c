@@ -5362,29 +5362,22 @@ void *rate_control_kernel(void *input_ptr) {
                     rate_control_param_ptr->scene_change_in_gop =
                         pcs_ptr->parent_pcs_ptr->scene_change_in_gop;
                     rate_control_param_ptr->first_pic_actual_qp_assigned = EB_TRUE;
-                }
-                {
-                    if (pcs_ptr->picture_number == rate_control_param_ptr->first_poc) {
-                        if (scs_ptr->static_config.look_ahead_distance != 0)
-                            context_ptr->base_layer_intra_frames_avg_qp =
-                                (3 * context_ptr->base_layer_intra_frames_avg_qp +
-                                 pcs_ptr->picture_qp + 2) >>
-                                2;
-                    }
-
-                    if (pcs_ptr->picture_number == rate_control_param_ptr->first_poc) {
-                        rate_control_param_ptr->intra_frames_qp         = pcs_ptr->picture_qp;
-                        rate_control_param_ptr->next_gop_intra_frame_qp = pcs_ptr->picture_qp;
-                        rate_control_param_ptr->intra_frames_qp_bef_scal =
-                            (uint8_t)scs_ptr->static_config.max_qp_allowed;
-                        for (uint32_t qindex = scs_ptr->static_config.min_qp_allowed;
-                             qindex <= scs_ptr->static_config.max_qp_allowed;
-                             qindex++) {
-                            if (rate_control_param_ptr->intra_frames_qp <=
-                                context_ptr->qp_scaling_map_i_slice[qindex]) {
-                                rate_control_param_ptr->intra_frames_qp_bef_scal = (uint8_t)qindex;
-                                break;
-                            }
+                    if (scs_ptr->static_config.look_ahead_distance != 0)
+                        context_ptr->base_layer_intra_frames_avg_qp =
+                            (3 * context_ptr->base_layer_intra_frames_avg_qp +
+                                pcs_ptr->picture_qp + 2) >>
+                            2;
+                    rate_control_param_ptr->intra_frames_qp         = pcs_ptr->picture_qp;
+                    rate_control_param_ptr->next_gop_intra_frame_qp = pcs_ptr->picture_qp;
+                    rate_control_param_ptr->intra_frames_qp_bef_scal =
+                        (uint8_t)scs_ptr->static_config.max_qp_allowed;
+                    for (uint32_t qindex = scs_ptr->static_config.min_qp_allowed;
+                            qindex <= scs_ptr->static_config.max_qp_allowed;
+                            qindex++) {
+                        if (rate_control_param_ptr->intra_frames_qp <=
+                            context_ptr->qp_scaling_map_i_slice[qindex]) {
+                            rate_control_param_ptr->intra_frames_qp_bef_scal = (uint8_t)qindex;
+                            break;
                         }
                     }
                 }
@@ -5400,12 +5393,11 @@ void *rate_control_kernel(void *input_ptr) {
                     sb_qp_derivation(pcs_ptr);
             else {
                 pcs_ptr->parent_pcs_ptr->frm_hdr.delta_q_params.delta_q_present = 0;
-                SuperBlock *sb_ptr;
                 pcs_ptr->parent_pcs_ptr->average_qp = 0;
                 for (int sb_addr = 0; sb_addr < pcs_ptr->sb_total_count_pix; ++sb_addr) {
-                    sb_ptr           = pcs_ptr->sb_ptr_array[sb_addr];
-                    sb_ptr->qp       = (uint8_t)pcs_ptr->picture_qp;
-                    sb_ptr->delta_qp = 0;
+                    SuperBlock *sb_ptr = pcs_ptr->sb_ptr_array[sb_addr];
+                    sb_ptr->qp         = pcs_ptr->picture_qp;
+                    sb_ptr->delta_qp   = 0;
                     pcs_ptr->parent_pcs_ptr->average_qp += sb_ptr->qp;
                 }
             }
