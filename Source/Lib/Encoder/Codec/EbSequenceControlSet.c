@@ -48,7 +48,6 @@ EbErrorType eb_sequence_control_set_ctor(SequenceControlSet *scs_ptr, EbPtr obje
 
     scs_ptr->static_config.sb_sz           = 64;
     scs_ptr->static_config.partition_depth = 4;
-    scs_ptr->static_config.qp              = 32;
 
     // Segments
     for (segment_index = 0; segment_index < MAX_TEMPORAL_LAYERS; ++segment_index) {
@@ -127,8 +126,7 @@ EbErrorType eb_sequence_control_set_ctor(SequenceControlSet *scs_ptr, EbPtr obje
     // if 0, enable_jnt_comp must be set zs 0.
     scs_ptr->seq_header.order_hint_info.enable_jnt_comp = 0;
 
-    scs_ptr->seq_header.order_hint_info.order_hint_bits =
-        scs_ptr->seq_header.order_hint_info.enable_order_hint ? (6 + 1) : (-1 + 1);
+    scs_ptr->seq_header.order_hint_info.order_hint_bits = 7;
 
     scs_ptr->seq_header.seq_force_screen_content_tools = 2;
     // 0 - force off
