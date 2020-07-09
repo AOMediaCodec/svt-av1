@@ -319,11 +319,9 @@ void decode_block(DecModCtxt *dec_mod_ctxt, BlockModeInfo *mode_info, int32_t mi
             const MvReferenceFrame frame = mode_info->ref_frame[ref];
             part_info.block_ref_sf[ref]  = get_ref_scale_factors(dec_handle, frame);
         }
-    }
-
-    if (inter_block)
         svtav1_predict_inter_block(
             dec_mod_ctxt, dec_handle, &part_info, mi_row, mi_col, num_planes);
+    }
 
     TxType           tx_type;
     int32_t *        coeffs;
