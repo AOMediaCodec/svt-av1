@@ -3658,23 +3658,17 @@ static EbErrorType allocate_frame_buffer(
     uint8_t is_16bit = config->encoder_bit_depth > 8 ? 1 : 0;
 
     input_pic_buf_desc_init_data.max_width =
-        !scs_ptr->max_input_luma_width % 8 ?
+        !(scs_ptr->max_input_luma_width % 8) ?
         scs_ptr->max_input_luma_width :
         scs_ptr->max_input_luma_width + (scs_ptr->max_input_luma_width % 8);
 
     input_pic_buf_desc_init_data.max_height =
-        !scs_ptr->max_input_luma_height % 8 ?
+        !(scs_ptr->max_input_luma_height % 8) ?
         scs_ptr->max_input_luma_height :
         scs_ptr->max_input_luma_height + (scs_ptr->max_input_luma_height % 8);
 
     input_pic_buf_desc_init_data.bit_depth = (EbBitDepthEnum)config->encoder_bit_depth;
     input_pic_buf_desc_init_data.color_format = (EbColorFormat)config->encoder_color_format;
-
-    if (config->compressed_ten_bit_format == 1)
-        input_pic_buf_desc_init_data.buffer_enable_mask = 0;
-    else
-        input_pic_buf_desc_init_data.buffer_enable_mask = is_16bit ?
-             PICTURE_BUFFER_DESC_FULL_MASK : 0;
 
     input_pic_buf_desc_init_data.left_padding = scs_ptr->left_padding;
     input_pic_buf_desc_init_data.right_padding = scs_ptr->right_padding;
