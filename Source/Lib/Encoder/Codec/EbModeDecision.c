@@ -1133,7 +1133,6 @@ void bipred_3x3_candidates_injection(const SequenceControlSet *scs_ptr, PictureC
                                      ModeDecisionContext *context_ptr, SuperBlock *sb_ptr,
                                      uint32_t me_sb_addr, uint32_t *candidate_total_cnt) {
     UNUSED(sb_ptr);
-    uint32_t           bipred_index;
     uint32_t           cand_total_cnt = (*candidate_total_cnt);
     FrameHeader *      frm_hdr        = &pcs_ptr->parent_pcs_ptr->frm_hdr;
     const MeSbResults *me_results     = pcs_ptr->parent_pcs_ptr->me_results[me_sb_addr];
@@ -1142,12 +1141,10 @@ void bipred_3x3_candidates_injection(const SequenceControlSet *scs_ptr, PictureC
     ModeDecisionCandidate *cand_array   = context_ptr->fast_candidate_array;
     EbBool       is_compound_enabled    = (frm_hdr->reference_mode == SINGLE_REFERENCE) ? 0 : 1;
     IntMv        best_pred_mv[2]        = {{0}, {0}};
-    int          inside_tile            = 1;
     MacroBlockD *xd                     = context_ptr->blk_ptr->av1xd;
     int          umv0tile               = (scs_ptr->static_config.unrestricted_motion_vector == 0);
     uint32_t     mi_row                 = context_ptr->blk_origin_y >> MI_SIZE_LOG2;
     uint32_t     mi_col                 = context_ptr->blk_origin_x >> MI_SIZE_LOG2;
-    MD_COMP_TYPE cur_type; //BIP 3x3
     BlockSize    bsize          = context_ptr->blk_geom->bsize;
     MD_COMP_TYPE tot_comp_types = (pcs_ptr->parent_pcs_ptr->compound_mode == 1 ||
                                    context_ptr->compound_types_to_try == MD_COMP_AVG)
@@ -1177,7 +1174,7 @@ void bipred_3x3_candidates_injection(const SequenceControlSet *scs_ptr, PictureC
                     list1_ref_index > context_ptr->md_max_ref_count - 1)
                     continue;
                 // (Best_L0, 8 Best_L1 neighbors)
-                for (bipred_index = 0; bipred_index < BIPRED_3x3_REFINMENT_POSITIONS;
+                for (int bipred_index = 0; bipred_index < BIPRED_3x3_REFINMENT_POSITIONS;
                      ++bipred_index) {
                     if (context_ptr->bipred3x3_injection >= 2) {
                         if (allow_refinement_flag[bipred_index] == 0) continue;
@@ -1222,21 +1219,21 @@ void bipred_3x3_candidates_injection(const SequenceControlSet *scs_ptr, PictureC
                     uint8_t skip_cand          = check_ref_beackout(
                         context_ptr, to_inject_ref_type, context_ptr->blk_geom->shape);
 
-                    inside_tile = 1;
-                    if (umv0tile) {
-                        inside_tile = is_inside_tile_boundary(&(xd->tile),
-                                                              to_inject_mv_x_l0,
-                                                              to_inject_mv_y_l0,
-                                                              mi_col,
-                                                              mi_row,
-                                                              context_ptr->blk_geom->bsize) &&
-                                      is_inside_tile_boundary(&(xd->tile),
-                                                              to_inject_mv_x_l1,
-                                                              to_inject_mv_y_l1,
-                                                              mi_col,
-                                                              mi_row,
-                                                              context_ptr->blk_geom->bsize);
-                    }
+                    int inside_tile = umv0tile
+                        ? is_inside_tile_boundary(&(xd->tile),
+                                                  to_inject_mv_x_l0,
+                                                  to_inject_mv_y_l0,
+                                                  mi_col,
+                                                  mi_row,
+                                                  context_ptr->blk_geom->bsize) &&
+                            is_inside_tile_boundary(&(xd->tile),
+                                                    to_inject_mv_x_l1,
+                                                    to_inject_mv_y_l1,
+                                                    mi_col,
+                                                    mi_row,
+                                                    context_ptr->blk_geom->bsize)
+                        : 1;
+
                     skip_cand = skip_cand || (!inside_tile);
                     if (!skip_cand &&
                         (context_ptr->injected_mv_count_bipred == 0 ||
@@ -1247,16 +1244,14 @@ void bipred_3x3_candidates_injection(const SequenceControlSet *scs_ptr, PictureC
                                                            to_inject_mv_y_l1,
                                                            to_inject_ref_type) == EB_FALSE)) {
                         context_ptr->variance_ready = 0;
-                        for (cur_type = MD_COMP_AVG; cur_type <= tot_comp_types; cur_type++) {
+                        for (MD_COMP_TYPE cur_type = MD_COMP_AVG; cur_type <= tot_comp_types;
+                             cur_type++) {
                             if (cur_type == MD_COMP_WEDGE &&
                                     get_wedge_params_bits(context_ptr->blk_geom->bsize) == 0)
                                 continue;
                             // If two predictors are very similar, skip wedge compound mode search
-                            if (context_ptr->variance_ready)
-                                if (context_ptr->prediction_mse < 8 ||
-                                    (!have_newmv_in_inter_mode(NEW_NEWMV) &&
-                                     context_ptr->prediction_mse < 64))
-                                    continue;
+                            if (context_ptr->variance_ready && context_ptr->prediction_mse < 8)
+                                continue;
 
                             cand_array[cand_total_cnt].type             = INTER_MODE;
                             cand_array[cand_total_cnt].distortion_ready = 0;
@@ -1330,7 +1325,7 @@ void bipred_3x3_candidates_injection(const SequenceControlSet *scs_ptr, PictureC
                 }
 
                 // (8 Best_L0 neighbors, Best_L1) :
-                for (bipred_index = 0; bipred_index < BIPRED_3x3_REFINMENT_POSITIONS;
+                for (int bipred_index = 0; bipred_index < BIPRED_3x3_REFINMENT_POSITIONS;
                      ++bipred_index) {
                     if (context_ptr->bipred3x3_injection >= 2) {
                         if (allow_refinement_flag[bipred_index] == 0) continue;
@@ -1374,21 +1369,21 @@ void bipred_3x3_candidates_injection(const SequenceControlSet *scs_ptr, PictureC
                     uint8_t skip_cand          = check_ref_beackout(
                         context_ptr, to_inject_ref_type, context_ptr->blk_geom->shape);
 
-                    inside_tile = 1;
-                    if (umv0tile) {
-                        inside_tile = is_inside_tile_boundary(&(xd->tile),
-                                                              to_inject_mv_x_l0,
-                                                              to_inject_mv_y_l0,
-                                                              mi_col,
-                                                              mi_row,
-                                                              context_ptr->blk_geom->bsize) &&
-                                      is_inside_tile_boundary(&(xd->tile),
-                                                              to_inject_mv_x_l1,
-                                                              to_inject_mv_y_l1,
-                                                              mi_col,
-                                                              mi_row,
-                                                              context_ptr->blk_geom->bsize);
-                    }
+                    int inside_tile = umv0tile
+                        ? is_inside_tile_boundary(&(xd->tile),
+                                                  to_inject_mv_x_l0,
+                                                  to_inject_mv_y_l0,
+                                                  mi_col,
+                                                  mi_row,
+                                                  context_ptr->blk_geom->bsize) &&
+                            is_inside_tile_boundary(&(xd->tile),
+                                                    to_inject_mv_x_l1,
+                                                    to_inject_mv_y_l1,
+                                                    mi_col,
+                                                    mi_row,
+                                                    context_ptr->blk_geom->bsize)
+                        : 1;
+
                     skip_cand = skip_cand || (!inside_tile);
                     if (!skip_cand &&
                         (context_ptr->injected_mv_count_bipred == 0 ||
@@ -1399,16 +1394,14 @@ void bipred_3x3_candidates_injection(const SequenceControlSet *scs_ptr, PictureC
                                                            to_inject_mv_y_l1,
                                                            to_inject_ref_type) == EB_FALSE)) {
                         context_ptr->variance_ready = 0;
-                        for (cur_type = MD_COMP_AVG; cur_type <= tot_comp_types; cur_type++) {
+                        for (MD_COMP_TYPE cur_type = MD_COMP_AVG; cur_type <= tot_comp_types;
+                             cur_type++) {
                             if (cur_type == MD_COMP_WEDGE &&
                                     get_wedge_params_bits(context_ptr->blk_geom->bsize) == 0)
                                 continue;
                             // If two predictors are very similar, skip wedge compound mode search
-                            if (context_ptr->variance_ready)
-                                if (context_ptr->prediction_mse < 8 ||
-                                    (!have_newmv_in_inter_mode(NEW_NEWMV) &&
-                                     context_ptr->prediction_mse < 64))
-                                    continue;
+                            if (context_ptr->variance_ready && context_ptr->prediction_mse < 8)
+                                continue;
                             cand_array[cand_total_cnt].type             = INTER_MODE;
                             cand_array[cand_total_cnt].distortion_ready = 0;
                             cand_array[cand_total_cnt].use_intrabc      = 0;
