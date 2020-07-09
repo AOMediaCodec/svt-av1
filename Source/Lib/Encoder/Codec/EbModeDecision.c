@@ -4886,7 +4886,6 @@ void  inject_intra_candidates(
     ModeDecisionCandidate    *cand_array = context_ptr->fast_candidate_array;
     EbBool                      disable_cfl_flag = (MAX(context_ptr->blk_geom->bheight, context_ptr->blk_geom->bwidth) > 32) ? EB_TRUE : EB_FALSE;
     uint8_t                     disable_z2_prediction;
-    uint8_t                     disable_angle_refinement;
     uint8_t                     disable_angle_prediction;
     uint8_t directional_mode_skip_mask[INTRA_MODES] = { 0 };
 
@@ -4908,9 +4907,7 @@ void  inject_intra_candidates(
         angle_delta_candidate_count = 1;
         angle_delta_shift = 1;
         disable_z2_prediction = 1;
-    }
-    else
-    if (pcs_ptr->parent_pcs_ptr->intra_pred_mode == 4) {
+    } else if (pcs_ptr->parent_pcs_ptr->intra_pred_mode == 4) {
         if (pcs_ptr->slice_type == I_SLICE) {
             intra_mode_end = context_ptr->md_enable_paeth ? PAETH_PRED :
                              context_ptr->md_enable_smooth ? SMOOTH_H_PRED : D67_PRED;
@@ -4926,37 +4923,29 @@ void  inject_intra_candidates(
             angle_delta_shift = 1;
             disable_z2_prediction = 0;
         }
-    }else
-    if (pcs_ptr->parent_pcs_ptr->intra_pred_mode == 3){
+    } else if (pcs_ptr->parent_pcs_ptr->intra_pred_mode == 3){
         disable_z2_prediction       = 0;
-        disable_angle_refinement    = 0;
         disable_angle_prediction    = 1;
-        angle_delta_candidate_count = disable_angle_refinement ? 1: angle_delta_candidate_count;
     } else if (pcs_ptr->parent_pcs_ptr->intra_pred_mode == 2) {
         disable_z2_prediction       = 0;
-        disable_angle_refinement    = 0 ;
         disable_angle_prediction    = (context_ptr->blk_geom->sq_size > 16 ||
                                        context_ptr->blk_geom->bwidth == 4 ||
                                        context_ptr->blk_geom->bheight == 4) ? 1 : 0;
-        angle_delta_candidate_count = disable_angle_refinement ? 1: angle_delta_candidate_count;
     } else if (pcs_ptr->parent_pcs_ptr->intra_pred_mode == 1) {
         disable_z2_prediction       = (context_ptr->blk_geom->sq_size > 16 ||
                                        context_ptr->blk_geom->bwidth == 4 ||
                                        context_ptr->blk_geom->bheight == 4) ? 1 : 0;
-        disable_angle_refinement    = (context_ptr->blk_geom->sq_size > 16 ||
-                                       context_ptr->blk_geom->bwidth == 4 ||
-                                       context_ptr->blk_geom->bheight == 4) ? 1 : 0;
         disable_angle_prediction    = 0;
-        angle_delta_candidate_count = disable_angle_refinement ? 1: angle_delta_candidate_count;
+        if (context_ptr->blk_geom->sq_size > 16 ||
+            context_ptr->blk_geom->bwidth == 4 ||
+            context_ptr->blk_geom->bheight == 4)
+            angle_delta_candidate_count = 1;
     } else {
         disable_z2_prediction       = 0;
-        disable_angle_refinement    = 0;
         disable_angle_prediction    = 0;
-        angle_delta_candidate_count = disable_angle_refinement ? 1: angle_delta_candidate_count;
     }
 #if MR_MODE
     disable_z2_prediction       = 0;
-    disable_angle_refinement    = 0;
     disable_angle_prediction    = 0;
 #endif
     for (open_loop_intra_candidate = intra_mode_start; open_loop_intra_candidate <= intra_mode_end ; ++open_loop_intra_candidate) {
