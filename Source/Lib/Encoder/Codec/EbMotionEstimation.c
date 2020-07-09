@@ -10020,7 +10020,6 @@ void hme_sb(
     uint32_t list_index;
     uint8_t ref_pic_index;
     uint8_t num_of_ref_pic_to_search;
-    EbPaReferenceObject *reference_object; // input parameter, reference Object Ptr
     // HME
     uint32_t search_region_number_in_width  = 0;
     uint32_t search_region_number_in_height = 0;
@@ -10050,8 +10049,6 @@ void hme_sb(
     EbPictureBufferDesc *ref_pic_ptr;
     EbPictureBufferDesc *quarter_ref_pic_ptr;
     EbPictureBufferDesc *sixteenth_ref_pic_ptr;
-    int16_t temp_x_hme_search_center = 0;
-    int16_t temp_y_hme_search_center = 0;
     uint32_t num_quad_in_width;
     uint32_t total_me_quad;
     uint32_t quad_index;
@@ -10062,14 +10059,9 @@ void hme_sb(
     int16_t hme_level1_search_area_in_width;
     int16_t hme_level1_search_area_in_height;
     // Configure HME level 0, level 1 and level 2 from static config parameters
-    EbBool enable_hme_level0_flag = context_ptr->enable_hme_level0_flag;
-    EbBool enable_hme_level1_flag = context_ptr->enable_hme_level1_flag;
-    EbBool enable_hme_level2_flag = context_ptr->enable_hme_level2_flag;
     uint64_t best_cost = (uint64_t)~0;
     context_ptr->best_list_idx = 0;
     context_ptr->best_ref_idx = 0;
-    EbBool one_quadrant_hme      = EB_FALSE;
-    one_quadrant_hme = scs_ptr->input_resolution < INPUT_SIZE_4K_RANGE ? 0 : one_quadrant_hme;
     num_of_list_to_search =
         (pcs_ptr->slice_type == P_SLICE) ? (uint32_t)REF_LIST_0 : (uint32_t)REF_LIST_1;
     if (context_ptr->me_alt_ref == EB_TRUE) num_of_list_to_search = 0;
@@ -10083,24 +10075,17 @@ void hme_sb(
                 ? pcs_ptr->ref_list0_count_try
                 : (list_index == REF_LIST_0) ? pcs_ptr->ref_list0_count_try
                 : pcs_ptr->ref_list1_count_try;
-            reference_object =
-                (EbPaReferenceObject *)pcs_ptr->ref_pa_pic_ptr_array[0][0]->object_ptr;
             ref_0_poc = pcs_ptr->ref_pic_poc_array[0][0];
         }
         // Ref Picture Loop
         for (ref_pic_index = 0; ref_pic_index < num_of_ref_pic_to_search; ++ref_pic_index) {
-            if (context_ptr->me_alt_ref == EB_TRUE)
-                reference_object = (EbPaReferenceObject *)context_ptr->alt_ref_reference_ptr;
-            else {
-                if (num_of_list_to_search) {
-                    reference_object =
-                        (EbPaReferenceObject *)pcs_ptr->ref_pa_pic_ptr_array[1][0]->object_ptr;
-                    ref_1_poc = pcs_ptr->ref_pic_poc_array[1][0];
-                }
-                reference_object =
-                    (EbPaReferenceObject *)pcs_ptr->ref_pa_pic_ptr_array[list_index][ref_pic_index]
-                        ->object_ptr;
-            }
+            if (!context_ptr->me_alt_ref && num_of_list_to_search)
+                ref_1_poc = pcs_ptr->ref_pic_poc_array[1][0];
+            // input parameter, reference Object Ptr
+            EbPaReferenceObject *reference_object = context_ptr->me_alt_ref == EB_TRUE
+                ? (EbPaReferenceObject *)context_ptr->alt_ref_reference_ptr
+                : (EbPaReferenceObject *)pcs_ptr->ref_pa_pic_ptr_array[list_index][ref_pic_index]
+                      ->object_ptr;
             ref_pic_ptr = (EbPictureBufferDesc *)reference_object->input_padded_picture_ptr;
             // Set 1/4 and 1/16 ME reference buffer(s); filtered or decimated
             quarter_ref_pic_ptr =
@@ -10170,73 +10155,45 @@ void hme_sb(
                         search_region_number_in_height++;
                     }
                     // HME: Level0 search
-                    if (enable_hme_level0_flag) {
-                        if (one_quadrant_hme && !enable_hme_level1_flag &&
-                            !enable_hme_level2_flag) {
-                            search_region_number_in_height = 0;
-                            search_region_number_in_width  = 0;
-                            hme_one_quadrant_level_0(
-                                pcs_ptr,
-                                context_ptr,
-                                origin_x >> 2,
-                                origin_y >> 2,
-                                sb_width >> 2,
-                                sb_height >> 2,
-                                x_search_center >> 2,
-                                y_search_center >> 2,
-                                sixteenth_ref_pic_ptr,
-                                &(hme_level0_sad[search_region_number_in_width]
-                                               [search_region_number_in_height]),
-                                &(x_hme_level_0_search_center[search_region_number_in_width]
-                                                             [search_region_number_in_height]),
-                                &(y_hme_level_0_search_center[search_region_number_in_width]
-                                                             [search_region_number_in_height]),
-                                hme_level_0_search_area_multiplier_x[pcs_ptr->hierarchical_levels]
-                                                                    [pcs_ptr->temporal_layer_index],
-                                hme_level_0_search_area_multiplier_y
-                                    [pcs_ptr->hierarchical_levels][pcs_ptr->temporal_layer_index]);
-                        } else {
-                            search_region_number_in_height = 0;
-                            search_region_number_in_width  = 0;
-                            while (search_region_number_in_height <
-                                context_ptr->number_hme_search_region_in_height) {
-                                while (search_region_number_in_width <
-                                    context_ptr->number_hme_search_region_in_width) {
-                                    hme_level_0(
-                                        pcs_ptr,
-                                        context_ptr,
-                                        origin_x >> 2,
-                                        origin_y >> 2,
-                                        sb_width >> 2,
-                                        sb_height >> 2,
-                                        x_search_center >> 2,
-                                        y_search_center >> 2,
-                                        sixteenth_ref_pic_ptr,
-                                        search_region_number_in_width,
-                                        search_region_number_in_height,
-                                        &(hme_level0_sad[search_region_number_in_width]
-                                        [search_region_number_in_height]),
-                                        &(x_hme_level_0_search_center
-                                        [search_region_number_in_width]
-                                        [search_region_number_in_height]),
-                                        &(y_hme_level_0_search_center
-                                        [search_region_number_in_width]
-                                        [search_region_number_in_height]),
-                                        hme_level_0_search_area_multiplier_x
+                    if (context_ptr->enable_hme_level0_flag) {
+                        search_region_number_in_height = 0;
+                        search_region_number_in_width  = 0;
+                        while (search_region_number_in_height <
+                               context_ptr->number_hme_search_region_in_height) {
+                            while (search_region_number_in_width <
+                                   context_ptr->number_hme_search_region_in_width) {
+                                hme_level_0(
+                                    pcs_ptr,
+                                    context_ptr,
+                                    origin_x >> 2,
+                                    origin_y >> 2,
+                                    sb_width >> 2,
+                                    sb_height >> 2,
+                                    x_search_center >> 2,
+                                    y_search_center >> 2,
+                                    sixteenth_ref_pic_ptr,
+                                    search_region_number_in_width,
+                                    search_region_number_in_height,
+                                    &(hme_level0_sad[search_region_number_in_width]
+                                                    [search_region_number_in_height]),
+                                    &(x_hme_level_0_search_center[search_region_number_in_width]
+                                                                 [search_region_number_in_height]),
+                                    &(y_hme_level_0_search_center[search_region_number_in_width]
+                                                                 [search_region_number_in_height]),
+                                    hme_level_0_search_area_multiplier_x
                                         [pcs_ptr->hierarchical_levels]
                                         [pcs_ptr->temporal_layer_index],
-                                        hme_level_0_search_area_multiplier_y
+                                    hme_level_0_search_area_multiplier_y
                                         [pcs_ptr->hierarchical_levels]
                                         [pcs_ptr->temporal_layer_index]);
-                                    search_region_number_in_width++;
-                                }
-                                search_region_number_in_width = 0;
-                                search_region_number_in_height++;
+                                search_region_number_in_width++;
                             }
+                            search_region_number_in_width = 0;
+                            search_region_number_in_height++;
                         }
                     }
                     // HME: Level1 search
-                    if (enable_hme_level1_flag) {
+                    if (context_ptr->enable_hme_level1_flag) {
                         search_region_number_in_height = 0;
                         search_region_number_in_width  = 0;
                         while (search_region_number_in_height <
@@ -10282,7 +10239,7 @@ void hme_sb(
                         }
                     }
                     // HME: Level2 search
-                    if (enable_hme_level2_flag) {
+                    if (context_ptr->enable_hme_level2_flag) {
                         search_region_number_in_height = 0;
                         search_region_number_in_width  = 0;
                         {
@@ -10321,50 +10278,44 @@ void hme_sb(
                         }
                     }
                     // Hierarchical ME - Search Center
-                    if (enable_hme_level0_flag && !enable_hme_level1_flag &&
-                        !enable_hme_level2_flag) {
-                        if (one_quadrant_hme) {
-                            x_hme_search_center = x_hme_level_0_search_center[0][0];
-                            y_hme_search_center = y_hme_level_0_search_center[0][0];
-                            hme_mv_sad           = hme_level0_sad[0][0];
-                        } else {
-                            x_hme_search_center = x_hme_level_0_search_center[0][0];
-                            y_hme_search_center = y_hme_level_0_search_center[0][0];
-                            hme_mv_sad           = hme_level0_sad[0][0];
-                            search_region_number_in_width  = 1;
-                            search_region_number_in_height = 0;
-                            while (search_region_number_in_height <
-                                   context_ptr->number_hme_search_region_in_height) {
-                                while (search_region_number_in_width <
-                                       context_ptr->number_hme_search_region_in_width) {
-                                    x_hme_search_center =
-                                        (hme_level0_sad[search_region_number_in_width]
-                                                      [search_region_number_in_height] < hme_mv_sad)
-                                            ? x_hme_level_0_search_center
-                                                  [search_region_number_in_width]
-                                                  [search_region_number_in_height]
-                                            : x_hme_search_center;
-                                    y_hme_search_center =
-                                        (hme_level0_sad[search_region_number_in_width]
-                                                      [search_region_number_in_height] < hme_mv_sad)
-                                            ? y_hme_level_0_search_center
-                                                  [search_region_number_in_width]
-                                                  [search_region_number_in_height]
-                                            : y_hme_search_center;
-                                    hme_mv_sad =
-                                        (hme_level0_sad[search_region_number_in_width]
-                                                      [search_region_number_in_height] < hme_mv_sad)
-                                            ? hme_level0_sad[search_region_number_in_width]
-                                                           [search_region_number_in_height]
-                                            : hme_mv_sad;
-                                    search_region_number_in_width++;
-                                }
-                                search_region_number_in_width = 0;
-                                search_region_number_in_height++;
+                    if (context_ptr->enable_hme_level0_flag &&
+                        !context_ptr->enable_hme_level1_flag &&
+                        !context_ptr->enable_hme_level2_flag) {
+                        x_hme_search_center            = x_hme_level_0_search_center[0][0];
+                        y_hme_search_center            = y_hme_level_0_search_center[0][0];
+                        hme_mv_sad                     = hme_level0_sad[0][0];
+                        search_region_number_in_width  = 1;
+                        search_region_number_in_height = 0;
+                        while (search_region_number_in_height <
+                               context_ptr->number_hme_search_region_in_height) {
+                            while (search_region_number_in_width <
+                                   context_ptr->number_hme_search_region_in_width) {
+                                x_hme_search_center =
+                                    (hme_level0_sad[search_region_number_in_width]
+                                                   [search_region_number_in_height] < hme_mv_sad)
+                                    ? x_hme_level_0_search_center[search_region_number_in_width]
+                                                                 [search_region_number_in_height]
+                                    : x_hme_search_center;
+                                y_hme_search_center =
+                                    (hme_level0_sad[search_region_number_in_width]
+                                                   [search_region_number_in_height] < hme_mv_sad)
+                                    ? y_hme_level_0_search_center[search_region_number_in_width]
+                                                                 [search_region_number_in_height]
+                                    : y_hme_search_center;
+                                hme_mv_sad = (hme_level0_sad[search_region_number_in_width]
+                                                            [search_region_number_in_height] <
+                                              hme_mv_sad)
+                                    ? hme_level0_sad[search_region_number_in_width]
+                                                    [search_region_number_in_height]
+                                    : hme_mv_sad;
+                                search_region_number_in_width++;
                             }
+                            search_region_number_in_width = 0;
+                            search_region_number_in_height++;
                         }
                     }
-                    if (enable_hme_level1_flag && !enable_hme_level2_flag) {
+                    if (context_ptr->enable_hme_level1_flag &&
+                        !context_ptr->enable_hme_level2_flag) {
                         x_hme_search_center = x_hme_level_1_search_center[0][0];
                         y_hme_search_center = y_hme_level_1_search_center[0][0];
                         hme_mv_sad           = hme_level1_sad[0][0];
@@ -10400,7 +10351,7 @@ void hme_sb(
                             search_region_number_in_height++;
                         }
                     }
-                    if (enable_hme_level2_flag) {
+                    if (context_ptr->enable_hme_level2_flag) {
                         x_hme_search_center = x_hme_level_2_search_center[0][0];
                         y_hme_search_center = y_hme_level_2_search_center[0][0];
                         hme_mv_sad           = hme_level2_sad[0][0];
@@ -10448,12 +10399,12 @@ void hme_sb(
                                                      [quad_index % num_quad_in_width] >
                                         hme_level2_sad[next_quad_index / num_quad_in_width]
                                                      [next_quad_index % num_quad_in_width]) {
-                                        temp_x_hme_search_center =
+                                        int16_t temp_x_hme_search_center =
                                             x_hme_level_2_search_center[quad_index /
                                                                         num_quad_in_width]
                                                                        [quad_index %
                                                                         num_quad_in_width];
-                                        temp_y_hme_search_center =
+                                        int16_t temp_y_hme_search_center =
                                             y_hme_level_2_search_center[quad_index /
                                                                         num_quad_in_width]
                                                                        [quad_index %
