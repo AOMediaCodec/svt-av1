@@ -822,7 +822,6 @@ void high_level_rc_input_picture_vbr(PictureParentControlSet *pcs_ptr, SequenceC
                                  hl_rate_control_histogram_ptr_temp,
                                  ref_qp_index_temp,
                                  area_in_pixel);
-
                 high_level_rate_control_ptr->pred_bits_ref_qp_per_sw[ref_qp_index] +=
                     hl_rate_control_histogram_ptr_temp->pred_bits_ref_qp[ref_qp_index_temp];
                 // Store the pred_bits_ref_qp for the first frame in the window to PCS
