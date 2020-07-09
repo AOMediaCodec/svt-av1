@@ -2723,10 +2723,7 @@ EbErrorType svt_av1_init_temporal_filtering(
                             ss_x,
                             ss_y,
                             EB_TRUE);
-        }
-
-        // Estimate source noise level
-        if (is_highbd) {
+            // Estimate source noise level
             uint16_t *altref_buffer_highbd_start[COLOR_CHANNELS];
             altref_buffer_highbd_start[C_Y] =
                 picture_control_set_ptr_central->altref_buffer_highbd[C_Y] +
