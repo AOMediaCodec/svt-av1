@@ -5436,7 +5436,6 @@ void pme_sad_loop_kernel_avx2(uint8_t * src, // input parameter, source samples 
                         0x1);
                     ss3 = _mm256_adds_epu16(ss3, _mm256_mpsadbw_epu8(ss0, ss2, 0));
                     ss5 = _mm256_adds_epu16(ss5, _mm256_mpsadbw_epu8(ss1, ss2, 18)); // 010 010
-                    p_ref += ref_stride << 2;
                     ss3     = _mm256_adds_epu16(ss3, ss5);
                     s3      = _mm_adds_epu16(_mm256_castsi256_si128(ss3),
                                         _mm256_extracti128_si256(ss3, 1));
@@ -6564,7 +6563,6 @@ void pme_sad_loop_kernel_avx2(uint8_t * src, // input parameter, source samples 
                 ref += ref_stride;
             }
         } else if (block_height <= 64) {
-            __m256i ss9, ss10;
             for (i = 0; i < search_area_height; i++) {
                 for (j = 0; j <= search_area_width - 8; j += 8) {
                     p_src = src;
@@ -6654,7 +6652,6 @@ void pme_sad_loop_kernel_avx2(uint8_t * src, // input parameter, source samples 
                 ref += ref_stride;
             }
         } else {
-            __m256i ss9, ss10;
             __m256i ssa1, ssa2, ssa3, ssa4, ssa5, ssa6, ssa7, ssa8;
             for (i = 0; i < search_area_height; i++) {
                 for (j = 0; j <= search_area_width - 8; j += 8) {
