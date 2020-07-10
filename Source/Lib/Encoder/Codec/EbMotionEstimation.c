@@ -6601,23 +6601,6 @@ static void quarter_pel_search_sb(
                                                     buf2,
                                                     buf_2_stride);
 
-    buf1[0] = buf1[0];
-    buf2[0] = buf2[0];
-    buf1[1] = buf1[1];
-    buf2[1] = buf2[1];
-    buf1[2] = buf1[2];
-    buf2[2] = buf2[2];
-    buf1[3] = buf1[3];
-    buf2[3] = buf2[3];
-    buf1[4] = buf1[4];
-    buf2[4] = buf2[4];
-    buf1[5] = buf1[5];
-    buf2[5] = buf2[5];
-    buf1[6] = buf1[6];
-    buf2[6] = buf2[6];
-    buf1[7] = buf1[7];
-    buf2[7] = buf2[7];
-
     pu_quarter_pel_refinement_on_the_fly(context_ptr,
                                             context_ptr->p_best_ssd64x64,
                                             0,
