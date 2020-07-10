@@ -1772,14 +1772,8 @@ void read_uncompressed_header(Bitstrm *bs, EbDecHandle *dec_handle_ptr, ObuHeade
                               int num_planes) {
     SeqHeader *  seq_header = &dec_handle_ptr->seq_header;
     FrameHeader *frame_info = &dec_handle_ptr->frame_header;
-    int          id_len = 0, all_frames, frame_is_intra = 0, i, frame_size_override_flag = 0;
-    uint32_t     diff_len;
-    int          delta_frame_id_length_minus_1, frame_refs_short_signaling;
-    int          gold_frame_idx, frame_to_show_map_idx;
-    int          have_prev_frame_id, diff_frame_id;
-    int          last_frame_idx;
+    int          id_len = 0, all_frames, frame_is_intra = 0, frame_size_override_flag = 0;
     uint32_t     prev_frame_id = 0;
-    uint32_t     expected_frame_id, display_frame_id;
 
     if (seq_header->frame_id_numbers_present_flag) {
         id_len = seq_header->frame_id_length - 1 + seq_header->delta_frame_id_length - 2 + 3;
@@ -1797,14 +1791,14 @@ void read_uncompressed_header(Bitstrm *bs, EbDecHandle *dec_handle_ptr, ObuHeade
         frame_info->show_existing_frame = dec_get_bits(bs, 1);
         PRINT_FRAME("show_existing_frame", frame_info->show_existing_frame);
         if (frame_info->show_existing_frame) {
-            frame_to_show_map_idx = dec_get_bits(bs, 3);
+            int frame_to_show_map_idx = dec_get_bits(bs, 3);
             PRINT_FRAME("frame_to_show_map_idx", frame_to_show_map_idx);
             if (seq_header->decoder_model_info_present_flag &&
                 !seq_header->timing_info.equal_picture_interval)
                 temporal_point_info(bs, &seq_header->decoder_model_info, frame_info);
             frame_info->refresh_frame_flags = 0;
             if (seq_header->frame_id_numbers_present_flag) {
-                display_frame_id = dec_get_bits(bs, id_len);
+                uint32_t display_frame_id = dec_get_bits(bs, id_len);
                 PRINT_FRAME("display_frame_id", display_frame_id);
                 if (display_frame_id != frame_info->ref_frame_idx[frame_to_show_map_idx] &&
                     frame_info->ref_valid[frame_to_show_map_idx] == 1)
@@ -1857,7 +1851,7 @@ void read_uncompressed_header(Bitstrm *bs, EbDecHandle *dec_handle_ptr, ObuHeade
     PRINT_FRAME("showable_frame", frame_info->showable_frame);
     PRINT_FRAME("error_resilient_mode", frame_info->error_resilient_mode);
     if (frame_info->frame_type == KEY_FRAME && frame_info->show_frame) {
-        for (i = 0; i < NUM_REF_FRAMES; i++) {
+        for (int i = 0; i < NUM_REF_FRAMES; i++) {
             frame_info->ref_valid[i] = 0;
             // TODO: Need to differentate RefOrderHint and ref_order_hint
             frame_info->ref_order_hint[i] = 0;
@@ -1881,7 +1875,7 @@ void read_uncompressed_header(Bitstrm *bs, EbDecHandle *dec_handle_ptr, ObuHeade
     PRINT_FRAME("force_integer_mv", frame_info->force_integer_mv);
 
     if (frame_is_intra) frame_info->force_integer_mv = 1;
-    have_prev_frame_id = /*!pbi->decoding_first_frame && */
+    int have_prev_frame_id = /*!pbi->decoding_first_frame && */
         !(frame_info->frame_type == KEY_FRAME && frame_info->show_frame);
     if (have_prev_frame_id) prev_frame_id = frame_info->current_frame_id;
 
@@ -1891,29 +1885,25 @@ void read_uncompressed_header(Bitstrm *bs, EbDecHandle *dec_handle_ptr, ObuHeade
         PRINT_FRAME("current_frame_id", frame_info->current_frame_id);
 
         if (have_prev_frame_id) {
-            if (frame_info->current_frame_id > prev_frame_id)
-                diff_frame_id = frame_info->current_frame_id - prev_frame_id;
-            else {
-                diff_frame_id = (1 << id_len) + frame_info->current_frame_id - prev_frame_id;
-            }
+            int diff_frame_id = frame_info->current_frame_id > prev_frame_id
+                ? frame_info->current_frame_id - prev_frame_id
+                : (1 << id_len) + frame_info->current_frame_id - prev_frame_id;
             // Bitstream conformance
             if (frame_info->current_frame_id == prev_frame_id || diff_frame_id >= 1 << (id_len - 1))
                 return; // EB_Corrupt_Frame;
         }
 
         //mark_ref_frames( id_len )
-        diff_len = seq_header->delta_frame_id_length;
-        for (i = 0; i < REF_FRAMES; i++) {
+        uint32_t diff_len = seq_header->delta_frame_id_length;
+        for (int i = 0; i < REF_FRAMES; i++) {
             if (frame_info->current_frame_id > (uint32_t)(1 << diff_len)) {
                 if (frame_info->ref_frame_idx[i] > frame_info->current_frame_id ||
                     frame_info->ref_frame_idx[i] > (frame_info->current_frame_id - (1 - diff_len)))
                     frame_info->ref_valid[i] = 0;
-            } else {
-                if (frame_info->ref_frame_idx[i] > frame_info->current_frame_id &&
+            } else if (frame_info->ref_frame_idx[i] > frame_info->current_frame_id &&
                     frame_info->ref_frame_idx[i] <
                         (uint32_t)((1 << id_len) + frame_info->current_frame_id - (1 << diff_len)))
                     frame_info->ref_valid[i] = 0;
-            }
         }
     } else
         frame_info->current_frame_id = 0;
@@ -1926,9 +1916,6 @@ void read_uncompressed_header(Bitstrm *bs, EbDecHandle *dec_handle_ptr, ObuHeade
     PRINT_FRAME("frame_size_override_flag", frame_size_override_flag);
     frame_info->order_hint = dec_get_bits(bs, seq_header->order_hint_info.order_hint_bits);
     PRINT_FRAME("order_hint", frame_info->order_hint);
-
-    uint16_t op_pt_idc;
-    int      in_temporal_layer, in_spatial_layer;
 
     if (frame_is_intra || frame_info->error_resilient_mode)
         frame_info->primary_ref_frame = PRIMARY_REF_NONE;
@@ -1943,9 +1930,9 @@ void read_uncompressed_header(Bitstrm *bs, EbDecHandle *dec_handle_ptr, ObuHeade
         if (frame_info->buffer_removal_time_present_flag) {
             for (int op_num = 0; op_num <= seq_header->operating_points_cnt_minus_1; op_num++) {
                 if (seq_header->operating_point[op_num].decoder_model_present_for_this_op) {
-                    op_pt_idc         = seq_header->operating_point[op_num].op_idc;
-                    in_temporal_layer = (op_pt_idc >> obu_header->temporal_id) & 1;
-                    in_spatial_layer  = (op_pt_idc >> (obu_header->spatial_id + 8)) & 1;
+                    uint16_t op_pt_idc = seq_header->operating_point[op_num].op_idc;
+                    int      in_temporal_layer = (op_pt_idc >> obu_header->temporal_id) & 1;
+                    int      in_spatial_layer  = (op_pt_idc >> (obu_header->spatial_id + 8)) & 1;
                     if (op_pt_idc == 0 || (in_temporal_layer && in_spatial_layer))
                         frame_info->buffer_removal_time[op_num] = dec_get_bits(
                             bs,
@@ -1971,9 +1958,8 @@ void read_uncompressed_header(Bitstrm *bs, EbDecHandle *dec_handle_ptr, ObuHeade
     PRINT_FRAME("refresh_frame_flags", frame_info->refresh_frame_flags);
     if (!frame_is_intra || (frame_info->refresh_frame_flags != 0xFF)) {
         if (frame_info->error_resilient_mode && seq_header->order_hint_info.enable_order_hint) {
-            int ref_order_hint;
-            for (i = 0; i < NUM_REF_FRAMES; i++) {
-                ref_order_hint = dec_get_bits(bs, seq_header->order_hint_info.order_hint_bits);
+            for (int i = 0; i < NUM_REF_FRAMES; i++) {
+                int ref_order_hint = dec_get_bits(bs, seq_header->order_hint_info.order_hint_bits);
                 PRINT_FRAME("ref_order_hint[i]", ref_order_hint);
 
                 if (ref_order_hint != (int)frame_info->ref_order_hint[i])
@@ -1994,14 +1980,15 @@ void read_uncompressed_header(Bitstrm *bs, EbDecHandle *dec_handle_ptr, ObuHeade
         }
         dec_handle_ptr->prev_frame = NULL;
     } else {
+        int          frame_refs_short_signaling;
         if (!seq_header->order_hint_info.enable_order_hint)
             frame_refs_short_signaling = 0;
         else {
             frame_refs_short_signaling = dec_get_bits(bs, 1);
             PRINT_FRAME("frame_refs_short_signaling", frame_refs_short_signaling);
             if (frame_refs_short_signaling) {
-                last_frame_idx = dec_get_bits(bs, 3);
-                gold_frame_idx = dec_get_bits(bs, 3);
+                int last_frame_idx = dec_get_bits(bs, 3);
+                int gold_frame_idx = dec_get_bits(bs, 3);
                 PRINT_FRAME("last_frame_idx", last_frame_idx);
                 PRINT_FRAME("gold_frame_idx", gold_frame_idx);
                 svt_set_frame_refs(dec_handle_ptr, last_frame_idx, gold_frame_idx);
@@ -2009,23 +1996,23 @@ void read_uncompressed_header(Bitstrm *bs, EbDecHandle *dec_handle_ptr, ObuHeade
         }
 
         //int DeltaFrameId;
-        for (i = 0; i < INTER_REFS_PER_FRAME; i++) {
-            int ref_frm_id;
+        for (int i = 0; i < INTER_REFS_PER_FRAME; i++) {
             if (!frame_refs_short_signaling) {
                 frame_info->ref_frame_idx[i] = dec_get_bits(bs, 3);
                 PRINT_FRAME("ref_frame_idx", frame_info->ref_frame_idx[i]);
                 dec_handle_ptr->remapped_ref_idx[i] = frame_info->ref_frame_idx[i];
             }
-            ref_frm_id = dec_handle_ptr->remapped_ref_idx[i];
+            int ref_frm_id = dec_handle_ptr->remapped_ref_idx[i];
 
             frame_info->ref_frame_sign_bias[LAST_FRAME + i] = 0;
 
             if (seq_header->frame_id_numbers_present_flag) {
-                delta_frame_id_length_minus_1 = dec_get_bits(bs, seq_header->delta_frame_id_length);
+                int delta_frame_id_length_minus_1 = dec_get_bits(bs,
+                                                                 seq_header->delta_frame_id_length);
                 PRINT_FRAME("delta_frame_id_length_minus_1", delta_frame_id_length_minus_1);
-                expected_frame_id = ((frame_info->current_frame_id + (1 << id_len) -
-                    (delta_frame_id_length_minus_1 + 1)) %
-                    (1 << id_len));
+                uint32_t expected_frame_id = ((frame_info->current_frame_id + (1 << id_len) -
+                                               (delta_frame_id_length_minus_1 + 1)) %
+                                              (1 << id_len));
                 if (expected_frame_id != frame_info->ref_frame_id[ref_frm_id]) {
                     assert(0);
                     return; // EB_Corrupt_Frame;
