@@ -492,20 +492,18 @@ int get_segment_id(FrameHeader *frm_info, uint8_t *segment_ids, BlockSize bsize,
 
 static int read_segment_id(EbDecHandle *dec_handle, ParseCtxt *parse_ctxt, PartitionInfo *xd,
                            int skip) {
-    SvtReader *r       = &parse_ctxt->r;
-    int        cdf_num = 0;
+    SvtReader *r = &parse_ctxt->r;
 
     int      prev_ul  = -1; // top left segment_id
     int      prev_l   = -1; // left segment_id
     int      prev_u   = -1; // top segment_id
-    int      pred     = -1;
     uint32_t mi_row   = xd->mi_row;
     uint32_t mi_col   = xd->mi_col;
     uint8_t *seg_maps = dec_handle->cur_pic_buf[0]->segment_maps;
 
     if ((xd->up_available) && (xd->left_available)) {
-        prev_ul =
-            get_segment_id(parse_ctxt->frame_header, seg_maps, BLOCK_4X4, mi_row - 1, mi_col - 1);
+        prev_ul = get_segment_id(
+            parse_ctxt->frame_header, seg_maps, BLOCK_4X4, mi_row - 1, mi_col - 1);
     }
     if (xd->up_available) {
         prev_u = get_segment_id(parse_ctxt->frame_header, seg_maps, BLOCK_4X4, mi_row - 1, mi_col);
@@ -515,22 +513,17 @@ static int read_segment_id(EbDecHandle *dec_handle, ParseCtxt *parse_ctxt, Parti
     }
 
     // Pick CDF index based on number of matching/out-of-bounds segment IDs.
-    if (prev_ul < 0) /* Edge cases */
-        cdf_num = 0;
-    else if ((prev_ul == prev_u) && (prev_ul == prev_l))
-        cdf_num = 2;
-    else if ((prev_ul == prev_u) || (prev_ul == prev_l) || (prev_u == prev_l))
-        cdf_num = 1;
+    int cdf_num = prev_ul < 0 ? 0 /* Edge cases */
+                              : prev_ul == prev_u && prev_ul == prev_l
+            ? 2
+            : prev_ul == prev_u || prev_ul == prev_l || prev_u == prev_l ? 1 : 0;
 
     // If 2 or more are identical returns that as predictor, otherwise prev_l.
-    if (prev_u == -1) // edge case
-        pred = prev_l == -1 ? 0 : prev_l;
-    else if (prev_l == -1) // edge case
-        pred = prev_u;
-    else
-        pred = (prev_ul == prev_u) ? prev_u : prev_l;
+    int predictor = prev_u == -1 ? prev_l == -1 ? 0 : prev_l
+                                 : prev_l == -1 ? prev_u : prev_ul == prev_u ? prev_u : prev_l;
 
-    if (skip) return pred;
+    if (skip)
+        return predictor;
 
     FRAME_CONTEXT *     ec_ctx = &parse_ctxt->cur_tile_ctx;
     SegmentationParams *seg    = &(parse_ctxt->frame_header->segmentation_params);
@@ -539,7 +532,7 @@ static int read_segment_id(EbDecHandle *dec_handle, ParseCtxt *parse_ctxt, Parti
     AomCdfProb *               pred_cdf = segp->spatial_pred_seg_cdf[cdf_num];
 
     int coded_id = svt_read_symbol(r, pred_cdf, MAX_SEGMENTS, ACCT_STR);
-    return neg_deinterleave(coded_id, pred, seg->last_active_seg_id + 1);
+    return neg_deinterleave(coded_id, predictor, seg->last_active_seg_id + 1);
 }
 
 int intra_segment_id(EbDecHandle *dec_handle, ParseCtxt *parse_ctxt, PartitionInfo *xd, int bsize,
