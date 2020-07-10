@@ -685,8 +685,7 @@ void *picture_manager_kernel(void *input_ptr) {
                     availability_flag = EB_TRUE;
 
                     // Check RefList0 Availability
-                    uint8_t ref_idx;
-                    for (ref_idx = 0; ref_idx < entry_pcs_ptr->ref_list0_count; ++ref_idx) {
+                    for (uint8_t ref_idx = 0; ref_idx < entry_pcs_ptr->ref_list0_count; ++ref_idx) {
                         //if (entry_pcs_ptr->ref_list0_count)  // NM: to double check.
                         {
                             // hardcode the reference for the overlay frame
@@ -753,8 +752,8 @@ void *picture_manager_kernel(void *input_ptr) {
                     }
                     // Check RefList1 Availability
                     if (entry_pcs_ptr->slice_type == B_SLICE) {
-                        uint8_t ref_idx;
-                        for (ref_idx = 0; ref_idx < entry_pcs_ptr->ref_list1_count; ++ref_idx) {
+                        for (uint8_t ref_idx = 0; ref_idx < entry_pcs_ptr->ref_list1_count;
+                             ++ref_idx) {
                             // if (entry_pcs_ptr->ref_list1_count) // NM: To double check
                             {
                                 // If Reference is valid (non-zero), update the availability
@@ -953,21 +952,21 @@ void *picture_manager_kernel(void *input_ptr) {
                                     tg_info_ptr->tile_group_height_in_sb);
 
                                 // Enable tile parallelism in Entropy Coding stage
-                                for (uint16_t r = top_left_tile_row_idx;
-                                     r < bottom_right_tile_row_idx;
-                                     r++) {
-                                    for (uint16_t c = top_left_tile_col_idx;
-                                         c < bottom_right_tile_col_idx;
-                                         c++) {
-                                        uint16_t tileIdx = r * tile_cols + c;
+                                for (uint16_t s = top_left_tile_row_idx;
+                                     s < bottom_right_tile_row_idx;
+                                     s++) {
+                                    for (uint16_t d = top_left_tile_col_idx;
+                                         d < bottom_right_tile_col_idx;
+                                         d++) {
+                                        uint16_t tileIdx = s * tile_cols + d;
                                         child_pcs_ptr->entropy_coding_info[tileIdx]
                                             ->entropy_coding_current_row = 0;
                                         child_pcs_ptr->entropy_coding_info[tileIdx]
                                             ->entropy_coding_current_available_row = 0;
                                         child_pcs_ptr->entropy_coding_info[tileIdx]
                                             ->entropy_coding_row_count =
-                                            (cm->tiles_info.tile_row_start_mi[r + 1] -
-                                             cm->tiles_info.tile_row_start_mi[r]) >>
+                                            (cm->tiles_info.tile_row_start_mi[s + 1] -
+                                             cm->tiles_info.tile_row_start_mi[s]) >>
                                             sb_size_log2;
                                         child_pcs_ptr->entropy_coding_info[tileIdx]
                                             ->entropy_coding_in_progress = EB_FALSE;
@@ -1104,8 +1103,8 @@ void *picture_manager_kernel(void *input_ptr) {
                         // Configure List0
                         if ((entry_pcs_ptr->slice_type == P_SLICE) ||
                             (entry_pcs_ptr->slice_type == B_SLICE)) {
-                            uint8_t ref_idx;
-                            for (ref_idx = 0; ref_idx < entry_pcs_ptr->ref_list0_count; ++ref_idx) {
+                            for (uint8_t ref_idx = 0; ref_idx < entry_pcs_ptr->ref_list0_count;
+                                 ++ref_idx) {
                                 if (entry_pcs_ptr->ref_list0_count) {
                                     // hardcode the reference for the overlay frame
                                     if (entry_pcs_ptr->is_overlay)
@@ -1181,12 +1180,13 @@ void *picture_manager_kernel(void *input_ptr) {
                                 }
                             }
                             //fill the non used spots to be used in MFMV.
-                            for (ref_idx = entry_pcs_ptr->ref_list0_count; ref_idx < 4; ++ref_idx)
+                            for (uint8_t ref_idx = entry_pcs_ptr->ref_list0_count; ref_idx < 4;
+                                 ++ref_idx)
                                 child_pcs_ptr->ref_pic_ptr_array[REF_LIST_0][ref_idx] =
                                     child_pcs_ptr->ref_pic_ptr_array[REF_LIST_0][0];
 
                             if (entry_pcs_ptr->ref_list1_count == 0) {
-                                for (ref_idx = entry_pcs_ptr->ref_list1_count; ref_idx < 3;
+                                for (uint8_t ref_idx = entry_pcs_ptr->ref_list1_count; ref_idx < 3;
                                      ++ref_idx)
                                     child_pcs_ptr->ref_pic_ptr_array[REF_LIST_1][ref_idx] =
                                         child_pcs_ptr->ref_pic_ptr_array[REF_LIST_0][0];
@@ -1195,8 +1195,8 @@ void *picture_manager_kernel(void *input_ptr) {
 
                         // Configure List1
                         if (entry_pcs_ptr->slice_type == B_SLICE) {
-                            uint8_t ref_idx;
-                            for (ref_idx = 0; ref_idx < entry_pcs_ptr->ref_list1_count; ++ref_idx) {
+                            for (uint8_t ref_idx = 0; ref_idx < entry_pcs_ptr->ref_list1_count;
+                                 ++ref_idx) {
                                 if (entry_pcs_ptr->ref_list1_count) {
                                     reference_queue_index = (uint32_t)CIRCULAR_ADD(
                                         ((int32_t)input_entry_ptr->reference_entry_index) -
@@ -1269,7 +1269,7 @@ void *picture_manager_kernel(void *input_ptr) {
                             }
                             //fill the non used spots to be used in MFMV.
                             if (entry_pcs_ptr->ref_list1_count) {
-                                for (ref_idx = entry_pcs_ptr->ref_list1_count; ref_idx < 3;
+                                for (uint8_t ref_idx = entry_pcs_ptr->ref_list1_count; ref_idx < 3;
                                      ++ref_idx)
                                     child_pcs_ptr->ref_pic_ptr_array[REF_LIST_1][ref_idx] =
                                         child_pcs_ptr->ref_pic_ptr_array[REF_LIST_1][0];
