@@ -4581,21 +4581,17 @@ uint64_t estimate_tx_size_bits(PictureControlSet *pcsPtr, ModeDecisionContext *c
 uint64_t get_tx_size_bits(ModeDecisionCandidateBuffer *candidateBuffer,
                           ModeDecisionContext *context_ptr, PictureControlSet *pcs_ptr,
                           uint8_t tx_depth, EbBool block_has_coeff) {
-    uint64_t tx_size_bits = 0;
-
-    tx_size_bits = estimate_tx_size_bits(pcs_ptr,
-                                         context_ptr,
-                                         candidateBuffer->candidate_ptr,
-                                         block_has_coeff ? 0 : 1,
-                                         context_ptr->blk_origin_x,
-                                         context_ptr->blk_origin_y,
-                                         context_ptr->blk_ptr,
-                                         context_ptr->blk_geom,
-                                         context_ptr->txfm_context_array,
-                                         tx_depth,
-                                         context_ptr->md_rate_estimation_ptr);
-
-    return tx_size_bits;
+    return estimate_tx_size_bits(pcs_ptr,
+                                 context_ptr,
+                                 candidateBuffer->candidate_ptr,
+                                 block_has_coeff ? 0 : 1,
+                                 context_ptr->blk_origin_x,
+                                 context_ptr->blk_origin_y,
+                                 context_ptr->blk_ptr,
+                                 context_ptr->blk_geom,
+                                 context_ptr->txfm_context_array,
+                                 tx_depth,
+                                 context_ptr->md_rate_estimation_ptr);
 }
 
 void init_tx_candidate_buffer(ModeDecisionCandidateBuffer *candidate_buffer,
