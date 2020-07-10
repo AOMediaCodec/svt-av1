@@ -1076,15 +1076,13 @@ void sb_forward_sq_non4_blocks_to_md(SequenceControlSet *scs_ptr, PictureControl
 }
 
 void forward_all_c_blocks_to_md(SequenceControlSet *scs_ptr, PictureControlSet *pcs_ptr) {
-    uint32_t sb_index;
-    for (sb_index = 0; sb_index < pcs_ptr->sb_total_count_pix; ++sb_index) {
+    for (uint16_t sb_index = 0; sb_index < pcs_ptr->sb_total_count_pix; ++sb_index) {
         MdcSbData *results_ptr  = &pcs_ptr->mdc_sb_array[sb_index];
         results_ptr->leaf_count = 0;
         uint32_t blk_index      = 0;
-        uint32_t tot_d1_blocks;
 
         while (blk_index < scs_ptr->max_block_cnt) {
-            tot_d1_blocks             = 0;
+            uint32_t         tot_d1_blocks = 0;
             const BlockGeom *blk_geom = get_blk_geom_mds(blk_index);
 
             //if the parentSq is inside inject this block
@@ -1099,7 +1097,7 @@ void forward_all_c_blocks_to_md(SequenceControlSet *scs_ptr, PictureControlSet *
                             ? 17
                             : blk_geom->sq_size > 16
                                   ? 25
-                                  : blk_geom->sq_size == 16 ? 17 : blk_geom->sq_size == 8 ? 1 : 1;
+                                  : blk_geom->sq_size == 16 ? 17 : 1;
 
                 for (uint32_t idx = 0; idx < tot_d1_blocks; ++idx) {
                     blk_geom = get_blk_geom_mds(blk_index);
