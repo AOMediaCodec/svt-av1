@@ -867,16 +867,14 @@ void av1_perform_inverse_transform_recon(ModeDecisionContext *        context_pt
 
     UNUSED(blk_geom);
 
-    uint8_t tx_depth       = candidate_buffer->candidate_ptr->tx_depth;
+    const uint8_t tx_depth = candidate_buffer->candidate_ptr->tx_depth;
     tu_total_count         = context_ptr->blk_geom->txb_count[tx_depth];
     txb_index              = 0;
     txb_itr                = 0;
     uint32_t txb_1d_offset = 0, txb_1d_offset_uv = 0;
     uint32_t rec_luma_offset, rec_cb_offset, rec_cr_offset;
-    int32_t  is_inter = (candidate_buffer->candidate_ptr->type == INTER_MODE ||
-                        candidate_buffer->candidate_ptr->use_intrabc)
-        ? EB_TRUE
-        : EB_FALSE;
+    int32_t  is_inter = candidate_buffer->candidate_ptr->type == INTER_MODE ||
+                        candidate_buffer->candidate_ptr->use_intrabc;
 
     do {
         txb_origin_x     = context_ptr->blk_geom->tx_org_x[is_inter][tx_depth][txb_itr];
@@ -920,7 +918,6 @@ void av1_perform_inverse_transform_recon(ModeDecisionContext *        context_pt
                          context_ptr->hbd_mode_decision);
 
         //CHROMA
-        uint8_t tx_depth = candidate_buffer->candidate_ptr->tx_depth;
         if (tx_depth == 0 || txb_itr == 0) {
             if (context_ptr->chroma_level <= CHROMA_MODE_1) {
                 uint32_t chroma_txb_width =
