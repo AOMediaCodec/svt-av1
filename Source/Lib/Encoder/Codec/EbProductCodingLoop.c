@@ -4843,9 +4843,6 @@ void perform_tx_partitioning(ModeDecisionCandidateBuffer *candidate_buffer,
         uint64_t tx_y_coeff_bits                       = 0;
         uint64_t tx_y_full_distortion[DIST_CALC_TOTAL] = {0};
 
-        // Current tx_cost while performing tx loop
-        uint64_t current_tx_cost = 0;
-
         context_ptr->txb_1d_offset                      = 0;
         context_ptr->three_quad_energy                  = 0;
         tx_candidate_buffer->candidate_ptr->y_has_coeff = 0;
@@ -4910,7 +4907,7 @@ void perform_tx_partitioning(ModeDecisionCandidateBuffer *candidate_buffer,
             if (y_has_coeff)
                 block_has_coeff = EB_TRUE;
 
-            current_tx_cost = RDCOST(
+            uint64_t current_tx_cost = RDCOST(
                 full_lambda, tx_y_coeff_bits, tx_y_full_distortion[DIST_CALC_RESIDUAL]);
             if (current_tx_cost > best_cost_search)
                 break;
@@ -4918,18 +4915,17 @@ void perform_tx_partitioning(ModeDecisionCandidateBuffer *candidate_buffer,
         } // Transform Loop
 
         if (end_tx_depth) {
-            uint64_t tx_size_bits = 0;
-            if (pcs_ptr->parent_pcs_ptr->frm_hdr.tx_mode == TX_MODE_SELECT)
-                tx_size_bits = get_tx_size_bits(tx_candidate_buffer,
-                                                context_ptr,
-                                                pcs_ptr,
-                                                context_ptr->tx_depth,
-                                                block_has_coeff);
+            const uint64_t tx_size_bit = pcs_ptr->parent_pcs_ptr->frm_hdr.tx_mode == TX_MODE_SELECT
+                ? get_tx_size_bits(tx_candidate_buffer,
+                                   context_ptr,
+                                   pcs_ptr,
+                                   context_ptr->tx_depth,
+                                   block_has_coeff)
+                : 0;
 
-            uint64_t cost = RDCOST(full_lambda,
-                                   (tx_y_coeff_bits + tx_size_bits),
-                                   tx_y_full_distortion[DIST_CALC_RESIDUAL]);
-
+            const uint64_t cost = RDCOST(full_lambda,
+                                         tx_y_coeff_bits + tx_size_bit,
+                                         tx_y_full_distortion[DIST_CALC_RESIDUAL]);
             if (cost < best_cost_search) {
                 best_cost_search                      = cost;
                 best_tx_depth                         = context_ptr->tx_depth;
