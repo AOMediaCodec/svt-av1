@@ -1378,21 +1378,12 @@ uint64_t av1_inter_fast_cost(BlkStruct *blk_ptr, ModeDecisionCandidate *candidat
     uint32_t luma_rate   = 0;
     uint32_t chroma_rate = 0;
     uint64_t mv_rate     = 0;
-    uint64_t skip_mode_rate;
     // Luma and chroma distortion
     uint64_t luma_sad;
     uint64_t chromasad_;
     uint64_t total_distortion;
 
     uint32_t rate;
-
-    int16_t pred_ref_x;
-    int16_t pred_ref_y;
-    int16_t mv_ref_x;
-    int16_t mv_ref_y;
-
-    EbReflist ref_list_idx;
-
     (void)qp;
 
     PredictionMode inter_mode = (PredictionMode)candidate_ptr->pred_mode;
@@ -1403,7 +1394,6 @@ uint64_t av1_inter_fast_cost(BlkStruct *blk_ptr, ModeDecisionCandidate *candidat
     MvReferenceFrame rf[2];
     av1_set_ref_frame(rf, candidate_ptr->ref_frame_type);
     uint32_t mode_context = av1_mode_context_analyzer(blk_ptr->inter_mode_ctx, rf);
-    skip_mode_rate = candidate_ptr->md_rate_estimation_ptr->skip_mode_fac_bits[skip_mode_ctx][0];
     uint64_t reference_picture_bits_num = 0;
 
     //Reference Type and Mode Bit estimation
@@ -1480,21 +1470,18 @@ uint64_t av1_inter_fast_cost(BlkStruct *blk_ptr, ModeDecisionCandidate *candidat
             mv_rate = 0;
 
             if (inter_mode == NEW_NEWMV) {
-                for (ref_list_idx = 0; ref_list_idx < 2; ++ref_list_idx) {
-                    pred_ref_x = candidate_ptr->motion_vector_pred_x[ref_list_idx];
-                    pred_ref_y = candidate_ptr->motion_vector_pred_y[ref_list_idx];
-                    mv_ref_x   = ref_list_idx == REF_LIST_1 ? candidate_ptr->motion_vector_xl1
-                                                          : candidate_ptr->motion_vector_xl0;
-                    mv_ref_y = ref_list_idx == REF_LIST_1 ? candidate_ptr->motion_vector_yl1
-                                                          : candidate_ptr->motion_vector_yl0;
+                for (EbReflist ref_list_idx = 0; ref_list_idx < 2; ++ref_list_idx) {
+                    MV mv = {
+                        .row = ref_list_idx == REF_LIST_1 ? candidate_ptr->motion_vector_yl1
+                                                          : candidate_ptr->motion_vector_yl0,
+                        .col = ref_list_idx == REF_LIST_1 ? candidate_ptr->motion_vector_xl1
+                                                          : candidate_ptr->motion_vector_xl0,
+                    };
 
-                    MV mv;
-                    mv.row = mv_ref_y;
-                    mv.col = mv_ref_x;
-
-                    MV ref_mv;
-                    ref_mv.row = pred_ref_y;
-                    ref_mv.col = pred_ref_x;
+                    MV ref_mv = {
+                        .row = candidate_ptr->motion_vector_pred_y[ref_list_idx],
+                        .col = candidate_ptr->motion_vector_pred_x[ref_list_idx],
+                    };
 
                     mv_rate +=
                         eb_av1_mv_bit_cost(&mv,
@@ -1504,18 +1491,15 @@ uint64_t av1_inter_fast_cost(BlkStruct *blk_ptr, ModeDecisionCandidate *candidat
                                            MV_COST_WEIGHT);
                 }
             } else if (inter_mode == NEAREST_NEWMV || inter_mode == NEAR_NEWMV) {
-                pred_ref_x = candidate_ptr->motion_vector_pred_x[REF_LIST_1];
-                pred_ref_y = candidate_ptr->motion_vector_pred_y[REF_LIST_1];
-                mv_ref_x   = candidate_ptr->motion_vector_xl1;
-                mv_ref_y   = candidate_ptr->motion_vector_yl1;
+                MV mv = {
+                    .row = candidate_ptr->motion_vector_yl1,
+                    .col = candidate_ptr->motion_vector_xl1,
+                };
 
-                MV mv;
-                mv.row = mv_ref_y;
-                mv.col = mv_ref_x;
-
-                MV ref_mv;
-                ref_mv.row = pred_ref_y;
-                ref_mv.col = pred_ref_x;
+                MV ref_mv = {
+                    .row = candidate_ptr->motion_vector_pred_y[REF_LIST_1],
+                    .col = candidate_ptr->motion_vector_pred_x[REF_LIST_1],
+                };
 
                 mv_rate += eb_av1_mv_bit_cost(&mv,
                                               &ref_mv,
@@ -1524,19 +1508,15 @@ uint64_t av1_inter_fast_cost(BlkStruct *blk_ptr, ModeDecisionCandidate *candidat
                                               MV_COST_WEIGHT);
             } else {
                 assert(inter_mode == NEW_NEARESTMV || inter_mode == NEW_NEARMV);
+                MV mv = {
+                    .row = candidate_ptr->motion_vector_yl0,
+                    .col = candidate_ptr->motion_vector_xl0,
+                };
 
-                pred_ref_x = candidate_ptr->motion_vector_pred_x[REF_LIST_0];
-                pred_ref_y = candidate_ptr->motion_vector_pred_y[REF_LIST_0];
-                mv_ref_x   = candidate_ptr->motion_vector_xl0;
-                mv_ref_y   = candidate_ptr->motion_vector_yl0;
-
-                MV mv;
-                mv.row = mv_ref_y;
-                mv.col = mv_ref_x;
-
-                MV ref_mv;
-                ref_mv.row = pred_ref_y;
-                ref_mv.col = pred_ref_x;
+                MV ref_mv = {
+                    .row = candidate_ptr->motion_vector_pred_y[REF_LIST_0],
+                    .col = candidate_ptr->motion_vector_pred_x[REF_LIST_0],
+                };
 
                 mv_rate += eb_av1_mv_bit_cost(&mv,
                                               &ref_mv,
@@ -1545,23 +1525,19 @@ uint64_t av1_inter_fast_cost(BlkStruct *blk_ptr, ModeDecisionCandidate *candidat
                                               MV_COST_WEIGHT);
             }
         } else {
-            ref_list_idx = candidate_ptr->prediction_direction[0] == 0 ? 0 : 1;
+            EbReflist ref_list_idx = candidate_ptr->prediction_direction[0] != 0;
 
-            pred_ref_x = candidate_ptr->motion_vector_pred_x[ref_list_idx];
-            pred_ref_y = candidate_ptr->motion_vector_pred_y[ref_list_idx];
+            MV mv = {
+                .row = ref_list_idx == 0 ? candidate_ptr->motion_vector_yl0
+                                         : candidate_ptr->motion_vector_yl1,
+                .col = ref_list_idx == 0 ? candidate_ptr->motion_vector_xl0
+                                         : candidate_ptr->motion_vector_xl1,
+            };
 
-            mv_ref_x = ref_list_idx == 0 ? candidate_ptr->motion_vector_xl0
-                                         : candidate_ptr->motion_vector_xl1;
-            mv_ref_y = ref_list_idx == 0 ? candidate_ptr->motion_vector_yl0
-                                         : candidate_ptr->motion_vector_yl1;
-
-            MV mv;
-            mv.row = mv_ref_y;
-            mv.col = mv_ref_x;
-
-            MV ref_mv;
-            ref_mv.row = pred_ref_y;
-            ref_mv.col = pred_ref_x;
+            MV ref_mv = {
+                .row = candidate_ptr->motion_vector_pred_y[ref_list_idx],
+                .col = candidate_ptr->motion_vector_pred_x[ref_list_idx],
+            };
 
             mv_rate = eb_av1_mv_bit_cost(&mv,
                                          &ref_mv,
@@ -1654,14 +1630,16 @@ uint64_t av1_inter_fast_cost(BlkStruct *blk_ptr, ModeDecisionCandidate *candidat
     //    }
     uint32_t is_inter_rate =
         candidate_ptr->md_rate_estimation_ptr->intra_inter_fac_bits[blk_ptr->is_inter_ctx][1];
-    luma_rate = (uint32_t)(reference_picture_bits_num + skip_mode_rate + inter_mode_bits_num +
-                           mv_rate + is_inter_rate);
+    luma_rate = (uint32_t)(
+        reference_picture_bits_num +
+        candidate_ptr->md_rate_estimation_ptr->skip_mode_fac_bits[skip_mode_ctx][0] +
+        inter_mode_bits_num + mv_rate + is_inter_rate);
 
     //chroma_rate = intra_chroma_mode_bits_num + intra_chroma_ang_mode_bits_num;
 
     // Keep the Fast Luma and Chroma rate for future use
     candidate_ptr->fast_luma_rate   = (full_cost_shut_fast_rate_flag) ? 0 : luma_rate;
-    candidate_ptr->fast_chroma_rate = (full_cost_shut_fast_rate_flag) ? 0 : chroma_rate;
+    candidate_ptr->fast_chroma_rate = 0; // (full_cost_shut_fast_rate_flag) ? 0 : chroma_rate
     if (use_ssd) {
         int32_t         current_q_index = frm_hdr->quantization_params.base_q_idx;
         Dequants *const dequants = &pcs_ptr->parent_pcs_ptr->deq_bd;
