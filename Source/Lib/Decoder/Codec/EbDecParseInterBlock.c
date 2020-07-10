@@ -2187,21 +2187,18 @@ void inter_block_mode_info(EbDecHandle *dec_handle, ParseCtxt *parse_ctxt, Parti
 int get_palette_color_context(uint8_t (*color_map)[COLOR_MAP_STRIDE][COLOR_MAP_STRIDE], int r,
                               int c, int palette_size, uint8_t *color_order) {
     // Get color indices of neighbors.
-    int color_neighbors[NUM_PALETTE_NEIGHBORS];
-    color_neighbors[0] = (c - 1 >= 0) ? (*color_map)[r][c - 1] : -1;
-    color_neighbors[1] = (c - 1 >= 0 && r - 1 >= 0) ? (*color_map)[(r - 1)][c - 1] : -1;
-    color_neighbors[2] = (r - 1 >= 0) ? (*color_map)[(r - 1)][c] : -1;
-
+    int color_neighbors[NUM_PALETTE_NEIGHBORS] = {
+        c - 1 >= 0 ? (*color_map)[r][c - 1] : -1,
+        c - 1 >= 0 && r - 1 >= 0 ? (*color_map)[r - 1][c - 1] : -1,
+        r - 1 >= 0 ? (*color_map)[r - 1][c] : -1};
     int              scores[PALETTE_MAX_SIZE + 10] = {0};
-    int              i;
     static const int weights[NUM_PALETTE_NEIGHBORS] = {2, 1, 2};
-    for (i = 0; i < NUM_PALETTE_NEIGHBORS; ++i) {
-        if (color_neighbors[i] >= 0) { scores[color_neighbors[i]] += weights[i]; }
-    }
+    for (int i = 0; i < NUM_PALETTE_NEIGHBORS; ++i)
+        if (color_neighbors[i] >= 0) scores[color_neighbors[i]] += weights[i];
 
-    for (i = 0; i < PALETTE_MAX_SIZE; ++i) { color_order[i] = i; }
+    for (int i = 0; i < PALETTE_MAX_SIZE; ++i) color_order[i] = i;
 
-    for (i = 0; i < NUM_PALETTE_NEIGHBORS; i++) {
+    for (int i = 0; i < NUM_PALETTE_NEIGHBORS; i++) {
         int max_score = scores[i];
         int max_id    = i;
         for (int j = i + 1; j < palette_size; j++) {
@@ -2223,9 +2220,8 @@ int get_palette_color_context(uint8_t (*color_map)[COLOR_MAP_STRIDE][COLOR_MAP_S
     }
     int              color_index_ctx_hash                    = 0;
     static const int hash_multipliers[NUM_PALETTE_NEIGHBORS] = {1, 2, 2};
-    for (int i = 0; i < NUM_PALETTE_NEIGHBORS; i++) {
+    for (int i = 0; i < NUM_PALETTE_NEIGHBORS; i++)
         color_index_ctx_hash += scores[i] * hash_multipliers[i];
-    }
     assert(color_index_ctx_hash > 0);
     assert(color_index_ctx_hash <= MAX_COLOR_CONTEXT_HASH);
 
