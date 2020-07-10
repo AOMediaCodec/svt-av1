@@ -4227,9 +4227,11 @@ void tx_type_search(PictureControlSet *pcs_ptr, ModeDecisionContext *context_ptr
             txb_full_distortion[0][DIST_CALC_RESIDUAL] += context_ptr->three_quad_energy;
             txb_full_distortion[0][DIST_CALC_PREDICTION] += context_ptr->three_quad_energy;
             //assert(context_ptr->three_quad_energy == 0 && context_ptr->cu_stats->size < 64);
-            TxSize tx_size =
-                context_ptr->blk_geom->txsize[context_ptr->tx_depth][context_ptr->txb_itr];
-            int32_t shift = (MAX_TX_SCALE - av1_get_tx_scale(tx_size)) * 2;
+            int32_t shift =
+                (MAX_TX_SCALE -
+                 av1_get_tx_scale(
+                     context_ptr->blk_geom->txsize[context_ptr->tx_depth][context_ptr->txb_itr])) *
+                2;
             txb_full_distortion[0][DIST_CALC_RESIDUAL] = RIGHT_SIGNED_SHIFT(
                 txb_full_distortion[0][DIST_CALC_RESIDUAL], shift);
             txb_full_distortion[0][DIST_CALC_PREDICTION] = RIGHT_SIGNED_SHIFT(
