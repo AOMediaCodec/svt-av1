@@ -1158,7 +1158,7 @@ void svt_av1_apply_temporal_filter_planewise_c(
                 const int u_pixel_value = u_pre[uv_r * uv_pre_stride + uv_c];
                 const int v_pixel_value = v_pre[uv_r * uv_pre_stride + uv_c];
                 // non-local mean approach
-                int      num_ref_pixels = 0;
+                num_ref_pixels = 0;
                 uint64_t u_sum_square_diff = 0, v_sum_square_diff = 0;
                 sum_square_diff = 0;
                 // Filter U-plane and V-plane using Y-plane. This is because motion
@@ -1284,7 +1284,7 @@ void svt_av1_apply_temporal_filter_planewise_hbd_c(
                 const int u_pixel_value = u_pre[uv_r * uv_pre_stride + uv_c];
                 const int v_pixel_value = v_pre[uv_r * uv_pre_stride + uv_c];
                 // non-local mean approach
-                int      num_ref_pixels = 0;
+                num_ref_pixels = 0;
                 uint64_t u_sum_square_diff = 0, v_sum_square_diff = 0;
                 sum_square_diff = 0;
                 // Filter U-plane and V-plane using Y-plane. This is because motion
