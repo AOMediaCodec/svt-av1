@@ -1811,11 +1811,8 @@ void inject_mvp_candidates_ii(struct ModeDecisionContext *context_ptr, PictureCo
                             get_wedge_params_bits(context_ptr->blk_geom->bsize) == 0)
                         continue;
                     // If two predictors are very similar, skip wedge compound mode search
-                    if (context_ptr->variance_ready)
-                        if (context_ptr->prediction_mse < 8 ||
-                            (!have_newmv_in_inter_mode(NEAREST_NEARESTMV) &&
-                             context_ptr->prediction_mse < 64))
-                            continue;
+                    if (context_ptr->variance_ready && context_ptr->prediction_mse < 64)
+                        continue;
                     cand_array[cand_idx].type               = INTER_MODE;
                     cand_array[cand_idx].inter_mode         = NEAREST_NEARESTMV;
                     cand_array[cand_idx].pred_mode          = NEAREST_NEARESTMV;
@@ -1916,11 +1913,8 @@ void inject_mvp_candidates_ii(struct ModeDecisionContext *context_ptr, PictureCo
                                 get_wedge_params_bits(context_ptr->blk_geom->bsize) == 0)
                             continue;
                         // If two predictors are very similar, skip wedge compound mode search
-                        if (context_ptr->variance_ready)
-                            if (context_ptr->prediction_mse < 8 ||
-                                (!have_newmv_in_inter_mode(NEAR_NEARMV) &&
-                                 context_ptr->prediction_mse < 64))
-                                continue;
+                        if (context_ptr->variance_ready && context_ptr->prediction_mse < 64)
+                            continue;
                         cand_array[cand_idx].type                    = INTER_MODE;
                         cand_array[cand_idx].inter_mode              = NEAR_NEARMV;
                         cand_array[cand_idx].pred_mode               = NEAR_NEARMV;
