@@ -1964,11 +1964,10 @@ uint16_t parse_coeffs(ParseCtxt *parse_ctxt, PartitionInfo *xd, uint32_t blk_row
 #endif
 
     for (int c = 0; c < eob; ++c) {
-        const int pos   = scan[c];
         uint8_t   sign  = 0;
-        TranLow   level = levels[get_padded_idx(pos, bwl)];
+        level = levels[get_padded_idx(scan[c], bwl)];
         if (level) {
-            max_scan_line = AOMMAX(max_scan_line, pos);
+            max_scan_line = AOMMAX(max_scan_line, scan[c]);
             if (c == 0) {
                 sign =
                     svt_read_symbol(r, frm_ctx->dc_sign_cdf[plane_type][dc_sign_ctx], 2, ACCT_STR);
