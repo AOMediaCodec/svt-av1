@@ -834,10 +834,10 @@ static int upsampled_obmc_pref_error(MacroBlockD *xd, const AV1_COMMON *const cm
                                      int subpel_search) {
     unsigned int besterr;
 
-    DECLARE_ALIGNED(16, uint8_t, pred[2 * MAX_SB_SQUARE]);
+    DECLARE_ALIGNED(16, uint8_t, predictor[2 * MAX_SB_SQUARE]) = {0};
 #if CONFIG_AV1_HIGHBITDEPTH
     if (is_cur_buf_hbd(xd)) {
-        uint8_t *pred8 = CONVERT_TO_BYTEPTR(pred);
+        uint8_t *pred8 = CONVERT_TO_BYTEPTR(predictor);
         aom_highbd_upsampled_pred(xd,
                                   cm,
                                   mi_row,
@@ -859,7 +859,7 @@ static int upsampled_obmc_pref_error(MacroBlockD *xd, const AV1_COMMON *const cm
                            mi_row,
                            mi_col,
                            mv,
-                           pred,
+                           predictor,
                            w,
                            h,
                            subpel_x_q3,
@@ -868,7 +868,7 @@ static int upsampled_obmc_pref_error(MacroBlockD *xd, const AV1_COMMON *const cm
                            y_stride,
                            subpel_search);
 
-        besterr = vfp->ovf(pred, w, wsrc, mask, sse);
+        besterr = vfp->ovf(predictor, w, wsrc, mask, sse);
     }
 #else
     aom_upsampled_pred(xd,
@@ -876,7 +876,7 @@ static int upsampled_obmc_pref_error(MacroBlockD *xd, const AV1_COMMON *const cm
                        mi_row,
                        mi_col,
                        mv,
-                       pred,
+                       predictor,
                        w,
                        h,
                        subpel_x_q3,
@@ -885,7 +885,7 @@ static int upsampled_obmc_pref_error(MacroBlockD *xd, const AV1_COMMON *const cm
                        y_stride,
                        subpel_search);
 
-    besterr = vfp->ovf(pred, w, wsrc, mask, sse);
+    besterr = vfp->ovf(predictor, w, wsrc, mask, sse);
 #endif
     return besterr;
 }
