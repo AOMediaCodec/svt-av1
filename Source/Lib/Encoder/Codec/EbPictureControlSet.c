@@ -274,7 +274,7 @@ EbErrorType picture_control_set_ctor(PictureControlSet *object_ptr, EbPtr object
     uint16_t    sb_index;
     uint16_t    sb_origin_x;
     uint16_t    sb_origin_y;
-    EbErrorType return_error = EB_ErrorNone;
+    EbErrorType return_error;
 
     EbBool         is_16bit      = init_data_ptr->bit_depth > 8 ? EB_TRUE : EB_FALSE;
     const uint16_t subsampling_x = (init_data_ptr->color_format == EB_YUV444 ? 1 : 2) - 1;
@@ -479,7 +479,7 @@ EbErrorType picture_control_set_ctor(PictureControlSet *object_ptr, EbPtr object
 
     for (tile_idx = 0; tile_idx < total_tile_cnt; tile_idx++) {
         for (depth = 0; depth < NEIGHBOR_ARRAY_TOTAL_COUNT; depth++) {
-            InitData data[] = {
+            InitData data0[] = {
                 {&object_ptr->md_intra_luma_mode_neighbor_array[depth][tile_idx],
                     MAX_PICTURE_WIDTH_SIZE,
                     MAX_PICTURE_HEIGHT_SIZE,
@@ -617,7 +617,7 @@ EbErrorType picture_control_set_ctor(PictureControlSet *object_ptr, EbPtr object
                     PU_NEIGHBOR_ARRAY_GRANULARITY,
                     NEIGHBOR_ARRAY_UNIT_TOP_AND_LEFT_ONLY_MASK,
                 }};
-            return_error = create_neighbor_array_units(data, DIM(data));
+            return_error = create_neighbor_array_units(data0, DIM(data0));
             if (return_error == EB_ErrorInsufficientResources) return EB_ErrorInsufficientResources;
             if (init_data_ptr->hbd_mode_decision != EB_10_BIT_MD) {
                 InitData data[] = {
@@ -772,7 +772,7 @@ EbErrorType picture_control_set_ctor(PictureControlSet *object_ptr, EbPtr object
     EB_ALLOC_PTR_ARRAY(object_ptr->interpolation_type_neighbor_array, total_tile_cnt);
 
     for (tile_idx = 0; tile_idx < total_tile_cnt; tile_idx++) {
-        InitData data[] = {
+        InitData data0[] = {
             {
                 &object_ptr->ep_intra_luma_mode_neighbor_array[tile_idx],
                 MAX_PICTURE_WIDTH_SIZE,
@@ -1009,7 +1009,7 @@ EbErrorType picture_control_set_ctor(PictureControlSet *object_ptr, EbPtr object
                 NEIGHBOR_ARRAY_UNIT_FULL_MASK,
             },
         };
-        return_error = create_neighbor_array_units(data, DIM(data));
+        return_error = create_neighbor_array_units(data0, DIM(data0));
         if (return_error == EB_ErrorInsufficientResources) return EB_ErrorInsufficientResources;
 
         if ((is_16bit) || (init_data_ptr->is_16bit_pipeline)) {
