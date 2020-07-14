@@ -1662,7 +1662,8 @@ void sad_loop_kernel_avx512_intrin(
                     } while (--h);
 
                     __m128i sum = complement_4_to_6(ref, ref_stride, src, src_stride, height, 8);
-                    sum256      = _mm256_adds_epu16(sum256, _mm256_zextsi128_si256(sum));
+                    sum256      = _mm256_adds_epu16(
+                        sum256, _mm256_insertf128_si256(_mm256_setzero_si256(), sum, 0));
 
                     update_small_pel(sum256, 0, y, &best_s, &best_x, &best_y);
                     ref += src_stride_raw;
@@ -2255,7 +2256,8 @@ void sad_loop_kernel_avx512_intrin(
 
                         __m128i sum = complement_4_to_6(
                             ref, ref_stride, src, src_stride, height, 8);
-                        sum256 = _mm256_adds_epu16(sum256, _mm256_zextsi128_si256(sum));
+                        sum256 = _mm256_adds_epu16(
+                            sum256, _mm256_insertf128_si256(_mm256_setzero_si256(), sum, 0));
 
                         update_small_pel(sum256, 0, y, &best_s, &best_x, &best_y);
                     }
@@ -2275,7 +2277,8 @@ void sad_loop_kernel_avx512_intrin(
 
                         __m128i sum = complement_4_to_6(
                             ref + 8, ref_stride, src, src_stride, height, 8);
-                        sum256 = _mm256_adds_epu16(sum256, _mm256_zextsi128_si256(sum));
+                        sum256 = _mm256_adds_epu16(
+                            sum256, _mm256_insertf128_si256(_mm256_setzero_si256(), sum, 0));
 
                         update_small_pel(sum256, 8, y, &best_s, &best_x, &best_y);
                     }
@@ -2957,7 +2960,8 @@ void sad_loop_kernel_avx512_intrin(
 
                         __m128i sum = complement_4_to_6(
                             ref + x, ref_stride, src, src_stride, height, 8);
-                        sum256 = _mm256_adds_epu16(sum256, _mm256_zextsi128_si256(sum));
+                        sum256 = _mm256_adds_epu16(
+                            sum256, _mm256_insertf128_si256(_mm256_setzero_si256(), sum, 0));
 
                         update_small_pel(sum256, x, y, &best_s, &best_x, &best_y);
                     }
@@ -2977,7 +2981,8 @@ void sad_loop_kernel_avx512_intrin(
 
                         __m128i sum = complement_4_to_6(
                             ref + x, ref_stride, src, src_stride, height, leftover);
-                        sum256 = _mm256_adds_epu16(sum256, _mm256_zextsi128_si256(sum));
+                        sum256 = _mm256_adds_epu16(
+                            sum256, _mm256_insertf128_si256(_mm256_setzero_si256(), sum, 0));
 
                         update_leftover_small_pel(sum256, x, y, mask128, &best_s, &best_x, &best_y);
                     }
