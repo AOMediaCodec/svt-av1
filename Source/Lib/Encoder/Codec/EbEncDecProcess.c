@@ -78,10 +78,10 @@ EbErrorType enc_dec_context_ctor(EbThreadContext *  thread_context_ptr,
     context_ptr->color_format = color_format;
 
     // Input/Output System Resource Manager FIFOs
-    context_ptr->mode_decision_input_fifo_ptr =
-        eb_system_resource_get_consumer_fifo(enc_handle_ptr->enc_dec_tasks_resource_ptr, index);
-    context_ptr->enc_dec_output_fifo_ptr =
-        eb_system_resource_get_producer_fifo(enc_handle_ptr->enc_dec_results_resource_ptr, index);
+    context_ptr->mode_decision_input_fifo_ptr = eb_system_resource_get_consumer_fifo(
+        enc_handle_ptr->enc_dec_tasks_resource_ptr, index);
+    context_ptr->enc_dec_output_fifo_ptr = eb_system_resource_get_producer_fifo(
+        enc_handle_ptr->enc_dec_results_resource_ptr, index);
     context_ptr->enc_dec_feedback_fifo_ptr = eb_system_resource_get_producer_fifo(
         enc_handle_ptr->enc_dec_tasks_resource_ptr, tasks_index);
     context_ptr->picture_demux_output_fifo_ptr = eb_system_resource_get_producer_fifo(
@@ -92,64 +92,53 @@ EbErrorType enc_dec_context_ctor(EbThreadContext *  thread_context_ptr,
     context_ptr->is_md_rate_estimation_ptr_owner = EB_TRUE;
 
     // Prediction Buffer
-    {
-        EbPictureBufferDescInitData init_data;
-
-        init_data.buffer_enable_mask = PICTURE_BUFFER_DESC_FULL_MASK;
-        init_data.max_width          = SB_STRIDE_Y;
-        init_data.max_height         = SB_STRIDE_Y;
-        init_data.bit_depth          = EB_8BIT;
-        init_data.left_padding       = 0;
-        init_data.right_padding      = 0;
-        init_data.top_padding        = 0;
-        init_data.bot_padding        = 0;
-        init_data.split_mode         = EB_FALSE;
-        init_data.color_format       = color_format;
-
-        context_ptr->input_sample16bit_buffer = (EbPictureBufferDesc *)NULL;
-        if (is_16bit || static_config->is_16bit_pipeline) {
-            init_data.bit_depth = EB_16BIT;
-
-            EB_NEW(context_ptr->input_sample16bit_buffer,
-                   eb_picture_buffer_desc_ctor,
-                   (EbPtr)&init_data);
-            init_data.bit_depth = static_config->is_16bit_pipeline ? static_config->encoder_bit_depth : init_data.bit_depth;
-        }
-    }
+    context_ptr->input_sample16bit_buffer = NULL;
+    if (is_16bit || static_config->is_16bit_pipeline)
+        EB_NEW(context_ptr->input_sample16bit_buffer,
+               eb_picture_buffer_desc_ctor,
+               &(EbPictureBufferDescInitData){
+                   .buffer_enable_mask = PICTURE_BUFFER_DESC_FULL_MASK,
+                   .max_width          = SB_STRIDE_Y,
+                   .max_height         = SB_STRIDE_Y,
+                   .bit_depth          = EB_16BIT,
+                   .left_padding       = 0,
+                   .right_padding      = 0,
+                   .top_padding        = 0,
+                   .bot_padding        = 0,
+                   .split_mode         = EB_FALSE,
+                   .color_format       = color_format,
+               });
 
     // Scratch Coeff Buffer
-    {
-        EbPictureBufferDescInitData init_data;
+    EbPictureBufferDescInitData init_32bit_data = {
+        .buffer_enable_mask = PICTURE_BUFFER_DESC_FULL_MASK,
+        .max_width          = SB_STRIDE_Y,
+        .max_height         = SB_STRIDE_Y,
+        .bit_depth          = EB_32BIT,
+        .color_format       = color_format,
+        .left_padding       = 0,
+        .right_padding      = 0,
+        .top_padding        = 0,
+        .bot_padding        = 0,
+        .split_mode         = EB_FALSE,
+    };
 
-        init_data.buffer_enable_mask = PICTURE_BUFFER_DESC_FULL_MASK;
-        init_data.max_width          = SB_STRIDE_Y;
-        init_data.max_height         = SB_STRIDE_Y;
-        init_data.bit_depth          = EB_16BIT;
-        init_data.color_format       = color_format;
-        init_data.left_padding       = 0;
-        init_data.right_padding      = 0;
-        init_data.top_padding        = 0;
-        init_data.bot_padding        = 0;
-        init_data.split_mode         = EB_FALSE;
-
-        EbPictureBufferDescInitData init_32bit_data;
-
-        init_32bit_data.buffer_enable_mask = PICTURE_BUFFER_DESC_FULL_MASK;
-        init_32bit_data.max_width          = SB_STRIDE_Y;
-        init_32bit_data.max_height         = SB_STRIDE_Y;
-        init_32bit_data.bit_depth          = EB_32BIT;
-        init_32bit_data.color_format       = color_format;
-        init_32bit_data.left_padding       = 0;
-        init_32bit_data.right_padding      = 0;
-        init_32bit_data.top_padding        = 0;
-        init_32bit_data.bot_padding        = 0;
-        init_32bit_data.split_mode         = EB_FALSE;
-        EB_NEW(context_ptr->inverse_quant_buffer,
-               eb_picture_buffer_desc_ctor,
-               (EbPtr)&init_32bit_data);
-        EB_NEW(context_ptr->transform_buffer, eb_picture_buffer_desc_ctor, (EbPtr)&init_32bit_data);
-        EB_NEW(context_ptr->residual_buffer, eb_picture_buffer_desc_ctor, (EbPtr)&init_data);
-    }
+    EB_NEW(context_ptr->inverse_quant_buffer, eb_picture_buffer_desc_ctor, &init_32bit_data);
+    EB_NEW(context_ptr->transform_buffer, eb_picture_buffer_desc_ctor, &init_32bit_data);
+    EB_NEW(context_ptr->residual_buffer,
+           eb_picture_buffer_desc_ctor,
+           &(EbPictureBufferDescInitData){
+               .buffer_enable_mask = PICTURE_BUFFER_DESC_FULL_MASK,
+               .max_width          = SB_STRIDE_Y,
+               .max_height         = SB_STRIDE_Y,
+               .bit_depth          = EB_16BIT,
+               .color_format       = color_format,
+               .left_padding       = 0,
+               .right_padding      = 0,
+               .top_padding        = 0,
+               .bot_padding        = 0,
+               .split_mode         = EB_FALSE,
+           });
 
     // Mode Decision Context
     EB_NEW(context_ptr->md_context,
