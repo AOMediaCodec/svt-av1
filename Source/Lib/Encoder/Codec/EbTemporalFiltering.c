@@ -878,123 +878,6 @@ void svt_av1_apply_filtering_highbd_c(
     }
 }
 
-static void apply_filtering_block(int block_row, int block_col, EbByte *src, uint16_t **src_16bit,
-                                  EbByte *pred, uint16_t **pred_16bit, uint32_t **accum,
-                                  uint16_t **count, uint32_t *stride, uint32_t *stride_pred,
-                                  int block_width, int block_height,
-                                  uint32_t ss_x, // chroma sub-sampling in x
-                                  uint32_t ss_y, // chroma sub-sampling in y
-                                  int altref_strength, const int *blk_fw, EbBool is_highbd) {
-    int blk_h = BH >> 1;
-    int blk_w = BW >> 1; // fixed 32x32 blocks for now
-
-    int offset_src_buffer_y = block_row * blk_h * stride[C_Y] + block_col * blk_w;
-    int offset_src_buffer_u =
-        block_row * (blk_h >> ss_y) * stride[C_U] + block_col * (blk_w >> ss_x);
-    int offset_src_buffer_v =
-        block_row * (blk_h >> ss_y) * stride[C_V] + block_col * (blk_w >> ss_x);
-
-    int offset_block_buffer_y = block_row * blk_h * stride_pred[C_Y] + block_col * blk_w;
-    int offset_block_buffer_u =
-        block_row * (blk_h >> ss_y) * stride_pred[C_U] + block_col * (blk_w >> ss_x);
-    int offset_block_buffer_v =
-        block_row * (blk_h >> ss_y) * stride_pred[C_V] + block_col * (blk_w >> ss_x);
-
-    int blk_fw_32x32[4];
-
-    int idx_32x32 = block_row * 2 + block_col;
-
-    uint8_t * src_ptr[COLOR_CHANNELS];
-    uint8_t * pred_ptr[COLOR_CHANNELS];
-    uint32_t *accum_ptr[COLOR_CHANNELS];
-    uint16_t *count_ptr[COLOR_CHANNELS];
-
-    uint16_t *src_ptr_16bit[COLOR_CHANNELS];
-    uint16_t *pred_ptr_16bit[COLOR_CHANNELS];
-
-    for (int ifw = 0; ifw < 4; ifw++) {
-        int ifw_index = index_16x16_from_subindexes[idx_32x32][ifw];
-
-        blk_fw_32x32[ifw] = blk_fw[ifw_index];
-    }
-
-    accum_ptr[C_Y] = accum[C_Y] + offset_block_buffer_y;
-    accum_ptr[C_U] = accum[C_U] + offset_block_buffer_u;
-    accum_ptr[C_V] = accum[C_V] + offset_block_buffer_v;
-
-    count_ptr[C_Y] = count[C_Y] + offset_block_buffer_y;
-    count_ptr[C_U] = count[C_U] + offset_block_buffer_u;
-    count_ptr[C_V] = count[C_V] + offset_block_buffer_v;
-
-    if (!is_highbd) {
-        src_ptr[C_Y] = src[C_Y] + offset_src_buffer_y;
-        src_ptr[C_U] = src[C_U] + offset_src_buffer_u;
-        src_ptr[C_V] = src[C_V] + offset_src_buffer_v;
-
-        pred_ptr[C_Y] = pred[C_Y] + offset_block_buffer_y;
-        pred_ptr[C_U] = pred[C_U] + offset_block_buffer_u;
-        pred_ptr[C_V] = pred[C_V] + offset_block_buffer_v;
-
-        // Apply the temporal filtering strategy
-        svt_av1_apply_filtering(src_ptr[C_Y],
-                                stride[C_Y],
-                                pred_ptr[C_Y],
-                                stride_pred[C_Y],
-                                src_ptr[C_U],
-                                src_ptr[C_V],
-                                stride[C_U],
-                                pred_ptr[C_U],
-                                pred_ptr[C_V],
-                                stride_pred[C_U],
-                                (unsigned int)block_width,
-                                (unsigned int)block_height,
-                                ss_x,
-                                ss_y,
-                                altref_strength,
-                                blk_fw_32x32,
-                                0, // use_32x32
-                                accum_ptr[C_Y],
-                                count_ptr[C_Y],
-                                accum_ptr[C_U],
-                                count_ptr[C_U],
-                                accum_ptr[C_V],
-                                count_ptr[C_V]);
-    } else {
-        src_ptr_16bit[C_Y] = src_16bit[C_Y] + offset_src_buffer_y;
-        src_ptr_16bit[C_U] = src_16bit[C_U] + offset_src_buffer_u;
-        src_ptr_16bit[C_V] = src_16bit[C_V] + offset_src_buffer_v;
-
-        pred_ptr_16bit[C_Y] = pred_16bit[C_Y] + offset_block_buffer_y;
-        pred_ptr_16bit[C_U] = pred_16bit[C_U] + offset_block_buffer_u;
-        pred_ptr_16bit[C_V] = pred_16bit[C_V] + offset_block_buffer_v;
-
-        // Apply the temporal filtering strategy
-        svt_av1_apply_filtering_highbd(src_ptr_16bit[C_Y],
-                                       stride[C_Y],
-                                       pred_ptr_16bit[C_Y],
-                                       stride_pred[C_Y],
-                                       src_ptr_16bit[C_U],
-                                       src_ptr_16bit[C_V],
-                                       stride[C_U],
-                                       pred_ptr_16bit[C_U],
-                                       pred_ptr_16bit[C_V],
-                                       stride_pred[C_U],
-                                       (unsigned int)block_width,
-                                       (unsigned int)block_height,
-                                       ss_x,
-                                       ss_y,
-                                       altref_strength,
-                                       blk_fw_32x32,
-                                       0, // use_32x32
-                                       accum_ptr[C_Y],
-                                       count_ptr[C_Y],
-                                       accum_ptr[C_U],
-                                       count_ptr[C_U],
-                                       accum_ptr[C_V],
-                                       count_ptr[C_V]);
-    }
-}
-
 // Apply filtering to the central picture
 static void apply_filtering_central(EbByte *pred, uint32_t **accum, uint16_t **count,
                                     uint16_t blk_width, uint16_t blk_height, uint32_t ss_x,
@@ -2059,7 +1942,7 @@ static void get_final_filtered_pixels(EbByte *   src_center_ptr_start,
 // - core function
 static EbErrorType produce_temporally_filtered_pic(
     PictureParentControlSet **list_picture_control_set_ptr,
-    EbPictureBufferDesc **list_input_picture_ptr, uint8_t altref_strength, uint8_t index_center,
+    EbPictureBufferDesc **list_input_picture_ptr, uint8_t index_center,
     uint64_t *filtered_sse, uint64_t *filtered_sse_uv, MotionEstimationContext_t *me_context_ptr,
     const double *noise_levels, int32_t segment_index, EbBool is_highbd) {
     int frame_index;
@@ -2085,7 +1968,6 @@ static EbErrorType produce_temporally_filtered_pic(
         *altref_buffer_highbd_ptr[COLOR_CHANNELS] = {NULL};
 
     uint32_t blk_row, blk_col;
-    int      blk_y_src_offset = 0, blk_ch_src_offset = 0;
 
     PictureParentControlSet *picture_control_set_ptr_central =
         list_picture_control_set_ptr[index_center];
@@ -2165,14 +2047,14 @@ static EbErrorType produce_temporally_filtered_pic(
 
     for (blk_row = y_b64_start_idx; blk_row < y_b64_end_idx; blk_row++) {
         for (blk_col = x_b64_start_idx; blk_col < x_b64_end_idx; blk_col++) {
-            blk_y_src_offset  = (blk_col * BW) + (blk_row * BH) * stride[C_Y];
-            blk_ch_src_offset = (blk_col * blk_width_ch) + (blk_row * blk_height_ch) * stride[C_U];
+            int blk_y_src_offset = (blk_col * BW) + (blk_row * BH) * stride[C_Y];
+            int blk_ch_src_offset = (blk_col * blk_width_ch) +
+                (blk_row * blk_height_ch) * stride[C_U];
 
             // reset accumulator and count
             memset(accumulator, 0, BLK_PELS * COLOR_CHANNELS * sizeof(accumulator[0]));
             memset(counter, 0, BLK_PELS * COLOR_CHANNELS * sizeof(counter[0]));
 
-            int blk_fw[N_16X16_BLOCKS];
             // for every frame to filter
             for (frame_index = 0;
                  frame_index < (picture_control_set_ptr_central->past_altref_nframes +
@@ -2306,7 +2188,7 @@ static EbErrorType produce_temporally_filtered_pic(
                 // ------------
                 // Step 2: temporal filtering using the motion compensated blocks
                 // ------------
-                int use_planewise_strategy = 1;
+                const int use_planewise_strategy = 1;
                 // Hyper-parameter for filter weight adjustment.
                 int decay_control = (picture_control_set_ptr_central->scs_ptr->input_resolution ==
                                      INPUT_SIZE_576p_RANGE_OR_LOWER)
@@ -2324,50 +2206,28 @@ static EbErrorType produce_temporally_filtered_pic(
                     else
                         apply_filtering_central_highbd(
                             pred_16bit, accum, count, BW, BH, ss_x, ss_y, use_planewise_strategy);
-                } else {
+                } else
                     // split filtering function into 32x32 blocks
                     // TODO: implement a 64x64 SIMD version
-                    for (int block_row = 0; block_row < 2; block_row++) {
-                        for (int block_col = 0; block_col < 2; block_col++) {
-                            if (use_planewise_strategy)
-                                apply_filtering_block_plane_wise(block_row,
-                                    block_col,
-                                    src_center_ptr,
-                                    altref_buffer_highbd_ptr,
-                                    pred,
-                                    pred_16bit,
-                                    accum,
-                                    count,
-                                    stride,
-                                    stride_pred,
-                                    BW >> 1,
-                                    BH >> 1,
-                                    ss_x,
-                                    ss_y,
-                                    noise_levels,
-                                    decay_control,
-                                    is_highbd);
-                            else
-                                apply_filtering_block(block_row,
-                                    block_col,
-                                    src_center_ptr,
-                                    altref_buffer_highbd_ptr,
-                                    pred,
-                                    pred_16bit,
-                                    accum,
-                                    count,
-                                    stride,
-                                    stride_pred,
-                                    BW >> 1, // fixed 32x32
-                                    BH >> 1, // fixed 32x32
-                                    ss_x, // chroma sub-sampling in x
-                                    ss_y, // chroma sub-sampling in y
-                                    altref_strength,
-                                    blk_fw,
-                                    is_highbd);
-                        }
-                    }
-                }
+                    for (int block_row = 0; block_row < 2; block_row++)
+                        for (int block_col = 0; block_col < 2; block_col++)
+                            apply_filtering_block_plane_wise(block_row,
+                                                             block_col,
+                                                             src_center_ptr,
+                                                             altref_buffer_highbd_ptr,
+                                                             pred,
+                                                             pred_16bit,
+                                                             accum,
+                                                             count,
+                                                             stride,
+                                                             stride_pred,
+                                                             BW >> 1,
+                                                             BH >> 1,
+                                                             ss_x,
+                                                             ss_y,
+                                                             noise_levels,
+                                                             decay_control,
+                                                             is_highbd);
             }
 
             // Normalize filter output to produce temporally filtered frame
@@ -2836,7 +2696,6 @@ EbErrorType svt_av1_init_temporal_filtering(
 
     produce_temporally_filtered_pic(list_picture_control_set_ptr,
                                     list_input_picture_ptr,
-                                    *altref_strength_ptr,
                                     index_center,
                                     &filtered_sse,
                                     &filtered_sse_uv,
