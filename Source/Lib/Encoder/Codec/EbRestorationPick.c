@@ -1511,7 +1511,6 @@ void restoration_seg_search(int32_t *rst_tmpbuf, Yv12BufferConfig *org_fts,
                             PictureControlSet *pcs_ptr, uint32_t segment_index) {
     Av1Common *const cm         = pcs_ptr->parent_pcs_ptr->av1_cm;
     Macroblock *     x          = pcs_ptr->parent_pcs_ptr->av1x;
-    const int32_t    num_planes = 3;
 
     // If the restoration unit dimensions are not multiples of
     // rsi->restoration_unit_size then some elements of the rusi array may be
@@ -1523,7 +1522,7 @@ void restoration_seg_search(int32_t *rst_tmpbuf, Yv12BufferConfig *org_fts,
     RestSearchCtxt *rsc_p = &rsc;
 
     const int32_t plane_start = AOM_PLANE_Y;
-    const int32_t plane_end   = num_planes > 1 ? AOM_PLANE_V : AOM_PLANE_Y;
+    const int32_t plane_end   = AOM_PLANE_V;
     for (int32_t plane = plane_start; plane <= plane_end; ++plane) {
         RestUnitSearchInfo *rusi = pcs_ptr->parent_pcs_ptr->rusi_picture[plane];
 
