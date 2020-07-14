@@ -1567,7 +1567,6 @@ void restoration_seg_search(int32_t *rst_tmpbuf, Yv12BufferConfig *org_fts,
     }
 }
 void rest_finish_search(PictureParentControlSet *p_pcs_ptr, Macroblock *x, Av1Common *const cm) {
-    const int32_t   num_planes           = 3;
     RestorationType force_restore_type_d = (cm->wn_filter_mode) ? RESTORE_TYPES : RESTORE_SGRPROJ;
     int32_t         ntiles[2];
     for (int32_t is_uv = 0; is_uv < 2; ++is_uv) ntiles[is_uv] = rest_tiles_in_plane(cm, is_uv);
@@ -1584,7 +1583,7 @@ void rest_finish_search(PictureParentControlSet *p_pcs_ptr, Macroblock *x, Av1Co
 
     RestSearchCtxt rsc;
     const int32_t  plane_start = AOM_PLANE_Y;
-    const int32_t  plane_end   = num_planes > 1 ? AOM_PLANE_V : AOM_PLANE_Y;
+    const int32_t  plane_end   = AOM_PLANE_V ;
     for (int32_t plane = plane_start; plane <= plane_end; ++plane) {
         //init rsc context for this plane
         rsc.cm       = cm;
