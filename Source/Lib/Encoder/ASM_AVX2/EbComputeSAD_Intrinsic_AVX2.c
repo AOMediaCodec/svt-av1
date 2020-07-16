@@ -2204,8 +2204,9 @@ void sad_loop_kernel_avx2_intrin(
                     p_ref = ref + j;
                     s3    = _mm_setzero_si128();
                     for (k = 0; k < block_height; k += 2) {
-                        s0 = _mm_loadu_si128((__m128i *)p_ref);
-                        s1 = _mm_loadu_si128((__m128i *)(p_ref + ref_stride));
+                        //Note: _mm_lddqu_si128 is used instead of _mm_loadu_si128 because clang Release configuration is emitting wrong assembly instructions
+                        s0 = _mm_lddqu_si128((__m128i *)p_ref);
+                        s1 = _mm_lddqu_si128((__m128i *)(p_ref + ref_stride));
                         s2 = _mm_cvtsi32_si128(*(uint32_t *)p_src);
                         s5 = _mm_cvtsi32_si128(*(uint32_t *)(p_src + src_stride));
                         s3 = _mm_adds_epu16(s3, _mm_mpsadbw_epu8(s0, s2, 0));
@@ -2244,8 +2245,9 @@ void sad_loop_kernel_avx2_intrin(
                     p_ref = ref + j;
                     s3    = _mm_setzero_si128();
                     for (k = 0; k < block_height; k += 2) {
-                        s0 = _mm_loadu_si128((__m128i *)p_ref);
-                        s1 = _mm_loadu_si128((__m128i *)(p_ref + ref_stride));
+                        //Note: _mm_lddqu_si128 is used instead of _mm_loadu_si128 because clang Release configuration is emitting wrong assembly instructions
+                        s0 = _mm_lddqu_si128((__m128i *)p_ref);
+                        s1 = _mm_lddqu_si128((__m128i *)(p_ref + ref_stride));
                         s2 = _mm_cvtsi32_si128(*(uint32_t *)p_src);
                         s5 = _mm_cvtsi32_si128(*(uint32_t *)(p_src + src_stride));
                         s3 = _mm_adds_epu16(s3, _mm_mpsadbw_epu8(s0, s2, 0));
