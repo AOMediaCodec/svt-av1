@@ -653,6 +653,11 @@ static INLINE void sad_loop_kernel_8_avx2(const uint8_t *const src, const uint32
     *sum = _mm256_adds_epu16(*sum, _mm256_mpsadbw_epu8(rr0, ss0, (5 << 3) | 5)); // 101 101
 }
 
+/*******************************************************************************
+* Function helper adds to "sums" vectors SAD's for block width of 12, uses AVX512 instructions
+* Requirement: width = 12
+* Requirement: height = 2
+*******************************************************************************/
 SIMD_INLINE void sad_loop_kernel_12_avx512(const uint8_t *const src, const uint32_t src_stride,
                                            const uint8_t *const ref, const uint32_t ref_stride,
                                            __m512i *const sum) {
@@ -706,6 +711,11 @@ SIMD_INLINE void sad_loop_kernel_16_avx512(const uint8_t *const src, const uint3
     *sum = _mm512_adds_epu16(*sum, _mm512_dbsad_epu8(ss3, rr1, 0xE9));
 }
 
+/*******************************************************************************
+* Function helper adds to two elements "sums" vectors SAD's for block width of 12, uses AVX512 instructions
+* Requirement: width = 12
+* Requirement: height = 2
+*******************************************************************************/
 SIMD_INLINE void sad_loop_kernel_12_2sum_avx512(const uint8_t *const src, const uint32_t src_stride,
                                                 const uint8_t *const ref, const uint32_t ref_stride,
                                                 __m512i sum[2]) {
@@ -759,6 +769,11 @@ SIMD_INLINE void sad_loop_kernel_16_2sum_avx512(const uint8_t *const src, const 
     sum[1] = _mm512_adds_epu16(sum[1], _mm512_dbsad_epu8(ss3, rr1, 0xE9));
 }
 
+/*******************************************************************************
+* Function helper adds to "sums" vectors SAD's for block width of 12, uses AVX2 instructions
+* Requirement: width = 12
+* Requirement: height = 2
+*******************************************************************************/
 static INLINE void sad_loop_kernel_12_avx2(const uint8_t *const src, const uint32_t src_stride,
                                            const uint8_t *const ref, const uint32_t ref_stride,
                                            __m256i *const sum) {
@@ -800,6 +815,11 @@ static INLINE void sad_loop_kernel_16_avx2(const uint8_t *const src, const uint3
     *sum = _mm256_adds_epu16(*sum, _mm256_mpsadbw_epu8(rr1, ss0, (7 << 3) | 7)); // 111 111
 }
 
+/*******************************************************************************
+* Function helper adds to two elements "sums" vectors SAD's for block width of 12, uses AVX2 instructions
+* Requirement: width = 12
+* Requirement: height = 2
+*******************************************************************************/
 static INLINE void sad_loop_kernel_12_2sum_avx2(const uint8_t *const src, const uint32_t src_stride,
                                                 const uint8_t *const ref, const uint32_t ref_stride,
                                                 __m256i sums[2]) {
@@ -1544,6 +1564,10 @@ SIMD_INLINE void update_leftover_2048_pel(const __m256i sums256[4], const int16_
     }
 }
 
+/*******************************************************************************
+* Requirement: search_size <= 8,
+* Returns "search_size" of SAD's for all height in 5th and 6th col
+*******************************************************************************/
 static INLINE __m128i complement_4_to_6(uint8_t *ref, uint32_t ref_stride, uint8_t *src,
                                         uint32_t src_stride, uint32_t height,uint32_t search_size) {
     __m128i sum;
@@ -1561,7 +1585,8 @@ static INLINE __m128i complement_4_to_6(uint8_t *ref, uint32_t ref_stride, uint8
 }
 
 /*******************************************************************************
-* Requirement: width   = 4, 8, 16, 24, 32, 48 or 64
+* Requirement: width   = 4, 6, 8, 12, 16, 24, 32, 48 or 64 to use SIMD
+* otherwise C version is used
 * Requirement: height <= 64
 * Requirement: height % 2 = 0
 *******************************************************************************/
