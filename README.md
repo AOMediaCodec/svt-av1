@@ -1,21 +1,24 @@
-# Scalable Video Technology for AV1 Encoder (SVT-AV1 Encoder)
+# Scalable Video Technology for AV1 (SVT-AV1 Encoder and Decoder)
 
-[![AppVeyor Build Status](https://ci.appveyor.com/api/projects/status/github/OpenVisualCloud/SVT-AV1?branch=master&svg=true)](https://ci.appveyor.com/project/OpenVisualCloud/SVT-AV1)
+[![CI](https://github.com/OpenVisualCloud/SVT-AV1/workflows/CI/badge.svg)](https://github.com/OpenVisualCloud/SVT-AV1/actions?query=workflow%3ACI+branch%3Amaster)
+[![MSVC builds](https://github.com/OpenVisualCloud/SVT-AV1/workflows/MSVC%20builds/badge.svg)](https://github.com/OpenVisualCloud/SVT-AV1/actions?query=workflow%3A%22MSVC+builds%22+branch%3Amaster)
+[![macOS](https://github.com/OpenVisualCloud/SVT-AV1/workflows/macOS/badge.svg)](https://github.com/OpenVisualCloud/SVT-AV1/actions?query=workflow%3AmacOS+branch%3Amaster)
 [![Travis Build Status](https://travis-ci.com/OpenVisualCloud/SVT-AV1.svg?branch=master)](https://travis-ci.com/OpenVisualCloud/SVT-AV1)
-[![Coverage Status](https://coveralls.io/repos/github/OpenVisualCloud/SVT-AV1/badge.svg?branch=master)](https://coveralls.io/github/OpenVisualCloud/SVT-AV1?branch=master)
 
-The Scalable Video Technology for AV1 Encoder (SVT-AV1 Encoder) is an AV1-compliant encoder library core. The SVT-AV1 development is a work-in-progress targeting performance levels applicable to both VOD and Live encoding / transcoding video applications.
+The Scalable Video Technology for AV1 (SVT-AV1 Encoder and Decoder) is an AV1-compliant encoder/decoder library core. The SVT-AV1 encoder development is a work-in-progress targeting performance levels applicable to both VOD and Live encoding / transcoding video applications. The SVT-AV1 decoder implementation is targeting future codec research activities.
 
 ## License
 
-SVT-AV1 Encoder is licensed under the OSI-approved BSD+Patent license. See [LICENSE](LICENSE.md) for details.
+SVT-AV1 is licensed under the OSI-approved BSD+Patent license. See [LICENSE](LICENSE.md) for details.
+SVT-AV1 uses code from the [libaom](https://aomedia.googlesource.com/aom/) project. The files used are marked with the following [license](LICENSE_AOM.md) in their headers.
 
 ## Documentation
 
-More details about the SVT-AV1 usage can be found under:
+More details about the SVT-AV1 usage and implementation can be found under:
 
 - [svt-av1-encoder-user-guide](Docs/svt-av1_encoder_user_guide.md)
 - [svt-av1-decoder-user-guide](Docs/svt-av1_decoder_user_guide.md)
+- [svt-av1-documentation-page](Docs/README.md)
 
 ## System Requirements
 
@@ -89,19 +92,6 @@ The SVT-AV1 Encoder library supports the x86 architecture
   - `cd Build/linux`
   - `./build.sh <release | debug>`
 
-  - __Note about macOS__
-
-    If you get
-
-    ``` none
-    errno: 24
-    Encoding
-    Could not allocate enough memory for channel 1
-    ```
-
-    while encoding, this can mean that the fd limit is too low.\
-    It is necessary to increase the amount of available file descriptors and the instructions to do so can be found [here](https://apple.lib.utah.edu/open-file-limits-on-os-x-what-they-are-why-increase-them-and-how-to-increase-them/).
-
 - __Sample Binaries location__
   - Binaries can be found under `Bin/Release` and/or `Bin/Debug`
 
@@ -114,6 +104,10 @@ The SVT-AV1 Encoder library supports the x86 architecture
   - cd into your chosen location
   - Run the sample application to encode: `./SvtAv1EncApp -i [in.yuv] -w [width] -h [height] -b [out.ivf]`
   - Sample application supports reading from pipe. E.g. `ffmpeg -i [input.mp4] -nostdin -f rawvideo -pix_fmt yuv420p - | ./SvtAv1EncApp -i stdin -n [number_of_frames_to_encode] -w [width] -h [height]`
+
+## How to evaluate by ready-to-run executables with docker
+
+Refer to the guide [here](https://github.com/OpenVisualCloud/Dockerfiles/blob/master/doc/svt.md#Evaluate-SVT).
 
 ## Demo features and limitations
 
@@ -140,7 +134,11 @@ Use the [Issues](https://github.com/OpenVisualCloud/SVT-AV1/issues) tab on Githu
 
 ## IRC
 
-`#svt` on Freenode. Join via [Freenode Webchat](https://webchat.freenode.net/?channels=svt) or use your favorite IRC client.
+`#svt` on Freenode. Join via [Freenode Webchat](https://webchat.freenode.net/?channels=svt) or use your favorite IRC client. A [public log](https://freenode.logbot.info/svt) is available.
+
+## Performance tracker
+
+Performance and raw data files available at http://videocodectracker.dev
 
 ## Notices and Disclaimers
 

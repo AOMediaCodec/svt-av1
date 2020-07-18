@@ -18,6 +18,7 @@
 #include <map>
 #include "VideoSource.h"
 #include "EbDefinitions.h"
+#include "ConfigEncoder.h"
 
 /** @defgroup svt_av1_e2e_test_vector Test vectors for E2E test
  *  Defines the test vectors of E2E test, with file-type, width, height and
@@ -88,6 +89,16 @@ const std::vector<TestVideoVector> dummy_test_vectors = {
                     10, 0, 0, 60),
 };
 
+const std::vector<TestVideoVector> dummy_422_test_vectors = {
+    std::make_tuple("colorbar_480p_8_422", DUMMY_SOURCE, IMG_FMT_422, 640, 480,
+                    8, 0, 0, 100),
+};
+
+const std::vector<TestVideoVector> dummy_444_test_vectors = {
+    std::make_tuple("colorbar_480p_8_444", DUMMY_SOURCE, IMG_FMT_444, 640, 480,
+                    8, 0, 0, 100),
+};
+
 using EncSetting = std::map<std::string, std::string>;
 typedef struct EncTestSetting {
     std::string name;    // description of the test cases
@@ -100,6 +111,17 @@ typedef struct EncTestSetting {
         return str;
     }
 
+    std::string to_cli(TestVideoVector& vector) const {
+        std::string str = "SvtAv1EncApp";
+        str += get_vector_cli(vector);
+        str += get_setting_cli();
+        append_token(str, "StreamFile");
+        str += "output.ivf";
+        append_token(str, "ReconFile");
+        str += "recon.yuv";
+        return str;
+    }
+
     std::string get_setting_str() const {
         std::string str(name);
         str += ": ";
@@ -108,6 +130,51 @@ typedef struct EncTestSetting {
             str += "=";
             str += x.second;
             str += ", ";
+        }
+        return str;
+    }
+
+    int color_fmt(VideoColorFormat fmt) const {
+        switch (fmt) {
+        case IMG_FMT_420:
+        case IMG_FMT_420P10_PACKED: return 420;
+        case IMG_FMT_422:
+        case IMG_FMT_422P10_PACKED: return 422;
+        case IMG_FMT_444:
+        case IMG_FMT_444P10_PACKED: return 444;
+        default: break;
+        }
+        return -1;
+    }
+
+    std::string get_vector_cli(TestVideoVector& vector) const {
+        std::string str;
+        append_token(str, "InputFile");
+        str += std::get<0>(vector);
+        if (std::get<1>(vector) != Y4M_VIDEO_FILE) {
+            append_token(str, "SourceWidth");
+            str += std::to_string(std::get<3>(vector));
+            append_token(str, "SourceHeight");
+            str += std::to_string(std::get<4>(vector));
+            append_token(str, "EncoderBitDepth");
+            str += std::to_string(std::get<5>(vector));
+            append_token(str, "EncoderColorFormat");
+            str += std::to_string(color_fmt(std::get<2>(vector)));
+        }
+        return str;
+    }
+
+    void append_token(std::string& str, const char* name) const {
+        str += " ";
+        str += get_enc_token(name);
+        str += " ";
+    }
+
+    std::string get_setting_cli() const {
+        std::string str;
+        for (auto x : setting) {
+            append_token(str, x.first.c_str());
+            str += x.second;
         }
         return str;
     }

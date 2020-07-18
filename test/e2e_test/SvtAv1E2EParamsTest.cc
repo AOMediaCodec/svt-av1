@@ -24,7 +24,7 @@
  *
  * Test strategy:
  * Config SVT-AV1 encoder with individual parameter, run the
- * conformance test and analyze the bitstream to check if the params
+ * conformance test and analyze the Bitstream to check if the params
  * take effect.
  *
  * Expected result:
@@ -98,13 +98,13 @@ static const std::vector<EncTestSetting> default_enc_settings = {
      {{"RateControlMode", "2"}, {"TargetBitRate", "500000"}},
      res_480p_test_vectors},
     {"RcTest4",
-     {{"RateControlMode", "3"}, {"TargetBitRate", "1000000"}},
+     {{"RateControlMode", "1"}, {"TargetBitRate", "1000000"}},
      res_480p_test_vectors},
     {"RcTest5",
-     {{"RateControlMode", "3"}, {"TargetBitRate", "750000"}},
+     {{"RateControlMode", "1"}, {"TargetBitRate", "750000"}},
      res_480p_test_vectors},
     {"RcTest6",
-     {{"RateControlMode", "3"}, {"TargetBitRate", "500000"}},
+     {{"RateControlMode", "1"}, {"TargetBitRate", "500000"}},
      res_480p_test_vectors},
 
     // test high bitrate with big min_qp, or low bitrate with small max_qp
@@ -118,13 +118,13 @@ static const std::vector<EncTestSetting> default_enc_settings = {
      {{"RateControlMode", "2"}, {"TargetBitRate", "750000"}, {"MaxQpAllowed", "50"}, {"MinQpAllowed", "20"}},
      res_480p_test_vectors},
     {"RcQpTest4",
-     {{"RateControlMode", "3"}, {"TargetBitRate", "1000000"}, {"MinQpAllowed", "20"}},
+     {{"RateControlMode", "1"}, {"TargetBitRate", "1000000"}, {"MinQpAllowed", "20"}},
      res_480p_test_vectors},
     {"RcQpTest5",
-     {{"RateControlMode", "3"}, {"TargetBitRate", "500000"}, {"MaxQpAllowed", "50"}},
+     {{"RateControlMode", "1"}, {"TargetBitRate", "500000"}, {"MaxQpAllowed", "50"}},
      res_480p_test_vectors},
     {"RcQpTest6",
-     {{"RateControlMode", "3"}, {"TargetBitRate", "750000"}, {"MaxQpAllowed", "50"}, {"MinQpAllowed", "20"}},
+     {{"RateControlMode", "1"}, {"TargetBitRate", "750000"}, {"MaxQpAllowed", "50"}, {"MinQpAllowed", "20"}},
      res_480p_test_vectors},
 };
 /* clang-format on */
@@ -186,9 +186,10 @@ class CodingOptionTest : public SvtAv1E2ETestFramework {
         EXPECT_GE(config->max_qp_allowed, actual_max_qp)
             << "Max qp allowd " << config->max_qp_allowed << " actual "
             << actual_max_qp;
-        if (config->rate_control_mode == 0)
+        if (config->rate_control_mode == 0) {
             EXPECT_EQ(actual_min_qp, actual_max_qp)
                 << "QP fluctuate in const qp mode";
+        }
 
         // verify the bitrate
         if (config->rate_control_mode == 3) {
@@ -204,11 +205,11 @@ class CodingOptionTest : public SvtAv1E2ETestFramework {
 
         // verify tile row and tile column
         uint32_t expect_cols =
-            (uint32_t)((video_src_->get_width_with_padding() / 4) /
-                       std::pow(2, config->tile_columns));
+            (uint32_t)((video_src_->get_width_with_padding() >> 2) /
+                       (1 << config->tile_columns));
         uint32_t expect_rows =
-            (uint32_t)((video_src_->get_height_with_padding() / 4) /
-                       std::pow(2, config->tile_rows));
+            (uint32_t)((video_src_->get_height_with_padding() >> 2) /
+                       (1 << config->tile_rows));
         printf("expect_cols %d, expect_rows %d\n", expect_cols, expect_rows);
         printf("tile_cols %d, tile_rows %d\n",
                stream_info->tile_cols,

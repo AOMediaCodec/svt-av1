@@ -69,8 +69,8 @@ class EncParamTestBase : public ::testing::Test {
     virtual void SetUp() override {
         // initialize encoder and get handle
         ASSERT_EQ(EB_ErrorNone,
-                  eb_init_handle(&ctxt_.enc_handle, &ctxt_, &ctxt_.enc_params))
-            << "eb_init_handle failed";
+                  svt_av1_enc_init_handle(&ctxt_.enc_handle, &ctxt_, &ctxt_.enc_params))
+            << "svt_av1_enc_init_handle failed";
         // setup encoder parameters with all default
         ASSERT_NE(nullptr, ctxt_.enc_handle) << "enc_handle is invalid";
         // setup source width/height with default if not in test source_width or
@@ -87,15 +87,15 @@ class EncParamTestBase : public ::testing::Test {
 
     // Tears down the test fixture.
     virtual void TearDown() override {
-        // TODO: eb_deinit_encoder should not be called here, for this test does
-        // not call eb_init_encoder, but there is huge memory leak if only calls
-        // eb_deinit_handle. please remmove it after we pass
+        // TODO: svt_av1_enc_deinit should not be called here, for this test does
+        // not call svt_av1_enc_init, but there is huge memory leak if only calls
+        // svt_av1_enc_deinit_handle. please remmove it after we pass
         // EncApiTest-->repeat_normal_setup
-        ASSERT_EQ(EB_ErrorNone, eb_deinit_encoder(ctxt_.enc_handle))
-            << "eb_deinit_encoder failed";
+        ASSERT_EQ(EB_ErrorNone, svt_av1_enc_deinit(ctxt_.enc_handle))
+            << "svt_av1_enc_deinit failed";
         // destory encoder
-        ASSERT_EQ(EB_ErrorNone, eb_deinit_handle(ctxt_.enc_handle))
-            << "eb_deinit_handle failed";
+        ASSERT_EQ(EB_ErrorNone, svt_av1_enc_deinit_handle(ctxt_.enc_handle))
+            << "svt_av1_enc_deinit_handle failed";
     }
 
     /** setup some of the params with related params modified before set
@@ -138,11 +138,11 @@ class EncParamTestBase : public ::testing::Test {
 
 /** Marcro defininition of printing parameter name when in failed */
 #define PRINT_PARAM_FATAL(p) \
-    << "eb_svt_enc_set_parameter " << #p << ": " << (int)(p) << " failed"
+    << "svt_av1_enc_set_parameter " << #p << ": " << (int)(p) << " failed"
 
 /** Marcro defininition of printing 2 parameters name when in failed */
 #define PRINT_2PARAM_FATAL(p1, p2)                                             \
-    << "eb_svt_enc_set_parameter " << #p1 << ": " << (int)(p1) << " + " << #p2 \
+    << "svt_av1_enc_set_parameter " << #p1 << ": " << (int)(p1) << " + " << #p2 \
     << ": " << (int)(p2) << " failed"
 
 /** Marcro defininition of batch processing check for default, valid, invalid
@@ -175,7 +175,7 @@ class EncParamTestBase : public ::testing::Test {
                 ctxt_.enc_params.param_name = GET_VALID_PARAM(param_name, i); \
                 config_enc_param();                                           \
                 EXPECT_EQ(EB_ErrorNone,                                       \
-                          eb_svt_enc_set_parameter(ctxt_.enc_handle,          \
+                          svt_av1_enc_set_parameter(ctxt_.enc_handle,          \
                                                    &ctxt_.enc_params))        \
                 PRINT_PARAM_FATAL(ctxt_.enc_params.param_name);               \
                 EncParamTestBase::TearDown();                                 \
@@ -188,7 +188,7 @@ class EncParamTestBase : public ::testing::Test {
                     GET_INVALID_PARAM(param_name, i);                         \
                 config_enc_param();                                           \
                 EXPECT_EQ(EB_ErrorBadParameter,                               \
-                          eb_svt_enc_set_parameter(ctxt_.enc_handle,          \
+                          svt_av1_enc_set_parameter(ctxt_.enc_handle,          \
                                                    &ctxt_.enc_params))        \
                 PRINT_PARAM_FATAL(ctxt_.enc_params.param_name);               \
                 EncParamTestBase::TearDown();                                 \
@@ -227,11 +227,6 @@ PARAM_TEST(EncParamHierarchicalLvlTest);
 DEFINE_PARAM_TEST_CLASS(EncParamPredStructTest, pred_structure);
 PARAM_TEST(EncParamPredStructTest);
 
-/** Test case for base_layer_switch_mode*/
-DEFINE_PARAM_TEST_CLASS(EncParamBaseLayerSwitchModeTest,
-                        base_layer_switch_mode);
-PARAM_TEST(EncParamBaseLayerSwitchModeTest);
-
 /** Test case for source_width*/
 DEFINE_PARAM_TEST_CLASS(EncParamSrcWidthTest, source_width);
 PARAM_TEST(EncParamSrcWidthTest);
@@ -251,14 +246,6 @@ PARAM_TEST(EncParamEncBitDepthTest);
 /** Test case for compressed_ten_bit_format*/
 DEFINE_PARAM_TEST_CLASS(EncParamCompr10BitFmtTest, compressed_ten_bit_format);
 PARAM_TEST(EncParamCompr10BitFmtTest);
-
-/** Test case for frames_to_be_encoded*/
-DEFINE_PARAM_TEST_CLASS(EncParamFrame2EncTest, frames_to_be_encoded);
-PARAM_TEST(EncParamFrame2EncTest);
-
-/** Test case for improve_sharpness*/
-DEFINE_PARAM_TEST_CLASS(EncParamImproveSharpTest, improve_sharpness);
-PARAM_TEST(EncParamImproveSharpTest);
 
 /** Test case for sb_sz*/
 DEFINE_PARAM_TEST_CLASS(EncParamSbSizeTest, sb_sz);
@@ -301,6 +288,10 @@ PARAM_TEST(EncParamFilmGrainDenoiseStrTest);
 DEFINE_PARAM_TEST_CLASS(EncParamEnableWarpedMotionTest, enable_warped_motion);
 PARAM_TEST(EncParamEnableWarpedMotionTest);
 
+/** Test case for enable_global_motion*/
+DEFINE_PARAM_TEST_CLASS(EncParamEnableGlobalMotionTest, enable_global_motion);
+PARAM_TEST(EncParamEnableGlobalMotionTest);
+
 /** Test case for use_default_me_hme*/
 DEFINE_PARAM_TEST_CLASS(EncParamUseDefaultMeHmeTest, use_default_me_hme);
 PARAM_TEST(EncParamUseDefaultMeHmeTest);
@@ -325,9 +316,9 @@ PARAM_TEST(EncParamSearchAreaWidthTest);
 DEFINE_PARAM_TEST_CLASS(EncParamSearchAreaHeightTest, search_area_height);
 PARAM_TEST(EncParamSearchAreaHeightTest);
 
-/** Test case for constrained_intra*/
-DEFINE_PARAM_TEST_CLASS(EncParamConstrainedIntraTest, constrained_intra);
-PARAM_TEST(EncParamConstrainedIntraTest);
+/** Test case for enable_palette*/
+DEFINE_PARAM_TEST_CLASS(EncParamEnablePaletteTest, enable_palette);
+PARAM_TEST(EncParamEnablePaletteTest);
 
 /** Test case for rate_control_mode*/
 DEFINE_PARAM_TEST_CLASS(EncParamRateCtrlModeTest, rate_control_mode);
@@ -358,9 +349,9 @@ DEFINE_PARAM_TEST_CLASS(EncParamHighDynamicRangeInputTest,
                         high_dynamic_range_input);
 PARAM_TEST(EncParamHighDynamicRangeInputTest);
 
-/** Test case for profile*/
-DEFINE_PARAM_TEST_CLASS(EncParamProfileTest, profile);
-PARAM_TEST(EncParamProfileTest);
+/** Test case for profile, requiure YUV 422 or 444 which is unsupported now */
+//DEFINE_PARAM_TEST_CLASS(EncParamProfileTest, profile);
+//PARAM_TEST(EncParamProfileTest);
 
 /** Test case for tier*/
 DEFINE_PARAM_TEST_CLASS(EncParamTierTest, tier);
@@ -370,9 +361,9 @@ PARAM_TEST(EncParamTierTest);
 DEFINE_PARAM_TEST_CLASS(EncParamLevelTest, level);
 PARAM_TEST(EncParamLevelTest);
 
-/** Test case for asm_type*/
-DEFINE_PARAM_TEST_CLASS(EncParamAsmTypeTest, asm_type);
-PARAM_TEST(EncParamAsmTypeTest);
+/** Test case for use_cpu_flags*/
+DEFINE_PARAM_TEST_CLASS(EncParamOplLevelTest, use_cpu_flags);
+PARAM_TEST(EncParamOplLevelTest);
 
 /** Test case for channel_id*/
 DEFINE_PARAM_TEST_CLASS(EncParamChIdTest, channel_id);

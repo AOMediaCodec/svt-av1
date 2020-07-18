@@ -25,7 +25,11 @@ test_apply_compiler_flags(${flags_to_test})
 
 file(GLOB all_files
     "*.h"
-    "*.asm"
     "*.c")
 
+set(asm_files
+    aom_subpixel_bilinear_ssse3.asm)
+
 add_library(COMMON_ASM_SSSE3 OBJECT ${all_files})
+
+asm_compile_to_target(COMMON_ASM_SSSE3 ${asm_files})

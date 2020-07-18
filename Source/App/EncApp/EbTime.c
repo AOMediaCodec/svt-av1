@@ -5,178 +5,127 @@
 
 #include <stdint.h>
 
+#ifndef __USE_POSIX199309
+#define __USE_POSIX199309
+#endif
+#include <time.h>
+
 #ifdef _WIN32
-//#if  (WIN_ENCODER_TIMING || WIN_DECODER_TIMING)
-#include <time.h>
-#include <stdio.h>
 #include <windows.h>
-//#endif
-
-#elif defined(__linux__) || defined(__APPLE__)
-#include <stdio.h>
-#include <stdlib.h>
-//#if   (LINUX_ENCODER_TIMING || LINUX_DECODER_TIMING)
-#include <sys/time.h>
-#include <time.h>
-//#endif
-
 #else
-#error OS/Platform not supported.
+#include <sys/time.h>
 #endif
 
 #include "EbTime.h"
 
-#if defined(__linux__)
-#ifndef __clang__
+#if defined(__GNUC__) && !defined(__clang__) && !defined(__ICC__)
 __attribute__((optimize("unroll-loops")))
 #endif
-#endif
 
-void StartTime(uint64_t *Startseconds, uint64_t *Startuseconds) {
-#if defined(__linux__) || defined(__APPLE__) //(LINUX_ENCODER_TIMING || LINUX_DECODER_TIMING)
+void start_time(uint64_t *start_seconds, uint64_t *start_u_seconds) {
+#ifdef _WIN32
+    *start_seconds = (uint64_t)clock();
+    (void)(*start_u_seconds);
+#else
     struct timeval start;
     gettimeofday(&start, NULL);
-    *Startseconds = start.tv_sec;
-    *Startuseconds = start.tv_usec;
-#elif _WIN32 //(WIN_ENCODER_TIMING || WIN_DECODER_TIMING)
-    *Startseconds = (uint64_t)clock();
-    (void)(*Startuseconds);
-#else
-    (void)(*Startuseconds);
-    (void)(*Startseconds);
+    *start_seconds   = start.tv_sec;
+    *start_u_seconds = start.tv_usec;
 #endif
 }
 
-void FinishTime(uint64_t *Finishseconds, uint64_t *Finishuseconds) {
-#if defined(__linux__) || defined(__APPLE__) //(LINUX_ENCODER_TIMING || LINUX_DECODER_TIMING)
+void finish_time(uint64_t *finish_seconds, uint64_t *finish_u_seconds) {
+#ifdef _WIN32
+    *finish_seconds = (uint64_t)clock();
+    (void)(*finish_u_seconds);
+#else
     struct timeval finish;
     gettimeofday(&finish, NULL);
-    *Finishseconds = finish.tv_sec;
-    *Finishuseconds = finish.tv_usec;
-#elif _WIN32 //(WIN_ENCODER_TIMING || WIN_DECODER_TIMING)
-    *Finishseconds = (uint64_t)clock();
-    (void)(*Finishuseconds);
-#else
-    (void)(*Finishuseconds);
-    (void)(*Finishseconds);
+    *finish_seconds   = finish.tv_sec;
+    *finish_u_seconds = finish.tv_usec;
 #endif
 }
 
-void ComputeOverallElapsedTime(uint64_t Startseconds, uint64_t Startuseconds, uint64_t Finishseconds, uint64_t Finishuseconds, double *duration)
-{
-#if defined(__linux__) || defined(__APPLE__) //(LINUX_ENCODER_TIMING || LINUX_DECODER_TIMING)
-    long   mtime, seconds, useconds;
-    seconds = Finishseconds - Startseconds;
-    useconds = Finishuseconds - Startuseconds;
-    mtime = ((seconds) * 1000 + useconds / 1000.0) + 0.5;
+void compute_overall_elapsed_time(uint64_t start_seconds, uint64_t start_u_seconds,
+                                  uint64_t finish_seconds, uint64_t finish_u_seconds,
+                                  double *duration) {
+#ifdef _WIN32
+    //double  duration;
+    *duration = (double)(finish_seconds - start_seconds) / CLOCKS_PER_SEC;
+    (void)(start_u_seconds);
+    (void)(finish_u_seconds);
+#else
+    long mtime, seconds, useconds;
+    seconds   = finish_seconds - start_seconds;
+    useconds  = finish_u_seconds - start_u_seconds;
+    mtime     = ((seconds)*1000 + useconds / 1000.0) + 0.5;
     *duration = (double)mtime / 1000;
-    //printf("\nElapsed time: %3.3ld seconds\n", mtime/1000);
-#elif _WIN32 //(WIN_ENCODER_TIMING || WIN_DECODER_TIMING)
-    //double  duration;
-    *duration = (double)(Finishseconds - Startseconds) / CLOCKS_PER_SEC;
-    //printf("\nElapsed time: %3.3f seconds\n", *duration);
-    (void)(Startuseconds);
-    (void)(Finishuseconds);
-#else
-    (void)(Startuseconds);
-    (void)(Startseconds);
-    (void)(Finishuseconds);
-    (void)(Finishseconds);
-
 #endif
 }
 
-void ComputeOverallElapsedTimeMs(uint64_t Startseconds, uint64_t Startuseconds, uint64_t Finishseconds, uint64_t Finishuseconds, double *duration)
-{
-#if defined(__linux__) || defined(__APPLE__) //(LINUX_ENCODER_TIMING || LINUX_DECODER_TIMING)
-    long   mtime, seconds, useconds;
-    seconds = Finishseconds - Startseconds;
-    useconds = Finishuseconds - Startuseconds;
-    mtime = ((seconds) * 1000 + useconds / 1000.0) + 0.5;
-    *duration = (double)mtime;
-    //printf("\nElapsed time: %3.3ld seconds\n", mtime/1000);
-#elif _WIN32 //(WIN_ENCODER_TIMING || WIN_DECODER_TIMING)
-    //double  duration;
-    *duration = (double)(Finishseconds - Startseconds);
-    //printf("\nElapsed time: %3.3f seconds\n", *duration);
-    (void)(Startuseconds);
-    (void)(Finishuseconds);
+static void sleep_ms(uint64_t milli_seconds) {
+    if (milli_seconds) {
+#ifdef _WIN32
+        Sleep((DWORD)milli_seconds);
 #else
-    (void)(Startuseconds);
-    (void)(Startseconds);
-    (void)(Finishuseconds);
-    (void)(Finishseconds);
-
-#endif
-}
-
-static void SleepMs(uint64_t milliSeconds)
-{
-    if(milliSeconds) {
-#if defined(__linux__) || defined(__APPLE__)
-        struct timespec req,rem;
-        req.tv_sec=(int32_t)(milliSeconds/1000);
-        milliSeconds -= req.tv_sec * 1000;
-        req.tv_nsec = milliSeconds * 1000000UL;
-        nanosleep(&req,&rem);
-#elif _WIN32
-        Sleep((DWORD) milliSeconds);
-#else
-#error OS Not supported
+        struct timespec req, rem;
+        req.tv_sec = (int32_t)(milli_seconds / 1000);
+        milli_seconds -= req.tv_sec * 1000;
+        req.tv_nsec = milli_seconds * 1000000UL;
+        nanosleep(&req, &rem);
 #endif
     }
 }
 
-void Injector(uint64_t processed_frame_count,
-              uint32_t injector_frame_rate)
-{
-#if defined(__linux__) || defined(__APPLE__)
-    uint64_t                  currentTimesSeconds = 0;
-    uint64_t                  currentTimesuSeconds = 0;
-    static uint64_t           startTimesSeconds;
-    static uint64_t           startTimesuSeconds;
-#elif _WIN32
-    static LARGE_INTEGER    startCount;               // this is the start time
-    static LARGE_INTEGER    counterFreq;              // performance counter frequency
-    LARGE_INTEGER           nowCount;                 // this is the current time
+void injector(uint64_t processed_frame_count, uint32_t injector_frame_rate) {
+#ifdef _WIN32
+    static LARGE_INTEGER start_count; // this is the start time
+    static LARGE_INTEGER counter_freq; // performance counter frequency
+    LARGE_INTEGER        now_count; // this is the current time
 #else
-#error OS Not supported
+    uint64_t        currentTimesSeconds  = 0;
+    uint64_t        currentTimesuSeconds = 0;
+    static uint64_t startTimesSeconds;
+    static uint64_t startTimesuSeconds;
 #endif
 
-    double                 injectorInterval  = (double)(1<<16)/(double)injector_frame_rate;     // 1.0 / injector frame rate (in this case, 1.0/encodRate)
-    double                  elapsedTime;
-    double                  predictedTime;
-    int32_t                     bufferFrames = 1;         // How far ahead of time should we let it get
-    int32_t                     milliSecAhead;
-    static int32_t              firstTime = 0;
+    double injector_interval =
+        (double)(1 << 16) /
+        (double)injector_frame_rate; // 1.0 / injector frame rate (in this case, 1.0/encodRate)
+    double         elapsed_time;
+    double         predicted_time;
+    int32_t        buffer_frames = 1; // How far ahead of time should we let it get
+    int32_t        millisec_ahead;
+    static int32_t first_time = 0;
 
-    if (firstTime == 0)
-    {
-        firstTime = 1;
+    if (first_time == 0) {
+        first_time = 1;
 
-#if defined(__linux__) || defined(__APPLE__)
-        StartTime((uint64_t*)&startTimesSeconds, (uint64_t*)&startTimesuSeconds);
-#elif _WIN32
-        QueryPerformanceFrequency(&counterFreq);
-        QueryPerformanceCounter(&startCount);
+#ifdef _WIN32
+        QueryPerformanceFrequency(&counter_freq);
+        QueryPerformanceCounter(&start_count);
+#else
+        start_time((uint64_t *)&startTimesSeconds, (uint64_t *)&startTimesuSeconds);
 #endif
-    }
-    else
-    {
-#if defined(__linux__) || defined(__APPLE__)
-        FinishTime((uint64_t*)&currentTimesSeconds, (uint64_t*)&currentTimesuSeconds);
-        ComputeOverallElapsedTime(startTimesSeconds, startTimesuSeconds, currentTimesSeconds, currentTimesuSeconds, &elapsedTime);
-#elif _WIN32
-        QueryPerformanceCounter(&nowCount);
-        elapsedTime = (double)(nowCount.QuadPart - startCount.QuadPart) / (double)counterFreq.QuadPart;
+    } else {
+#ifdef _WIN32
+        QueryPerformanceCounter(&now_count);
+        elapsed_time =
+            (double)(now_count.QuadPart - start_count.QuadPart) / (double)counter_freq.QuadPart;
+#else
+        finish_time((uint64_t *)&currentTimesSeconds, (uint64_t *)&currentTimesuSeconds);
+        compute_overall_elapsed_time(startTimesSeconds,
+                                     startTimesuSeconds,
+                                     currentTimesSeconds,
+                                     currentTimesuSeconds,
+                                     &elapsed_time);
 #endif
 
-        predictedTime = (processed_frame_count - bufferFrames) * injectorInterval;
-        milliSecAhead = (int32_t)(1000 * (predictedTime - elapsedTime ));
-        if (milliSecAhead>0)
-        {
+        predicted_time = (processed_frame_count - buffer_frames) * injector_interval;
+        millisec_ahead = (int32_t)(1000 * (predicted_time - elapsed_time));
+        if (millisec_ahead > 0) {
             //  timeBeginPeriod(1);
-            SleepMs(milliSecAhead);
+            sleep_ms(millisec_ahead);
             //  timeEndPeriod (1);
         }
     }

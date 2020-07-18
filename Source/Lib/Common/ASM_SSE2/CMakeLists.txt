@@ -21,7 +21,15 @@ test_apply_compiler_flags(${flags_to_test})
 
 file(GLOB all_files
     "*.h"
-    "*.asm"
     "*.c")
 
+set(asm_files
+    intrapred_sse2.asm
+    EbPictureOperators_SSE2.asm
+    highbd_intrapred_sse2_.asm
+    aom_subpixel_8t_sse2.asm
+    subtract_sse2.asm)
+
 add_library(COMMON_ASM_SSE2 OBJECT ${all_files})
+
+asm_compile_to_target(COMMON_ASM_SSE2 ${asm_files})

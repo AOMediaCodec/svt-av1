@@ -12,18 +12,9 @@
 #ifndef EbDecObmc_h
 #define EbDecObmc_h
 
+#include "EbDecHandle.h"
+
 #define MAX_OBMC_LEN 32
-#define IS_POWER_OF_TWO(x) (((x) & ((x)-1)) == 0)
-
- // Alpha blending with alpha values from the range [0, 64], where 64
- // means use the first input and 0 means use the second input.
-
-#define AOM_BLEND_A64_ROUND_BITS 6
-#define AOM_BLEND_A64_MAX_ALPHA (1 << AOM_BLEND_A64_ROUND_BITS)  // 64
-
-#define AOM_BLEND_A64(a, v0, v1)                                          \
-  ROUND_POWER_OF_TWO((a) * (v0) + (AOM_BLEND_A64_MAX_ALPHA - (a)) * (v1), \
-                     AOM_BLEND_A64_ROUND_BITS)
 
 typedef struct ObmcCtx {
     /*we can reduce memory size by fixing one side to 32, because
@@ -33,14 +24,11 @@ typedef struct ObmcCtx {
 
     int dst_stride[MAX_MB_PLANE];
 
-
 } ObmcCtx;
 
-static const int max_neighbor_obmc[6] = { 0, 1, 2, 3, 4, 4 };
+static const int max_neighbor_obmc[6] = {0, 1, 2, 3, 4, 4};
 
-void dec_build_obmc_inter_predictors_sb(EbDecHandle *dec_handle,
-    PartitionInfo_t *pi, int mi_row, int mi_col);
+void dec_build_obmc_inter_predictors_sb(void *pv_dec_mod_ctx, EbDecHandle *dec_handle,
+                                        PartitionInfo *pi, int mi_row, int mi_col);
 
-
-#endif  // EbDecObmc_h
-
+#endif // EbDecObmc_h

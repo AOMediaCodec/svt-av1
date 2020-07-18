@@ -34,6 +34,7 @@ extern "C" {
 #include "EbDecNbr.h"
 #include "EbDecPicMgr.h"
 #include "EbDecUtils.h"
+#include "EbDecInterPrediction.h"
 
 #define MVREF_ROW_COLS 3
 // Set the upper limit of the motion vector component magnitude.
@@ -42,34 +43,20 @@ extern "C" {
 // 32 bit range for efficient load/store operations.
 #define REFMVS_LIMIT ((1 << 12) - 1)
 
-#define MV_BORDER (16 << 3)  // Allow 16 pels in 1/8th pel units
-#define MAX_DIFFWTD_MASK_BITS 1
-#define NELEMENTS(x) (int)(sizeof(x) / sizeof(x[0]))
-#define MAX_OFFSET_WIDTH 64
-#define MAX_OFFSET_HEIGHT 0
+static const MV k_zero_mv = {0, 0};
 
-/* Harmonize with encoder */
-#define INTRABC_DELAY_PIXELS 256
-#define INTRABC_DELAY_SB64 (INTRABC_DELAY_PIXELS / 64)
+extern int8_t av1_ref_frame_type(const MvReferenceFrame *const rf);
+extern void   av1_set_ref_frame(MvReferenceFrame *rf, int8_t ref_frame_type);
 
-static const MV kZeroMv = { 0, 0 };
+void inter_block_mode_info(EbDecHandle *dec_handle, ParseCtxt *parse_ctxt, PartitionInfo *pi);
 
-extern  int8_t av1_ref_frame_type(const MvReferenceFrame *const rf);
-extern void av1_set_ref_frame(MvReferenceFrame *rf, int8_t ref_frame_type);
-
-void inter_block_mode_info(EbDecHandle *dec_handle, PartitionInfo_t* pi,
-    int mi_row, int mi_col, SvtReader *r);
-
-void av1_find_mv_refs(EbDecHandle *dec_handle, PartitionInfo_t *pi,
-    MvReferenceFrame ref_frame, CandidateMvDec ref_mv_stack[][MAX_REF_MV_STACK_SIZE],
-    IntMvDec mv_ref_list[][MAX_MV_REF_CANDIDATES], IntMvDec global_mvs[2],
-    int mi_row, int mi_col, int16_t *mode_context, MvCount *mv_cnt);
-void get_mv_projection(MV *output, MV ref, int num, int den);
-void assign_intrabc_mv(EbDecHandle *dec_handle,
-    IntMvDec ref_mvs[INTRA_FRAME + 1][MAX_MV_REF_CANDIDATES],
-    PartitionInfo_t *pi, int mi_row, int mi_col, SvtReader *r);
-void palette_tokens(EbDecHandle *dec_handle, PartitionInfo_t *pi,
-    int mi_row, int mi_col, SvtReader *r);
+void av1_find_mv_refs(EbDecHandle *dec_handle, PartitionInfo *pi, ParseCtxt *parse_ctx,
+                      MvReferenceFrame ref_frame, CandidateMv ref_mv_stack[][MAX_REF_MV_STACK_SIZE],
+                      IntMv mv_ref_list[][MAX_MV_REF_CANDIDATES], IntMv global_mvs[2],
+                      int16_t *mode_context, MvCount *mv_cnt);
+void assign_intrabc_mv(ParseCtxt *parse_ctxt, IntMv ref_mvs[INTRA_FRAME + 1][MAX_MV_REF_CANDIDATES],
+                       PartitionInfo *pi);
+void palette_tokens(EbDecHandle *dec_handle, ParseCtxt *parse_ctx, PartitionInfo *pi);
 #ifdef __cplusplus
 }
 #endif
