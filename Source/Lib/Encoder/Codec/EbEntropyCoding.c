@@ -2824,19 +2824,13 @@ static void encode_restoration_mode(PictureParentControlSet * pcs_ptr,
             eb_aom_wb_write_bit(wb, rsi->restoration_unit_size > 128);
     }
 
-    if (num_planes > 1) {
-        int32_t s = 1; // AOMMIN(cm->subsampling_x, cm->subsampling_y);
-        if (s && !chroma_none) {
-            eb_aom_wb_write_bit(
-                wb, cm->rst_info[1].restoration_unit_size != cm->rst_info[0].restoration_unit_size);
-            assert(cm->rst_info[1].restoration_unit_size == cm->rst_info[0].restoration_unit_size ||
-                   cm->rst_info[1].restoration_unit_size ==
-                       (cm->rst_info[0].restoration_unit_size >> s));
-            assert(cm->rst_info[2].restoration_unit_size == cm->rst_info[1].restoration_unit_size);
-        } else if (!s) {
-            assert(cm->rst_info[1].restoration_unit_size == cm->rst_info[0].restoration_unit_size);
-            assert(cm->rst_info[2].restoration_unit_size == cm->rst_info[1].restoration_unit_size);
-        }
+    if (!chroma_none) {
+        eb_aom_wb_write_bit(
+            wb, cm->rst_info[1].restoration_unit_size != cm->rst_info[0].restoration_unit_size);
+        assert(cm->rst_info[1].restoration_unit_size == cm->rst_info[0].restoration_unit_size ||
+               cm->rst_info[1].restoration_unit_size ==
+                   (cm->rst_info[0].restoration_unit_size >> 1));
+        assert(cm->rst_info[2].restoration_unit_size == cm->rst_info[1].restoration_unit_size);
     }
 }
 
