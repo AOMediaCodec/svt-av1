@@ -118,10 +118,11 @@ jobs:
             "::set-env name=PATH::/usr/local/opt/ccache/libexec:$PATH" \
             "::set-env name=CCACHE_DIR::$HOME/.ccache"
           clang -v
+          rm -rf macos-build
       - name: Run CMake
         run: |
-          cmake -S "$GITHUB_WORKSPACE" -B Build -GNinja -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=OFF -DBUILD_TESTING=ON -BBUILD_DEC=OFF -DBUILD_APPS=OFF
-          cmake --build Build --config Release --target all --target TestVectors
+          cmake -S "$GITHUB_WORKSPACE" -B macos-build -GNinja -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=OFF -DBUILD_TESTING=ON -DBUILD_APPS=OFF
+          cmake --build macos-build --config Release --target all --target TestVectors
       - name: Upload unit-tests (macOS)
         uses: actions/upload-artifact@v2
         with:
