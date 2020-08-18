@@ -713,7 +713,9 @@ typedef struct ModeDecisionContext {
     uint8_t *    left_txfm_context;
     // square cost weighting for deciding if a/b shapes could be skipped
     uint32_t sq_weight;
+#if !MERGE_SQW_FEATURES
     uint32_t nsq_hv_level;
+#endif
     // signal for enabling shortcut to skip search depths
     MD_COMP_TYPE compound_types_to_try;
 #if !PD0_INTER_CAND
@@ -737,7 +739,7 @@ typedef struct ModeDecisionContext {
 #endif
     uint8_t      md_enable_paeth;
     uint8_t      md_enable_smooth;
-    uint8_t      md_enable_inter_intra;
+    uint8_t      md_inter_intra_level;
 #if FILTER_INTRA_CLI
     uint8_t      md_filter_intra_level;
 #else
@@ -920,6 +922,10 @@ typedef struct ModeDecisionContext {
     int16_t sprs_lev0_start_y;
     int16_t sprs_lev0_end_y;
 #endif
+#if MOVE_SIGNALS_TO_MD
+    uint8_t txs_in_inter_classes;
+    uint8_t nic_scaling_level;
+    uint8_t inter_compound_mode;
 #endif
 } ModeDecisionContext;
 

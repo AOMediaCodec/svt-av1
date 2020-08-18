@@ -1046,12 +1046,12 @@ void unipred_3x3_candidates_injection(const SequenceControlSet *scs_ptr, Picture
                     uint8_t inter_type;
                     uint8_t is_ii_allowed =
 #if INTRA_COMPOUND_OPT
-                        svt_is_interintra_allowed(context_ptr->md_enable_inter_intra == 1 , context_ptr->blk_geom->bsize, NEWMV, rf);
+                        svt_is_interintra_allowed(context_ptr->md_inter_intra_level == 1 , context_ptr->blk_geom->bsize, NEWMV, rf);
 #else
                         0; //svt_is_interintra_allowed(pcs_ptr->parent_pcs_ptr->enable_inter_intra, bsize, NEWMV, rf);
 #endif
 #if INTRA_COMPOUND_OPT
-                    if (context_ptr->md_enable_inter_intra > 2)
+                    if (context_ptr->md_inter_intra_level > 2)
 #if DECOUPLE_ME_RES
                         if (pcs_ptr->parent_pcs_ptr->pa_me_data->me_results[me_sb_addr]->do_comp[0][list0_ref_index] == 0)
 #else
@@ -1225,13 +1225,13 @@ void unipred_3x3_candidates_injection(const SequenceControlSet *scs_ptr, Picture
                              EB_FALSE)) {
                         uint8_t inter_type;
 #if INTRA_COMPOUND_OPT
-                        uint8_t is_ii_allowed   = svt_is_interintra_allowed(context_ptr->md_enable_inter_intra == 1,
+                        uint8_t is_ii_allowed   = svt_is_interintra_allowed(context_ptr->md_inter_intra_level == 1,
                             context_ptr->blk_geom->bsize, NEWMV, rf);
 #else
                         uint8_t is_ii_allowed   = 0;
 #endif
 #if INTRA_COMPOUND_OPT
-                    if (context_ptr->md_enable_inter_intra > 2)
+                    if (context_ptr->md_inter_intra_level > 2)
 #if DECOUPLE_ME_RES
                         if (pcs_ptr->parent_pcs_ptr->pa_me_data->me_results[me_sb_addr]->do_comp[1][list1_ref_index] == 0)
 #else
@@ -1887,11 +1887,11 @@ void inject_mvp_candidates_ii(struct ModeDecisionContext *context_ptr, PictureCo
         if (inj_mv) {
             uint8_t inter_type;
             uint8_t is_ii_allowed =
-                svt_is_interintra_allowed(context_ptr->md_enable_inter_intra, bsize, NEARESTMV, rf);
+                svt_is_interintra_allowed(context_ptr->md_inter_intra_level, bsize, NEARESTMV, rf);
 #if INTRA_COMPOUND_OPT
             uint8_t ref_idx_0 = get_ref_frame_idx(rf[0]);
 
-            if (context_ptr->md_enable_inter_intra > 2)
+            if (context_ptr->md_inter_intra_level > 2)
                 if (ref_idx_0 > context_ptr->inter_comp_ctrls.mrp_pruning_w_distance - 1)
                     is_ii_allowed = 0;
 #endif
@@ -2004,11 +2004,11 @@ void inject_mvp_candidates_ii(struct ModeDecisionContext *context_ptr, PictureCo
             if (inj_mv) {
                 uint8_t inter_type;
                 uint8_t is_ii_allowed = svt_is_interintra_allowed(
-                    context_ptr->md_enable_inter_intra, bsize, NEARMV, rf);
+                    context_ptr->md_inter_intra_level, bsize, NEARMV, rf);
 #if INTRA_COMPOUND_OPT
             uint8_t ref_idx_0 = get_ref_frame_idx(rf[0]);
 
-            if (context_ptr->md_enable_inter_intra > 2)
+            if (context_ptr->md_inter_intra_level > 2)
                 if (ref_idx_0 > context_ptr->inter_comp_ctrls.mrp_pruning_w_distance - 1)
                     is_ii_allowed = 0;
 #endif
@@ -3726,17 +3726,17 @@ void inject_new_candidates(const SequenceControlSet *  scs_ptr,
                      EB_FALSE)) {
                 uint8_t inter_type;
                 uint8_t is_ii_allowed = svt_is_interintra_allowed(
-                    context_ptr->md_enable_inter_intra,
+                    context_ptr->md_inter_intra_level,
                     bsize,
                     NEWMV,
                     (const MvReferenceFrame[]){to_inject_ref_type, -1});
 #if INTRA_COMPOUND_OPT
 #if DECOUPLE_ME_RES
-                if (context_ptr->md_enable_inter_intra > 2)
+                if (context_ptr->md_inter_intra_level > 2)
                     if (pcs_ptr->parent_pcs_ptr->pa_me_data->me_results[me_sb_addr]->do_comp[0][list0_ref_index] == 0)
                         is_ii_allowed = 0;
 #else
-                if (context_ptr->md_enable_inter_intra > 2)
+                if (context_ptr->md_inter_intra_level > 2)
                     if  (pcs_ptr->parent_pcs_ptr->me_results[me_sb_addr]->do_comp[0][list0_ref_index] == 0 )
                         is_ii_allowed = 0;
 #endif
@@ -3884,17 +3884,17 @@ void inject_new_candidates(const SequenceControlSet *  scs_ptr,
 
                     uint8_t inter_type;
                     uint8_t is_ii_allowed = svt_is_interintra_allowed(
-                        context_ptr->md_enable_inter_intra,
+                        context_ptr->md_inter_intra_level,
                         bsize,
                         NEWMV,
                         (const MvReferenceFrame[]){to_inject_ref_type, -1});
 #if INTRA_COMPOUND_OPT
 #if DECOUPLE_ME_RES
-                    if (context_ptr->md_enable_inter_intra > 2)
+                    if (context_ptr->md_inter_intra_level > 2)
                         if (pcs_ptr->parent_pcs_ptr->pa_me_data->me_results[me_sb_addr]->do_comp[1][list1_ref_index] == 0)
                             is_ii_allowed = 0;
 #else
-                    if (context_ptr->md_enable_inter_intra > 2)
+                    if (context_ptr->md_inter_intra_level > 2)
                         if  ( pcs_ptr->parent_pcs_ptr->me_results[me_sb_addr]->do_comp[1][list1_ref_index] == 0)
                                 is_ii_allowed = 0;
 #endif
@@ -4859,12 +4859,12 @@ void inject_predictive_me_candidates(
 #endif
                     uint8_t is_ii_allowed =
 #if INTRA_COMPOUND_OPT
-                        svt_is_interintra_allowed(context_ptr->md_enable_inter_intra == 1, bsize, NEWMV, rf);
+                        svt_is_interintra_allowed(context_ptr->md_inter_intra_level == 1, bsize, NEWMV, rf);
 #else
                         0; // svt_is_interintra_allowed(pcs_ptr->parent_pcs_ptr->enable_inter_intra, bsize, NEWMV, rf);
 #endif
 #if INTRA_COMPOUND_OPT
-                    if (context_ptr->md_enable_inter_intra > 2)
+                    if (context_ptr->md_inter_intra_level > 2)
                         if (is_reference_best_pme(context_ptr , 0 ,ref_pic_index ,1)  == 0)
                             is_ii_allowed = 0;
 #endif
@@ -5024,12 +5024,12 @@ void inject_predictive_me_candidates(
 #endif
                         uint8_t is_ii_allowed =
 #if INTRA_COMPOUND_OPT
-                        svt_is_interintra_allowed(context_ptr->md_enable_inter_intra == 1, bsize, NEWMV, rf);
+                        svt_is_interintra_allowed(context_ptr->md_inter_intra_level == 1, bsize, NEWMV, rf);
 #else
                             0; // svt_is_interintra_allowed(pcs_ptr->parent_pcs_ptr->enable_inter_intra, bsize, NEWMV, rf);
 #endif
 #if INTRA_COMPOUND_OPT
-                    if (context_ptr->md_enable_inter_intra > 2)
+                    if (context_ptr->md_inter_intra_level > 2)
                         if (is_reference_best_pme(context_ptr , 0 ,ref_pic_index ,1)  == 0)
                             is_ii_allowed = 0;
 #endif
@@ -5426,7 +5426,7 @@ void inject_inter_candidates(PictureControlSet *pcs_ptr, ModeDecisionContext *co
                            context_ptr->blk_geom->bheight >= 8) ||
                           params_l0->wmtype <= TRANSLATION))) {
                         int is_ii_allowed = svt_is_interintra_allowed(
-                            context_ptr->md_enable_inter_intra,
+                            context_ptr->md_inter_intra_level,
                             bsize,
                             GLOBALMV,
                             (const MvReferenceFrame[]){to_inject_ref_type, -1});
@@ -5629,7 +5629,7 @@ void inject_inter_candidates(PictureControlSet *pcs_ptr, ModeDecisionContext *co
                                              : 1;
             if (inj_mv && inside_tile) {
                 uint8_t is_ii_allowed = svt_is_interintra_allowed(
-                    context_ptr->md_enable_inter_intra,
+                    context_ptr->md_inter_intra_level,
                     bsize,
                     GLOBALMV,
                     (const MvReferenceFrame[]){to_inject_ref_type, -1});

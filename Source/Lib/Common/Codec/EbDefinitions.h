@@ -509,6 +509,12 @@ extern "C" {
 #define UPGRADE_SUBPEL      1 // Upgrade subpel of me and of pme to use libaom subpel search
 #define REMOVE_USELESS_CODE 1 // Remove useless code
 
+#define MOVE_SIGNALS_TO_MD               1 // move txs_in_inter_classes, compound_mode and inter_intra to MD
+#define SHUT_SIMILARITY_FEATURES         1 // turn off features related to similar blocks
+#define MERGE_SQW_FEATURES               1 // Merge nsq_hv_level and sq_weight; if sq_weight on, so is nsq_hv_level
+#define SHUT_EDGE_BASED_SKIP_ANGLE_INTRA 1 // Turn off edge_based_skip_angle_intra_feature
+#define MOVE_TXT_TXS_STATS_TO_FUNCS      1 // Cleanup TXT/TXS stats code by creating functions for stats-based decisions
+
 #endif
 
 ///////// END MASTER_SYNCH
