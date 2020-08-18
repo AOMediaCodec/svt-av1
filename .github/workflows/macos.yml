@@ -143,6 +143,7 @@ jobs:
         uses: actions/download-artifact@v2
         with:
           name: svtav1-macOS-unittest
+          path: Bin/Release
       - name: Run unit tests
         run: |
           parallel -u -j 4 GTEST_SHARD_INDEX={} ./Bin/Release/SvtAv1UnitTests ::: $(seq 0 $((GTEST_TOTAL_SHARDS - 1)))
@@ -161,5 +162,6 @@ jobs:
         uses: actions/download-artifact@v2
         with:
           name: svtav1-macOS-unittest
+          path: Bin/Release
       - name: Run e2e tests
         run: ./Bin/Release/SvtAv1E2ETests --gtest_filter=-*DummySrcTest*
