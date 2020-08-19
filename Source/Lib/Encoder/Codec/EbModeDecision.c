@@ -4249,7 +4249,7 @@ void inject_global_candidates(const SequenceControlSet *  scs_ptr,
 
                 uint8_t inter_type;
                 uint8_t is_ii_allowed = svt_is_interintra_allowed(
-                    context_ptr->md_enable_inter_intra, bsize, GLOBALMV, rf);
+                    context_ptr->md_inter_intra_level, bsize, GLOBALMV, rf);
 
                 uint8_t tot_inter_types = is_ii_allowed ? II_COUNT : 1;
 
@@ -4567,9 +4567,9 @@ void inject_predictive_me_candidates(
                 if (inj_mv) {
                     uint8_t inter_type;
                     uint8_t is_ii_allowed = svt_is_interintra_allowed(
-                        context_ptr->md_enable_inter_intra == 1, bsize, NEWMV, rf);
+                        context_ptr->md_inter_intra_level == 1, bsize, NEWMV, rf);
 
-                    if (context_ptr->md_enable_inter_intra > 2)
+                    if (context_ptr->md_inter_intra_level > 2)
                         if (is_reference_best_pme(context_ptr, list_idx, ref_idx, 1) == 0)
                             is_ii_allowed = 0;
                     uint8_t tot_inter_types = is_ii_allowed ? II_COUNT : 1;

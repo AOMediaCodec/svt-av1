@@ -3761,6 +3761,37 @@ void set_md_stage_counts(PictureControlSet *pcs_ptr, ModeDecisionContext *contex
         }
     }
 #endif
+
+#if FAST_M8_V1
+    uint8_t use_nic_1_last_stage;
+#if SHIFT_PRESETS
+    if (pcs_ptr->enc_mode <= ENC_M5) {
+#else
+    if (pcs_ptr->enc_mode <= ENC_M6) {
+#endif
+        use_nic_1_last_stage = 0;
+    }
+    else {
+        use_nic_1_last_stage = 1;
+    }
+
+    if (use_nic_1_last_stage) {
+        for (uint8_t cidx = 0; cidx < CAND_CLASS_TOTAL; ++cidx) {
+            if (context_ptr->bypass_md_stage_2[cidx]) {
+                context_ptr->md_stage_2_count[cidx] = 1;
+                context_ptr->md_stage_2_count[cidx] = 1;
+                context_ptr->md_stage_2_count[cidx] = 1;
+                context_ptr->md_stage_2_count[cidx] = 1;
+            }
+            else {
+                context_ptr->md_stage_3_count[cidx] = 1;
+                context_ptr->md_stage_3_count[cidx] = 1;
+                context_ptr->md_stage_3_count[cidx] = 1;
+                context_ptr->md_stage_3_count[cidx] = 1;
+            }
+        }
+    }
+#endif
     // Step 3: update count for md_stage_1 and d_stage_2 if bypassed (no NIC
     // setting should be done beyond this point)
     context_ptr->md_stage_2_count[CAND_CLASS_0] = context_ptr->bypass_md_stage_1[CAND_CLASS_0]
@@ -3811,6 +3842,7 @@ void set_md_stage_counts(PictureControlSet *pcs_ptr, ModeDecisionContext *contex
     context_ptr->md_stage_3_count[CAND_CLASS_3] = context_ptr->bypass_md_stage_2[CAND_CLASS_3]
                                                       ? context_ptr->md_stage_2_count[CAND_CLASS_3]
                                                       : context_ptr->md_stage_3_count[CAND_CLASS_3];
+#if !FAST_M8_V1
 #if M6_M7_NIC
     uint8_t use_nic_1_last_stage;
 #if JUNE26_ADOPTIONS
@@ -3830,6 +3862,7 @@ void set_md_stage_counts(PictureControlSet *pcs_ptr, ModeDecisionContext *contex
         context_ptr->md_stage_3_count[CAND_CLASS_2] = 1;
         context_ptr->md_stage_3_count[CAND_CLASS_3] = 1;
     }
+#endif
 #endif
 #if !CLASS_MERGING
     context_ptr->md_stage_3_count[CAND_CLASS_4] = context_ptr->bypass_md_stage_2[CAND_CLASS_4]
@@ -9333,7 +9366,17 @@ uint8_t intra_txt_cycles_reduction_th[2/*depth*/][3/*depth refinement*/][3/*tx_s
 #endif
 #if MOVE_TXT_TXS_STATS_TO_FUNCS
 /*
- * Determine whether to bypass a give tx_type based on statistics of previously chosen tx_types
+ * Determine whether to bypass a given tx_type based on statistics of previously chosen tx_types.
+ *
+ * Inputs:
+ * tx_type - corresponds to the current tx_type; this function determines if that tx_type should be evaluated
+ *           based on statistics of previous blocks.
+ * tx_size - the tx_size of the current block.
+ * is_inter - whether the current block uses inter or intra prediction.
+ * dct_dct_count_non_zero_coeffs - the number of non-zero coefficients of the DCT_DCT transform of the block (which is always evaluated first)
+ *
+ * Returns:
+ * TRUE if the current tx_type should be evaluated or FALSE if the current tx_type should be skipped.
  */
 EbBool bypass_txt_based_on_stats(PictureControlSet *pcs_ptr,
                                  ModeDecisionContext *context_ptr,
@@ -11077,7 +11120,15 @@ uint8_t m0_inter_txs_depth_2_cycles_reduction_stats[6/*depth*/][3/*pred-depth de
 #endif
 #if MOVE_TXT_TXS_STATS_TO_FUNCS
 /*
- * Update the end TX depth based on statistics
+ * Update the end TX depth based on statistics.
+ *
+ * Inputs:
+ * end_tx_depth - corresponds to the current max. TX depth that TXS could use.
+ * is_inter - whether the current block uses inter or intra prediction.
+ *
+ * Returns:
+ * Nothing, but updated end_tx_depth to the new meximum depth that should be evaluted, as determined by the statistics
+ * of previously evaluated blocks.
  */
 void bypass_txs_based_on_stats(ModeDecisionContext *context_ptr, uint8_t* end_tx_depth, EbBool is_inter) {
     int8_t pred_depth_refinement = context_ptr->md_local_blk_unit[context_ptr->blk_geom->sqi_mds].pred_depth_refinement;
@@ -12065,6 +12116,7 @@ void set_inter_comp_controls(ModeDecisionContext *mdctxt, uint8_t inter_comp_mod
 #endif
         break;
 #if NEW_MRP_SETTINGS
+#if !SHUT_SIMILARITY_FEATURES // this level becomes the same as level 1
     case 2://FAST - similar based disable
         inter_comp_ctrls->enabled = 1;
 #if SHUT_SIMILARITY_FEATURES
@@ -12089,6 +12141,9 @@ void set_inter_comp_controls(ModeDecisionContext *mdctxt, uint8_t inter_comp_mod
 #endif
         break;
     case 3://FAST - MRP pruning/ similar based disable
+#else
+    case 2://FAST - MRP pruning
+#endif
         inter_comp_ctrls->enabled = 1;
 #if SHUT_SIMILARITY_FEATURES
         inter_comp_ctrls->similar_predictions = 0;
@@ -12948,7 +13003,11 @@ static void class_pruning(PictureControlSet *pcs_ptr, ModeDecisionContext *conte
     const unsigned class_pruning_scaling_level = pcs_ptr->enc_mode <= ENC_MRS
         // class prune OFF
         ? 0
+#if ADD_M9
+        : pcs_ptr->enc_mode <= ENC_M9 ? 1 : 2;
+#else
         : pcs_ptr->enc_mode <= ENC_M8 ? 1 : 2;
+#endif
     // minimum nics
     const uint32_t min_nics = pcs_ptr->parent_pcs_ptr->is_used_as_reference_flag
         ? MIN(2, context_ptr->md_stage_2_count[cand_class_it])

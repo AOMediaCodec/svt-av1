@@ -380,13 +380,13 @@ typedef struct MdSubPelSearchCtrls {
 #endif
 }MdSubPelSearchCtrls;
 #endif
+#endif
 #if SEARCH_TOP_N
 typedef struct MdMotionSearchResults {
     uint32_t dist; // distortion
     int16_t mvx;  // MVx
     int16_t mvy;  // MVy
 } MdMotionSearchResults;
-#endif
 #endif
 #if SWITCH_MODE_BASED_ON_SQ_COEFF
 typedef struct CoeffBSwMdCtrls {
@@ -799,9 +799,9 @@ typedef struct ModeDecisionContext {
     uint8_t md_subpel_search_level;
     MdSubPelSearchCtrls md_subpel_search_ctrls;
 #endif
+#endif
 #if SEARCH_TOP_N
     MdMotionSearchResults md_motion_search_best_mv[MD_MOTION_SEARCH_MAX_BEST_MV];
-#endif
 #endif
 #if !PRUNING_PER_INTER_TYPE
 #if ADD_BEST_CAND_COUNT_SIGNAL
@@ -939,6 +939,7 @@ typedef struct ModeDecisionContext {
     int16_t sprs_lev0_end_x;
     int16_t sprs_lev0_start_y;
     int16_t sprs_lev0_end_y;
+#endif
 #endif
 #if MOVE_SIGNALS_TO_MD
     uint8_t txs_in_inter_classes;
