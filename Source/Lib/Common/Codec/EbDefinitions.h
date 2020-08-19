@@ -515,6 +515,12 @@ extern "C" {
 #define SHUT_EDGE_BASED_SKIP_ANGLE_INTRA 1 // Turn off edge_based_skip_angle_intra_feature
 #define MOVE_TXT_TXS_STATS_TO_FUNCS      1 // Cleanup TXT/TXS stats code by creating functions for stats-based decisions
 
+
+#define SWITCH_MODE_BASED_ON_SQ_COEFF   1 // Use aggressive settings for NSQ blocks if SQ block has zero coeffs
+#define SWITCH_MODE_BASED_ON_STATISTICS 1 // Use aggressive settings for unlikely partitions (determined using stats)
+#if SWITCH_MODE_BASED_ON_SQ_COEFF || SWITCH_MODE_BASED_ON_STATISTICS
+#define UNIFY_LEVELS                    1 // Have the mode-switching features use the regular MD feature levels when switching modes
+#endif
 #endif
 
 ///////// END MASTER_SYNCH

@@ -196,6 +196,14 @@ typedef struct  NsqCycleRControls {
 }NsqCycleRControls;
 #endif
 #if SOFT_CYCLES_REDUCTION
+#if SWITCH_MODE_BASED_ON_STATISTICS
+typedef struct  AMdCycleRControls {
+    uint8_t enabled; // On/Off feature control
+    uint16_t skip_nsq_th;  // Threshold to bypass nsq <the higher th the higher speed>
+    uint16_t switch_mode_th;
+    uint8_t mode_offset;
+}AMdCycleRControls;
+#else
 typedef struct  AMdCycleRControls {
     uint8_t enabled; // On/Off feature control
     uint16_t sq_weight_th;  // Threshold adjust the sq_weight <the higher th the higher speed>
@@ -204,6 +212,7 @@ typedef struct  AMdCycleRControls {
     uint16_t mrp_th;  // Threshold to adjust mrp <the higher th the higher speed>
     uint16_t compound_th;  // Threshold to adjust compound <the higher th the higher speed>
 }AMdCycleRControls;
+#endif
 #endif
 #if DEPTH_CYCLES_REDUCTION
 typedef struct  DepthCycleRControls {
@@ -378,6 +387,13 @@ typedef struct MdMotionSearchResults {
     int16_t mvy;  // MVy
 } MdMotionSearchResults;
 #endif
+#endif
+#if SWITCH_MODE_BASED_ON_SQ_COEFF
+typedef struct CoeffBSwMdCtrls {
+    uint8_t enabled;                // 0:  OFF; 1:  ON
+    uint8_t mode_offset;            // Offset to the mode to switch to
+    uint8_t skip_block;             // Allow skipping NSQ blocks
+}CoeffBSwMdCtrls;
 #endif
 #if TXT_CONTROL
 typedef struct TxTSearchCtrls {
@@ -724,7 +740,9 @@ typedef struct ModeDecisionContext {
     uint8_t      dc_cand_only_flag;
     EbBool       disable_angle_z2_intra_flag;
     uint8_t      full_cost_shut_fast_rate_flag;
+#if !SWITCH_MODE_BASED_ON_SQ_COEFF
     EbBool       coeff_based_nsq_cand_reduction;
+#endif
     uint8_t      tx_search_level;
 #if !TXT_CONTROL
     uint64_t     tx_weight;
@@ -926,6 +944,10 @@ typedef struct ModeDecisionContext {
     uint8_t txs_in_inter_classes;
     uint8_t nic_scaling_level;
     uint8_t inter_compound_mode;
+#endif
+#if SWITCH_MODE_BASED_ON_SQ_COEFF
+    uint8_t switch_md_mode_based_on_sq_coeff;
+    CoeffBSwMdCtrls cb_sw_md_ctrls;
 #endif
 } ModeDecisionContext;
 

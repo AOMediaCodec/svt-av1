@@ -5308,8 +5308,11 @@ void inject_predictive_me_candidates(
 }
 
 void inject_inter_candidates(PictureControlSet *pcs_ptr, ModeDecisionContext *context_ptr,
-                             const SequenceControlSet *scs_ptr, SuperBlock *sb_ptr,
-                             EbBool coeff_based_nsq_cand_reduction, uint32_t *candidate_total_cnt) {
+#if SWITCH_MODE_BASED_ON_SQ_COEFF
+                             const SequenceControlSet *scs_ptr, SuperBlock *sb_ptr, uint32_t *candidate_total_cnt) {
+#else
+                             const SequenceControlSet *scs_ptr, SuperBlock *sb_ptr, EbBool coeff_based_nsq_cand_reduction, uint32_t *candidate_total_cnt) {
+#endif
     (void)scs_ptr;
 
     FrameHeader *          frm_hdr        = &pcs_ptr->parent_pcs_ptr->frm_hdr;
@@ -5808,7 +5811,11 @@ void inject_inter_candidates(PictureControlSet *pcs_ptr, ModeDecisionContext *co
         inject_warped_motion_candidates(
             pcs_ptr, context_ptr, context_ptr->blk_ptr, &cand_total_cnt, me_results);
     }
+#if SWITCH_MODE_BASED_ON_SQ_COEFF
+    if (is_compound_enabled) {
+#else
     if (!coeff_based_nsq_cand_reduction && is_compound_enabled) {
+#endif
         if (allow_bipred && context_ptr->bipred3x3_injection > 0 && pcs_ptr->slice_type == B_SLICE)
             //----------------------
             // Bipred2Nx2N
@@ -6944,6 +6951,7 @@ EbErrorType generate_md_stage_0_cand(
     context_ptr->injected_mv_count_l0 = 0;
     context_ptr->injected_mv_count_l1 = 0;
     context_ptr->injected_mv_count_bipred = 0;
+#if !SWITCH_MODE_BASED_ON_SQ_COEFF
     uint8_t sq_index = eb_log2f(context_ptr->blk_geom->sq_size) - 2;
     EbBool coeff_based_nsq_cand_reduction = EB_FALSE;
     if (slice_type != I_SLICE) {
@@ -6952,6 +6960,7 @@ EbErrorType generate_md_stage_0_cand(
                 coeff_based_nsq_cand_reduction = context_ptr->blk_geom->shape == PART_N || context_ptr->parent_sq_has_coeff[sq_index] != 0 ? EB_FALSE : EB_TRUE;
         }
 }
+#endif
     //----------------------
     // Intra
     if (context_ptr->blk_geom->sq_size < 128) {
@@ -6969,10 +6978,16 @@ EbErrorType generate_md_stage_0_cand(
                     context_ptr,
                     scs_ptr,
                     sb_ptr,
+#if SWITCH_MODE_BASED_ON_SQ_COEFF
+                    context_ptr->dc_cand_only_flag,
+#else
                     context_ptr->dc_cand_only_flag || coeff_based_nsq_cand_reduction,
+#endif
                 &cand_total_cnt);
     }
+#if !SWITCH_MODE_BASED_ON_SQ_COEFF
     if (!coeff_based_nsq_cand_reduction)
+#endif
 #if FILTER_INTRA_CLI
        if (context_ptr->md_filter_intra_level > 0 && av1_filter_intra_allowed_bsize(scs_ptr->seq_header.filter_intra_level, context_ptr->blk_geom->bsize))
 #else
@@ -7037,7 +7052,9 @@ EbErrorType generate_md_stage_0_cand(
                 context_ptr,
                 scs_ptr,
                 sb_ptr,
+#if !SWITCH_MODE_BASED_ON_SQ_COEFF
                 coeff_based_nsq_cand_reduction,
+#endif
                 &cand_total_cnt);
     }
 #if INJECT_BACKUP_CANDIDATE

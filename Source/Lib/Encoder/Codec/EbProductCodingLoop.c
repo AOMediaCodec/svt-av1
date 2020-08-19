@@ -1711,7 +1711,7 @@ void set_inter_inter_distortion_based_reference_pruning_controls(
     default: assert(0); break;
     }
 }
-
+#if !SWITCH_MODE_BASED_ON_STATISTICS
 void soft_cycles_reduction_mrp(ModeDecisionContext *context_ptr, uint8_t *mrp_level) {
     AMdCycleRControls*adaptive_md_cycles_red_ctrls = &context_ptr->admd_cycles_red_ctrls;
     if (adaptive_md_cycles_red_ctrls->enabled){
@@ -1773,7 +1773,7 @@ void soft_cycles_reduction_sq_weight(ModeDecisionContext *context_ptr, uint32_t 
         }
     }
 }
-
+#endif
 #endif
 void scale_nics(PictureControlSet *pcs_ptr, ModeDecisionContext *context_ptr) {
     // minimum nics allowed
@@ -3747,7 +3747,7 @@ void set_md_stage_counts(PictureControlSet *pcs_ptr, ModeDecisionContext *contex
             (context_ptr->md_stage_2_count[CAND_CLASS_8] + 1) >> 1;
 #endif
     }
-#if SOFT_CYCLES_REDUCTION
+#if SOFT_CYCLES_REDUCTION && !SWITCH_MODE_BASED_ON_STATISTICS
     uint32_t nics_div = 0;
     soft_cycles_reduction_nics(context_ptr, &nics_div);
     if (nics_div) {
@@ -12138,9 +12138,22 @@ void set_inter_comp_controls(ModeDecisionContext *mdctxt, uint8_t inter_comp_mod
 * Derive md Settings(feature signals) that could be
   changed  at the block level
 ******************************************************/
-EbErrorType signal_derivation_block(PictureControlSet *pcs, ModeDecisionContext *context_ptr) {
+EbErrorType signal_derivation_block(PictureControlSet *pcs,
+#if UNIFY_LEVELS
+    ModeDecisionContext   *context_ptr,
+    EbEncMode              mode_offset) {
+#else
+ModeDecisionContext *context_ptr) {
+#endif
     EbErrorType return_error = EB_ErrorNone;
 
+#if UNIFY_LEVELS
+    EbEncMode enc_mode;
+    if (mode_offset)
+        enc_mode = MIN(ENC_M8, pcs->parent_pcs_ptr->enc_mode + mode_offset);
+    else
+        enc_mode = pcs->parent_pcs_ptr->enc_mode;
+#endif
 
 #if INTER_COMP_REDESIGN
 #if SOFT_CYCLES_REDUCTION
@@ -12164,7 +12177,11 @@ EbErrorType signal_derivation_block(PictureControlSet *pcs, ModeDecisionContext 
         else if (enc_mode <= ENC_M0)
 #else
 #if UNIFY_SC_NSC
+#if UNIFY_LEVELS
+        else if (enc_mode <= ENC_M0)
+#else
         else if (pcs->parent_pcs_ptr->enc_mode <= ENC_M0)
+#endif
 #else
         else if (MR_MODE || (pcs->parent_pcs_ptr->enc_mode <= ENC_M0 && !pcs->parent_pcs_ptr->sc_content_detected))
 #endif
@@ -12219,7 +12236,9 @@ EbErrorType signal_derivation_block(PictureControlSet *pcs, ModeDecisionContext 
     else {
         context_ptr->inter_inter_distortion_based_reference_pruning = 0;
     }
+#if !SWITCH_MODE_BASED_ON_STATISTICS
     soft_cycles_reduction_mrp(context_ptr, & context_ptr->inter_inter_distortion_based_reference_pruning);
+#endif
     set_inter_inter_distortion_based_reference_pruning_controls(context_ptr, context_ptr->inter_inter_distortion_based_reference_pruning);
 
 
@@ -12234,7 +12253,9 @@ EbErrorType signal_derivation_block(PictureControlSet *pcs, ModeDecisionContext 
     else if (context_ptr->pd_pass == PD_PASS_1)
         set_inter_comp_controls(context_ptr,0);
     else {
+#if !SWITCH_MODE_BASED_ON_STATISTICS
         soft_cycles_reduction_compound(context_ptr, &compound_mode);
+#endif
         set_inter_comp_controls(context_ptr, compound_mode);
     }
 #else
@@ -13311,8 +13332,9 @@ void md_encode_block(PictureControlSet *pcs_ptr, ModeDecisionContext *context_pt
 #endif
     }
 #endif
-
+#if !(SWITCH_MODE_BASED_ON_SQ_COEFF || SWITCH_MODE_BASED_ON_STATISTICS)
     signal_derivation_block(pcs_ptr, context_ptr);
+#endif
 
     for (uint8_t ref_idx = 0; ref_idx < MAX_REF_TYPE_CAND; ref_idx++)
         context_ptr->ref_best_cost_sq_table[ref_idx] = MAX_CU_COST;
@@ -13937,7 +13959,7 @@ uint8_t update_skip_nsq_shapes(
         sq_weight += AGGRESSIVE_OFFSET_1;
 #endif
 #endif
-#if SOFT_CYCLES_REDUCTION
+#if SOFT_CYCLES_REDUCTION && !SWITCH_MODE_BASED_ON_STATISTICS
    soft_cycles_reduction_sq_weight(context_ptr, &sq_weight);
 #endif
     // use a conservative threshold for H4, V4 blocks
@@ -14677,6 +14699,47 @@ uint8_t get_allowed_block(PictureControlSet *pcs_ptr, ModeDecisionContext *conte
 }
 #endif
 #endif
+#if SWITCH_MODE_BASED_ON_STATISTICS
+void update_md_settings_based_on_stats(SequenceControlSet *scs_ptr, PictureControlSet *pcs_ptr,
+    ModeDecisionContext *context_ptr,int8_t pred_depth_refinement) {
+    // Use more aggressive (faster, but less accurate) settigns for unlikely paritions (incl. SQ)
+    AMdCycleRControls*adaptive_md_cycles_red_ctrls = &context_ptr->admd_cycles_red_ctrls;
+    if (adaptive_md_cycles_red_ctrls->enabled) {
+        pred_depth_refinement = MIN(pred_depth_refinement, 1);
+        pred_depth_refinement = MAX(pred_depth_refinement, -1);
+        pred_depth_refinement += 2;
+        if (context_ptr->ad_md_prob[pred_depth_refinement][context_ptr->blk_geom->shape] < adaptive_md_cycles_red_ctrls->switch_mode_th) {
+            signal_derivation_enc_dec_kernel_oq(scs_ptr, pcs_ptr, context_ptr, adaptive_md_cycles_red_ctrls->mode_offset);
+            signal_derivation_block(pcs_ptr, context_ptr, adaptive_md_cycles_red_ctrls->mode_offset);
+        }
+    }
+}
+#endif
+#if SWITCH_MODE_BASED_ON_SQ_COEFF
+uint8_t update_md_settings_based_on_sq_coeff(SequenceControlSet *scs_ptr, PictureControlSet *pcs_ptr,ModeDecisionContext *context_ptr) {
+    // If SQ block has zero coeffs, use more aggressive settings (or skip) for NSQ blocks
+    uint8_t zero_sq_coeff_skip_action = 0;
+    uint8_t sq_index = eb_log2f(context_ptr->blk_geom->sq_size) - 2;
+    EbBool switch_md_mode_based_on_sq_coeff = EB_FALSE;
+    CoeffBSwMdCtrls *coeffb_sw_md_ctrls = &context_ptr->cb_sw_md_ctrls;
+    if (coeffb_sw_md_ctrls->enabled) {
+
+        if (context_ptr->md_local_blk_unit[context_ptr->blk_geom->sqi_mds].avail_blk_flag)
+            switch_md_mode_based_on_sq_coeff = context_ptr->blk_geom->shape == PART_N || context_ptr->parent_sq_has_coeff[sq_index] != 0 ? EB_FALSE : EB_TRUE;
+
+        if (switch_md_mode_based_on_sq_coeff) {
+            if (coeffb_sw_md_ctrls->skip_block) {
+                zero_sq_coeff_skip_action = 1;
+            }
+            else {
+                signal_derivation_enc_dec_kernel_oq(scs_ptr, pcs_ptr, context_ptr, coeffb_sw_md_ctrls->mode_offset);
+                signal_derivation_block(pcs_ptr, context_ptr, coeffb_sw_md_ctrls->mode_offset);
+            }
+        }
+    }
+    return zero_sq_coeff_skip_action;
+}
+#endif
 EB_EXTERN EbErrorType mode_decision_sb(SequenceControlSet *scs_ptr, PictureControlSet *pcs_ptr,
                                        const MdcSbData *const mdcResultTbPtr, SuperBlock *sb_ptr,
                                        uint16_t sb_origin_x, uint16_t sb_origin_y, uint32_t sb_addr,
@@ -14962,6 +15025,20 @@ EB_EXTERN EbErrorType mode_decision_sb(SequenceControlSet *scs_ptr, PictureContr
 
         uint8_t  redundant_blk_avail = 0;
         uint16_t redundant_blk_mds;
+#if SWITCH_MODE_BASED_ON_SQ_COEFF || SWITCH_MODE_BASED_ON_STATISTICS
+        // Reset settings, in case they were over-written by previous block
+        signal_derivation_enc_dec_kernel_oq(scs_ptr, pcs_ptr, context_ptr,0);
+        signal_derivation_block(pcs_ptr, context_ptr,0);
+#endif
+#if SWITCH_MODE_BASED_ON_STATISTICS
+        // Use more aggressive (faster, but less accurate) settigns for unlikely paritions (incl. SQ)
+        update_md_settings_based_on_stats(scs_ptr, pcs_ptr, context_ptr,
+            context_ptr->md_local_blk_unit[blk_idx_mds].pred_depth_refinement);
+#endif
+#if SWITCH_MODE_BASED_ON_SQ_COEFF
+        // If SQ block has zero coeffs, use more aggressive settings (or skip) for NSQ blocks
+        uint8_t zero_sq_coeff_skip_action = update_md_settings_based_on_sq_coeff(scs_ptr, pcs_ptr, context_ptr);
+#endif
 #if DEPTH_PART_CLEAN_UP
 #if REDUCE_COMPLEX_CLIP_CYCLES || SB_CLASSIFIER
         if (!context_ptr->md_disallow_nsq)
@@ -15134,6 +15211,9 @@ EB_EXTERN EbErrorType mode_decision_sb(SequenceControlSet *scs_ptr, PictureContr
             if (pcs_ptr->parent_pcs_ptr->sb_geom[sb_addr].block_is_allowed[blk_ptr->mds_idx] &&
                 !skip_next_nsq && !skip_next_sq &&
                 !sq_weight_based_nsq_skip &&
+#if SWITCH_MODE_BASED_ON_SQ_COEFF
+                !zero_sq_coeff_skip_action &&
+#endif
                 !skip_next_depth &&
                 !skip_nsq) {
 #else
@@ -15147,7 +15227,11 @@ EB_EXTERN EbErrorType mode_decision_sb(SequenceControlSet *scs_ptr, PictureContr
                         context_ptr->prune_ref_frame_for_rec_partitions = 0;
                 }
                 md_encode_block(pcs_ptr, context_ptr, input_picture_ptr, bestcandidate_buffers);
+#if SWITCH_MODE_BASED_ON_SQ_COEFF
+            } else if (sq_weight_based_nsq_skip || skip_next_depth || zero_sq_coeff_skip_action) {
+#else
             } else if (sq_weight_based_nsq_skip || skip_next_depth) {
+#endif
                 if (context_ptr->blk_geom->shape != PART_N)
                     context_ptr->md_local_blk_unit[context_ptr->blk_ptr->mds_idx].cost =
                         (MAX_MODE_COST >> 4);
