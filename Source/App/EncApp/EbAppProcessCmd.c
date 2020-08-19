@@ -1163,6 +1163,12 @@ AppExitConditionType process_output_stream_buffer(EbConfig *config, EbAppContext
 
             ++*frame_count;
             const double fps = (double)*frame_count / config->performance_context.total_encode_time;
+            const double frame_rate = config->frame_rate_numerator && config->frame_rate_denominator
+                ? (double)config->frame_rate_numerator / (double)config->frame_rate_denominator
+                : config->frame_rate > 1000
+                    // Correct for 16-bit fixed-point fractional precision
+                    ? (double)config->frame_rate / (1 << 16)
+                    : (double)config->frame_rate;
             switch (config->progress) {
             case 0: break;
             case 1:
@@ -1171,8 +1177,10 @@ AppExitConditionType process_output_stream_buffer(EbConfig *config, EbAppContext
                 break;
             case 2:
                 fprintf(stderr,
-                        "\rEncoding frame %4d %.2f fp%c  ",
+                        "\rEncoding frame %4d %.2f kbps %.2f fp%c  ",
                         *frame_count,
+                        ((double)(config->performance_context.byte_count << 3) * frame_rate /
+                         (config->frames_encoded * 1000)),
                         fps >= 1.0 ? fps : fps * 60,
                         fps >= 1.0 ? 's' : 'm');
             default: break;
