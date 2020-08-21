@@ -7226,11 +7226,23 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
 #if PERFORM_SUB_PEL_MD
 #if UPGRADE_SUBPEL
     if (pd_pass == PD_PASS_0)
+#if FAST_M8_V1
+#if SHIFT_PRESETS
+        context_ptr->md_subpel_me_level = enc_mode <= ENC_M5 ? 3 : 0;
+#else
+        context_ptr->md_subpel_me_level = enc_mode <= ENC_M7 ? 3 : 0;
+#endif
+#else
         context_ptr->md_subpel_me_level = 3;
+#endif
     else if (pd_pass == PD_PASS_1)
         context_ptr->md_subpel_me_level = 3;
     else
+#if SHIFT_PRESETS
+        if (enc_mode <= ENC_M5)
+#else
         if (enc_mode <= ENC_M7)
+#endif
             context_ptr->md_subpel_me_level = 1;
         else
             context_ptr->md_subpel_me_level = 2;
@@ -7238,11 +7250,23 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
     md_subpel_me_controls(context_ptr, context_ptr->md_subpel_me_level);
 
     if (pd_pass == PD_PASS_0)
+#if FAST_M8_V1
+#if SHIFT_PRESETS
+        context_ptr->md_subpel_pme_level = enc_mode <= ENC_M5 ? 3 : 0;
+#else
+        context_ptr->md_subpel_pme_level = enc_mode <= ENC_M7 ? 3 : 0;
+#endif
+#else
         context_ptr->md_subpel_pme_level = 3;
+#endif
     else if (pd_pass == PD_PASS_1)
         context_ptr->md_subpel_pme_level = 3;
     else
+#if SHIFT_PRESETS
+        if (enc_mode <= ENC_M5)
+#else
         if (enc_mode <= ENC_M7)
+#endif
             context_ptr->md_subpel_pme_level = 1;
         else
             context_ptr->md_subpel_pme_level = 2;
