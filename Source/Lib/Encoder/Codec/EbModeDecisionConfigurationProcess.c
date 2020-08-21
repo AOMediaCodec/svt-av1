@@ -1243,7 +1243,7 @@ EbErrorType signal_derivation_mode_decision_config_kernel_oq(
 #endif
         enable_wm = EB_TRUE;
 #if UPGRADE_M8
-#if ADD_M9
+#if SHIFT_PRESETS
     } else if (pcs_ptr->parent_pcs_ptr->enc_mode <= ENC_M9) {
 #else
     } else if (pcs_ptr->parent_pcs_ptr->enc_mode <= ENC_M8) {

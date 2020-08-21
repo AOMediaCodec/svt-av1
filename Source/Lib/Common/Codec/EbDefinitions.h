@@ -521,7 +521,6 @@ extern "C" {
 #define UNIFY_LEVELS                    1 // Have the mode-switching features use the regular MD feature levels when switching modes
 #endif
 #define FAST_M8_V1                      1 // > 2x faster than M7
-#define ADD_M9                          1 // Create a spot for M9; M9 = M8
 #define JULY31_PRESETS_ADOPTIONS        1
 #define SHIFT_PRESETS                   1 // M5->M4, M6->M5, M8->M6
 #define AUG5_ADOPTS                     1 // Adoptions for MR and M2

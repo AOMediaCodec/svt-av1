@@ -3941,7 +3941,7 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
 #endif
 #if MAR4_M6_ADOPTIONS
 #if MAR10_ADOPTIONS
-#if ADD_M9
+#if SHIFT_PRESETS
     else if (enc_mode <= ENC_M9)
 #else
     else if (enc_mode <= ENC_M8)
@@ -5004,7 +5004,7 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
 #if MOVE_SIGNALS_TO_MD
 #if SHUT_SIMILARITY_FEATURES
         // Level   Settings
-        // 0       OFF: No compond mode search : AVG only
+        // 0       OFF: No compound mode search : AVG only
         // 1       ON: Full - AVG/DIST/DIFF/WEDGE
         // 2       ON: Fast - Use AVG only for non-closest ref frames or ref frames with high distortion
 #else
@@ -5178,7 +5178,7 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
 #endif
 #if JUNE17_ADOPTIONS
 #if NEW_M8
-#if ADD_M9
+#if SHIFT_PRESETS
                 else if (enc_mode <= ENC_M9)
 #else
                 else if (enc_mode <= ENC_M8)
@@ -5385,7 +5385,7 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
         else if (enc_mode <= ENC_M4)
 #endif
 #else
-#if ADD_M9
+#if SHIFT_PRESETS
         if (enc_mode <= ENC_M9)
 #else
         if (enc_mode <= ENC_M8)
@@ -5453,7 +5453,7 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
             else if (enc_mode <= ENC_M3)
 #endif
 #else
-#if ADD_M9
+#if SHIFT_PRESETS
             if (enc_mode <= ENC_M9)
 #else
             if (enc_mode <= ENC_M8)
@@ -5486,7 +5486,7 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
             else if (enc_mode <= ENC_M5)
 #endif
 #else
-#if ADD_M9
+#if SHIFT_PRESETS
             if (enc_mode <= ENC_M9)
 #else
             if (enc_mode <= ENC_M8)
@@ -5607,7 +5607,7 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
         if (sequence_control_set_ptr->static_config.prune_ref_rec_part == DEFAULT)
 #if UNIFY_SC_NSC
 #if JUNE25_ADOPTIONS
-#if ADD_M9
+#if SHIFT_PRESETS
             if (enc_mode <= ENC_M9)
 #else
             if (enc_mode <= ENC_M8)
@@ -5882,7 +5882,7 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
             context_ptr->md_stage_2_3_cand_prune_th = 45;
 #if JUNE11_ADOPTIONS
 #if JUNE25_ADOPTIONS
-#if ADD_M9
+#if SHIFT_PRESETS
         else if (enc_mode <= ENC_M9)
 #else
         else if (enc_mode <= ENC_M8)
@@ -6577,7 +6577,7 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
 #endif
             context_ptr->nsq_hv_level = 0;
 #if MAR25_ADOPTIONS
-#if ADD_M9
+#if SHIFT_PRESETS
         else if (enc_mode <= ENC_M9) {
 #else
         else if (enc_mode <= ENC_M8) {
@@ -7098,7 +7098,7 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
 #if MAY23_M0_ADOPTIONS
 #if JUNE11_ADOPTIONS
 #if JUNE25_ADOPTIONS
-#if ADD_M9
+#if SHIFT_PRESETS
         if (enc_mode <= ENC_M9)
 #else
         if (enc_mode <= ENC_M8)
@@ -10365,7 +10365,7 @@ static void perform_pred_depth_refinement(SequenceControlSet *scs_ptr, PictureCo
                                     e_depth = pcs_ptr->parent_pcs_ptr->is_used_as_reference_flag ? 1 : 0;
                             }
 #if !SHIFT_PRESETS
-#if ADD_M9
+#if SHIFT_PRESETS
                                 else if (pcs_ptr->enc_mode <= ENC_M9) {
 #else
                                 else if (pcs_ptr->enc_mode <= ENC_M8) {

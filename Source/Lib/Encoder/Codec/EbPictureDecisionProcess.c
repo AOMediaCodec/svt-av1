@@ -1313,7 +1313,7 @@ EbErrorType signal_derivation_multi_processes_oq(
     // Set disallow_all_nsq_blocks_below_8x8: 8x4, 4x8
 #if UNIFY_SC_NSC
 #if NEW_M8
-#if ADD_M9
+#if SHIFT_PRESETS
     if (pcs_ptr->enc_mode <= ENC_M9)
 #else
     if (pcs_ptr->enc_mode <= ENC_M8)
@@ -1412,7 +1412,7 @@ EbErrorType signal_derivation_multi_processes_oq(
 #if JUNE17_ADOPTIONS
 #if SOFT_CYCLES_REDUCTION
 #if NEW_M8
-#if ADD_M9
+#if SHIFT_PRESETS
     if (pcs_ptr->enc_mode <= ENC_M9)
 #else
     if (pcs_ptr->enc_mode <= ENC_M8)
@@ -1622,7 +1622,7 @@ EbErrorType signal_derivation_multi_processes_oq(
             // ENABLE/DISABLE IBC
 #if MAR3_M6_ADOPTIONS
 #if MAR4_M8_ADOPTIONS
-#if ADD_M9
+#if SHIFT_PRESETS
             if (pcs_ptr->enc_mode <= ENC_M9)
 #else
             if (pcs_ptr->enc_mode <= ENC_M8)
@@ -1644,7 +1644,7 @@ EbErrorType signal_derivation_multi_processes_oq(
 #if M8_IBC
 #if UPGRADE_M6_M7_M8
 #if M5_I_IBC
-#if ADD_M9
+#if SHIFT_PRESETS
             if (pcs_ptr->enc_mode <= ENC_M9)
 #else
             if (pcs_ptr->enc_mode <= ENC_M8)
@@ -1714,7 +1714,7 @@ EbErrorType signal_derivation_multi_processes_oq(
 #if REVERT_WHITE // palette_mode
 #if MAY19_ADOPTIONS
 #if JUNE23_ADOPTIONS
-#if ADD_M9
+#if SHIFT_PRESETS
             ((pcs_ptr->enc_mode <= ENC_M3) || (pcs_ptr->temporal_layer_index == 0 && pcs_ptr->enc_mode <= ENC_M9))
 #else
             ((pcs_ptr->enc_mode <= ENC_M3) || (pcs_ptr->temporal_layer_index == 0 && pcs_ptr->enc_mode <= ENC_M8))
@@ -2302,7 +2302,7 @@ EbErrorType signal_derivation_multi_processes_oq(
 #endif
 #if NEW_TXS_SETTINGS
 #if NEW_M8
-#if ADD_M9
+#if SHIFT_PRESETS
     else if (pcs_ptr->enc_mode <= ENC_M9)
 #else
     else if (pcs_ptr->enc_mode <= ENC_M8)

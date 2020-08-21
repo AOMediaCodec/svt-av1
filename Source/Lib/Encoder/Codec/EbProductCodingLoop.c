@@ -11151,7 +11151,7 @@ uint8_t m0_inter_txs_depth_2_cycles_reduction_stats[6/*depth*/][3/*pred-depth de
  * is_inter - whether the current block uses inter or intra prediction.
  *
  * Returns:
- * Nothing, but updated end_tx_depth to the new meximum depth that should be evaluted, as determined by the statistics
+ * Nothing, but updates end_tx_depth to the new maximum depth that should be evaluated, as determined by the statistics
  * of previously evaluated blocks.
  */
 void bypass_txs_based_on_stats(ModeDecisionContext *context_ptr, uint8_t* end_tx_depth, EbBool is_inter) {
@@ -13027,7 +13027,7 @@ static void class_pruning(PictureControlSet *pcs_ptr, ModeDecisionContext *conte
     const unsigned class_pruning_scaling_level = pcs_ptr->enc_mode <= ENC_MRS
         // class prune OFF
         ? 0
-#if ADD_M9
+#if SHIFT_PRESETS
         : pcs_ptr->enc_mode <= ENC_M9 ? 1 : 2;
 #else
         : pcs_ptr->enc_mode <= ENC_M8 ? 1 : 2;
