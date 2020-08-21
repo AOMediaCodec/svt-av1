@@ -5143,6 +5143,8 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
 #if JUNE26_ADOPTIONS
 #if !UPGRADE_SUBPEL
                     else if (enc_mode <= ENC_M5)
+#endif
+#else
 #if JUNE25_ADOPTIONS
                     else if (enc_mode <= ENC_M6)
 #else
@@ -5217,7 +5219,6 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
                         context_ptr->predictive_me_level = 2;
                     else
                         context_ptr->predictive_me_level = 0;
-#endif
 #endif
             }
             else

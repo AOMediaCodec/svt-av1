@@ -14779,10 +14779,10 @@ uint8_t update_md_settings_based_on_sq_coeff(SequenceControlSet *scs_ptr, Pictur
     // If SQ block has zero coeffs, use more aggressive settings (or skip) for NSQ blocks
     uint8_t zero_sq_coeff_skip_action = 0;
     uint8_t sq_index = eb_log2f(context_ptr->blk_geom->sq_size) - 2;
-    EbBool switch_md_mode_based_on_sq_coeff = EB_FALSE;
     CoeffBSwMdCtrls *coeffb_sw_md_ctrls = &context_ptr->cb_sw_md_ctrls;
     if (coeffb_sw_md_ctrls->enabled) {
 
+        EbBool switch_md_mode_based_on_sq_coeff = EB_FALSE;
         if (context_ptr->md_local_blk_unit[context_ptr->blk_geom->sqi_mds].avail_blk_flag)
             switch_md_mode_based_on_sq_coeff = context_ptr->blk_geom->shape == PART_N || context_ptr->parent_sq_has_coeff[sq_index] != 0 ? EB_FALSE : EB_TRUE;
 

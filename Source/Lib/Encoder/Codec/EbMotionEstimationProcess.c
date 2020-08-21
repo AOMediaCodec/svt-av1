@@ -360,7 +360,7 @@ void *set_me_hme_params_oq(MeContext *me_context_ptr, PictureParentControlSet *p
     }
 #endif
 #if NEW_M5_HME_ME
-#if JULY31_PRESETS_ADOPTIONS
+#if PRESET_SHIFITNG
     else if (pcs_ptr->enc_mode <= ENC_M3) {
 #else
     else if (pcs_ptr->enc_mode <= ENC_M5) {

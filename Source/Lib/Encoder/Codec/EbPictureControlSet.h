@@ -879,7 +879,7 @@ typedef struct PictureParentControlSet {
     uint8_t           prune_unipred_at_me;
 #endif
     uint16_t *        altref_buffer_highbd[3];
-#if MOVE_SIGNALS_TO_MD
+#if !MOVE_SIGNALS_TO_MD
     uint8_t           enable_inter_intra;
 #endif
 #if OBMC_CLI
