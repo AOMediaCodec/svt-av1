@@ -1935,6 +1935,12 @@ void sad_loop_kernel_generalized_avx2(
     int16_t        x_best = *x_search_center, y_best = *y_search_center;
     uint32_t       leftover = search_area_width & 7;
 
+    __m128i leftover_mask32b = _mm_set1_epi32(-1);
+    if (leftover) {
+        for (k = 0; k < (search_area_width & 3); k++)
+            leftover_mask32b = _mm_slli_si128(leftover_mask32b, 4);
+    }
+
     for (i = 0; i < search_area_height; i++) {
         for (j = 0; j < search_area_width; j += 8) {
             p_src = src;
@@ -2160,6 +2166,16 @@ void sad_loop_kernel_generalized_avx2(
                                        _mm256_extracti128_si256(ss0, 1));
                     s3  = _mm_add_epi32(_mm256_castsi256_si128(ss3),
                                        _mm256_extracti128_si256(ss3, 1));
+
+                    if (leftover && (j + 8) >= search_area_width) {
+                        if (leftover < 4) {
+                            s0 = _mm_or_si128(s0, leftover_mask32b);
+                            s3 = _mm_set1_epi32(-1);
+                        } else {
+                            s3 = _mm_or_si128(s3, leftover_mask32b);
+                        }
+                    }
+
                     UPDATE_BEST(s0, 0, 0);
                     UPDATE_BEST(s0, 1, 0);
                     UPDATE_BEST(s0, 2, 0);
