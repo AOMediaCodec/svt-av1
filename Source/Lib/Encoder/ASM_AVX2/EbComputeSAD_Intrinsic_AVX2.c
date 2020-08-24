@@ -2011,8 +2011,8 @@ void sad_loop_kernel_generalized_avx2(
                     temp_ref += 8;
                 }
                 if (width_calc >= 4) {
-                    s0 = _mm_loadu_si128((__m128i *)temp_ref);
-                    s1 = _mm_loadu_si128((__m128i *)(temp_ref + ref_stride));
+                    s0 = _mm_lddqu_si128((__m128i *)temp_ref);
+                    s1 = _mm_lddqu_si128((__m128i *)(temp_ref + ref_stride));
                     s2 = _mm_cvtsi32_si128(*(uint32_t *)temp_src);
                     s5 = _mm_cvtsi32_si128(*(uint32_t *)(temp_src + src_stride));
                     s3 = _mm_mpsadbw_epu8(s0, s2, 0);
@@ -2094,7 +2094,7 @@ void sad_loop_kernel_generalized_avx2(
                     temp_ref += 8;
                 }
                 if (width_calc >= 4) {
-                    s0 = _mm_loadu_si128((__m128i *)temp_ref);
+                    s0 = _mm_lddqu_si128((__m128i *)temp_ref);
                     s2 = _mm_cvtsi32_si128(*(uint32_t *)temp_src);
                     s3 = _mm_mpsadbw_epu8(s0, s2, 0);
 
@@ -2320,8 +2320,8 @@ void sad_loop_kernel_avx2_intrin(
                     p_ref = ref + j;
                     s3    = _mm_setzero_si128();
                     for (k = 0; k + 2 <= block_height; k += 2) {
-                        s0 = _mm_loadu_si128((__m128i *)p_ref);
-                        s1 = _mm_loadu_si128((__m128i *)(p_ref + ref_stride));
+                        s0 = _mm_lddqu_si128((__m128i *)p_ref);
+                        s1 = _mm_lddqu_si128((__m128i *)(p_ref + ref_stride));
                         s2 = _mm_cvtsi32_si128(*(uint32_t *)p_src);
                         s5 = _mm_cvtsi32_si128(*(uint32_t *)(p_src + src_stride));
                         s3 = _mm_adds_epu16(s3, _mm_mpsadbw_epu8(s0, s2, 0));
@@ -2352,8 +2352,8 @@ void sad_loop_kernel_avx2_intrin(
                     p_ref = ref + j;
                     s3    = _mm_setzero_si128();
                     for (k = 0; k + 2 <= block_height; k += 2) {
-                        s0 = _mm_loadu_si128((__m128i *)p_ref);
-                        s1 = _mm_loadu_si128((__m128i *)(p_ref + ref_stride));
+                        s0 = _mm_lddqu_si128((__m128i *)p_ref);
+                        s1 = _mm_lddqu_si128((__m128i *)(p_ref + ref_stride));
                         s2 = _mm_cvtsi32_si128(*(uint32_t *)p_src);
                         s5 = _mm_cvtsi32_si128(*(uint32_t *)(p_src + src_stride));
                         s3 = _mm_adds_epu16(s3, _mm_mpsadbw_epu8(s0, s2, 0));
