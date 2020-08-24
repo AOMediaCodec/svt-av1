@@ -1937,7 +1937,7 @@ void sad_loop_kernel_generalized_avx2(
 
     __m128i leftover_mask32b = _mm_set1_epi32(-1);
     if (leftover) {
-        for (k = 0; k < (search_area_width & 3); k++)
+        for (k = 0; k <(uint32_t)(search_area_width & 3); k++)
             leftover_mask32b = _mm_slli_si128(leftover_mask32b, 4);
     }
 

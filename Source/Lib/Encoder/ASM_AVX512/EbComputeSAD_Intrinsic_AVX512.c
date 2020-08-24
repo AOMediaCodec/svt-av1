@@ -1780,9 +1780,9 @@ void sad_loop_kernel_generalized_avx512(
     __m128i leftover_mask = _mm_set1_epi32(-1);
     __m128i leftover_mask32b = _mm_set1_epi32(-1);
     if (leftover) {
-        for (k = 0; k < (search_area_width & 7); k++)
+        for (k = 0; k < (uint32_t)(search_area_width & 7); k++)
             leftover_mask = _mm_slli_si128(leftover_mask, 2);
-        for (k = 0; k < (search_area_width & 3); k++)
+        for (k = 0; k < (uint32_t)(search_area_width & 3); k++)
             leftover_mask32b = _mm_slli_si128(leftover_mask32b, 4);
     }
 
