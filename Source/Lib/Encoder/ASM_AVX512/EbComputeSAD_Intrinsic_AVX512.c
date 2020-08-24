@@ -1952,13 +1952,19 @@ void sad_loop_kernel_avx512_intrin(
                     s = src;
                     r = ref;
 
-                    h = height2;
-                    do {
+                    h = height;
+                    while (h >= 2) {
                         sad_loop_kernel_16_avx2(s, src_stride, r, ref_stride, &sum256);
                         sad_loop_kernel_8_avx2(s + 16, src_stride, r + 16, ref_stride, &sum256);
                         s += 2 * src_stride;
                         r += 2 * ref_stride;
-                    } while (--h);
+                        h -= 2;
+                    };
+
+                    if (h) {
+                        sad_loop_kernel_16_oneline_avx2(s, r, &sum256);
+                        sad_loop_kernel_8_oneline_avx2(s + 16, r + 16, &sum256);
+                    }
 
                     update_some_pel(sum256, 0, y, &best_s, &best_x, &best_y);
                     ref += src_stride_raw;
@@ -1971,13 +1977,19 @@ void sad_loop_kernel_avx512_intrin(
                     s = src;
                     r = ref;
 
-                    h = height2;
-                    do {
+                    h = height;
+                    while (h >= 2) {
                         sad_loop_kernel_16_avx2(s, src_stride, r, ref_stride, &sums256[0]);
                         sad_loop_kernel_8_avx2(s + 16, src_stride, r + 16, ref_stride, &sums256[1]);
                         s += 2 * src_stride;
                         r += 2 * ref_stride;
-                    } while (--h);
+                        h -= 2;
+                    };
+
+                    if (h) {
+                        sad_loop_kernel_16_oneline_avx2(s, r, &sums256[0]);
+                        sad_loop_kernel_8_oneline_avx2(s + 16, r + 16, &sums256[1]);
+                    }
 
                     update_leftover8_1024_pel(sums256, 0, y, &best_s, &best_x, &best_y);
                     ref += src_stride_raw;
@@ -2614,14 +2626,21 @@ void sad_loop_kernel_avx512_intrin(
                     s = src;
                     r = ref;
 
-                    h = height2;
-                    do {
+                    h = height;
+                    while (h >= 2) {
                         sad_loop_kernel_16_avx512(s, src_stride, r, ref_stride, &sum512);
                         sad_loop_kernel_8_avx2(s + 16, src_stride, r + 16, ref_stride, &sums256[0]);
                         sad_loop_kernel_8_avx2(s + 16, src_stride, r + 24, ref_stride, &sums256[1]);
                         s += 2 * src_stride;
                         r += 2 * ref_stride;
-                    } while (--h);
+                        h -= 2;
+                    };
+
+                    if (h) {
+                        sad_loop_kernel_16_oneline_avx512(s, r, &sum512);
+                        sad_loop_kernel_8_oneline_avx2(s + 16, r + 16, &sums256[0]);
+                        sad_loop_kernel_8_oneline_avx2(s + 16, r + 24, &sums256[1]);
+                    }
 
                     update_384_pel(sum512, sums256, 0, y, &best_s, &best_x, &best_y);
                     ref += src_stride_raw;
@@ -2635,14 +2654,21 @@ void sad_loop_kernel_avx512_intrin(
                     s = src;
                     r = ref;
 
-                    h = height2;
-                    do {
+                    h = height;
+                    while (h >= 2) {
                         sad_loop_kernel_16_avx512(s, src_stride, r, ref_stride, &sum512);
                         sad_loop_kernel_8_avx2(s + 16, src_stride, r + 16, ref_stride, &sums256[0]);
                         sad_loop_kernel_8_avx2(s + 16, src_stride, r + 24, ref_stride, &sums256[1]);
                         s += 2 * src_stride;
                         r += 2 * ref_stride;
-                    } while (--h);
+                        h -= 2;
+                    };
+
+                    if (h) {
+                        sad_loop_kernel_16_oneline_avx512(s, r, &sum512);
+                        sad_loop_kernel_8_oneline_avx2(s + 16, r + 16, &sums256[0]);
+                        sad_loop_kernel_8_oneline_avx2(s + 16, r + 24, &sums256[1]);
+                    }
 
                     update_768_pel(sum512, sums256, 0, y, &best_s, &best_x, &best_y);
                     ref += src_stride_raw;
@@ -3521,8 +3547,8 @@ void sad_loop_kernel_avx512_intrin(
                         s = src;
                         r = ref + x;
 
-                        h = height2;
-                        do {
+                        h = height;
+                        while (h >= 2) {
                             sad_loop_kernel_16_avx512(s, src_stride, r, ref_stride, &sum512);
                             sad_loop_kernel_8_avx2(
                                 s + 16, src_stride, r + 16, ref_stride, &sums256[0]);
@@ -3530,7 +3556,14 @@ void sad_loop_kernel_avx512_intrin(
                                 s + 16, src_stride, r + 24, ref_stride, &sums256[1]);
                             s += 2 * src_stride;
                             r += 2 * ref_stride;
-                        } while (--h);
+                            h -= 2;
+                        };
+
+                        if (h) {
+                            sad_loop_kernel_16_oneline_avx512(s, r, &sum512);
+                            sad_loop_kernel_8_oneline_avx2(s + 16, r + 16, &sums256[0]);
+                            sad_loop_kernel_8_oneline_avx2(s + 16, r + 24, &sums256[1]);
+                        }
 
                         update_384_pel(sum512, sums256, x, y, &best_s, &best_x, &best_y);
                     }
@@ -3542,13 +3575,19 @@ void sad_loop_kernel_avx512_intrin(
                         s = src;
                         r = ref + x;
 
-                        h = height2;
-                        do {
+                        h = height;
+                        while (h >= 2) {
                             sad_loop_kernel_16_avx2(s, src_stride, r, ref_stride, &sum256);
                             sad_loop_kernel_8_avx2(s + 16, src_stride, r + 16, ref_stride, &sum256);
                             s += 2 * src_stride;
                             r += 2 * ref_stride;
-                        } while (--h);
+                            h -= 2;
+                        };
+
+                        if (h) {
+                            sad_loop_kernel_16_oneline_avx2(s, r, &sum256);
+                            sad_loop_kernel_8_oneline_avx2(s + 16, r + 16, &sum256);
+                        }
 
                         update_leftover_512_pel(
                             sum256, search_area_width, x, y, mask256, &best_s, &best_x, &best_y);
@@ -3568,8 +3607,8 @@ void sad_loop_kernel_avx512_intrin(
                         s = src;
                         r = ref + x;
 
-                        h = height2;
-                        do {
+                        h = height;
+                        while (h >= 2) {
                             sad_loop_kernel_16_avx512(s, src_stride, r, ref_stride, &sum512);
                             sad_loop_kernel_8_avx2(
                                 s + 16, src_stride, r + 16, ref_stride, &sums256[0]);
@@ -3577,7 +3616,14 @@ void sad_loop_kernel_avx512_intrin(
                                 s + 16, src_stride, r + 24, ref_stride, &sums256[1]);
                             s += 2 * src_stride;
                             r += 2 * ref_stride;
-                        } while (--h);
+                            h -= 2;
+                        };
+
+                        if (h) {
+                            sad_loop_kernel_16_oneline_avx512(s, r, &sum512);
+                            sad_loop_kernel_8_oneline_avx2(s + 16, r + 16, &sums256[0]);
+                            sad_loop_kernel_8_oneline_avx2(s + 16, r + 24, &sums256[1]);
+                        }
 
                         update_768_pel(sum512, sums256, x, y, &best_s, &best_x, &best_y);
                     }
@@ -3589,14 +3635,20 @@ void sad_loop_kernel_avx512_intrin(
                         s = src;
                         r = ref + x;
 
-                        h = height2;
-                        do {
+                        h = height;
+                        while (h >= 2) {
                             sad_loop_kernel_16_avx2(s, src_stride, r, ref_stride, &sums256[0]);
                             sad_loop_kernel_8_avx2(
                                 s + 16, src_stride, r + 16, ref_stride, &sums256[1]);
                             s += 2 * src_stride;
                             r += 2 * ref_stride;
-                        } while (--h);
+                            h -= 2;
+                        };
+
+                        if (h) {
+                            sad_loop_kernel_16_oneline_avx2(s, r, &sums256[0]);
+                            sad_loop_kernel_8_oneline_avx2(s + 16, r + 16, &sums256[1]);
+                        }
 
                         update_leftover8_1024_pel(sums256, x, y, &best_s, &best_x, &best_y);
 
@@ -3609,14 +3661,20 @@ void sad_loop_kernel_avx512_intrin(
                         s = src;
                         r = ref + x;
 
-                        h = height2;
-                        do {
+                        h = height;
+                        while (h >= 2) {
                             sad_loop_kernel_16_avx2(s, src_stride, r, ref_stride, &sums256[0]);
                             sad_loop_kernel_8_avx2(
                                 s + 16, src_stride, r + 16, ref_stride, &sums256[1]);
                             s += 2 * src_stride;
                             r += 2 * ref_stride;
-                        } while (--h);
+                            h -= 2;
+                        };
+
+                        if (h) {
+                            sad_loop_kernel_16_oneline_avx2(s, r, &sums256[0]);
+                            sad_loop_kernel_8_oneline_avx2(s + 16, r + 16, &sums256[1]);
+                        }
 
                         update_leftover_1024_pel(sums256,
                                                  search_area_width,
