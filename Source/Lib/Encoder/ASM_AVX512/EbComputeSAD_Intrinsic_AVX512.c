@@ -1844,12 +1844,17 @@ void sad_loop_kernel_avx512_intrin(
                     s = src;
                     r = ref;
 
-                    h = height2;
-                    do {
+                    h = height;
+                    while (h >= 2) {
                         sad_loop_kernel_4_sse4_1(s, src_stride, r, ref_stride, &sum);
                         s += 2 * src_stride;
                         r += 2 * ref_stride;
-                    } while (--h);
+                        h -= 2;
+                    };
+
+                    if (h) {
+                        sad_loop_kernel_4_oneline_sse4_1(s, r, &sum);
+                    }
 
                     __m128i sum2 = complement_4_to_6(ref, ref_stride, src, src_stride, height, 8);
                     sum          = _mm_adds_epu16(sum, sum2);
@@ -1865,12 +1870,17 @@ void sad_loop_kernel_avx512_intrin(
                     s = src;
                     r = ref;
 
-                    h = height2;
-                    do {
+                    h = height;
+                    while (h >= 2) {
                         sad_loop_kernel_4_avx2(s, src_stride, r, ref_stride, &sum256);
                         s += 2 * src_stride;
                         r += 2 * ref_stride;
-                    } while (--h);
+                        h -= 2;
+                    };
+
+                    if (h) {
+                        sad_loop_kernel_4_oneline_avx2(s, r, &sum256);
+                    }
 
                     __m128i sum = complement_4_to_6(ref, ref_stride, src, src_stride, height, 8);
                     sum256      = _mm256_adds_epu16(
@@ -2480,12 +2490,17 @@ void sad_loop_kernel_avx512_intrin(
                         s = src;
                         r = ref;
 
-                        h = height2;
-                        do {
+                        h = height;
+                        while (h >= 2) {
                             sad_loop_kernel_4_sse4_1(s, src_stride, r, ref_stride, &sum);
                             s += 2 * src_stride;
                             r += 2 * ref_stride;
-                        } while (--h);
+                            h -= 2;
+                        };
+
+                        if (h) {
+                            sad_loop_kernel_4_oneline_sse4_1(s, r, &sum);
+                        }
 
                         __m128i sum2 = complement_4_to_6(
                             ref, ref_stride, src, src_stride, height, 8);
@@ -2500,12 +2515,17 @@ void sad_loop_kernel_avx512_intrin(
                         s = src;
                         r = ref + 8;
 
-                        h = height2;
-                        do {
+                        h = height;
+                        while (h >= 2) {
                             sad_loop_kernel_4_sse4_1(s, src_stride, r, ref_stride, &sum);
                             s += 2 * src_stride;
                             r += 2 * ref_stride;
-                        } while (--h);
+                            h -= 2;
+                        };
+
+                        if (h) {
+                            sad_loop_kernel_4_oneline_sse4_1(s, r, &sum);
+                        }
 
                         __m128i sum2 = complement_4_to_6(
                             ref + 8, ref_stride, src, src_stride, height, 8);
@@ -2525,12 +2545,17 @@ void sad_loop_kernel_avx512_intrin(
                         s = src;
                         r = ref;
 
-                        h = height2;
-                        do {
+                        h = height;
+                        while (h >= 2) {
                             sad_loop_kernel_4_avx2(s, src_stride, r, ref_stride, &sum256);
                             s += 2 * src_stride;
                             r += 2 * ref_stride;
-                        } while (--h);
+                            h -= 2;
+                        };
+
+                        if (h) {
+                            sad_loop_kernel_4_oneline_avx2(s, r, &sum256);
+                        }
 
                         __m128i sum = complement_4_to_6(
                             ref, ref_stride, src, src_stride, height, 8);
@@ -2546,12 +2571,17 @@ void sad_loop_kernel_avx512_intrin(
                         s = src;
                         r = ref + 8;
 
-                        h = height2;
-                        do {
+                        h = height;
+                        while (h >= 2) {
                             sad_loop_kernel_4_avx2(s, src_stride, r, ref_stride, &sum256);
                             s += 2 * src_stride;
                             r += 2 * ref_stride;
-                        } while (--h);
+                            h -= 2;
+                        };
+
+                        if (h) {
+                            sad_loop_kernel_4_oneline_avx2(s, r, &sum256);
+                        }
 
                         __m128i sum = complement_4_to_6(
                             ref + 8, ref_stride, src, src_stride, height, 8);
@@ -3236,12 +3266,17 @@ void sad_loop_kernel_avx512_intrin(
                         s = src;
                         r = ref + x;
 
-                        h = height2;
-                        do {
+                        h = height;
+                        while (h >= 2) {
                             sad_loop_kernel_4_sse4_1(s, src_stride, r, ref_stride, &sum);
                             s += 2 * src_stride;
                             r += 2 * ref_stride;
-                        } while (--h);
+                            h -= 2;
+                        };
+
+                        if (h) {
+                            sad_loop_kernel_4_oneline_sse4_1(s, r, &sum);
+                        }
 
                         __m128i sum2 = complement_4_to_6(
                             ref + x, ref_stride, src, src_stride, height, 8);
@@ -3256,12 +3291,17 @@ void sad_loop_kernel_avx512_intrin(
                         s = src;
                         r = ref + x;
 
-                        h = height2;
-                        do {
+                        h = height;
+                        while (h >= 2) {
                             sad_loop_kernel_4_sse4_1(s, src_stride, r, ref_stride, &sum);
                             s += 2 * src_stride;
                             r += 2 * ref_stride;
-                        } while (--h);
+                            h -= 2;
+                        };
+
+                        if (h) {
+                            sad_loop_kernel_4_oneline_sse4_1(s, r, &sum);
+                        }
 
                         sum = _mm_or_si128(sum, mask128);
 
@@ -3283,12 +3323,17 @@ void sad_loop_kernel_avx512_intrin(
                         s = src;
                         r = ref + x;
 
-                        h = height2;
-                        do {
+                        h = height;
+                        while (h >= 2) {
                             sad_loop_kernel_4_avx2(s, src_stride, r, ref_stride, &sum256);
                             s += 2 * src_stride;
                             r += 2 * ref_stride;
-                        } while (--h);
+                            h -= 2;
+                        };
+
+                        if (h) {
+                            sad_loop_kernel_4_oneline_avx2(s, r, &sum256);
+                        }
 
                         __m128i sum = complement_4_to_6(
                             ref + x, ref_stride, src, src_stride, height, 8);
@@ -3304,12 +3349,17 @@ void sad_loop_kernel_avx512_intrin(
                         s = src;
                         r = ref + x;
 
-                        h = height2;
-                        do {
+                        h = height;
+                        while (h >= 2) {
                             sad_loop_kernel_4_avx2(s, src_stride, r, ref_stride, &sum256);
                             s += 2 * src_stride;
                             r += 2 * ref_stride;
-                        } while (--h);
+                            h -= 2;
+                        };
+
+                        if (h) {
+                            sad_loop_kernel_4_oneline_avx2(s, r, &sum256);
+                        }
 
                         __m128i sum = complement_4_to_6(
                             ref + x, ref_stride, src, src_stride, height, leftover);
