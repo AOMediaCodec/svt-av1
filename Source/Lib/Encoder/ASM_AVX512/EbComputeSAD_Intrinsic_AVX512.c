@@ -2569,7 +2569,7 @@ void sad_loop_kernel_avx512_intrin(
             break;
 
         case 32:
-            if (height <= 8) {
+            if (height <= 16) {
                 y = 0;
                 do {
                     __m512i sum512 = _mm512_setzero_si512();
@@ -2583,25 +2583,6 @@ void sad_loop_kernel_avx512_intrin(
                         sad_loop_kernel_32_avx512(s, r, &sum512);
                         s += src_stride;
                         r += ref_stride;
-                    } while (--h);
-
-                    update_256_pel(sum512, 0, y, &best_s, &best_x, &best_y);
-                    ref += src_stride_raw;
-                } while (++y < search_area_height);
-            } else if (height <= 16) {
-                y = 0;
-                do {
-                    __m512i sum512 = _mm512_setzero_si512();
-
-                    s = src;
-                    r = ref;
-
-                    h = height2;
-                    do {
-                        sad_loop_kernel_32_avx512(s, r, &sum512);
-                        sad_loop_kernel_32_avx512(s + src_stride, r + ref_stride, &sum512);
-                        s += 2 * src_stride;
-                        r += 2 * ref_stride;
                     } while (--h);
 
                     update_512_pel(sum512, 0, y, &best_s, &best_x, &best_y);
@@ -3584,7 +3565,7 @@ void sad_loop_kernel_avx512_intrin(
             break;
 
         case 32:
-            if (height <= 8) {
+            if (height <= 16) {
                 y = 0;
                 do {
                     for (x = 0; x <= search_area_width - 16; x += 16) {
@@ -3599,46 +3580,6 @@ void sad_loop_kernel_avx512_intrin(
                             sad_loop_kernel_32_avx512(s, r, &sum512);
                             s += src_stride;
                             r += ref_stride;
-                        } while (--h);
-
-                        update_256_pel(sum512, x, y, &best_s, &best_x, &best_y);
-                    }
-
-                    // leftover
-                    for (; x < search_area_width; x += 8) {
-                        __m256i sum256 = _mm256_setzero_si256();
-
-                        s = src;
-                        r = ref + x;
-
-                        h = height;
-                        do {
-                            sad_loop_kernel_32_avx2(s, r, &sum256);
-                            s += src_stride;
-                            r += ref_stride;
-                        } while (--h);
-
-                        update_leftover_256_pel(
-                            sum256, search_area_width, x, y, mask128, &best_s, &best_x, &best_y);
-                    }
-
-                    ref += src_stride_raw;
-                } while (++y < search_area_height);
-            } else if (height <= 16) {
-                y = 0;
-                do {
-                    for (x = 0; x <= search_area_width - 16; x += 16) {
-                        __m512i sum512 = _mm512_setzero_si512();
-
-                        s = src;
-                        r = ref + x;
-
-                        h = height2;
-                        do {
-                            sad_loop_kernel_32_avx512(s, r, &sum512);
-                            sad_loop_kernel_32_avx512(s + src_stride, r + ref_stride, &sum512);
-                            s += 2 * src_stride;
-                            r += 2 * ref_stride;
                         } while (--h);
 
                         update_512_pel(sum512, x, y, &best_s, &best_x, &best_y);
