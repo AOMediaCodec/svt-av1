@@ -36,7 +36,6 @@
 #else
 #include <pthread.h>
 #include <semaphore.h>
-#include <time.h>
 #include <errno.h>
 #endif
 
@@ -132,8 +131,8 @@ static EbErrorType enc_context_ctor(EncApp* enc_app, EncContext* enc_context, in
             config->active_channel_count = num_channels;
             config->channel_id           = inst_cnt;
 
-            start_time((uint64_t *)&config->performance_context.lib_start_time[0],
-                        (uint64_t *)&config->performance_context.lib_start_time[1]);
+            app_svt_av1_get_time(&config->performance_context.lib_start_time[0],
+                                 &config->performance_context.lib_start_time[1]);
 
             if (pass == ENCODE_FIRST_PASS) {
                 //TODO: remove this if we can use a quick first pass in svt av1 library.
@@ -422,11 +421,9 @@ static void enc_channel_start(EncChannel* c)
             : APP_ExitConditionError;
         c->exit_cond_input = APP_ExitConditionNone;
         c->active  = EB_TRUE;
-        start_time(
-            (uint64_t *)&config->performance_context.encode_start_time[0],
-            (uint64_t *)&config->performance_context.encode_start_time[1]);
+        app_svt_av1_get_time(&config->performance_context.encode_start_time[0],
+                             &config->performance_context.encode_start_time[1]);
     }
-
 }
 
 static EbErrorType encode(EncApp* enc_app, EncContext* enc_context) {
