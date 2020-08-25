@@ -627,6 +627,12 @@ static INLINE void sad_loop_kernel_4_avx2(const uint8_t *const src, const uint32
     *sum = _mm256_adds_epu16(*sum, _mm256_mpsadbw_epu8(rr0, ss0, 0));
 }
 
+/*******************************************************************************
+* Function helper adds to "sum" vector SAD's for block width of 4, uses AVX2 instructions
+* Requirement: width = 4
+* Requirement: height = 1
+* Compute one line
+*******************************************************************************/
 static INLINE void sad_loop_kernel_4_oneline_avx2(const uint8_t *const src,
                                                   const uint8_t *const ref, __m256i *const sum) {
     const __m256i ss0 = _mm256_insertf128_si256(
@@ -647,6 +653,12 @@ static INLINE void sad_loop_kernel_4_sse4_1(const uint8_t *const src, const uint
     *sum             = _mm_adds_epu16(*sum, _mm_mpsadbw_epu8(r1, s1, 0));
 }
 
+/*******************************************************************************
+* Function helper adds to "sum" vector SAD's for block width of 4, uses sse4_1 instructions
+* Requirement: width = 4
+* Requirement: height = 1
+* Compute one line
+*******************************************************************************/
 static INLINE void sad_loop_kernel_4_oneline_sse4_1(const uint8_t *const src,
                                                     const uint8_t *const ref, __m128i *const sum) {
     const __m128i s0 = _mm_cvtsi32_si128(*(uint32_t *)src);
@@ -669,6 +681,12 @@ static INLINE void sad_loop_kernel_8_avx2(const uint8_t *const src, const uint32
     *sum = _mm256_adds_epu16(*sum, _mm256_mpsadbw_epu8(rr0, ss0, (5 << 3) | 5)); // 101 101
 }
 
+/*******************************************************************************
+* Function helper adds to "sum" vector SAD's for block width of 8, uses AVX2 instructions
+* Requirement: width = 8
+* Requirement: height = 1
+* Compute one line
+*******************************************************************************/
 static INLINE void sad_loop_kernel_8_oneline_avx2(const uint8_t *const src,
                                                   const uint8_t *const ref, __m256i *const sum) {
     const __m256i ss0 = _mm256_insertf128_si256(
@@ -711,6 +729,12 @@ SIMD_INLINE void sad_loop_kernel_12_avx512(const uint8_t *const src, const uint3
     *sum = _mm512_adds_epu16(*sum, _mm512_dbsad_epu8(ss2, rr1, 0x94));
 }
 
+/*******************************************************************************
+* Function helper adds to "sums" vectors SAD's for block width of 12, uses AVX512 instructions
+* Requirement: width = 12
+* Requirement: height = 1
+* Compute one line
+*******************************************************************************/
 SIMD_INLINE void sad_loop_kernel_12_oneline_avx512(const uint8_t *const src,
                                                    const uint8_t *const ref, __m512i *const sum) {
     const __m128i s0  = _mm_loadu_si128((__m128i *)src);
@@ -761,6 +785,12 @@ SIMD_INLINE void sad_loop_kernel_16_avx512(const uint8_t *const src, const uint3
     *sum = _mm512_adds_epu16(*sum, _mm512_dbsad_epu8(ss3, rr1, 0xE9));
 }
 
+/*******************************************************************************
+* Function helper adds to "sums" vectors SAD's for block width of 16, uses AVX512 instructions
+* Requirement: width = 16
+* Requirement: height = 1
+* Compute one line
+*******************************************************************************/
 SIMD_INLINE void sad_loop_kernel_16_oneline_avx512(const uint8_t *const src,
                                                    const uint8_t *const ref, __m512i *const sum) {
     const __m128i s0  = _mm_loadu_si128((__m128i *)src);
@@ -816,6 +846,12 @@ SIMD_INLINE void sad_loop_kernel_12_2sum_avx512(const uint8_t *const src, const 
     sum[0] = _mm512_adds_epu16(sum[0], _mm512_dbsad_epu8(ss2, rr1, 0x94));
 }
 
+/*******************************************************************************
+* Function helper adds to two elements "sums" vectors SAD's for block width of 12, uses AVX512 instructions
+* Requirement: width = 12
+* Requirement: height = 1
+* Compute one line
+*******************************************************************************/
 SIMD_INLINE void sad_loop_kernel_12_2sum_oneline_avx512(const uint8_t *const src,
                                                         const uint8_t *const ref, __m512i sum[2]) {
     const __m128i s0  = _mm_loadu_si128((__m128i *)src);
@@ -866,6 +902,12 @@ SIMD_INLINE void sad_loop_kernel_16_2sum_avx512(const uint8_t *const src, const 
     sum[1] = _mm512_adds_epu16(sum[1], _mm512_dbsad_epu8(ss3, rr1, 0xE9));
 }
 
+/*******************************************************************************
+* Function helper adds to two elements "sums" vectors SAD's for block width of 16, uses AVX512 instructions
+* Requirement: width = 16
+* Requirement: height = 1
+* Compute one line
+*******************************************************************************/
 SIMD_INLINE void sad_loop_kernel_16_2sum_oneline_avx512(const uint8_t *const src,
                                                          const uint8_t *const ref, __m512i sum[2]) {
     const __m128i s0  = _mm_loadu_si128((__m128i *)src);
@@ -916,6 +958,12 @@ static INLINE void sad_loop_kernel_12_avx2(const uint8_t *const src, const uint3
     *sum = _mm256_adds_epu16(*sum, _mm256_mpsadbw_epu8(rr1, ss0, (2 << 3) | 2)); // 010 010
 }
 
+/*******************************************************************************
+* Function helper adds to "sums" vectors SAD's for block width of 12, uses AVX2 instructions
+* Requirement: width = 12
+* Requirement: height = 1
+* Compute one line
+*******************************************************************************/
 static INLINE void sad_loop_kernel_12_oneline_avx2(const uint8_t *const src,
                                                    const uint8_t *const ref, __m256i *const sum) {
     const __m256i ss0 = _mm256_insertf128_si256(
@@ -950,6 +998,12 @@ static INLINE void sad_loop_kernel_16_avx2(const uint8_t *const src, const uint3
     *sum = _mm256_adds_epu16(*sum, _mm256_mpsadbw_epu8(rr1, ss0, (7 << 3) | 7)); // 111 111
 }
 
+/*******************************************************************************
+* Function helper adds to "sums" vectors SAD's for block width of 16, uses AVX512 instructions
+* Requirement: width = 16
+* Requirement: height = 1
+* Compute one line
+*******************************************************************************/
 static INLINE void sad_loop_kernel_16_oneline_avx2(const uint8_t *const src,
                                                    const uint8_t *const ref, __m256i *const sum) {
     const __m256i ss0 = _mm256_insertf128_si256(
@@ -989,6 +1043,12 @@ static INLINE void sad_loop_kernel_12_2sum_avx2(const uint8_t *const src, const 
     sums[0] = _mm256_adds_epu16(sums[0], _mm256_mpsadbw_epu8(rr1, ss0, (2 << 3) | 2)); // 010 010
 }
 
+/*******************************************************************************
+* Function helper adds to two elements "sums" vectors SAD's for block width of 12, uses AVX2 instructions
+* Requirement: width = 12
+* Requirement: height = 1
+* Compute one line
+*******************************************************************************/
 static INLINE void sad_loop_kernel_12_2sum_oneline_avx2(const uint8_t *const src,
                                                    const uint8_t *const ref, __m256i sums[2]) {
     const __m256i ss0 = _mm256_insertf128_si256(
@@ -1023,6 +1083,12 @@ static INLINE void sad_loop_kernel_16_2sum_avx2(const uint8_t *const src, const 
     sums[1] = _mm256_adds_epu16(sums[1], _mm256_mpsadbw_epu8(rr1, ss0, (7 << 3) | 7)); // 111 111
 }
 
+/*******************************************************************************
+* Function helper adds to two elements "sums" vectors SAD's for block width of 16, uses AVX2 instructions
+* Requirement: width = 16
+* Requirement: height = 1
+* Compute one line
+*******************************************************************************/
 static INLINE void sad_loop_kernel_16_2sum_oneline_avx2(const uint8_t *const src,
                                                         const uint8_t *const ref, __m256i sums[2]) {
     const __m256i ss0 = _mm256_insertf128_si256(
@@ -1760,6 +1826,10 @@ static INLINE __m128i complement_4_to_6(uint8_t *ref, uint32_t ref_stride, uint8
     return sum;
 }
 
+/*******************************************************************************
+ * Requirement: block_height < 64
+ * General version for SAD computing that support any block width and height
+*******************************************************************************/
 void sad_loop_kernel_generalized_avx512(
     uint8_t * src, // input parameter, source samples Ptr
     uint32_t  src_stride, // input parameter, source stride
@@ -1999,7 +2069,7 @@ void sad_loop_kernel_generalized_avx512(
 
 /*******************************************************************************
 * Requirement: width   = 4, 6, 8, 12, 16, 24, 32, 48 or 64 to use SIMD
-* otherwise C version is used
+* otherwise general/slower SIMD verison is used
 * Requirement: height <= 64
 * Requirement: height % 2 = 0
 *******************************************************************************/

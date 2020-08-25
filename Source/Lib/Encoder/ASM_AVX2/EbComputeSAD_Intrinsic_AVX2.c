@@ -1911,7 +1911,7 @@ void sad_loop_kernel_sparse_avx2_intrin(
 
 /*******************************************************************************
  * Requirement: block_height < 64
- * General version for SAD computing that support any width and height
+ * General version for SAD computing that support any block width and height
 *******************************************************************************/
 void sad_loop_kernel_generalized_avx2(
     uint8_t * src, // input parameter, source samples Ptr
