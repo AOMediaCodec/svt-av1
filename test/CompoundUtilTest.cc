@@ -315,7 +315,7 @@ TEST_P(LbdCompBlendHMaskTest, BlendA64Mask) {
 
 INSTANTIATE_TEST_CASE_P(BLEND, LbdCompBlendHMaskTest,
                         ::testing::ValuesIn({make_tuple(
-                            aom_blend_a64_hmask_c, eb_aom_blend_a64_hmask_sse4_1,
+                            eb_aom_blend_a64_hmask_c, eb_aom_blend_a64_hmask_sse4_1,
                             "eb_aom_blend_a64_hmask_sse4_1")}));
 
 using LbdBlendA64VMaskFunc = void (*)(uint8_t *, uint32_t, const uint8_t *,

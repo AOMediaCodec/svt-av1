@@ -377,7 +377,7 @@ void aom_highbd_blend_a64_vmask_c(uint8_t *dst_8, uint32_t dst_stride, const uin
 }
 
 /*Horizontal mask related blend functions*/
-void aom_blend_a64_hmask_c(uint8_t *dst, uint32_t dst_stride, const uint8_t *src0,
+void eb_aom_blend_a64_hmask_c(uint8_t *dst, uint32_t dst_stride, const uint8_t *src0,
                            uint32_t src0_stride, const uint8_t *src1, uint32_t src1_stride,
                            const uint8_t *mask, int w, int h) {
     int i, j;
