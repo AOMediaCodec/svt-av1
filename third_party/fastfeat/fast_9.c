@@ -2973,7 +2973,7 @@ int* aom_fast9_score(const byte* i, int stride, xy* corners, int num_corners, in
 }
 
 
-xy* aom_fast9_detect(const byte* im, int xsize, int ysize, int stride, int b, int* ret_num_corners)
+xy* svt_aom_fast9_detect(const byte* im, int xsize, int ysize, int stride, int b, int* ret_num_corners)
 {
   int num_corners=0;
   xy* ret_corners;
