@@ -5,7 +5,7 @@
 typedef struct { int x, y; } xy;
 typedef unsigned char byte;
 
-int aom_fast9_corner_score(const byte* p, const int pixel[], int bstart)
+static int aom_fast9_corner_score(const byte* p, const int pixel[], int bstart)
 {
   int bmin = bstart;
   int bmax = 255;
