@@ -389,7 +389,7 @@ void eb_aom_blend_a64_mask_sse4_1(uint8_t *dst, uint32_t dst_stride, const uint8
     assert(IS_POWER_OF_TWO(w));
 
     if (UNLIKELY((h | w) & 3)) { // if (w <= 2 || h <= 2)
-        aom_blend_a64_mask_c(dst,
+        eb_aom_blend_a64_mask_c(dst,
                              dst_stride,
                              src0,
                              src0_stride,

@@ -14,7 +14,7 @@
  *
  * @brief Unit test for util functions in wedge prediction:
  * - av1_build_compound_diffwtd_mask_{, d16}avx2
- * - aom_blend_a64_mask_avx2/aom_lowbd_blend_a64_d16_mask_avx2
+ * - eb_aom_blend_a64_mask_avx2/aom_lowbd_blend_a64_d16_mask_avx2
  * - eb_aom_blend_a64_mask_sse4_1
  * - eb_aom_highbd_blend_a64_mask_sse4_1_8bit/aom_highbd_blend_a64_d16_mask_avx2
  * - eb_aom_blend_a64_hmask_sse4_1/eb_aom_blend_a64_vmask_sse4_1
@@ -203,9 +203,9 @@ TEST_P(LbdCompBlendTest, BlendA64Mask) {
 INSTANTIATE_TEST_CASE_P(
     BLEND, LbdCompBlendTest,
     ::testing::ValuesIn({
-        make_tuple(aom_blend_a64_mask_c, aom_blend_a64_mask_avx2,
-                   "aom_blend_a64_mask_avx2"),
-        make_tuple(aom_blend_a64_mask_c, eb_aom_blend_a64_mask_sse4_1,
+        make_tuple(eb_aom_blend_a64_mask_c, eb_aom_blend_a64_mask_avx2,
+                   "eb_aom_blend_a64_mask_avx2"),
+        make_tuple(eb_aom_blend_a64_mask_c, eb_aom_blend_a64_mask_sse4_1,
                    "eb_aom_blend_a64_mask_sse4_1"),
     }));
 

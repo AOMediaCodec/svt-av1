@@ -242,7 +242,7 @@ void setup_common_rtcd_internal(CPU_FLAGS flags) {
 
     //to use C: flags=0
     (void)flags;
-    eb_aom_blend_a64_mask = aom_blend_a64_mask_c;
+    eb_aom_blend_a64_mask = eb_aom_blend_a64_mask_c;
     eb_aom_blend_a64_hmask = eb_aom_blend_a64_hmask_c;
     eb_aom_blend_a64_vmask = aom_blend_a64_vmask_c;
 
@@ -812,7 +812,7 @@ void setup_common_rtcd_internal(CPU_FLAGS flags) {
 #ifdef ARCH_X86
     flags &= get_cpu_flags_to_use();
     if (flags & HAS_SSE4_1) eb_aom_blend_a64_mask = eb_aom_blend_a64_mask_sse4_1;
-    if (flags & HAS_AVX2) eb_aom_blend_a64_mask = aom_blend_a64_mask_avx2;
+    if (flags & HAS_AVX2) eb_aom_blend_a64_mask = eb_aom_blend_a64_mask_avx2;
     if (flags & HAS_SSE4_1) eb_aom_blend_a64_hmask = eb_aom_blend_a64_hmask_sse4_1;
     if (flags & HAS_SSE4_1) eb_aom_blend_a64_vmask = eb_aom_blend_a64_vmask_sse4_1;
     if (flags & HAS_SSE4_1) eb_aom_highbd_blend_a64_mask = eb_aom_highbd_blend_a64_mask_sse4_1_8bit;
