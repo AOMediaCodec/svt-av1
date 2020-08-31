@@ -585,7 +585,7 @@ static void pick_wedge(PictureControlSet *picture_control_set_ptr, ModeDecisionC
         uint16_t *src_buf_hbd = (uint16_t *)src_pic->buffer_y +
                                 (context_ptr->blk_origin_x + src_pic->origin_x) +
                                 (context_ptr->blk_origin_y + src_pic->origin_y) * src_pic->stride_y;
-        aom_highbd_subtract_block(bh,
+        eb_aom_highbd_subtract_block(bh,
                                   bw,
                                   residual0,
                                   bw,
@@ -6243,7 +6243,7 @@ void calc_pred_masked_compound(PictureControlSet *    pcs_ptr,
             uint16_t *src_buf_hbd =
                 (uint16_t *)src_pic->buffer_y + (context_ptr->blk_origin_x + src_pic->origin_x) +
                 (context_ptr->blk_origin_y + src_pic->origin_y) * src_pic->stride_y;
-            aom_highbd_subtract_block(bheight,
+            eb_aom_highbd_subtract_block(bheight,
                 bwidth,
                 context_ptr->residual1,
                 bwidth,
@@ -6252,7 +6252,7 @@ void calc_pred_masked_compound(PictureControlSet *    pcs_ptr,
                 (uint8_t *)context_ptr->pred1,
                 bwidth,
                 EB_10BIT);
-            aom_highbd_subtract_block(bheight,
+            eb_aom_highbd_subtract_block(bheight,
                 bwidth,
                 context_ptr->diff10,
                 bwidth,
