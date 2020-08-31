@@ -7,7 +7,7 @@ typedef unsigned char byte;
 
 xy* svt_aom_fast9_detect(const byte* im, int xsize, int ysize, int stride, int b, int* ret_num_corners);
 
-int* aom_fast9_score(const byte* i, int stride, xy* corners, int num_corners, int b);
+int* svt_aom_fast9_score(const byte* i, int stride, xy* corners, int num_corners, int b);
 
 xy* svt_aom_fast9_detect_nonmax(const byte* im, int xsize, int ysize, int stride, int b, int* ret_num_corners);
 

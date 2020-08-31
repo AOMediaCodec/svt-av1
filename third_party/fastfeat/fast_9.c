@@ -2958,7 +2958,7 @@ static void make_offsets(int pixel[], int row_stride)
 
 
 
-int* aom_fast9_score(const byte* i, int stride, xy* corners, int num_corners, int b)
+int* svt_aom_fast9_score(const byte* i, int stride, xy* corners, int num_corners, int b)
 {
   int* scores = (int*)malloc(sizeof(int)* num_corners);
   int n;
