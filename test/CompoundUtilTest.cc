@@ -1208,6 +1208,6 @@ TEST_P(AomHighbdSubstractBlockTest, MatchTest) {
 INSTANTIATE_TEST_CASE_P(
     SUBSTRACT_BLOCK_TEST, AomHighbdSubstractBlockTest,
     ::testing::Combine(::testing::Range(BLOCK_4X4, BlockSizeS_ALL),
-                       ::testing::Values(aom_highbd_subtract_block_sse2)));
+                       ::testing::Values(eb_aom_highbd_subtract_block_sse2)));
 
 }  // namespace
