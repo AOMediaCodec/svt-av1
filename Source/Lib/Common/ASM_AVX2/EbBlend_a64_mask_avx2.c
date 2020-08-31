@@ -760,7 +760,7 @@ static INLINE void lowbd_blend_a64_d16_mask_subw0_subh1_w32_avx2(
     }
 }
 
-void aom_lowbd_blend_a64_d16_mask_avx2(uint8_t *dst, uint32_t dst_stride, const CONV_BUF_TYPE *src0,
+void eb_aom_lowbd_blend_a64_d16_mask_avx2(uint8_t *dst, uint32_t dst_stride, const CONV_BUF_TYPE *src0,
                                        uint32_t src0_stride, const CONV_BUF_TYPE *src1,
                                        uint32_t src1_stride, const uint8_t *mask,
                                        uint32_t mask_stride, int w, int h, int subw, int subh,
