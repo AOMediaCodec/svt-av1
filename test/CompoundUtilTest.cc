@@ -16,7 +16,7 @@
  * - av1_build_compound_diffwtd_mask_{, d16}avx2
  * - eb_aom_blend_a64_mask_avx2/aom_lowbd_blend_a64_d16_mask_avx2
  * - eb_aom_blend_a64_mask_sse4_1
- * - eb_aom_highbd_blend_a64_mask_sse4_1_8bit/aom_highbd_blend_a64_d16_mask_avx2
+ * - eb_aom_highbd_blend_a64_mask_sse4_1_8bit/eb_aom_highbd_blend_a64_d16_mask_avx2
  * - eb_aom_blend_a64_hmask_sse4_1/eb_aom_blend_a64_vmask_sse4_1
  * - eb_aom_highbd_blend_a64_hmask_sse4_1_8bit/eb_aom_highbd_blend_a64_vmask_sse4_1_8bit
  * - eb_aom_highbd_blend_a64_hmask_sse4_1_16bit/eb_aom_highbd_blend_a64_vmask_sse4_1_16bit
@@ -496,8 +496,8 @@ TEST_P(HbdCompBlendD16Test, BlendA64MaskD16) {
 INSTANTIATE_TEST_CASE_P(
     BLEND, HbdCompBlendD16Test,
     ::testing::ValuesIn({make_tuple(aom_highbd_blend_a64_d16_mask_c,
-                                    aom_highbd_blend_a64_d16_mask_avx2,
-                                    "aom_highbd_blend_a64_d16_mask_avx2")}));
+                                    eb_aom_highbd_blend_a64_d16_mask_avx2,
+                                    "eb_aom_highbd_blend_a64_d16_mask_avx2")}));
 
 using HbdBlendA64HMaskFunc = void (*)(uint8_t *, uint32_t, const uint8_t *,
                                       uint32_t, const uint8_t *, uint32_t,

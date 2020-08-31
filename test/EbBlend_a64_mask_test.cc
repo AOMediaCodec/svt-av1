@@ -466,5 +466,5 @@ class BlendA64MaskTestHBD_d16
 };
 
 TEST_CLASS(BlendA64MaskTestHBD_d16, aom_highbd_blend_a64_d16_mask_c,
-           aom_highbd_blend_a64_d16_mask_avx2, _Mask_Blend_Hbd_d16_AVX2)
+           eb_aom_highbd_blend_a64_d16_mask_avx2, _Mask_Blend_Hbd_d16_AVX2)
 }; // namespace

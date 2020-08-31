@@ -1013,7 +1013,7 @@ void aom_lowbd_blend_a64_d16_mask_avx2(uint8_t *dst, uint32_t dst_stride, const 
 }
 
 //////////////////////////////////////////////////////////////////////////////
-// aom_highbd_blend_a64_d16_mask_avx2()
+// eb_aom_highbd_blend_a64_d16_mask_avx2()
 //////////////////////////////////////////////////////////////////////////////
 
 static INLINE void highbd_blend_a64_d16_mask_w4_avx2(
@@ -1422,7 +1422,7 @@ static INLINE void highbd_blend_a64_d16_mask_subw1_subh1_w16_avx2(
     }
 }
 
-void aom_highbd_blend_a64_d16_mask_avx2(uint8_t *dst8, uint32_t dst_stride,
+void eb_aom_highbd_blend_a64_d16_mask_avx2(uint8_t *dst8, uint32_t dst_stride,
                                         const CONV_BUF_TYPE *src0, uint32_t src0_stride,
                                         const CONV_BUF_TYPE *src1, uint32_t src1_stride,
                                         const uint8_t *mask, uint32_t mask_stride, int w, int h,
