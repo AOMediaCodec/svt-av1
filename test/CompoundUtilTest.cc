@@ -20,7 +20,7 @@
  * - eb_aom_blend_a64_hmask_sse4_1/eb_aom_blend_a64_vmask_sse4_1
  * - eb_aom_highbd_blend_a64_hmask_sse4_1_8bit/eb_aom_highbd_blend_a64_vmask_sse4_1_8bit
  * - eb_aom_highbd_blend_a64_hmask_sse4_1_16bit/eb_aom_highbd_blend_a64_vmask_sse4_1_16bit
- * - eb_aom_sse_avx2/aom_highbd_sse_avx2
+ * - eb_aom_sse_avx2/eb_aom_highbd_sse_avx2
  *
  * @author Cidana-Wenyao
  *
@@ -1075,7 +1075,7 @@ TEST_P(AomSseHighbdTest, MatchTest) {
 INSTANTIATE_TEST_CASE_P(
     SSETEST, AomSseHighbdTest,
     ::testing::Combine(::testing::Range(BLOCK_4X4, BlockSizeS_ALL),
-                       ::testing::Values(aom_highbd_sse_avx2)));
+                       ::testing::Values(eb_aom_highbd_sse_avx2)));
 
 typedef void (*AomSubstractBlockFunc)(int, int, int16_t *, ptrdiff_t,
                                       const uint8_t *, ptrdiff_t,

@@ -342,7 +342,7 @@ void setup_rtcd_internal(CPU_FLAGS flags) {
 #ifdef ARCH_X86
     flags &= get_cpu_flags_to_use();
     if (flags & HAS_AVX2) eb_aom_sse = eb_aom_sse_avx2;
-    if (flags & HAS_AVX2) eb_aom_highbd_sse = aom_highbd_sse_avx2;
+    if (flags & HAS_AVX2) eb_aom_highbd_sse = eb_aom_highbd_sse_avx2;
     if (flags & HAS_AVX2) eb_av1_wedge_compute_delta_squares = eb_av1_wedge_compute_delta_squares_avx2;
     if (flags & HAS_AVX2) eb_av1_wedge_sign_from_residuals = eb_av1_wedge_sign_from_residuals_avx2;
     if (flags & HAS_AVX2) eb_compute_cdef_dist = compute_cdef_dist_avx2;
