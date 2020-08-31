@@ -1038,8 +1038,8 @@ void eb_aom_blend_a64_vmask_sse4_1(uint8_t *dst, uint32_t dst_stride, const uint
     // Dimension: width_index
     static const BlendFn blend[9] = {
         blend_a64_vmask_w16n_sse4_1, // w % 16 == 0
-        aom_blend_a64_vmask_c, // w == 1
-        aom_blend_a64_vmask_c, // w == 2
+        eb_aom_blend_a64_vmask_c, // w == 1
+        eb_aom_blend_a64_vmask_c, // w == 2
         NULL, // INVALID
         blend_a64_vmask_w4_sse4_1, // w == 4
         NULL, // INVALID

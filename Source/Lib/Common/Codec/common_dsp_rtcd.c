@@ -244,7 +244,7 @@ void setup_common_rtcd_internal(CPU_FLAGS flags) {
     (void)flags;
     eb_aom_blend_a64_mask = eb_aom_blend_a64_mask_c;
     eb_aom_blend_a64_hmask = eb_aom_blend_a64_hmask_c;
-    eb_aom_blend_a64_vmask = aom_blend_a64_vmask_c;
+    eb_aom_blend_a64_vmask = eb_aom_blend_a64_vmask_c;
 
     eb_aom_highbd_blend_a64_mask = aom_highbd_blend_a64_mask_c;
     eb_aom_highbd_blend_a64_hmask_8bit = aom_highbd_blend_a64_hmask_c;

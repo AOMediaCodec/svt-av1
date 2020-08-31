@@ -228,7 +228,7 @@ static void blend_a64_vmask_ref(uint8_t *dst, uint32_t dst_stride,
 TEST_CLASS(BlendA64Mask1DTest8B, blend_a64_hmask_ref,
           eb_aom_blend_a64_hmask_c, Horz_Blend_C)
 TEST_CLASS(BlendA64Mask1DTest8B, blend_a64_vmask_ref,
-           aom_blend_a64_vmask_c, Vert_Blend_C)
+           eb_aom_blend_a64_vmask_c, Vert_Blend_C)
 // Intrinsic
 TEST_CLASS(BlendA64Mask1DTest8B, blend_a64_hmask_ref,
            eb_aom_blend_a64_hmask_sse4_1, Horz_Blend_SSE4_1)
