@@ -57,7 +57,7 @@ void aom_var_filter_block2d_bil_second_pass_ssse3(const uint16_t *a, uint8_t *b,
         aom_var_filter_block2d_bil_second_pass_ssse3(                                 \
             fdata3, temp2, W, W, H, W, bilinear_filters_2t[yoffset]);                 \
                                                                                       \
-        return aom_obmc_variance##W##x##H##_avx2(temp2, W, wsrc, mask, sse);          \
+        return eb_aom_obmc_variance##W##x##H##_avx2(temp2, W, wsrc, mask, sse);          \
     }
 
 OBMC_SUBPIX_VAR(128, 128)
