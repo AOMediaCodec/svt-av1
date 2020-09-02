@@ -135,8 +135,8 @@ but it computes the global motion for the whole frame. The function involves a l
 that runs over all reference frames.
 
 To compute the global motion between two frames, the FAST features of the reference
-frames are extracted and matched to those of the current frame in the ```av1_fast_corner_detect```
-function, thanks to the fastfeat third-party library. The ```av1_fast_corner_detect``` function
+frames are extracted and matched to those of the current frame in the ```svt_av1_fast_corner_detect```
+function, thanks to the fastfeat third-party library. The ```svt_av1_fast_corner_detect``` function
 is first called to determine the features in the source picture. Then it is called again
 from the function ```svt_av1_compute_global_motion``` to determine the features in the reference picture.
 

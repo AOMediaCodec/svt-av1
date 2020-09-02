@@ -190,7 +190,7 @@ void compute_global_motion(EbPictureBufferDesc *input_pic, EbPictureBufferDesc *
     {
         int frm_corners[2 * MAX_CORNERS], inliers_by_motion[RANSAC_NUM_MOTIONS];
         // compute interest points using FAST features
-        int num_frm_corners = av1_fast_corner_detect(frm_buffer,
+        int num_frm_corners = svt_av1_fast_corner_detect(frm_buffer,
                                                      input_pic->width,
                                                      input_pic->height,
                                                      input_pic->stride_y,
