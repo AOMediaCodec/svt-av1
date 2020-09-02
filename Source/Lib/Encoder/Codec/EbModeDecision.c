@@ -4174,8 +4174,8 @@ void intra_bc_search(PictureControlSet *pcs, ModeDecisionContext *context_ptr,
     x->is_exhaustive_allowed =
         context_ptr->blk_geom->bwidth == 4 || context_ptr->blk_geom->bheight == 4 ? 1 : 0;
     //CHKN crc calculator could be moved to mdContext and these init at init time.
-    av1_crc_calculator_init(&x->crc_calculator1, 24, 0x5D6DCB);
-    av1_crc_calculator_init(&x->crc_calculator2, 24, 0x864CFB);
+    svt_av1_crc_calculator_init(&x->crc_calculator1, 24, 0x5D6DCB);
+    svt_av1_crc_calculator_init(&x->crc_calculator2, 24, 0x864CFB);
 
     x->xd            = blk_ptr->av1xd;
     x->nmv_vec_cost  = context_ptr->md_rate_estimation_ptr->nmv_vec_cost;

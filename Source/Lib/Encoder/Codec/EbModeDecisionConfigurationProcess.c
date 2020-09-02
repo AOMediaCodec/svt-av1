@@ -1228,8 +1228,8 @@ void *mode_decision_configuration_kernel(void *input_ptr) {
                 link_eb_to_aom_buffer_desc_8bit(pcs_ptr->parent_pcs_ptr->enhanced_picture_ptr,
                                                 &cpi_source);
 
-                av1_crc_calculator_init(&pcs_ptr->crc_calculator1, 24, 0x5D6DCB);
-                av1_crc_calculator_init(&pcs_ptr->crc_calculator2, 24, 0x864CFB);
+                svt_av1_crc_calculator_init(&pcs_ptr->crc_calculator1, 24, 0x5D6DCB);
+                svt_av1_crc_calculator_init(&pcs_ptr->crc_calculator2, 24, 0x864CFB);
 
                 svt_av1_generate_block_2x2_hash_value(
                     &cpi_source, block_hash_values[0], is_block_same[0], pcs_ptr);
