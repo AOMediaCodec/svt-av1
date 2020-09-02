@@ -352,7 +352,7 @@ void setup_common_rtcd_internal(CPU_FLAGS flags) {
 
     eb_av1_build_compound_diffwtd_mask = eb_av1_build_compound_diffwtd_mask_c;
     eb_av1_build_compound_diffwtd_mask_highbd = eb_av1_build_compound_diffwtd_mask_highbd_c;
-    eb_av1_wedge_sse_from_residuals = av1_wedge_sse_from_residuals_c;
+    eb_av1_wedge_sse_from_residuals = eb_av1_wedge_sse_from_residuals_c;
 
     eb_aom_subtract_block = eb_aom_subtract_block_c;
 

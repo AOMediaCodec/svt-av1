@@ -2140,7 +2140,7 @@ int eb_av1_skip_u4x4_pred_in_obmc(BlockSize bsize, int dir, int subsampling_x, i
  * holds for 8 bit input, and on real input, it should hold practically always,
  * as residuals are expected to be small.
  */
-uint64_t av1_wedge_sse_from_residuals_c(const int16_t *r1, const int16_t *d, const uint8_t *m,
+uint64_t eb_av1_wedge_sse_from_residuals_c(const int16_t *r1, const int16_t *d, const uint8_t *m,
                                         int N) {
     uint64_t csse = 0;
 

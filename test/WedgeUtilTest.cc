@@ -198,7 +198,7 @@ TEST_F(WedgeUtilTest, SseFromResidualRandomTest) {
         // eb_av1_wedge_sse_from_residuals_avx2
         const int N = 64 * n_rnd.random();
 
-        uint64_t ref_sse = av1_wedge_sse_from_residuals_c(r0, r1, m, N);
+        uint64_t ref_sse = eb_av1_wedge_sse_from_residuals_c(r0, r1, m, N);
         uint64_t tst_sse = eb_av1_wedge_sse_from_residuals_avx2(r0, r1, m, N);
 
         // check output
@@ -251,7 +251,7 @@ TEST_F(WedgeUtilTest, SseFromResidualExtremeTest) {
         // eb_av1_wedge_sse_from_residuals_avx2
         const int N = 64 * n_rnd.random();
 
-        uint64_t ref_sse = av1_wedge_sse_from_residuals_c(r0, r1, m, N);
+        uint64_t ref_sse = eb_av1_wedge_sse_from_residuals_c(r0, r1, m, N);
         uint64_t tst_sse = eb_av1_wedge_sse_from_residuals_avx2(r0, r1, m, N);
 
         // check output

@@ -1517,7 +1517,7 @@ void eb_av1_build_compound_diffwtd_mask_avx2(uint8_t *mask, DIFFWTD_MASK_TYPE ma
 #define MAX_MASK_VALUE (1 << WEDGE_WEIGHT_BITS)
 
 /**
- * See av1_wedge_sse_from_residuals_c
+ * See eb_av1_wedge_sse_from_residuals_c
  */
 uint64_t eb_av1_wedge_sse_from_residuals_avx2(const int16_t *r1, const int16_t *d, const uint8_t *m,
                                               int N) {
