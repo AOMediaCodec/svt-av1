@@ -426,7 +426,7 @@ TEST_P(HbdCompBlendTest, BlendA64Mask) {
 
 INSTANTIATE_TEST_CASE_P(
     BLEND, HbdCompBlendTest,
-    ::testing::ValuesIn({make_tuple(aom_highbd_blend_a64_mask_c,
+    ::testing::ValuesIn({make_tuple(eb_aom_highbd_blend_a64_mask_c,
                                     eb_aom_highbd_blend_a64_mask_sse4_1_8bit,
                                     "eb_aom_highbd_blend_a64_mask_sse4_1_8bit")}));
 
@@ -495,7 +495,7 @@ TEST_P(HbdCompBlendD16Test, BlendA64MaskD16) {
 
 INSTANTIATE_TEST_CASE_P(
     BLEND, HbdCompBlendD16Test,
-    ::testing::ValuesIn({make_tuple(aom_highbd_blend_a64_d16_mask_c,
+    ::testing::ValuesIn({make_tuple(eb_aom_highbd_blend_a64_d16_mask_c,
                                     eb_aom_highbd_blend_a64_d16_mask_avx2,
                                     "eb_aom_highbd_blend_a64_d16_mask_avx2")}));
 

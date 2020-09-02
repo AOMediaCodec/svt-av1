@@ -246,7 +246,7 @@ void setup_common_rtcd_internal(CPU_FLAGS flags) {
     eb_aom_blend_a64_hmask = eb_aom_blend_a64_hmask_c;
     eb_aom_blend_a64_vmask = eb_aom_blend_a64_vmask_c;
 
-    eb_aom_highbd_blend_a64_mask = aom_highbd_blend_a64_mask_c;
+    eb_aom_highbd_blend_a64_mask = eb_aom_highbd_blend_a64_mask_c;
     eb_aom_highbd_blend_a64_hmask_8bit = aom_highbd_blend_a64_hmask_c;
     eb_aom_highbd_blend_a64_vmask_8bit = aom_highbd_blend_a64_vmask_c;
 
@@ -357,7 +357,7 @@ void setup_common_rtcd_internal(CPU_FLAGS flags) {
     eb_aom_subtract_block = aom_subtract_block_c;
 
     eb_aom_lowbd_blend_a64_d16_mask = aom_lowbd_blend_a64_d16_mask_c;
-    eb_aom_highbd_blend_a64_d16_mask = aom_highbd_blend_a64_d16_mask_c;
+    eb_aom_highbd_blend_a64_d16_mask = eb_aom_highbd_blend_a64_d16_mask_c;
 
     eb_aom_highbd_subtract_block = aom_highbd_subtract_block_c;
 

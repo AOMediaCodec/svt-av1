@@ -907,7 +907,7 @@ void eb_aom_highbd_blend_a64_mask_sse4_1_8bit(uint8_t *dst_8, uint32_t dst_strid
 
     assert(bd == 8 || bd == 10 || bd == 12);
     if (UNLIKELY((h | w) & 3)) { // if (w <= 2 || h <= 2)
-        aom_highbd_blend_a64_mask_c(dst_8,
+        eb_aom_highbd_blend_a64_mask_c(dst_8,
                                     dst_stride,
                                     src0_8,
                                     src0_stride,
@@ -1236,7 +1236,7 @@ void eb_aom_highbd_blend_a64_mask_sse4_1_16bit(uint16_t *dst, uint32_t dst_strid
 
     assert(bd == 8 || bd == 10 || bd == 12);
     if (UNLIKELY((h | w) & 3)) { // if (w <= 2 || h <= 2)
-        aom_highbd_blend_a64_mask_c((uint8_t *)dst,
+        eb_aom_highbd_blend_a64_mask_c((uint8_t *)dst,
                                     dst_stride,
                                     (uint8_t *)src0,
                                     src0_stride,

@@ -1557,7 +1557,7 @@ void eb_aom_highbd_blend_a64_d16_mask_avx2(uint8_t *dst8, uint32_t dst_stride,
         // Sub-sampling in only one axis doesn't seem to happen very much, so fall
         // back to the vanilla C implementation instead of having all the optimised
         // code for these.
-        aom_highbd_blend_a64_d16_mask_c(dst8,
+        eb_aom_highbd_blend_a64_d16_mask_c(dst8,
                                         dst_stride,
                                         src0,
                                         src0_stride,
