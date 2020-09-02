@@ -149,7 +149,7 @@ uint32_t av1_variance(uint8_t *input, int bw, int bh, int stride) {
   return sse - (uint32_t)(((int64_t)sum * sum) / (bw * bh));
 }
 
-int av1_haar_ac_sad_8x8_uint8_input(uint8_t *input, int stride, int hbd) {
+int eb_av1_haar_ac_sad_8x8_uint8_input_c(uint8_t *input, int stride, int hbd) {
   tran_low_t output[64];
 
   av1_fdwt8x8_uint8_input_c(input, output, stride, hbd);
