@@ -299,7 +299,7 @@ public:
   }
 };
 
-TEST_CLASS(BlendA64MaskTest8B_d16, aom_lowbd_blend_a64_d16_mask_c,
+TEST_CLASS(BlendA64MaskTest8B_d16, eb_aom_lowbd_blend_a64_d16_mask_c,
            eb_aom_lowbd_blend_a64_d16_mask_avx2, Mask_Blend_d16_AVX2)
 
 //////////////////////////////////////////////////////////////////////////////

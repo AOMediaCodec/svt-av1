@@ -265,7 +265,7 @@ TEST_P(LbdCompBlendD16Test, BlendA64MaskD16) {
 
 INSTANTIATE_TEST_CASE_P(
     BLEND, LbdCompBlendD16Test,
-    ::testing::ValuesIn({make_tuple(aom_lowbd_blend_a64_d16_mask_c,
+    ::testing::ValuesIn({make_tuple(eb_aom_lowbd_blend_a64_d16_mask_c,
                                     eb_aom_lowbd_blend_a64_d16_mask_avx2,
                                     "eb_aom_lowbd_blend_a64_d16_mask_avx2")}));
 

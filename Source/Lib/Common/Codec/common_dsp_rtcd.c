@@ -356,7 +356,7 @@ void setup_common_rtcd_internal(CPU_FLAGS flags) {
 
     eb_aom_subtract_block = aom_subtract_block_c;
 
-    eb_aom_lowbd_blend_a64_d16_mask = aom_lowbd_blend_a64_d16_mask_c;
+    eb_aom_lowbd_blend_a64_d16_mask = eb_aom_lowbd_blend_a64_d16_mask_c;
     eb_aom_highbd_blend_a64_d16_mask = eb_aom_highbd_blend_a64_d16_mask_c;
 
     eb_aom_highbd_subtract_block = aom_highbd_subtract_block_c;
