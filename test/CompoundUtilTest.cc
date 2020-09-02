@@ -880,7 +880,7 @@ INSTANTIATE_TEST_CASE_P(
     CompUtilTest, BuildCompDiffwtdMaskHighbdTest,
     ::testing::Combine(
         ::testing::Range(BLOCK_4X4, BlockSizeS_ALL),
-        ::testing::Values(av1_build_compound_diffwtd_mask_highbd_ssse3,
+        ::testing::Values(eb_av1_build_compound_diffwtd_mask_highbd_ssse3,
                           eb_av1_build_compound_diffwtd_mask_highbd_avx2)));
 
 // test eb_av1_build_compound_diffwtd_mask_d16_avx2

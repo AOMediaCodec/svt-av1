@@ -1309,7 +1309,7 @@ void eb_av1_build_compound_diffwtd_mask_highbd_avx2(uint8_t *mask, DIFFWTD_MASK_
                                                     const uint8_t *src1, int src1_stride, int h, int w,
                                                     int bd) {
     if (w < 16) {
-        av1_build_compound_diffwtd_mask_highbd_ssse3(
+        eb_av1_build_compound_diffwtd_mask_highbd_ssse3(
             mask, mask_type, src0, src0_stride, src1, src1_stride, h, w, bd);
     } else {
         assert(mask_type == DIFFWTD_38 || mask_type == DIFFWTD_38_INV);
