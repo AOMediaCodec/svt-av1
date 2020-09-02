@@ -2003,7 +2003,7 @@ uint64_t eb_aom_sum_squares_i16_sse2(const int16_t *src, uint32_t n) {
 }
 
 /**
- * See av1_wedge_sign_from_residuals_c
+ * See eb_av1_wedge_sign_from_residuals_c
  */
 int8_t eb_av1_wedge_sign_from_residuals_avx2(const int16_t *ds, const uint8_t *m, int N,
                                              int64_t limit) {

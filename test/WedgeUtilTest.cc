@@ -60,7 +60,7 @@ class WedgeUtilTest : public ::testing::Test {
         for (int i = 0; i < N; ++i)
             ds[i] = clamp(r0[i] * r0[i] - r1[i] * r1[i], INT16_MIN, INT16_MAX);
         const int8_t ref_sign =
-            av1_wedge_sign_from_residuals_c(ds, m, N, limit);
+            eb_av1_wedge_sign_from_residuals_c(ds, m, N, limit);
         const int8_t tst_sign =
             eb_av1_wedge_sign_from_residuals_avx2(ds, m, N, limit);
         ASSERT_EQ(ref_sign, tst_sign)
