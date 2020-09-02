@@ -11,7 +11,7 @@ int* svt_aom_fast9_score(const byte* i, int stride, xy* corners, int num_corners
 
 xy* svt_aom_fast9_detect_nonmax(const byte* im, int xsize, int ysize, int stride, int b, int* ret_num_corners);
 
-xy* aom_nonmax_suppression(const xy* corners, const int* scores, int num_corners, int* ret_num_nonmax);
+xy* svt_aom_nonmax_suppression(const xy* corners, const int* scores, int num_corners, int* ret_num_nonmax);
 
 
 #endif
