@@ -883,7 +883,7 @@ INSTANTIATE_TEST_CASE_P(
         ::testing::Values(av1_build_compound_diffwtd_mask_highbd_ssse3,
                           eb_av1_build_compound_diffwtd_mask_highbd_avx2)));
 
-// test av1_build_compound_diffwtd_mask_d16_avx2
+// test eb_av1_build_compound_diffwtd_mask_d16_avx2
 typedef void (*BuildCompDiffwtdMaskD16Func)(
     uint8_t *mask, DIFFWTD_MASK_TYPE mask_type, const CONV_BUF_TYPE *src0,
     int src0_stride, const CONV_BUF_TYPE *src1, int src1_stride, int h, int w,
@@ -975,7 +975,7 @@ INSTANTIATE_TEST_CASE_P(
     SSE4_1, BuildCompDiffwtdMaskD16Test,
     ::testing::Combine(
         ::testing::Range(8, 13, 2),
-        ::testing::Values(av1_build_compound_diffwtd_mask_d16_avx2),
+        ::testing::Values(eb_av1_build_compound_diffwtd_mask_d16_avx2),
         ::testing::Range(BLOCK_4X4, BlockSizeS_ALL)));
 
 typedef int64_t (*AomSseFunc)(const uint8_t *, int, const uint8_t *, int, int,
