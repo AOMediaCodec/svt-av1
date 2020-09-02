@@ -283,7 +283,7 @@ static int compute_global_motion_feature_based(TransformationType type, unsigned
     int *          correspondences;
     int            ref_corners[2 * MAX_CORNERS];
     unsigned char *ref_buffer = ref;
-    RansacFunc     ransac     = av1_get_ransac_type(type);
+    RansacFunc     ransac     = svt_av1_get_ransac_type(type);
 
     num_ref_corners = av1_fast_corner_detect(
         ref_buffer, frm_width, frm_height, ref_stride, ref_corners, MAX_CORNERS);
