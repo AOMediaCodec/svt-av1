@@ -513,7 +513,7 @@ static void model_rd_with_curvfit(PictureControlSet *picture_control_set_ptr, Bl
  *
  * The result is saturated to signed 16 bits.
  */
-void av1_wedge_compute_delta_squares_c(int16_t *d, const int16_t *a, const int16_t *b, int N) {
+void eb_av1_wedge_compute_delta_squares_c(int16_t *d, const int16_t *a, const int16_t *b, int N) {
     int i;
 
     for (i = 0; i < N; i++) d[i] = clamp(a[i] * a[i] - b[i] * b[i], INT16_MIN, INT16_MAX);

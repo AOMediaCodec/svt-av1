@@ -2068,7 +2068,7 @@ int8_t eb_av1_wedge_sign_from_residuals_avx2(const int16_t *ds, const uint8_t *m
 }
 
 /**
- * av1_wedge_compute_delta_squares_c
+ * eb_av1_wedge_compute_delta_squares_c
  */
 void eb_av1_wedge_compute_delta_squares_avx2(int16_t *d, const int16_t *a, const int16_t *b, int N) {
     const __m256i v_neg_w = _mm256_set1_epi32(0xffff0001);

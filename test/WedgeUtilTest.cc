@@ -165,7 +165,7 @@ TEST_F(WedgeUtilTest, ComputeDeltaSquareTest) {
         // eb_av1_wedge_compute_delta_squares_avx2
         const int N = 64 * n_rnd.random();
 
-        av1_wedge_compute_delta_squares_c(ref_diff, r0, r1, N);
+        eb_av1_wedge_compute_delta_squares_c(ref_diff, r0, r1, N);
         eb_av1_wedge_compute_delta_squares_avx2(tst_diff, r0, r1, N);
 
         // check the output
