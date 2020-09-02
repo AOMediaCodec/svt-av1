@@ -929,7 +929,7 @@ class BuildCompDiffwtdMaskD16Test
         }
 
         for (int mask_type = 0; mask_type < DIFFWTD_MASK_TYPES; mask_type++) {
-            av1_build_compound_diffwtd_mask_d16_c(mask_ref,
+            eb_av1_build_compound_diffwtd_mask_d16_c(mask_ref,
                                                   (DIFFWTD_MASK_TYPE)mask_type,
                                                   src0,
                                                   width,

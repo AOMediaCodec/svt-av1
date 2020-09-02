@@ -264,7 +264,7 @@ void setup_common_rtcd_internal(CPU_FLAGS flags) {
 
     eb_av1_upsample_intra_edge = eb_av1_upsample_intra_edge_c;
 
-    eb_av1_build_compound_diffwtd_mask_d16 = av1_build_compound_diffwtd_mask_d16_c;
+    eb_av1_build_compound_diffwtd_mask_d16 = eb_av1_build_compound_diffwtd_mask_d16_c;
 
     eb_av1_highbd_wiener_convolve_add_src = eb_av1_highbd_wiener_convolve_add_src_c;
 
