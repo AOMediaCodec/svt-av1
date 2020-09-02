@@ -42,7 +42,7 @@ void aom_var_filter_block2d_bil_second_pass_ssse3(const uint16_t *a, uint8_t *b,
                                                   unsigned int output_width, const uint8_t *filter);
 
 #define OBMC_SUBPIX_VAR(W, H)                                                         \
-    uint32_t aom_obmc_sub_pixel_variance##W##x##H##_sse4_1(const uint8_t *pre,        \
+    uint32_t eb_aom_obmc_sub_pixel_variance##W##x##H##_sse4_1(const uint8_t *pre,        \
                                                            int            pre_stride, \
                                                            int            xoffset,    \
                                                            int            yoffset,    \

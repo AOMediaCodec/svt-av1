@@ -13,8 +13,8 @@
  * @file OBMCVarianceTest.cc
  *
  * @brief Unit test for obmc variance functions:
- * - aom_obmc_variance{4-128}x{4-128}_{c, avx2}
- * - aom_obmc_sub_pixel_variance{4-128}x{4-128}_{c, sse4_1}
+ * - eb_aom_obmc_variance{4-128}x{4-128}_{c, avx2}
+ * - eb_aom_obmc_sub_pixel_variance{4-128}x{4-128}_{c, sse4_1}
  *
  * @author Cidana-Edmond
  *
@@ -206,7 +206,7 @@ TEST_P(OBMCSubPixelVarianceTest, RunCheckOutput) {
 
 #define OBMC_SUB_PIX_VAR_FUNC_C(W, H) eb_aom_obmc_sub_pixel_variance##W##x##H##_c
 #define OBMC_SUB_PIX_VAR_FUNC_SSE41(W, H) \
-    aom_obmc_sub_pixel_variance##W##x##H##_sse4_1
+    eb_aom_obmc_sub_pixel_variance##W##x##H##_sse4_1
 #define GEN_OBMC_SUB_PIX_VAR_TEST_PARAM(W, H)         \
     ObmcSubPixVarParam(OBMC_SUB_PIX_VAR_FUNC_C(W, H), \
                        OBMC_SUB_PIX_VAR_FUNC_SSE41(W, H))
