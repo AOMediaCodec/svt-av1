@@ -148,8 +148,7 @@ TEST_P(AV1CornerMatchTest, DISABLED_Speed) { RunCheckOutput(1000); }
 
 INSTANTIATE_TEST_CASE_P(
     AV1CornerMatchTest, AV1CornerMatchTest,
-    ::testing::Values(make_tuple(0, &av1_compute_cross_correlation_avx2),
-                      make_tuple(1, &av1_compute_cross_correlation_avx2)));
+    ::testing::Values(make_tuple(0, &eb_av1_compute_cross_correlation_avx2),
+                      make_tuple(1, &eb_av1_compute_cross_correlation_avx2)));
 
 }
-

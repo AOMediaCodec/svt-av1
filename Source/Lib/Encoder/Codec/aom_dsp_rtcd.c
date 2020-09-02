@@ -635,7 +635,7 @@ void setup_rtcd_internal(CPU_FLAGS flags) {
                     SET_AVX2(sad_16b_kernel, sad_16b_kernel_c, sad_16bit_kernel_avx2);
                     SET_AVX2(eb_av1_compute_cross_correlation,
                         av1_compute_cross_correlation_c,
-                        av1_compute_cross_correlation_avx2);
+                        eb_av1_compute_cross_correlation_avx2);
                     SET_AVX2(eb_av1_k_means_dim1, av1_k_means_dim1_c, av1_k_means_dim1_avx2);
                     SET_AVX2(eb_av1_k_means_dim2, av1_k_means_dim2_c, av1_k_means_dim2_avx2);
                     SET_AVX2(eb_av1_calc_indices_dim1, av1_calc_indices_dim1_c, av1_calc_indices_dim1_avx2);
