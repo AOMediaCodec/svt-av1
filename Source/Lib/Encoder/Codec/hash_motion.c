@@ -84,13 +84,13 @@ static int hash_block_size_to_index(int block_size) {
     }
 }
 
-void av1_hash_table_destroy(HashTable *p_hash_table) {
+void svt_av1_hash_table_destroy(HashTable *p_hash_table) {
     hash_table_clear_all(p_hash_table);
     EB_FREE_ARRAY(p_hash_table->p_lookup_table);
     p_hash_table->p_lookup_table = NULL;
 }
 
-EbErrorType av1_hash_table_create(HashTable *p_hash_table) {
+EbErrorType svt_av1_hash_table_create(HashTable *p_hash_table) {
     EbErrorType err_code = EB_ErrorNone;
     ;
 
@@ -118,19 +118,19 @@ static void hash_table_add_to_table(HashTable *p_hash_table, uint32_t hash_value
     }
 }
 
-int32_t av1_hash_table_count(const HashTable *p_hash_table, uint32_t hash_value) {
+int32_t svt_av1_hash_table_count(const HashTable *p_hash_table, uint32_t hash_value) {
     if (p_hash_table->p_lookup_table[hash_value] == NULL) {
         return 0;
     } else
         return (int32_t)(p_hash_table->p_lookup_table[hash_value]->size);
 }
 
-Iterator av1_hash_get_first_iterator(HashTable *p_hash_table, uint32_t hash_value) {
-    assert(av1_hash_table_count(p_hash_table, hash_value) > 0);
+Iterator svt_av1_hash_get_first_iterator(HashTable *p_hash_table, uint32_t hash_value) {
+    assert(svt_av1_hash_table_count(p_hash_table, hash_value) > 0);
     return eb_aom_vector_begin(p_hash_table->p_lookup_table[hash_value]);
 }
 
-void av1_generate_block_2x2_hash_value(const Yv12BufferConfig *picture, uint32_t *pic_block_hash[2],
+void svt_av1_generate_block_2x2_hash_value(const Yv12BufferConfig *picture, uint32_t *pic_block_hash[2],
                                        int8_t *pic_block_same_info[3], PictureControlSet *pcs) {
     const int width  = 2;
     const int height = 2;
@@ -179,7 +179,7 @@ void av1_generate_block_2x2_hash_value(const Yv12BufferConfig *picture, uint32_t
     }
 }
 
-void av1_generate_block_hash_value(const Yv12BufferConfig *picture, int block_size,
+void svt_av1_generate_block_hash_value(const Yv12BufferConfig *picture, int block_size,
                                    uint32_t *src_pic_block_hash[2], uint32_t *dst_pic_block_hash[2],
                                    int8_t *src_pic_block_same_info[3],
                                    int8_t *dst_pic_block_same_info[3], PictureControlSet *pcs) {
@@ -243,7 +243,7 @@ void av1_generate_block_hash_value(const Yv12BufferConfig *picture, int block_si
     }
 }
 
-void av1_add_to_hash_map_by_row_with_precal_data(HashTable *p_hash_table, uint32_t *pic_hash[2],
+void svt_av1_add_to_hash_map_by_row_with_precal_data(HashTable *p_hash_table, uint32_t *pic_hash[2],
                                                  int8_t *pic_is_same, int pic_width, int pic_height,
                                                  int block_size) {
     const int x_end = pic_width - block_size + 1;
@@ -275,7 +275,7 @@ void av1_add_to_hash_map_by_row_with_precal_data(HashTable *p_hash_table, uint32
     }
 }
 
-void av1_get_block_hash_value(uint8_t *y_src, int stride, int block_size, uint32_t *hash_value1,
+void svt_av1_get_block_hash_value(uint8_t *y_src, int stride, int block_size, uint32_t *hash_value1,
                               uint32_t *hash_value2, int use_highbitdepth,
                               struct PictureControlSet *pcs, IntraBcContext *x) {
     UNUSED(pcs);
