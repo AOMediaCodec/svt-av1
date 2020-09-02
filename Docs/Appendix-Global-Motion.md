@@ -141,7 +141,7 @@ is first called to determine the features in the source picture. Then it is call
 from the function ```svt_av1_compute_global_motion``` to determine the features in the reference picture.
 
 Once the features have been extracted, they are matched. This is done in the
-```av1_determine_correspondence``` function by two nested loops over the features of the
+```svt_av1_determine_correspondence``` function by two nested loops over the features of the
 reference frame and the current frame. A current frame feature is matched to a reference
 frame feature that maximizes their cross-correlation computed by ```eb_av1_compute_cross_correlation_c```.
 However, the match is kept only if the cross-correlation is superior to the ```THRESHOLD_NCC```

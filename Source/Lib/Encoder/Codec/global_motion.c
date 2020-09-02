@@ -290,7 +290,7 @@ static int compute_global_motion_feature_based(TransformationType type, unsigned
 
     // find correspondences between the two images
     correspondences     = (int *)malloc(num_frm_corners * 4 * sizeof(*correspondences));
-    num_correspondences = av1_determine_correspondence(frm_buffer,
+    num_correspondences = svt_av1_determine_correspondence(frm_buffer,
                                                        (int *)frm_corners,
                                                        num_frm_corners,
                                                        ref_buffer,
