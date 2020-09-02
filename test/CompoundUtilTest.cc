@@ -1114,7 +1114,7 @@ class AomSubstractBlockTest
             memset(diff_ref_, 0, sizeof(diff_ref_));
             memset(diff_tst_, 0, sizeof(diff_tst_));
 
-            aom_subtract_block_c(
+            eb_aom_subtract_block_c(
                 width, height, diff_ref_, width, src_, width, pred_, width);
             test_impl(
                 width, height, diff_tst_, width, src_, width, pred_, width);
