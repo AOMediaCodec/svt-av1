@@ -143,7 +143,7 @@ from the function ```av1_compute_global_motion``` to determine the features in t
 Once the features have been extracted, they are matched. This is done in the
 ```av1_determine_correspondence``` function by two nested loops over the features of the
 reference frame and the current frame. A current frame feature is matched to a reference
-frame feature that maximizes their cross-correlation computed by ```av1_compute_cross_correlation_c```.
+frame feature that maximizes their cross-correlation computed by ```eb_av1_compute_cross_correlation_c```.
 However, the match is kept only if the cross-correlation is superior to the ```THRESHOLD_NCC```
 threshold multiplied by the variance of the current feature patch.
 

@@ -508,7 +508,7 @@ extern "C" {
     RTCD_EXTERN void(*eb_av1_txb_init_levels)(const TranLow *const coeff, const int32_t width, const int32_t height, uint8_t *const levels);
     void av1_get_gradient_hist_c(const uint8_t *src, int src_stride, int rows, int cols, uint64_t *hist);
     RTCD_EXTERN void(*av1_get_gradient_hist)(const uint8_t *src, int src_stride, int rows, int cols, uint64_t *hist);
-    double av1_compute_cross_correlation_c(unsigned char *im1, int stride1, int x1, int y1, unsigned char *im2, int stride2, int x2, int y2);
+    double eb_av1_compute_cross_correlation_c(unsigned char *im1, int stride1, int x1, int y1, unsigned char *im2, int stride2, int x2, int y2);
     RTCD_EXTERN double(*eb_av1_compute_cross_correlation)(unsigned char *im1, int stride1, int x1, int y1, unsigned char *im2, int stride2, int x2, int y2);
     void av1_k_means_dim1_c(const int* data, int* centroids, uint8_t* indices, int n, int k, int max_itr);
     RTCD_EXTERN void(*eb_av1_k_means_dim1)(const int* data, int* centroids, uint8_t* indices, int n, int k, int max_itr);

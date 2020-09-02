@@ -328,7 +328,7 @@ void setup_rtcd_internal(CPU_FLAGS flags) {
     compute_sub_mean_8x8 = compute_sub_mean_8x8_c;
     compute_interm_var_four8x8 = compute_interm_var_four8x8_c;
     sad_16b_kernel = sad_16b_kernel_c;
-    eb_av1_compute_cross_correlation = av1_compute_cross_correlation_c;
+    eb_av1_compute_cross_correlation = eb_av1_compute_cross_correlation_c;
     eb_av1_k_means_dim1 = av1_k_means_dim1_c;
     eb_av1_k_means_dim2 = av1_k_means_dim2_c;
     eb_av1_calc_indices_dim1 = av1_calc_indices_dim1_c;
@@ -634,7 +634,7 @@ void setup_rtcd_internal(CPU_FLAGS flags) {
                         compute_interm_var_four8x8_avx2_intrin);
                     SET_AVX2(sad_16b_kernel, sad_16b_kernel_c, sad_16bit_kernel_avx2);
                     SET_AVX2(eb_av1_compute_cross_correlation,
-                        av1_compute_cross_correlation_c,
+                        eb_av1_compute_cross_correlation_c,
                         eb_av1_compute_cross_correlation_avx2);
                     SET_AVX2(eb_av1_k_means_dim1, av1_k_means_dim1_c, av1_k_means_dim1_avx2);
                     SET_AVX2(eb_av1_k_means_dim2, av1_k_means_dim2_c, av1_k_means_dim2_avx2);
