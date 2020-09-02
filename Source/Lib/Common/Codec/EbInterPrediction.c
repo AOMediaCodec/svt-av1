@@ -46,7 +46,7 @@ int is_masked_compound_type(COMPOUND_TYPE type) {
 }
 
 
-void aom_highbd_subtract_block_c(int rows, int cols, int16_t *diff, ptrdiff_t diff_stride,
+void eb_aom_highbd_subtract_block_c(int rows, int cols, int16_t *diff, ptrdiff_t diff_stride,
                                  const uint8_t *src8, ptrdiff_t src_stride, const uint8_t *pred8,
                                  ptrdiff_t pred_stride, int bd) {
     uint16_t *src  = (uint16_t *)(src8);
@@ -2264,5 +2264,3 @@ const uint8_t *eb_av1_get_obmc_mask(int length) {
         default: assert(0); return NULL;
     }
 }
-
-
