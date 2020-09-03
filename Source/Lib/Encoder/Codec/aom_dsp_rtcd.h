@@ -140,18 +140,11 @@ extern "C" {
     RTCD_EXTERN void(*eb_av1_fwd_txfm2d_4x4)(int16_t *input, int32_t *output, uint32_t input_stride, TxType transform_type, uint8_t  bit_depth);
 #if TPL_LA
 #if TPL_C_FIX
-    void svt_av1_lowbd_fwd_txfm_c(int16_t *src_diff, TranLow *coeff, int diff_stride, TxfmParam *txfm_param);
-    RTCD_EXTERN void(*svt_av1_lowbd_fwd_txfm)(int16_t *src_diff, TranLow *coeff, int diff_stride, TxfmParam *txfm_param);
     int svt_aom_satd_c(const TranLow *coeff, int length);
     RTCD_EXTERN int(*svt_aom_satd)(const TranLow *coeff, int length);
     int64_t svt_av1_block_error_c(const TranLow *coeff, const TranLow *dqcoeff, intptr_t block_size, int64_t *ssz);
     RTCD_EXTERN int64_t(*svt_av1_block_error)(const TranLow *coeff, const TranLow *dqcoeff, intptr_t block_size, int64_t *ssz);
 #else
-    void svt_av1_lowbd_fwd_txfm_c(int16_t *src_diff, TranLow *coeff, int diff_stride, TxfmParam *txfm_param);
-    //void av1_lowbd_fwd_txfm_sse2(const int16_t *src_diff, TranLow *coeff, int diff_stride, TxfmParam *txfm_param);
-    //void av1_lowbd_fwd_txfm_sse4_1(const int16_t *src_diff, TranLow *coeff, int diff_stride, TxfmParam *txfm_param);
-    //void av1_lowbd_fwd_txfm_avx2(const int16_t *src_diff, TranLow *coeff, int diff_stride, TxfmParam *txfm_param);
-    RTCD_EXTERN void(*svt_av1_lowbd_fwd_txfm)(int16_t *src_diff, TranLow *coeff, int diff_stride, TxfmParam *txfm_param);
     int svt_aom_satd_c(const TranLow *coeff, int length);
     int svt_aom_satd_avx2(const TranLow *coeff, int length);
     RTCD_EXTERN int (*svt_aom_satd)(const TranLow *coeff, int length);
