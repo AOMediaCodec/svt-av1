@@ -1020,9 +1020,10 @@ void unipred_3x3_candidates_injection(const SequenceControlSet *scs_ptr, Picture
                         uint8_t inter_type;
                         uint8_t is_ii_allowed   = svt_is_interintra_allowed(context_ptr->md_inter_intra_level == 1,
                             context_ptr->blk_geom->bsize, NEWMV, rf);
-                    if (context_ptr->md_inter_intra_level > 2)
+                        if (context_ptr->md_inter_intra_level > 2) {
                         if (pcs_ptr->parent_pcs_ptr->pa_me_data->me_results[me_sb_addr]->do_comp[1][list1_ref_index] == 0)
                                 is_ii_allowed = 0;
+                        }
                         uint8_t tot_inter_types = is_ii_allowed ? II_COUNT : 1;
                         for (inter_type = 0; inter_type < tot_inter_types; inter_type++) {
                             cand_array[cand_total_cnt].type                    = INTER_MODE;
@@ -1642,11 +1643,11 @@ void inject_mvp_candidates_ii(struct ModeDecisionContext *context_ptr, PictureCo
                 uint8_t inter_type;
                 uint8_t is_ii_allowed = svt_is_interintra_allowed(
                     context_ptr->md_inter_intra_level, bsize, NEARMV, rf);
-            uint8_t ref_idx_0 = get_ref_frame_idx(rf[0]);
-
-            if (context_ptr->md_inter_intra_level > 2)
-                if (ref_idx_0 > context_ptr->inter_comp_ctrls.mrp_pruning_w_distance - 1)
+                uint8_t ref_idx_0 = get_ref_frame_idx(rf[0]);
+                if (context_ptr->md_inter_intra_level > 2) {
+                    if (ref_idx_0 > context_ptr->inter_comp_ctrls.mrp_pruning_w_distance - 1)
                     is_ii_allowed = 0;
+                }
                 uint8_t tot_inter_types = is_ii_allowed ? II_COUNT : 1;
                 uint8_t is_obmc_allowed =
                     obmc_motion_mode_allowed(pcs_ptr, context_ptr, bsize, rf[0], rf[1], NEARMV) ==
@@ -1881,7 +1882,7 @@ void inject_mvp_candidates_ii(struct ModeDecisionContext *context_ptr, PictureCo
                 }
                 inj_mv = inj_mv && inside_tile;
                 if (inj_mv) {
-                if (ref_idx_0 > context_ptr->inter_comp_ctrls.mrp_pruning_w_distance - 1 &&
+                    if (ref_idx_0 > context_ptr->inter_comp_ctrls.mrp_pruning_w_distance - 1 &&
                     ref_idx_1 > context_ptr->inter_comp_ctrls.mrp_pruning_w_distance - 1)
                     tot_comp_types = MD_COMP_AVG;
                     for (cur_type = MD_COMP_AVG; cur_type <= tot_comp_types; cur_type++) {

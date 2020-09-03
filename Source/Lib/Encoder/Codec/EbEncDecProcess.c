@@ -2393,23 +2393,23 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
     else if (pd_pass == PD_PASS_1) {
         context_ptr->bipred3x3_injection = 2;
     }
-    else if (sequence_control_set_ptr->static_config.bipred_3x3_inject ==
-        DEFAULT)
+    else if (sequence_control_set_ptr->static_config.bipred_3x3_inject == DEFAULT) {
         if (enc_mode <= ENC_M2)
             context_ptr->bipred3x3_injection = 1;
         else if (enc_mode <= ENC_M6)
             context_ptr->bipred3x3_injection = 2;
         else
             context_ptr->bipred3x3_injection = 0;
-    else
+        }
+    else{
         context_ptr->bipred3x3_injection =
         sequence_control_set_ptr->static_config.bipred_3x3_inject;
-
+        }
         // Level   Settings
         // 0       OFF: No compound mode search : AVG only
         // 1       ON: Full - AVG/DIST/DIFF/WEDGE
         // 2       ON: Fast - Use AVG only for non-closest ref frames or ref frames with high distortion
-        if (sequence_control_set_ptr->compound_mode) {
+    if (sequence_control_set_ptr->compound_mode) {
             if (sequence_control_set_ptr->static_config.compound_level == DEFAULT) {
                 if (enc_mode <= ENC_M0)
                     context_ptr->inter_compound_mode = 1;
@@ -2422,7 +2422,7 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
                 context_ptr->inter_compound_mode = sequence_control_set_ptr->static_config.compound_level;
             }
         }
-        else
+    else
             context_ptr->inter_compound_mode = 0;
     if (pd_pass == PD_PASS_0) {
         context_ptr->md_staging_mode = MD_STAGING_MODE_0;
