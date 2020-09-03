@@ -1168,7 +1168,7 @@ void eb_aom_highbd_blend_a64_vmask_sse4_1_8bit(uint8_t *dst_8, uint32_t dst_stri
     assert(bd == 8 || bd == 10 || bd == 12);
 
     if (UNLIKELY((h | w) & 3)) { // if (w <= 2 || h <= 2)
-        aom_highbd_blend_a64_vmask_c(
+        eb_aom_highbd_blend_a64_vmask_c_8bit(
             dst_8, dst_stride, src0_8, src0_stride, src1_8, src1_stride, mask, w, h, bd);
     } else {
         uint16_t *const       dst  = (uint16_t *)(dst_8); // CONVERT_TO_SHORTPTR(dst_8);
@@ -1306,7 +1306,7 @@ void eb_aom_highbd_blend_a64_vmask_sse4_1_16bit(uint16_t *dst, uint32_t dst_stri
     assert(bd == 8 || bd == 10 || bd == 12);
 
     if (UNLIKELY((h | w) & 3)) { // if (w <= 2 || h <= 2)
-        eb_aom_highbd_blend_a64_vmask_c(
+        eb_aom_highbd_blend_a64_vmask_c_16bit(
             dst, dst_stride, src0, src0_stride, src1, src1_stride, mask, w, h, bd);
     } else {
         //uint16_t *const dst = CONVERT_TO_SHORTPTR(dst_8);

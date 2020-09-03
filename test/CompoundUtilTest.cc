@@ -552,11 +552,11 @@ TEST_P(HbdCompBlendHMaskTest, BlendA64Mask) {
     run_hbd_test(12);
 }
 
-INSTANTIATE_TEST_CASE_P(
-    BLEND, HbdCompBlendHMaskTest,
-    ::testing::ValuesIn({make_tuple(aom_highbd_blend_a64_hmask_c,
-                                    eb_aom_highbd_blend_a64_hmask_sse4_1_8bit,
-                                    "eb_aom_highbd_blend_a64_hmask_sse4_1_8bit")}));
+INSTANTIATE_TEST_CASE_P(BLEND, HbdCompBlendHMaskTest,
+                        ::testing::ValuesIn({make_tuple(
+                            eb_aom_highbd_blend_a64_hmask_c_8bit,
+                            eb_aom_highbd_blend_a64_hmask_sse4_1_8bit,
+                            "eb_aom_highbd_blend_a64_hmask_sse4_1_8bit")}));
 
 using EbHbdBlendA64HMaskFunc = void (*)(uint16_t *, uint32_t, const uint16_t *,
                                         uint32_t, const uint16_t *, uint32_t,
@@ -613,7 +613,7 @@ TEST_P(EbHbdCompBlendHMaskTest, BlendA64Mask) {
 
 INSTANTIATE_TEST_CASE_P(
     BLEND, EbHbdCompBlendHMaskTest,
-    ::testing::ValuesIn({make_tuple(eb_aom_highbd_blend_a64_hmask_c,
+    ::testing::ValuesIn({make_tuple(eb_aom_highbd_blend_a64_hmask_c_16bit,
                                     eb_aom_highbd_blend_a64_hmask_sse4_1_16bit,
                                     "eb_aom_highbd_blend_a64_hmask_sse4_1_16bit")}));
 
@@ -672,7 +672,7 @@ TEST_P(HbdCompBlendVMaskTest, BlendA64Mask) {
 
 INSTANTIATE_TEST_CASE_P(
     BLEND, HbdCompBlendVMaskTest,
-    ::testing::ValuesIn({make_tuple(aom_highbd_blend_a64_vmask_c,
+    ::testing::ValuesIn({make_tuple(eb_aom_highbd_blend_a64_vmask_c_8bit,
                                     eb_aom_highbd_blend_a64_vmask_sse4_1_8bit,
                                     "eb_aom_highbd_blend_a64_vmask_sse4_1_8bit")}));
 
@@ -731,7 +731,7 @@ TEST_P(EbHbdCompBlendVMaskTest, BlendA64Mask) {
 
 INSTANTIATE_TEST_CASE_P(
     BLEND, EbHbdCompBlendVMaskTest,
-    ::testing::ValuesIn({make_tuple(eb_aom_highbd_blend_a64_vmask_c,
+    ::testing::ValuesIn({make_tuple(eb_aom_highbd_blend_a64_vmask_c_16bit,
                                     eb_aom_highbd_blend_a64_vmask_sse4_1_16bit,
                                     "eb_aom_highbd_blend_a64_vmask_sse4_1_16bit")}));
 

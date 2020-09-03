@@ -247,11 +247,11 @@ void setup_common_rtcd_internal(CPU_FLAGS flags) {
     eb_aom_blend_a64_vmask = eb_aom_blend_a64_vmask_c;
 
     eb_aom_highbd_blend_a64_mask = eb_aom_highbd_blend_a64_mask_c;
-    eb_aom_highbd_blend_a64_hmask_8bit = aom_highbd_blend_a64_hmask_c;
-    eb_aom_highbd_blend_a64_vmask_8bit = aom_highbd_blend_a64_vmask_c;
+    eb_aom_highbd_blend_a64_hmask_8bit = eb_aom_highbd_blend_a64_hmask_c_8bit;
+    eb_aom_highbd_blend_a64_vmask_8bit = eb_aom_highbd_blend_a64_vmask_c_8bit;
 
-    eb_aom_highbd_blend_a64_vmask_16bit = eb_aom_highbd_blend_a64_vmask_c;
-    eb_aom_highbd_blend_a64_hmask_16bit = eb_aom_highbd_blend_a64_hmask_c;
+    eb_aom_highbd_blend_a64_vmask_16bit = eb_aom_highbd_blend_a64_vmask_c_16bit;
+    eb_aom_highbd_blend_a64_hmask_16bit = eb_aom_highbd_blend_a64_hmask_c_16bit;
 
     eb_cfl_predict_lbd = eb_cfl_predict_lbd_c;
     eb_cfl_predict_hbd = eb_cfl_predict_hbd_c;
