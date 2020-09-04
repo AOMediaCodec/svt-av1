@@ -10,7 +10,7 @@ Encoder
 - Quality speed trade-offs tuned to VOD use cases
 - Added first level non-optimized support for 2pass VBR and CRF
 - Added combined cli two pass support with options for stats being written to a memory buffer and a specified file
-- Added non square partitioning optimizations 
+- Added non square partitioning optimizations
 - Improved lambda generation
 
 Build and Testing
