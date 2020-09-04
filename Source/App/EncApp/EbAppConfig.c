@@ -340,15 +340,6 @@ static void set_passes(const char* value, EbConfig *cfg) {
     return;
 }
 
-static void set_input_stat_file(const char *value, EbConfig *cfg) {
-    if (cfg->input_stat_file) { unlock_and_fclose(cfg->input_stat_file); }
-    fopen_and_lock(&cfg->input_stat_file, value, EB_FALSE);
-};
-static void set_output_stat_file(const char *value, EbConfig *cfg) {
-    if (cfg->output_stat_file) { unlock_and_fclose(cfg->output_stat_file); }
-    fopen_and_lock(&cfg->output_stat_file, value, EB_TRUE);
-    cfg->rc_firstpass_stats_out = EB_TRUE;
-};
 static void set_cfg_stat_file(const char *value, EbConfig *cfg) {
     if (cfg->stat_file) { fclose(cfg->stat_file); }
     FOPEN(cfg->stat_file, value, "wb");
