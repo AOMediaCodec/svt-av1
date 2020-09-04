@@ -612,7 +612,6 @@ set_default_svt_configuration (EbSvtAv1EncConfiguration * svt_config)
   svt_config->intra_period_length = PROP_GOP_SIZE_DEFAULT - 1;
   svt_config->intra_refresh_type = PROP_INTRA_REFRESH_DEFAULT;
   svt_config->enc_mode = PROP_ENCMODE_DEFAULT;
-  svt_config->snd_pass_enc_mode = PROP_ENCMODE_DEFAULT + 1;
   svt_config->frame_rate = 25;
   svt_config->frame_rate_denominator = 1;
   svt_config->frame_rate_numerator = 25;

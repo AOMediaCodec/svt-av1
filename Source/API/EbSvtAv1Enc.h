@@ -98,8 +98,6 @@ typedef struct EbSvtAv1EncConfiguration {
     * First pass has the option to run with second pass ME settings.
     *
     * Default is defined as MAX_ENC_PRESET. */
-    // hack for gstreamer building
-    uint8_t snd_pass_enc_mode;
     // GOP Structure
 
     /* The intra period defines the interval of frames after which you insert an
