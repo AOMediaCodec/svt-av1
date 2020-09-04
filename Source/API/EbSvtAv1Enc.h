@@ -94,10 +94,7 @@ typedef struct EbSvtAv1EncConfiguration {
      *
      * Default is defined as MAX_ENC_PRESET. */
     int8_t enc_mode;
-    /* For two pass encoding, the enc_mod of the second pass is passed in the first pass.
-    * First pass has the option to run with second pass ME settings.
-    *
-    * Default is defined as MAX_ENC_PRESET. */
+
     // GOP Structure
 
     /* The intra period defines the interval of frames after which you insert an
