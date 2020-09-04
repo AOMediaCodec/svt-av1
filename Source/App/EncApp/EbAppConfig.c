@@ -44,7 +44,8 @@
 #define PASS_TOKEN "--pass"
 #define TWO_PASS_STATS_TOKEN "--stats"
 #define PASSES_TOKEN "--passes"
-
+#define INPUT_STAT_FILE_TOKEN "-input-stat-file"
+#define OUTPUT_STAT_FILE_TOKEN "-output-stat-file"
 #define STAT_FILE_TOKEN "-stat-file"
 #define INPUT_PREDSTRUCT_FILE_TOKEN "-pred-struct-file"
 #define WIDTH_TOKEN "-w"
@@ -2182,23 +2183,6 @@ uint32_t get_help(int32_t argc, char *const argv[]) {
     } else
         return 0;
 }
-//uint32_t get_help(int32_t argc, char *const argv[]) {
-//    char config_string[COMMAND_LINE_MAX_SIZE];
-//    if (find_token(argc, argv, HELP_TOKEN, config_string) == 0) {
-//        int32_t token_index = -1;
-//
-//        fprintf(stderr, "\n%-25s\t%-25s\t%s\n\n", "TOKEN", "DESCRIPTION", "INPUT TYPE");
-//        fprintf(stderr, "%-25s\t%-25s\t%s\n", "-nch", "NumberOfChannels", "Single input");
-//        while (config_entry[++token_index].token != NULL)
-//            fprintf(stderr,
-//                    "%-25s\t%-25s\t%s\n",
-//                    config_entry[token_index].token,
-//                    config_entry[token_index].name,
-//                    config_entry[token_index].type ? "Array input" : "Single input");
-//        return 1;
-//    } else
-//        return 0;
-//}
 
 /******************************************************
 * Get the number of channels and validate it with input
@@ -2217,6 +2201,28 @@ uint32_t get_number_of_channels(int32_t argc, char *const argv[]) {
         return channel_number;
     }
     return 1;
+}
+
+static EbBool check_two_pass_conflicts(int32_t argc, char *const argv[])
+{
+    char     config_string[COMMAND_LINE_MAX_SIZE];
+    const char* conflicts[] = {
+        PASS_TOKEN,
+        INPUT_STAT_FILE_TOKEN,
+        OUTPUT_STAT_FILE_TOKEN,
+        NULL,
+    };
+    int i = 0;
+    const char* token;
+    while ((token = conflicts[i])) {
+        if (find_token(argc, argv, token, config_string) == 0) {
+            fprintf(stderr,
+                "--passes 2 conflicts with %s\n", token);
+            return EB_TRUE;
+        }
+        i++;
+    }
+    return EB_FALSE;
 }
 
 uint32_t get_passes(int32_t argc, char *const argv[], EncodePass pass[MAX_ENCODE_PASS]) {
@@ -2256,6 +2262,8 @@ uint32_t get_passes(int32_t argc, char *const argv[], EncodePass pass[MAX_ENCODE
         pass[0] = ENCODE_SINGLE_PASS;
         return 1;
     }
+    if (check_two_pass_conflicts(argc, argv))
+        return 0;
 
     pass[0] = ENCODE_FIRST_PASS;
     pass[1] = ENCODE_LAST_PASS;
