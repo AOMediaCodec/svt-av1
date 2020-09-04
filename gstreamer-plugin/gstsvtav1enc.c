@@ -719,13 +719,6 @@ set_default_svt_configuration (EbSvtAv1EncConfiguration * svt_config)
   svt_config->superres_kf_denom = 8;
   svt_config->superres_qthres = 43;
 
-  svt_config->sq_weight = 100;
-
-  svt_config->md_stage_1_cand_prune_th = 75;
-  svt_config->md_stage_1_class_prune_th = 100;
-  svt_config->md_stage_2_3_cand_prune_th = 15;
-  svt_config->md_stage_2_3_class_prune_th = 25;
-
   // latency
   svt_config->injector_frame_rate = PROP_SPEEDCONTROL_DEFAULT;
   svt_config->speed_control_flag = FALSE;
