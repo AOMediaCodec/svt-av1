@@ -697,13 +697,6 @@ typedef struct EbSvtAv1EncConfiguration {
     uint8_t superres_kf_denom;
     uint8_t superres_qthres;
 
-    uint32_t sq_weight;
-
-    uint64_t md_stage_1_cand_prune_th;
-    uint64_t md_stage_1_class_prune_th;
-    uint64_t md_stage_2_3_cand_prune_th;
-    uint64_t md_stage_2_3_class_prune_th;
-
   /* Prediction Structure user defined
    */
   PredictionStructureConfigEntry pred_struct[1 << (MAX_HIERARCHICAL_LEVEL - 1)];
