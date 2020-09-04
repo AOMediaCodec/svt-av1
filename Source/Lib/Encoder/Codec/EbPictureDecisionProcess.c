@@ -1023,11 +1023,11 @@ EbErrorType signal_derivation_multi_processes_oq(
         //Exit TX size search when all coefficients are zero
         // 0: OFF
         // 1: ON
-        pcs_ptr->tx_size_early_exit = 1;
+    pcs_ptr->tx_size_early_exit = 1;
         //Prune reference and reduce ME SR based on HME/ME distortion
         // 0: OFF
         // 1: ON
-        uint8_t perform_filtering =
+    uint8_t perform_filtering =
             (scs_ptr->tf_level && scs_ptr->static_config.pred_structure == EB_PRED_RANDOM_ACCESS && scs_ptr->static_config.hierarchical_levels >= 1)
             ? 1 : 0;
 

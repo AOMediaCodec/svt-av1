@@ -1883,8 +1883,8 @@ void inject_mvp_candidates_ii(struct ModeDecisionContext *context_ptr, PictureCo
                 inj_mv = inj_mv && inside_tile;
                 if (inj_mv) {
                     if (ref_idx_0 > context_ptr->inter_comp_ctrls.mrp_pruning_w_distance - 1 &&
-                    ref_idx_1 > context_ptr->inter_comp_ctrls.mrp_pruning_w_distance - 1)
-                    tot_comp_types = MD_COMP_AVG;
+                        ref_idx_1 > context_ptr->inter_comp_ctrls.mrp_pruning_w_distance - 1)
+                        tot_comp_types = MD_COMP_AVG;
                     for (cur_type = MD_COMP_AVG; cur_type <= tot_comp_types; cur_type++) {
                         cand_array[cand_idx].type                    = INTER_MODE;
                         cand_array[cand_idx].inter_mode              = NEAR_NEARMV;
@@ -2017,9 +2017,9 @@ void inject_new_nearest_new_comb_candidates(const SequenceControlSet *  scs_ptr,
                 inj_mv = inj_mv && inside_tile;
                 inj_mv = inj_mv && is_me_data_present(context_ptr, me_results, get_list_idx(rf[1]), ref_idx_1);
                 if (inj_mv) {
-                if (ref_idx_0 > context_ptr->inter_comp_ctrls.mrp_pruning_w_distance - 1 &&
-                    ref_idx_1 > context_ptr->inter_comp_ctrls.mrp_pruning_w_distance - 1)
-                    tot_comp_types = MD_COMP_AVG;
+                    if (ref_idx_0 > context_ptr->inter_comp_ctrls.mrp_pruning_w_distance - 1 &&
+                        ref_idx_1 > context_ptr->inter_comp_ctrls.mrp_pruning_w_distance - 1)
+                        tot_comp_types = MD_COMP_AVG;
                     for (MD_COMP_TYPE cur_type = MD_COMP_AVG; cur_type <= tot_comp_types; cur_type++) {
                         cand_array[cand_idx].type               = INTER_MODE;
                         cand_array[cand_idx].inter_mode         = NEAREST_NEWMV;
@@ -2223,9 +2223,9 @@ void inject_new_nearest_new_comb_candidates(const SequenceControlSet *  scs_ptr,
                                                                ref_pair) == EB_FALSE;
                     inj_mv = inj_mv && is_me_data_present(context_ptr, me_results, 0, ref_idx_0);
                     if (inj_mv) {
-                if (ref_idx_0 > context_ptr->inter_comp_ctrls.mrp_pruning_w_distance - 1 &&
-                    ref_idx_1 > context_ptr->inter_comp_ctrls.mrp_pruning_w_distance - 1)
-                    tot_comp_types = MD_COMP_AVG;
+                        if (ref_idx_0 > context_ptr->inter_comp_ctrls.mrp_pruning_w_distance - 1 &&
+                            ref_idx_1 > context_ptr->inter_comp_ctrls.mrp_pruning_w_distance - 1)
+                            tot_comp_types = MD_COMP_AVG;
 
                         for (MD_COMP_TYPE cur_type = MD_COMP_AVG; cur_type <= tot_comp_types; cur_type++) {
                             cand_array[cand_idx].type               = INTER_MODE;
@@ -2321,9 +2321,9 @@ void inject_new_nearest_new_comb_candidates(const SequenceControlSet *  scs_ptr,
                                                                ref_pair) == EB_FALSE;
                     inj_mv = inj_mv && is_me_data_present(context_ptr, me_results, get_list_idx(rf[1]), ref_idx_1);
                     if (inj_mv) {
-                    if (ref_idx_0 > context_ptr->inter_comp_ctrls.mrp_pruning_w_distance - 1 &&
-                        ref_idx_1 > context_ptr->inter_comp_ctrls.mrp_pruning_w_distance - 1)
-                        tot_comp_types = MD_COMP_AVG;
+                        if (ref_idx_0 > context_ptr->inter_comp_ctrls.mrp_pruning_w_distance - 1 &&
+                            ref_idx_1 > context_ptr->inter_comp_ctrls.mrp_pruning_w_distance - 1)
+                            tot_comp_types = MD_COMP_AVG;
 
                         for (MD_COMP_TYPE cur_type = MD_COMP_AVG; cur_type <= tot_comp_types; cur_type++) {
                             cand_array[cand_idx].type               = INTER_MODE;
@@ -3261,8 +3261,8 @@ void inject_new_candidates(const SequenceControlSet *  scs_ptr,
             ************* */
             if (allow_bipred) {
                 if (inter_direction == 2) {
-                if (!is_valid_bipred_ref(context_ptr, PA_ME_GROUP, me_block_results_ptr->ref0_list, list0_ref_index, me_block_results_ptr->ref1_list, list1_ref_index))
-                    continue;
+                    if (!is_valid_bipred_ref(context_ptr, PA_ME_GROUP, me_block_results_ptr->ref0_list, list0_ref_index, me_block_results_ptr->ref1_list, list1_ref_index))
+                        continue;
                     if (list0_ref_index > context_ptr->md_max_ref_count - 1 ||
                         list1_ref_index > context_ptr->md_max_ref_count - 1)
                         continue;
