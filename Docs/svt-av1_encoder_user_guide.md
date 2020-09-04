@@ -258,7 +258,7 @@ The encoder parameters present in the `Sample.cfg` file are listed in this table
 | **StatReport** | --enable-stat-report | [0-1] | 0 | When set to 1, calculates and outputs average PSNR values |
 
 
-the DEFAULT option would allow the encoder to choose adaptively any of the values in the range for that option whether on a preset, picture, or SB level. 
+the DEFAULT option would allow the encoder to choose adaptively any of the values in the range for that option whether on a preset, picture, or SB level.
 
 ## Appendix A Encoder Parameters
 

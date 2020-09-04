@@ -247,18 +247,6 @@ static EbBool fopen_and_lock(FILE** file, const char* name, EbBool write)
     return EB_FALSE;
 }
 
-static void unlock_and_fclose(FILE* file)
-{
-    if (!file)
-        return;
-
-#ifdef _WIN32
-    HANDLE handle = get_file_handle(file);
-    UnlockFile(handle, 0, 0, MAXDWORD, MAXDWORD);
-#endif
-    fclose(file);
-}
-
 /**********************************
  * Set Cfg Functions
  **********************************/
