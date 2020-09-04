@@ -42,10 +42,6 @@
 extern "C" {
 #endif
 
-#ifndef NON_AVX512_SUPPORT
-#define NON_AVX512_SUPPORT
-#endif
-
 #define MAX_TX_WEIGHT 500
 #define MAX_TPL_LA_SW 60 // Max TPL look ahead sliding window size
 #define DEPTH_PROB_PRECISION 10000
@@ -56,8 +52,6 @@ extern "C" {
 // Q threshold for high precision mv.
 #define HIGH_PRECISION_MV_QTHRESH 128
 // Actions in the second pass: Frame and SB QP assignment and temporal filtering strenght change
-//FOR DEBUGGING - Do not remove
-#define NO_ENCDEC         0 // bypass encDec to test cmpliance of MD. complained achieved when skip_flag is OFF. Port sample code from VCI-SW_AV1_Candidate1 branch
 #define AOM_INTERP_EXTEND 4
 #define AOM_LEFT_TOP_MARGIN_PX(subsampling) \
     ((AOM_BORDER_IN_PIXELS >> subsampling) - AOM_INTERP_EXTEND)
