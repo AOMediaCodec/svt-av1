@@ -950,8 +950,8 @@ void setup_common_rtcd_internal(CPU_FLAGS flags) {
             eb_av1_jnt_convolve_y_avx2,
             eb_av1_jnt_convolve_y_avx512);
 
-        if (flags & HAS_AVX2) eb_aom_convolve8_horiz = aom_convolve8_horiz_avx2;
-        if (flags & HAS_AVX2) eb_aom_convolve8_vert = aom_convolve8_vert_avx2;
+        if (flags & HAS_AVX2) eb_aom_convolve8_horiz = eb_aom_convolve8_horiz_avx2;
+        if (flags & HAS_AVX2) eb_aom_convolve8_vert = eb_aom_convolve8_vert_avx2;
         if (flags & HAS_AVX2) eb_av1_build_compound_diffwtd_mask = eb_av1_build_compound_diffwtd_mask_avx2;
         if (flags & HAS_AVX2) eb_av1_build_compound_diffwtd_mask_highbd = eb_av1_build_compound_diffwtd_mask_highbd_avx2;
         if (flags & HAS_AVX2) eb_av1_wedge_sse_from_residuals = eb_av1_wedge_sse_from_residuals_avx2;
