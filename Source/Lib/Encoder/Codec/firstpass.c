@@ -929,9 +929,6 @@ void product_coding_loop_init_fast_loop(ModeDecisionContext *context_ptr,
                                         NeighborArrayUnit *  mode_type_neighbor_array,
                                         NeighborArrayUnit *  leaf_depth_neighbor_array,
                                         NeighborArrayUnit *  leaf_partition_neighbor_array);
-void perform_md_reference_pruning(PictureControlSet *pcs_ptr, ModeDecisionContext *context_ptr,
-                         EbPictureBufferDesc *input_picture_ptr, uint32_t blk_origin_index);
-
 // inject intra candidates for first pass
 void  first_pass_inject_intra_candidates(
     ModeDecisionContext          *context_ptr,
@@ -1369,7 +1366,7 @@ extern void first_pass_md_encode_block(PictureControlSet *pcs_ptr, ModeDecisionC
         read_refine_me_mvs(pcs_ptr, context_ptr, input_picture_ptr);
     if (context_ptr->ref_pruning_ctrls.enabled)
         // Perform md reference pruning
-        perform_md_reference_pruning(pcs_ptr, context_ptr, input_picture_ptr, blk_origin_index);
+        perform_md_reference_pruning(pcs_ptr, context_ptr, input_picture_ptr);
     context_ptr->inject_inter_candidates = 1;
     first_pass_generate_md_stage_0_cand(
      context_ptr, &fast_candidate_total_count, pcs_ptr);
