@@ -110,10 +110,15 @@ build() (
     cd_safe $build_type
 
     cmake ../../.. -DCMAKE_BUILD_TYPE=$build_type $CMAKE_EXTRA_FLAGS "$@"
-    set --
 
+    if [ -f Makefile ]; then
+        make -j "$jobs"
+        return
+    fi
+
+    set --
     if cmake --build 2>&1 | grep -q parallel; then
-        set -- --parallel $(($(nproc) + 2))
+        set -- --parallel "$jobs"
     fi
 
     # Compile the Library
@@ -181,10 +186,6 @@ if [ -z "$CXX" ] && [ "$(uname -a | cut -c1-5)" != "MINGW" ]; then
             "Please either install one or set it via cxx=*"
     export CXX
 fi
-
-case $jobs in
-*[!0-9]*) jobs=$(getconf _NPROCESSORS_ONLN 2> /dev/null || nproc 2> /dev/null || sysctl -n hw.ncpu 2> /dev/null) ;;
-esac
 
 build_release=false
 build_debug=false
@@ -394,6 +395,10 @@ else
         esac
     done
 fi
+
+case $jobs in
+*[!0-9]* | "") jobs=$(getconf _NPROCESSORS_ONLN 2> /dev/null || nproc 2> /dev/null || sysctl -n hw.ncpu 2> /dev/null) ;;
+esac
 
 [ "${PATH#*\/usr\/local\/bin}" = "$PATH" ] && PATH=$PATH:/usr/local/bin
 
