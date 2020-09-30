@@ -342,9 +342,19 @@ else
                     i=$((i + 1))
                     ;;
                 j)
-                    parse_options jobs="$1"
-                    i=$((i + 1))
-                    shift
+                    case $(echo "$match" | cut -c$((i + 1))-) in
+                    *[!0-9]*)
+                        parse_options jobs="$1"
+                        i=$((i + 1))
+                        shift
+                        ;;
+                    *)
+                        # Found number right after
+                        parse_options jobs="$(echo "$match" | cut -c$((i + 1))-)"
+                        # go ahead and skip this block
+                        i=$((${#match} + 1))
+                        ;;
+                    esac
                     ;;
                 p)
                     parse_options prefix="$1"
