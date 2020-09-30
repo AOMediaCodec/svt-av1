@@ -333,9 +333,21 @@ else
                     shift
                     ;;
                 g)
-                    parse_options gen="$1"
-                    i=$((i + 1))
-                    shift
+                    case $(echo "$match" | cut -c$((i + 1))-) in
+                    "")
+                        # if it's -g Ninja
+                        parse_options gen="$1"
+                        i=$((i + 1))
+                        shift
+                        ;;
+                    *)
+                        # if it's -GNinja
+                        # Just put everything past -g as the generator
+                        parse_options gen="$(echo "$match" | cut -c$((i + 1))-)"
+                        # go ahead and skip this block
+                        i=$((${#match} + 1))
+                        ;;
+                    esac
                     ;;
                 i)
                     parse_options install
