@@ -2054,117 +2054,112 @@ uint32_t get_help(int32_t argc, char *const argv[]) {
         "Or a combined cli:\n"
         "    SvtAv1EncApp <--stats svtav1_2pass.log> --passes 2 -b dst_filename -i src_filename\n"
         "\nOptions:\n");
-    for (int options_token_index = -1; config_entry_options[++options_token_index].token;) {
+    for (ConfigEntry *options_token_index = config_entry_options; options_token_index->token;
+         ++options_token_index) {
         // this only works if short and long token are one after another
-        switch (check_long(config_entry_options[options_token_index],
-                           config_entry_options[options_token_index + 1])) {
+        switch (check_long(*options_token_index, options_token_index[1])) {
         case 1:
             printf("  %s, %-25s    %-25s\n",
-                   config_entry_options[options_token_index].token,
-                   config_entry_options[options_token_index + 1].token,
-                   config_entry_options[options_token_index].name);
+                   options_token_index->token,
+                   options_token_index[1].token,
+                   options_token_index->name);
             ++options_token_index;
             break;
         default:
-            printf(*(config_entry_options[options_token_index].token + 1) == '-'
-                       ? "      %-25s    %-25s\n"
-                       : "      -%-25s   %-25s\n",
-                   config_entry_options[options_token_index].token,
-                   config_entry_options[options_token_index].name);
+            printf(options_token_index->token[1] == '-' ? "      %-25s    %-25s\n"
+                                                        : "      -%-25s   %-25s\n",
+                   options_token_index->token,
+                   options_token_index->name);
         }
     }
     printf("\nEncoder Global Options:\n");
-    for (int global_options_token_index = -1;
-         config_entry_global_options[++global_options_token_index].token;) {
-        switch (check_long(config_entry_global_options[global_options_token_index],
-                           config_entry_global_options[global_options_token_index + 1])) {
+    for (ConfigEntry *global_options_token_index = config_entry_global_options;
+         global_options_token_index->token;
+         ++global_options_token_index) {
+        switch (check_long(*global_options_token_index, global_options_token_index[1])) {
         case 1:
             printf("  %s, %-25s    %-25s\n",
-                   config_entry_global_options[global_options_token_index].token,
-                   config_entry_global_options[global_options_token_index + 1].token,
-                   config_entry_global_options[global_options_token_index].name);
+                   global_options_token_index->token,
+                   global_options_token_index[1].token,
+                   global_options_token_index->name);
             ++global_options_token_index;
             break;
         default:
-            printf(*(config_entry_global_options[global_options_token_index].token + 1) == '-'
-                       ? "      %-25s    %-25s\n"
-                       : "      -%-25s   %-25s\n",
-                   config_entry_global_options[global_options_token_index].token,
-                   config_entry_global_options[global_options_token_index].name);
+            printf(global_options_token_index->token[1] == '-' ? "      %-25s    %-25s\n"
+                                                               : "      -%-25s   %-25s\n",
+                   global_options_token_index->token,
+                   global_options_token_index->name);
         }
     }
     printf("\nRate Control Options:\n");
-    for (int rc_token_index = -1; config_entry_rc[++rc_token_index].token;) {
-        switch (check_long(config_entry_rc[rc_token_index], config_entry_rc[rc_token_index + 1])) {
+    for (ConfigEntry *rc_token_index = config_entry_rc; rc_token_index->token; ++rc_token_index) {
+        switch (check_long(*rc_token_index, rc_token_index[1])) {
         case 1:
             printf("  %s, %-25s    %-25s\n",
-                   config_entry_rc[rc_token_index].token,
-                   config_entry_rc[rc_token_index + 1].token,
-                   config_entry_rc[rc_token_index].name);
+                   rc_token_index->token,
+                   rc_token_index[1].token,
+                   rc_token_index->name);
             ++rc_token_index;
             break;
         default:
-            printf(*(config_entry_rc[rc_token_index].token + 1) == '-' ? "      %-25s    %-25s\n"
-                                                                       : "      -%-25s   %-25s\n",
-                   config_entry_rc[rc_token_index].token,
-                   config_entry_rc[rc_token_index].name);
+            printf(rc_token_index->token[1] == '-' ? "      %-25s    %-25s\n"
+                                                   : "      -%-25s   %-25s\n",
+                   rc_token_index->token,
+                   rc_token_index->name);
         }
     }
     printf("\nTwopass Options:\n");
-    for (int two_p_token_index = -1; config_entry_2p[++two_p_token_index].token;) {
-        switch (check_long(config_entry_2p[two_p_token_index],
-                           config_entry_2p[two_p_token_index + 1])) {
+    for (ConfigEntry *two_p_token_index = config_entry_2p; two_p_token_index->token;
+         ++two_p_token_index) {
+        switch (check_long(*two_p_token_index, two_p_token_index[1])) {
         case 1:
             printf("  %s, %-25s    %-25s\n",
-                   config_entry_2p[two_p_token_index].token,
-                   config_entry_2p[two_p_token_index + 1].token,
-                   config_entry_2p[two_p_token_index].name);
+                   two_p_token_index->token,
+                   two_p_token_index[1].token,
+                   two_p_token_index->name);
             ++two_p_token_index;
             break;
         default:
-            printf(*(config_entry_2p[two_p_token_index].token + 1) == '-'
-                       ? "      %-25s    %-25s\n"
-                       : "      -%-25s   %-25s\n",
-                   config_entry_2p[two_p_token_index].token,
-                   config_entry_2p[two_p_token_index].name);
+            printf(two_p_token_index->token[1] == '-' ? "      %-25s    %-25s\n"
+                                                      : "      -%-25s   %-25s\n",
+                   two_p_token_index->token,
+                   two_p_token_index->name);
         }
     }
     printf("\nKeyframe Placement Options:\n");
-    for (int kf_token_index = -1; config_entry_intra_refresh[++kf_token_index].token;) {
-        switch (check_long(config_entry_intra_refresh[kf_token_index],
-                           config_entry_intra_refresh[kf_token_index + 1])) {
+    for (ConfigEntry *kf_token_index = config_entry_intra_refresh; kf_token_index->token;
+         ++kf_token_index) {
+        switch (check_long(*kf_token_index, kf_token_index[1])) {
         case 1:
             printf("  %s, %-25s    %-25s\n",
-                   config_entry_intra_refresh[kf_token_index].token,
-                   config_entry_intra_refresh[kf_token_index + 1].token,
-                   config_entry_intra_refresh[kf_token_index].name);
+                   kf_token_index->token,
+                   kf_token_index[1].token,
+                   kf_token_index->name);
             ++kf_token_index;
             break;
         default:
-            printf(*(config_entry_intra_refresh[kf_token_index].token + 1) == '-'
-                       ? "      %-25s    %-25s\n"
-                       : "      -%-25s   %-25s\n",
-                   config_entry_intra_refresh[kf_token_index].token,
-                   config_entry_intra_refresh[kf_token_index].name);
+            printf(kf_token_index->token[1] == '-' ? "      %-25s    %-25s\n"
+                                                   : "      -%-25s   %-25s\n",
+                   kf_token_index->token,
+                   kf_token_index->name);
         }
     }
     printf("\nAV1 Specific Options:\n");
-    for (int sp_token_index = -1; config_entry_specific[++sp_token_index].token;) {
-        switch (check_long(config_entry_specific[sp_token_index],
-                           config_entry_specific[sp_token_index + 1])) {
+    for (ConfigEntry *sp_token_index = config_entry_specific; sp_token_index->token;
+         ++sp_token_index) {
+        switch (check_long(*sp_token_index, sp_token_index[1])) {
         case 1:
             printf("  %s, %-25s    %-25s\n",
-                   config_entry_specific[sp_token_index].token,
-                   config_entry_specific[sp_token_index + 1].token,
-                   config_entry_specific[sp_token_index].name);
+                   sp_token_index->token,
+                   sp_token_index[1].token,
+                   sp_token_index->name);
             ++sp_token_index;
             break;
         default:
-            printf(*(config_entry_specific[sp_token_index].token + 1) == '-'
-                       ? "      %-25s    %-25s\n"
-                       : "      -%-25s   %-25s\n",
-                   config_entry_specific[sp_token_index].token,
-                   config_entry_specific[sp_token_index].name);
+            printf(sp_token_index->token[1] == '-' ? "      %-25s    %-25s\n"
+                                                   : "      -%-25s   %-25s\n",
+                   sp_token_index->token,
+                   sp_token_index->name);
         }
     }
     return 1;
