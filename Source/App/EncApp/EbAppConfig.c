@@ -1729,7 +1729,8 @@ static int32_t find_token(int32_t argc, char *const argv[], char const *token, c
 
     while ((argc > 0) && (return_error != 0)) {
         return_error = strcmp(argv[--argc], token);
-        if (return_error == 0) { strcpy_s(configStr, COMMAND_LINE_MAX_SIZE, argv[argc + 1]); }
+        if (return_error == 0 && configStr)
+            strcpy_s(configStr, COMMAND_LINE_MAX_SIZE, argv[argc + 1]);
     }
 
     return return_error;
