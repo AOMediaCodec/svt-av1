@@ -91,6 +91,7 @@ EbErrorType copy_configuration_parameters(EbConfig *config, EbAppContext *callba
     callback_data->eb_enc_parameters.frame_rate             = config->frame_rate;
     callback_data->eb_enc_parameters.frame_rate_denominator = config->frame_rate_denominator;
     callback_data->eb_enc_parameters.frame_rate_numerator   = config->frame_rate_numerator;
+    callback_data->eb_enc_parameters.film_grain_denoise_strength    = config->film_grain_denoise_strength;
     callback_data->eb_enc_parameters.hierarchical_levels    = config->hierarchical_levels;
     callback_data->eb_enc_parameters.pred_structure         = (uint8_t)config->pred_structure;
     callback_data->eb_enc_parameters.ext_block_flag         = config->ext_block_flag;

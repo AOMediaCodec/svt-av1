@@ -1421,6 +1421,7 @@ EbConfig * eb_config_ctor(EncodePass pass) {
     config_ptr->over_shoot_pct      = 25;
     config_ptr->intra_period                              = -2;
     config_ptr->intra_refresh_type                        = 1;
+    config_ptr->film_grain_denoise_strength               = 0;
     config_ptr->hierarchical_levels                       = 4;
     config_ptr->pred_structure                            = 2;
     config_ptr->disable_dlf_flag                          = EB_FALSE;

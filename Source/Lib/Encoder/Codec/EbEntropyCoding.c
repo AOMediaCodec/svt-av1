@@ -4021,6 +4021,7 @@ static void write_uncompressed_header_obu(SequenceControlSet *     scs_ptr /*Av1
         //  SVT_LOG("ERROR[AN]: Global motion not supported yet\n");
         write_global_motion(pcs_ptr, wb);
     }
+
     if (scs_ptr->seq_header.film_grain_params_present &&
         (frm_hdr->show_frame || frm_hdr->showable_frame))
         write_film_grain_params(pcs_ptr, wb);
