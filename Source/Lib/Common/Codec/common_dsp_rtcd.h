@@ -1227,6 +1227,10 @@ extern "C" {
         uint32_t pred_stride, int16_t *residual,
         uint32_t residual_stride, uint32_t area_width,
         uint32_t area_height);
+    extern void svt_residual_kernel16bit_avx2(uint16_t *input, uint32_t input_stride, uint16_t *pred,
+        uint32_t pred_stride, int16_t *residual,
+        uint32_t residual_stride, uint32_t area_width,
+        uint32_t area_height);
     void avc_style_luma_interpolation_filter_helper_ssse3(EbByte ref_pic, uint32_t src_stride,
         EbByte dst, uint32_t dst_stride,
         uint32_t pu_width, uint32_t pu_height,

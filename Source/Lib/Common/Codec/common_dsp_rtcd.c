@@ -905,7 +905,10 @@ void setup_common_rtcd_internal(CPU_FLAGS flags) {
                         svt_residual_kernel8bit_avx2,
                         svt_residual_kernel8bit_avx512);
 
-        SET_SSE2(svt_residual_kernel16bit, svt_residual_kernel16bit_c, svt_residual_kernel16bit_sse2_intrin);
+        SET_SSE2_AVX2(svt_residual_kernel16bit,
+                      svt_residual_kernel16bit_c,
+                      svt_residual_kernel16bit_sse2_intrin,
+                      svt_residual_kernel16bit_avx2);
         SET_SSE2(svt_picture_average_kernel,
                  svt_picture_average_kernel_c,
                  svt_picture_average_kernel_sse2_intrin);
