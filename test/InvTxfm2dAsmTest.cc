@@ -107,7 +107,7 @@ static const InvSqrTxfmFuncPair inv_txfm_c_avx2_func_pairs[TX_64X64 + 1] = {
     SQR_FUNC_PAIRS(eb_av1_inv_txfm2d_add_8x8, avx2, all_txtype_imp),
     SQR_FUNC_PAIRS(eb_av1_inv_txfm2d_add_16x16, avx2, all_txtype_imp),
     SQR_FUNC_PAIRS(eb_av1_inv_txfm2d_add_32x32, avx2, is_tx_type_imp_32x32_avx2),
-    EMPTY_FUNC_PAIRS(eb_av1_inv_txfm2d_add_64x64),
+    SQR_FUNC_PAIRS(eb_av1_inv_txfm2d_add_64x64, avx2, is_tx_type_imp_64x64_sse4),
 };
 
 static const InvSqrTxfmFuncPair inv_txfm_c_sse4_1_func_pairs[TX_64X64 + 1] = {
