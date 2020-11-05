@@ -1,7 +1,13 @@
 /*
- * Copyright(c) 2019 Intel Corporation
- * SPDX - License - Identifier: BSD - 2 - Clause - Patent
- */
+* Copyright(c) 2019 Intel Corporation
+*
+* This source code is subject to the terms of the BSD 2 Clause License and
+* the Alliance for Open Media Patent License 1.0. If the BSD 2 Clause License
+* was not distributed with this source code in the LICENSE file, you can
+* obtain it at https://www.aomedia.org/license/software-license. If the Alliance for Open
+* Media Patent License 1.0 was not distributed with this source code in the
+* PATENTS file, you can obtain it at https://www.aomedia.org/license/patent-license.
+*/
 
 #include "gtest/gtest.h"
 #include "aom_dsp_rtcd.h"
@@ -34,67 +40,67 @@ typedef void (*AomSadMultiDFn)(const uint8_t *a, int a_stride,
                                      int b_stride, uint32_t *sad_array);
 
 AomSadFn aom_sad_c_func_ptr_array[num_sad] = {
-    eb_aom_sad4x4_c,    eb_aom_sad4x8_c,    eb_aom_sad4x16_c,
-    eb_aom_sad8x4_c,    eb_aom_sad8x8_c,    eb_aom_sad8x16_c,
-    eb_aom_sad8x32_c,   eb_aom_sad16x4_c,   eb_aom_sad16x8_c,
-    eb_aom_sad16x16_c,  eb_aom_sad16x32_c,  eb_aom_sad16x64_c,
-    eb_aom_sad32x8_c,   eb_aom_sad32x16_c,  eb_aom_sad32x32_c,
-    eb_aom_sad32x64_c,  eb_aom_sad64x16_c,  eb_aom_sad64x32_c,
-    eb_aom_sad64x64_c,  eb_aom_sad64x128_c, eb_aom_sad128x64_c,
-    eb_aom_sad128x128_c};
+    svt_aom_sad4x4_c,    svt_aom_sad4x8_c,    svt_aom_sad4x16_c,
+    svt_aom_sad8x4_c,    svt_aom_sad8x8_c,    svt_aom_sad8x16_c,
+    svt_aom_sad8x32_c,   svt_aom_sad16x4_c,   svt_aom_sad16x8_c,
+    svt_aom_sad16x16_c,  svt_aom_sad16x32_c,  svt_aom_sad16x64_c,
+    svt_aom_sad32x8_c,   svt_aom_sad32x16_c,  svt_aom_sad32x32_c,
+    svt_aom_sad32x64_c,  svt_aom_sad64x16_c,  svt_aom_sad64x32_c,
+    svt_aom_sad64x64_c,  svt_aom_sad64x128_c, svt_aom_sad128x64_c,
+    svt_aom_sad128x128_c};
 
 AomSadMultiDFn aom_sad_4d_c_func_ptr_array[num_sad] = {
-    eb_aom_sad4x4x4d_c,    eb_aom_sad4x8x4d_c,    eb_aom_sad4x16x4d_c,
-    eb_aom_sad8x4x4d_c,    eb_aom_sad8x8x4d_c,    eb_aom_sad8x16x4d_c,
-    eb_aom_sad8x32x4d_c,   eb_aom_sad16x4x4d_c,   eb_aom_sad16x8x4d_c,
-    eb_aom_sad16x16x4d_c,  eb_aom_sad16x32x4d_c,  eb_aom_sad16x64x4d_c,
-    eb_aom_sad32x8x4d_c,   eb_aom_sad32x16x4d_c,  eb_aom_sad32x32x4d_c,
-    eb_aom_sad32x64x4d_c,  eb_aom_sad64x16x4d_c,  eb_aom_sad64x32x4d_c,
-    eb_aom_sad64x64x4d_c,  eb_aom_sad64x128x4d_c, eb_aom_sad128x64x4d_c,
-    eb_aom_sad128x128x4d_c};
+    svt_aom_sad4x4x4d_c,    svt_aom_sad4x8x4d_c,    svt_aom_sad4x16x4d_c,
+    svt_aom_sad8x4x4d_c,    svt_aom_sad8x8x4d_c,    svt_aom_sad8x16x4d_c,
+    svt_aom_sad8x32x4d_c,   svt_aom_sad16x4x4d_c,   svt_aom_sad16x8x4d_c,
+    svt_aom_sad16x16x4d_c,  svt_aom_sad16x32x4d_c,  svt_aom_sad16x64x4d_c,
+    svt_aom_sad32x8x4d_c,   svt_aom_sad32x16x4d_c,  svt_aom_sad32x32x4d_c,
+    svt_aom_sad32x64x4d_c,  svt_aom_sad64x16x4d_c,  svt_aom_sad64x32x4d_c,
+    svt_aom_sad64x64x4d_c,  svt_aom_sad64x128x4d_c, svt_aom_sad128x64x4d_c,
+    svt_aom_sad128x128x4d_c};
 
 AomSadFn aom_sad_avx2_func_ptr_array[num_sad] = {
-    eb_aom_sad4x4_avx2,    eb_aom_sad4x8_avx2,    eb_aom_sad4x16_avx2,
-    eb_aom_sad8x4_avx2,    eb_aom_sad8x8_avx2,    eb_aom_sad8x16_avx2,
-    eb_aom_sad8x32_avx2,   eb_aom_sad16x4_avx2,   eb_aom_sad16x8_avx2,
-    eb_aom_sad16x16_avx2,  eb_aom_sad16x32_avx2,  eb_aom_sad16x64_avx2,
-    eb_aom_sad32x8_avx2,   eb_aom_sad32x16_avx2,  eb_aom_sad32x32_avx2,
-    eb_aom_sad32x64_avx2,  eb_aom_sad64x16_avx2,  eb_aom_sad64x32_avx2,
-    eb_aom_sad64x64_avx2,  eb_aom_sad64x128_avx2, eb_aom_sad128x64_avx2,
-    eb_aom_sad128x128_avx2};
+    svt_aom_sad4x4_avx2,    svt_aom_sad4x8_avx2,    svt_aom_sad4x16_avx2,
+    svt_aom_sad8x4_avx2,    svt_aom_sad8x8_avx2,    svt_aom_sad8x16_avx2,
+    svt_aom_sad8x32_avx2,   svt_aom_sad16x4_avx2,   svt_aom_sad16x8_avx2,
+    svt_aom_sad16x16_avx2,  svt_aom_sad16x32_avx2,  svt_aom_sad16x64_avx2,
+    svt_aom_sad32x8_avx2,   svt_aom_sad32x16_avx2,  svt_aom_sad32x32_avx2,
+    svt_aom_sad32x64_avx2,  svt_aom_sad64x16_avx2,  svt_aom_sad64x32_avx2,
+    svt_aom_sad64x64_avx2,  svt_aom_sad64x128_avx2, svt_aom_sad128x64_avx2,
+    svt_aom_sad128x128_avx2};
 
 AomSadMultiDFn aom_sad_4d_avx2_func_ptr_array[num_sad] = {
-    eb_aom_sad4x4x4d_avx2,    eb_aom_sad4x8x4d_avx2,
-    eb_aom_sad4x16x4d_avx2,   eb_aom_sad8x4x4d_avx2,
-    eb_aom_sad8x8x4d_avx2,    eb_aom_sad8x16x4d_avx2,
-    eb_aom_sad8x32x4d_avx2,   eb_aom_sad16x4x4d_avx2,
-    eb_aom_sad16x8x4d_avx2,   eb_aom_sad16x16x4d_avx2,
-    eb_aom_sad16x32x4d_avx2,  eb_aom_sad16x64x4d_avx2,
-    eb_aom_sad32x8x4d_avx2,   eb_aom_sad32x16x4d_avx2,
-    eb_aom_sad32x32x4d_avx2,  eb_aom_sad32x64x4d_avx2,
-    eb_aom_sad64x16x4d_avx2,  eb_aom_sad64x32x4d_avx2,
-    eb_aom_sad64x64x4d_avx2,  eb_aom_sad64x128x4d_avx2,
-    eb_aom_sad128x64x4d_avx2, eb_aom_sad128x128x4d_avx2};
+    svt_aom_sad4x4x4d_avx2,    svt_aom_sad4x8x4d_avx2,
+    svt_aom_sad4x16x4d_avx2,   svt_aom_sad8x4x4d_avx2,
+    svt_aom_sad8x8x4d_avx2,    svt_aom_sad8x16x4d_avx2,
+    svt_aom_sad8x32x4d_avx2,   svt_aom_sad16x4x4d_avx2,
+    svt_aom_sad16x8x4d_avx2,   svt_aom_sad16x16x4d_avx2,
+    svt_aom_sad16x32x4d_avx2,  svt_aom_sad16x64x4d_avx2,
+    svt_aom_sad32x8x4d_avx2,   svt_aom_sad32x16x4d_avx2,
+    svt_aom_sad32x32x4d_avx2,  svt_aom_sad32x64x4d_avx2,
+    svt_aom_sad64x16x4d_avx2,  svt_aom_sad64x32x4d_avx2,
+    svt_aom_sad64x64x4d_avx2,  svt_aom_sad64x128x4d_avx2,
+    svt_aom_sad128x64x4d_avx2, svt_aom_sad128x128x4d_avx2};
 
 static void init_data_sadMxN(uint8_t **src_ptr, uint32_t *src_stride,
                              uint8_t **ref_ptr, uint32_t *ref_stride) {
-    *src_stride = eb_create_random_aligned_stride(MAX_SB_SIZE, 64);
-    *ref_stride = eb_create_random_aligned_stride(MAX_SB_SIZE, 64);
+    *src_stride = svt_create_random_aligned_stride(MAX_SB_SIZE, 64);
+    *ref_stride = svt_create_random_aligned_stride(MAX_SB_SIZE, 64);
     *src_ptr = (uint8_t *)malloc(sizeof(**src_ptr) * MAX_SB_SIZE * *src_stride);
     *ref_ptr = (uint8_t *)malloc(sizeof(**ref_ptr) * MAX_SB_SIZE * *ref_stride);
-    eb_buf_random_u8(*src_ptr, MAX_SB_SIZE * *src_stride);
-    eb_buf_random_u8(*ref_ptr, MAX_SB_SIZE * *ref_stride);
+    svt_buf_random_u8(*src_ptr, MAX_SB_SIZE * *src_stride);
+    svt_buf_random_u8(*ref_ptr, MAX_SB_SIZE * *ref_stride);
 }
 
 static void init_data_sadMxNx4d(uint8_t **src_ptr, uint32_t *src_stride,
                                 uint8_t *ref_ptr[4], uint32_t *ref_stride) {
-    *src_stride = eb_create_random_aligned_stride(MAX_SB_SIZE, 64);
-    *ref_stride = eb_create_random_aligned_stride(MAX_SB_SIZE, 64);
+    *src_stride = svt_create_random_aligned_stride(MAX_SB_SIZE, 64);
+    *ref_stride = svt_create_random_aligned_stride(MAX_SB_SIZE, 64);
     *src_ptr = (uint8_t *)malloc(sizeof(**src_ptr) * MAX_SB_SIZE * *src_stride);
     ref_ptr[0] =
         (uint8_t *)malloc(sizeof(**ref_ptr) * (MAX_SB_SIZE + 3) * *ref_stride);
-    eb_buf_random_u8(*src_ptr, MAX_SB_SIZE * *src_stride);
-    eb_buf_random_u8(ref_ptr[0], (MAX_SB_SIZE + 3) * *ref_stride);
+    svt_buf_random_u8(*src_ptr, MAX_SB_SIZE * *src_stride);
+    svt_buf_random_u8(ref_ptr[0], (MAX_SB_SIZE + 3) * *ref_stride);
     ref_ptr[1] = ref_ptr[0] + *ref_stride;
     ref_ptr[2] = ref_ptr[1] + *ref_stride;
     ref_ptr[3] = ref_ptr[2] + *ref_stride;
@@ -138,7 +144,7 @@ void sadMxNx4d_match_test(const AomSadMultiDFn *const func_table) {
         for (int j = 0; j < num_sad; j++) {
             if(func_table[j] == NULL)
                 continue;
-            eb_buf_random_u32(sad_array_opt, 4);
+            svt_buf_random_u32(sad_array_opt, 4);
             aom_sad_4d_c_func_ptr_array[j](
                 src_ptr, src_stride, ref_ptr, ref_stride, sad_array_org);
             func_table[j](
@@ -170,28 +176,26 @@ void sadMxN_speed_test(const AomSadFn *const func_table) {
         const uint64_t num_loop = 100000000 / (width + height);
         uint32_t sad_org, sad_opt;
 
-        eb_start_time(&start_time_seconds, &start_time_useconds);
+        svt_av1_get_time(&start_time_seconds, &start_time_useconds);
 
         for (uint64_t i = 0; i < num_loop; i++)
             sad_org = aom_sad_c_func_ptr_array[j](
                 src_ptr, src_stride, ref_ptr, ref_stride);
 
-        eb_start_time(&middle_time_seconds, &middle_time_useconds);
+        svt_av1_get_time(&middle_time_seconds, &middle_time_useconds);
 
         for (uint64_t i = 0; i < num_loop; i++)
             sad_opt = func_table[j](src_ptr, src_stride, ref_ptr, ref_stride);
 
-        eb_start_time(&finish_time_seconds, &finish_time_useconds);
-        eb_compute_overall_elapsed_time_ms(start_time_seconds,
-                                      start_time_useconds,
-                                      middle_time_seconds,
-                                      middle_time_useconds,
-                                      &time_c);
-        eb_compute_overall_elapsed_time_ms(middle_time_seconds,
-                                      middle_time_useconds,
-                                      finish_time_seconds,
-                                      finish_time_useconds,
-                                      &time_o);
+        svt_av1_get_time(&finish_time_seconds, &finish_time_useconds);
+        time_c = svt_av1_compute_overall_elapsed_time_ms(start_time_seconds,
+                                                         start_time_useconds,
+                                                         middle_time_seconds,
+                                                         middle_time_useconds);
+        time_o = svt_av1_compute_overall_elapsed_time_ms(middle_time_seconds,
+                                                         middle_time_useconds,
+                                                         finish_time_seconds,
+                                                         finish_time_useconds);
 
         EXPECT_EQ(sad_org, sad_opt);
 
@@ -222,7 +226,7 @@ void sadMxNx4d_speed_test(const AomSadMultiDFn *const func_table) {
     uint64_t finish_time_seconds, finish_time_useconds;
 
     init_data_sadMxNx4d(&src_ptr, &src_stride, ref_ptr, &ref_stride);
-    eb_buf_random_u32(sad_array_opt, 4);
+    svt_buf_random_u32(sad_array_opt, 4);
 
     for (int j = 0; j < num_sad; j++) {
         if(func_table[j] == NULL)
@@ -231,29 +235,27 @@ void sadMxNx4d_speed_test(const AomSadMultiDFn *const func_table) {
         const uint32_t height = sad_size_info[j].height;
         const uint64_t num_loop = 20000000 / (width + height);
 
-        eb_start_time(&start_time_seconds, &start_time_useconds);
+        svt_av1_get_time(&start_time_seconds, &start_time_useconds);
 
         for (uint64_t i = 0; i < num_loop; i++)
             aom_sad_4d_c_func_ptr_array[j](
                 src_ptr, src_stride, ref_ptr, ref_stride, sad_array_org);
 
-        eb_start_time(&middle_time_seconds, &middle_time_useconds);
+        svt_av1_get_time(&middle_time_seconds, &middle_time_useconds);
 
         for (uint64_t i = 0; i < num_loop; i++)
             func_table[j](
                 src_ptr, src_stride, ref_ptr, ref_stride, sad_array_opt);
 
-        eb_start_time(&finish_time_seconds, &finish_time_useconds);
-        eb_compute_overall_elapsed_time_ms(start_time_seconds,
-                                      start_time_useconds,
-                                      middle_time_seconds,
-                                      middle_time_useconds,
-                                      &time_c);
-        eb_compute_overall_elapsed_time_ms(middle_time_seconds,
-                                      middle_time_useconds,
-                                      finish_time_seconds,
-                                      finish_time_useconds,
-                                      &time_o);
+        svt_av1_get_time(&finish_time_seconds, &finish_time_useconds);
+        time_c = svt_av1_compute_overall_elapsed_time_ms(start_time_seconds,
+                                                         start_time_useconds,
+                                                         middle_time_seconds,
+                                                         middle_time_useconds);
+        time_o = svt_av1_compute_overall_elapsed_time_ms(middle_time_seconds,
+                                                         middle_time_useconds,
+                                                         finish_time_seconds,
+                                                         finish_time_useconds);
 
         for (int l = 0; l < 4; l++)
             EXPECT_EQ(sad_array_org[l], sad_array_opt[l]);
@@ -300,9 +302,9 @@ AomSadFn aom_sad_avx512_func_ptr_array[num_sad] = {
     NULL, NULL, NULL,
     NULL, NULL, NULL,
     NULL, NULL, NULL,
-    NULL, eb_aom_sad64x16_avx512, eb_aom_sad64x32_avx512,
-    eb_aom_sad64x64_avx512, eb_aom_sad64x128_avx512,
-    eb_aom_sad128x64_avx512, eb_aom_sad128x128_avx512};
+    NULL, svt_aom_sad64x16_avx512, svt_aom_sad64x32_avx512,
+    svt_aom_sad64x64_avx512, svt_aom_sad64x128_avx512,
+    svt_aom_sad128x64_avx512, svt_aom_sad128x128_avx512};
 
 //NULL means not implemented
 AomSadMultiDFn aom_sad_4d_avx512_func_ptr_array[num_sad] = {
@@ -311,9 +313,9 @@ AomSadMultiDFn aom_sad_4d_avx512_func_ptr_array[num_sad] = {
     NULL, NULL, NULL,
     NULL, NULL, NULL,
     NULL, NULL, NULL,
-    NULL, eb_aom_sad64x16x4d_avx2, eb_aom_sad64x32x4d_avx2,
-    eb_aom_sad64x64x4d_avx2, eb_aom_sad64x128x4d_avx2,
-    eb_aom_sad128x64x4d_avx512, eb_aom_sad128x128x4d_avx512};
+    NULL, svt_aom_sad64x16x4d_avx2, svt_aom_sad64x32x4d_avx2,
+    svt_aom_sad64x64x4d_avx2, svt_aom_sad64x128x4d_avx2,
+    svt_aom_sad128x64x4d_avx512, svt_aom_sad128x128x4d_avx512};
 
 TEST(MotionEstimation_avx512, sadMxN_match) {
     sadMxN_match_test(aom_sad_avx512_func_ptr_array);

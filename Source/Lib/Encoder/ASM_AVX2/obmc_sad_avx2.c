@@ -4,9 +4,9 @@
  * This source code is subject to the terms of the BSD 2 Clause License and
  * the Alliance for Open Media Patent License 1.0. If the BSD 2 Clause License
  * was not distributed with this source code in the LICENSE file, you can
- * obtain it at www.aomedia.org/license/software. If the Alliance for Open
+ * obtain it at https://www.aomedia.org/license/software-license. If the Alliance for Open
  * Media Patent License 1.0 was not distributed with this source code in the
- * PATENTS file, you can obtain it at www.aomedia.org/license/patent.
+ * PATENTS file, you can obtain it at https://www.aomedia.org/license/patent-license.
  */
 
 #include "EbDefinitions.h"
@@ -110,7 +110,7 @@ static INLINE unsigned int obmc_sad_w8n_avx2(const uint8_t *pre, const int pre_s
 }
 
 #define OBMCSADWXH(w, h)                                                               \
-    unsigned int aom_obmc_sad##w##x##h##_avx2(                                         \
+    unsigned int svt_aom_obmc_sad##w##x##h##_avx2(                                     \
         const uint8_t *pre, int pre_stride, const int32_t *wsrc, const int32_t *msk) { \
         if (w == 4) {                                                                  \
             return obmc_sad_w4_avx2(pre, pre_stride, wsrc, msk, h);                    \

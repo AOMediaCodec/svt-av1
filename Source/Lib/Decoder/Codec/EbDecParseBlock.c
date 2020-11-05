@@ -1,17 +1,13 @@
 /*
 * Copyright(c) 2019 Netflix, Inc.
-* SPDX - License - Identifier: BSD - 2 - Clause - Patent
-*/
-
-/*
 * Copyright (c) 2016, Alliance for Open Media. All rights reserved
 *
 * This source code is subject to the terms of the BSD 2 Clause License and
 * the Alliance for Open Media Patent License 1.0. If the BSD 2 Clause License
 * was not distributed with this source code in the LICENSE file, you can
-* obtain it at www.aomedia.org/license/software. If the Alliance for Open
+* obtain it at https://www.aomedia.org/license/software-license. If the Alliance for Open
 * Media Patent License 1.0 was not distributed with this source code in the
-* PATENTS file, you can obtain it at www.aomedia.org/license/patent.
+* PATENTS file, you can obtain it at https://www.aomedia.org/license/patent-license.
 */
 
 #include "EbDefinitions.h"
@@ -167,7 +163,7 @@ static void read_palette_colors_y(ParseCtxt *parse_ctx, PartitionInfo *pi, int b
         }
         merge_colors(parse_ctx->palette_colors[AOM_PLANE_Y], cached_colors, n, n_cached_colors);
     } else {
-        eb_memcpy(parse_ctx->palette_colors[AOM_PLANE_Y], cached_colors, n * sizeof(cached_colors[0]));
+        svt_memcpy(parse_ctx->palette_colors[AOM_PLANE_Y], cached_colors, n * sizeof(cached_colors[0]));
     }
 }
 
@@ -202,7 +198,7 @@ static void read_palette_colors_uv(ParseCtxt *parse_ctx, PartitionInfo *pi, int 
         }
         merge_colors(parse_ctx->palette_colors[AOM_PLANE_U], cached_colors, n, n_cached_colors);
     } else {
-        eb_memcpy(parse_ctx->palette_colors[AOM_PLANE_U], cached_colors, n * sizeof(cached_colors[0]));
+        svt_memcpy(parse_ctx->palette_colors[AOM_PLANE_U], cached_colors, n * sizeof(cached_colors[0]));
     }
 
     // V channel colors.
@@ -273,11 +269,7 @@ void palette_mode_info(ParseCtxt *parse_ctxt, PartitionInfo *pi) {
 }
 
 static INLINE int filter_intra_allowed_bsize(ParseCtxt *parse_ctxt, BlockSize bs) {
-#if FILTER_INTRA_CLI
     if (!parse_ctxt->seq_header->filter_intra_level || bs == BLOCK_INVALID) return 0;
-#else
-    if (!parse_ctxt->seq_header->enable_filter_intra || bs == BLOCK_INVALID) return 0;
-#endif
 
     return block_size_wide[bs] <= 32 && block_size_high[bs] <= 32;
 }
@@ -324,7 +316,7 @@ void read_cdef(ParseCtxt *parse_ctxt, PartitionInfo *xd) {
     SvtReader *          r    = &parse_ctxt->r;
     BlockModeInfo *const mbmi = xd->mi;
     if (mbmi->skip || parse_ctxt->frame_header->coded_lossless ||
-        !parse_ctxt->seq_header->enable_cdef || parse_ctxt->frame_header->allow_intrabc) {
+        !parse_ctxt->seq_header->cdef_level || parse_ctxt->frame_header->allow_intrabc) {
         return;
     }
     int       cdf_size = mi_size_wide[BLOCK_64X64];
@@ -566,13 +558,13 @@ static INLINE void update_palette_context(ParseCtxt *parse_ctx, int mi_row, int 
         uint16_t *left_pal_col = left_ctx->left_palette_colors[plane] +
                                  (PALETTE_MAX_SIZE * (mi_row - parse_ctx->sb_row_mi));
         for (int i = 0; i < bw; i++) {
-            eb_memcpy(above_pal_col,
+            svt_memcpy(above_pal_col,
                    &parse_ctx->palette_colors[plane][0],
                    mi->palette_size[plane != 0] * sizeof(uint16_t));
             above_pal_col += PALETTE_MAX_SIZE;
         }
         for (int i = 0; i < bh; i++) {
-            eb_memcpy(left_pal_col,
+            svt_memcpy(left_pal_col,
                    &parse_ctx->palette_colors[plane][0],
                    mi->palette_size[plane != 0] * sizeof(uint16_t));
             left_pal_col += PALETTE_MAX_SIZE;
@@ -964,21 +956,21 @@ void svt_setup_motion_field(EbDecHandle *dec_handle, DecThreadCtxt *thread_ctxt)
         volatile EbBool *start_motion_proj = &dec_mt_frame_data->start_motion_proj;
 
         while (*start_motion_proj != EB_TRUE)
-            eb_block_on_semaphore(NULL == thread_ctxt ? dec_handle->thread_semaphore
+            svt_block_on_semaphore(NULL == thread_ctxt ? dec_handle->thread_semaphore
                                                       : thread_ctxt->thread_semaphore);
 
         DecMtMotionProjInfo *motion_proj_info =
             &dec_mt_frame_data->motion_proj_info;
         do_memset = EB_FALSE;
         //lock mutex
-        eb_block_on_mutex(motion_proj_info->motion_proj_mutex);
+        svt_block_on_mutex(motion_proj_info->motion_proj_mutex);
         //Check memset needed
         if (motion_proj_info->motion_proj_init_done == EB_FALSE) {
             do_memset = EB_TRUE;
             motion_proj_info->motion_proj_init_done = EB_TRUE;
         }
         //unlock mutex
-        eb_release_mutex(motion_proj_info->motion_proj_mutex);
+        svt_release_mutex(motion_proj_info->motion_proj_mutex);
     }
 
     if (do_memset) {
@@ -1024,7 +1016,7 @@ void svt_setup_motion_field(EbDecHandle *dec_handle, DecThreadCtxt *thread_ctxt)
                 int32_t proj_row = -1;
 
                 //lock mutex
-                eb_block_on_mutex(motion_proj_info->motion_proj_mutex);
+                svt_block_on_mutex(motion_proj_info->motion_proj_mutex);
 
                 //pick up a row and increment the sb row counter
                 if (motion_proj_info->motion_proj_row_to_process !=
@@ -1034,7 +1026,7 @@ void svt_setup_motion_field(EbDecHandle *dec_handle, DecThreadCtxt *thread_ctxt)
                 }
 
                 //unlock mutex
-                eb_release_mutex(motion_proj_info->motion_proj_mutex);
+                svt_release_mutex(motion_proj_info->motion_proj_mutex);
 
                 //wait for parse
                 if (-1 != proj_row)
@@ -1055,12 +1047,12 @@ void svt_setup_motion_field(EbDecHandle *dec_handle, DecThreadCtxt *thread_ctxt)
     }
 
     if (is_mt) {
-        eb_block_on_mutex(dec_mt_frame_data->temp_mutex);
+        svt_block_on_mutex(dec_mt_frame_data->temp_mutex);
         dec_mt_frame_data->num_threads_header++;
         if (dec_handle->dec_config.threads == dec_mt_frame_data->num_threads_header) {
             dec_mt_frame_data->start_motion_proj = EB_FALSE;
         }
-        eb_release_mutex(dec_mt_frame_data->temp_mutex);
+        svt_release_mutex(dec_mt_frame_data->temp_mutex);
 
         volatile uint32_t *num_threads_header = &dec_mt_frame_data->num_threads_header;
         while (*num_threads_header != dec_handle->dec_config.threads &&
@@ -1279,12 +1271,13 @@ void update_chroma_trans_info(ParseCtxt *parse_ctx, PartitionInfo *part_info, Bl
 
     /* TODO: Make plane loop and avoid the unroll */
     for (int idy = 0, force_split_cnt = 0; idy < max_blocks_high; idy += height) {
-        for (int idx = 0, num_chroma_tus = 0; idx < max_blocks_wide;
-             idx += width, force_split_cnt++) {
+        for (int idx = 0; idx < max_blocks_wide; idx += width, force_split_cnt++) {
             if (color_config.mono_chrome) continue;
 
             /* Update Chroma Transform Info */
             if (!part_info->is_chroma_ref) continue;
+
+            int num_chroma_tus = 0;
 
             step_r = tx_size_high_unit[tx_size_uv];
             step_c = tx_size_wide_unit[tx_size_uv];
@@ -1316,7 +1309,7 @@ void update_chroma_trans_info(ParseCtxt *parse_ctx, PartitionInfo *part_info, Bl
     if (total_chroma_tus) {
         assert((chroma_trans_info - total_chroma_tus) ==
                sb_info->sb_trans_info[AOM_PLANE_U] + mbmi->first_txb_offset[AOM_PLANE_U]);
-        eb_memcpy(chroma_trans_info,
+        svt_memcpy(chroma_trans_info,
                chroma_trans_info - total_chroma_tus,
                total_chroma_tus * sizeof(*chroma_trans_info));
     }
@@ -1472,7 +1465,7 @@ void update_flat_trans_info(ParseCtxt *parse_ctx, PartitionInfo *part_info, Bloc
     if (total_chroma_tus) {
         assert((chroma_trans_info - total_chroma_tus) ==
                sb_info->sb_trans_info[AOM_PLANE_U] + mbmi->first_txb_offset[AOM_PLANE_U]);
-        eb_memcpy(chroma_trans_info,
+        svt_memcpy(chroma_trans_info,
                chroma_trans_info - total_chroma_tus,
                total_chroma_tus * sizeof(*chroma_trans_info));
     }
@@ -1524,7 +1517,8 @@ void read_block_tx_size(ParseCtxt *parse_ctx, PartitionInfo *part_info, BlockSiz
 
         // Luma trans_info update
         for (int idy = 0; idy < height; idy += bh)
-            for (int idx = 0, num_luma_tus = 0; idx < width; idx += bw) {
+            for (int idx = 0; idx < width; idx += bw) {
+                int num_luma_tus = 0;
                 read_var_tx_size(parse_ctx, part_info, max_tx_size, idy, idx, 0, &num_luma_tus);
                 parse_ctx->num_tus[AOM_PLANE_Y][force_split_cnt] = num_luma_tus;
                 force_split_cnt++;
@@ -2691,7 +2685,7 @@ void read_wiener_filter(int wiener_win, WienerInfo *wiener_info, WienerInfo *ref
     wiener_info->hfilter[WIENER_HALFWIN] =
         -2 * (wiener_info->hfilter[0] + wiener_info->hfilter[1] + wiener_info->hfilter[2]);
 
-    eb_memcpy(ref_wiener_info, wiener_info, sizeof(*wiener_info));
+    svt_memcpy(ref_wiener_info, wiener_info, sizeof(*wiener_info));
 }
 
 void read_sgrproj_filter(SgrprojInfo *sgrproj_info, SgrprojInfo *ref_sgrproj_info,
@@ -2727,7 +2721,7 @@ void read_sgrproj_filter(SgrprojInfo *sgrproj_info, SgrprojInfo *ref_sgrproj_inf
                                                                   reader);
     }
 
-    eb_memcpy(ref_sgrproj_info, sgrproj_info, sizeof(*sgrproj_info));
+    svt_memcpy(ref_sgrproj_info, sgrproj_info, sizeof(*sgrproj_info));
 }
 
 void read_lr_unit(ParseCtxt *parse_ctxt, int32_t plane, RestorationUnitInfo *lr_unit) {

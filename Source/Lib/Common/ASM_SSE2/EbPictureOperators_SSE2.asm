@@ -1,6 +1,12 @@
 ;
 ; Copyright(c) 2019 Intel Corporation
-; SPDX - License - Identifier: BSD - 2 - Clause - Patent
+;
+; This source code is subject to the terms of the BSD 2 Clause License and
+; the Alliance for Open Media Patent License 1.0. If the BSD 2 Clause License
+; was not distributed with this source code in the LICENSE file, you can
+; obtain it at https://www.aomedia.org/license/software-license. If the Alliance for Open
+; Media Patent License 1.0 was not distributed with this source code in the
+; PATENTS file, you can obtain it at https://www.aomedia.org/license/patent-license.
 ;
 
 %include "x64inc.asm"
@@ -210,7 +216,7 @@ Label_PictureCopyKernel_SSE2_WIDTH16:
 
 ; ----------------------------------------------------------------------------------------
 
-cglobal picture_average_kernel_sse2
+cglobal svt_picture_average_kernel_sse2
 
 ; Requirement: pu_width         = 4, 8, 12, 16, 24, 32, 48 or 64
 ; Requirement: pu_height   %  2 = 0

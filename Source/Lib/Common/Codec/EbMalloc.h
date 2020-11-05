@@ -1,6 +1,12 @@
 /*
 * Copyright(c) 2019 Intel Corporation
-* SPDX - License - Identifier: BSD - 2 - Clause - Patent
+*
+* This source code is subject to the terms of the BSD 2 Clause License and
+* the Alliance for Open Media Patent License 1.0. If the BSD 2 Clause License
+* was not distributed with this source code in the LICENSE file, you can
+* obtain it at https://www.aomedia.org/license/software-license. If the Alliance for Open
+* Media Patent License 1.0 was not distributed with this source code in the
+* PATENTS file, you can obtain it at https://www.aomedia.org/license/patent-license.
 */
 #ifndef EbMalloc_h
 #define EbMalloc_h
@@ -14,28 +20,28 @@
 #define DEBUG_MEMORY_USAGE
 #endif
 
-void eb_print_alloc_fail(const char* file, int line);
+void svt_print_alloc_fail(const char* file, int line);
 
 #ifdef DEBUG_MEMORY_USAGE
-void eb_print_memory_usage(void);
-void eb_increase_component_count(void);
-void eb_decrease_component_count(void);
-void eb_add_mem_entry(void* ptr, EbPtrType type, size_t count, const char* file, uint32_t line);
-void eb_remove_mem_entry(void* ptr, EbPtrType type);
+void svt_print_memory_usage(void);
+void svt_increase_component_count(void);
+void svt_decrease_component_count(void);
+void svt_add_mem_entry(void* ptr, EbPtrType type, size_t count, const char* file, uint32_t line);
+void svt_remove_mem_entry(void* ptr, EbPtrType type);
 
-#define EB_ADD_MEM_ENTRY(p, type, count) eb_add_mem_entry(p, type, count, __FILE__, __LINE__)
+#define EB_ADD_MEM_ENTRY(p, type, count) svt_add_mem_entry(p, type, count, __FILE__, __LINE__)
 
-#define EB_REMOVE_MEM_ENTRY(p, type) eb_remove_mem_entry(p, type);
+#define EB_REMOVE_MEM_ENTRY(p, type) svt_remove_mem_entry(p, type);
 
 #else
-#define eb_print_memory_usage() \
-    do {                        \
+#define svt_print_memory_usage() \
+    do {                         \
     } while (0)
-#define eb_increase_component_count() \
-    do {                              \
+#define svt_increase_component_count() \
+    do {                               \
     } while (0)
-#define eb_decrease_component_count() \
-    do {                              \
+#define svt_decrease_component_count() \
+    do {                               \
     } while (0)
 #define EB_ADD_MEM_ENTRY(p, type, count) \
     do {                                 \
@@ -49,7 +55,7 @@ void eb_remove_mem_entry(void* ptr, EbPtrType type);
 #define EB_NO_THROW_ADD_MEM(p, size, type)                                               \
     do {                                                                                 \
         if (!p)                                                                          \
-            eb_print_alloc_fail(__FILE__, __LINE__);                                     \
+            svt_print_alloc_fail(__FILE__, __LINE__);                                    \
         else                                                                             \
             EB_ADD_MEM_ENTRY(p, type, size);                                             \
     } while (0)
@@ -66,11 +72,11 @@ void eb_remove_mem_entry(void* ptr, EbPtrType type);
         EB_CHECK_MEM(p);                    \
     } while (0)
 
-#define EB_NO_THROW_MALLOC(pointer, size)       \
-    do {                                        \
-        void* p = malloc(size);                 \
-        EB_NO_THROW_ADD_MEM(p, size, EB_N_PTR); \
-        pointer = p;                            \
+#define EB_NO_THROW_MALLOC(pointer, size)                \
+    do {                                                 \
+        void* malloced_p = malloc(size);                 \
+        EB_NO_THROW_ADD_MEM(malloced_p, size, EB_N_PTR); \
+        pointer = malloced_p;                            \
     } while (0)
 
 #define EB_MALLOC(pointer, size)           \
@@ -100,6 +106,17 @@ void eb_remove_mem_entry(void* ptr, EbPtrType type);
 
 #define EB_MALLOC_ARRAY(pa, count) \
     do { EB_MALLOC(pa, sizeof(*(pa)) * (count)); } while (0)
+
+#define EB_REALLOC_ARRAY(pa, count)             \
+    do {                                        \
+        size_t size = sizeof(*(pa)) * (count);  \
+        void* p = realloc(pa, size);            \
+        if (p) {                                \
+            EB_REMOVE_MEM_ENTRY(pa, EB_N_PTR);  \
+        }                                       \
+        EB_ADD_MEM(p, size, EB_N_PTR);          \
+        pa = p;                                 \
+    } while (0)
 
 #define EB_CALLOC_ARRAY(pa, count) \
     do { EB_CALLOC(pa, count, sizeof(*(pa))); } while (0)

@@ -1,17 +1,14 @@
 /*
+ * Copyright(c) 2019 Intel Corporation
  * Copyright (c) 2016, Alliance for Open Media. All rights reserved
  *
  * This source code is subject to the terms of the BSD 2 Clause License and
  * the Alliance for Open Media Patent License 1.0. If the BSD 2 Clause License
  * was not distributed with this source code in the LICENSE file, you can
- * obtain it at www.aomedia.org/license/software. If the Alliance for Open
+ * obtain it at https://www.aomedia.org/license/software-license. If the Alliance for Open
  * Media Patent License 1.0 was not distributed with this source code in the
- * PATENTS file, you can obtain it at www.aomedia.org/license/patent.
+ * PATENTS file, you can obtain it at https://www.aomedia.org/license/patent-license.
  */
-/*
-* Copyright(c) 2019 Intel Corporation
-* SPDX - License - Identifier: BSD - 2 - Clause - Patent
-*/
 
 #include <assert.h>
 #include <limits.h>
@@ -413,7 +410,7 @@ static void interpolate(const uint8_t *const input, int in_length, uint8_t *outp
 static void resize_multistep(const uint8_t *const input, int length, uint8_t *output, int olength,
                              uint8_t *otmp) {
     if (length == olength) {
-        eb_memcpy(output, input, sizeof(output[0]) * length);
+        svt_memcpy(output, input, sizeof(output[0]) * length);
         return;
     }
     const int steps = get_down2_steps(length, olength);
@@ -685,7 +682,7 @@ static void highbd_down2_symodd(const uint16_t *const input, int length, uint16_
 static void highbd_resize_multistep(const uint16_t *const input, int length, uint16_t *output,
                                     int olength, uint16_t *otmp, int bd) {
     if (length == olength) {
-        eb_memcpy(output, input, sizeof(output[0]) * length);
+        svt_memcpy(output, input, sizeof(output[0]) * length);
         return;
     }
     const int steps = get_down2_steps(length, olength);
@@ -1038,7 +1035,7 @@ static EbErrorType downscaled_source_buffer_desc_ctor(EbPictureBufferDesc **pict
     initData.top_padding        = picture_ptr_for_reference->origin_y;
     initData.bot_padding        = picture_ptr_for_reference->origin_y;
 
-    EB_NEW(*picture_ptr, eb_picture_buffer_desc_ctor, (EbPtr)&initData);
+    EB_NEW(*picture_ptr, svt_picture_buffer_desc_ctor, (EbPtr)&initData);
 
     return EB_ErrorNone;
 }
@@ -1142,19 +1139,19 @@ static EbErrorType allocate_downscaled_reference_pics(EbPictureBufferDesc **down
         // Hsan: set split_mode to 0 to construct the packed reference buffer (used @ EP)
         ref_pic_buf_desc_init_data.split_mode = EB_FALSE;
         EB_NEW(*downscaled_reference_picture16bit,
-               eb_picture_buffer_desc_ctor,
+               svt_picture_buffer_desc_ctor,
                (EbPtr)&ref_pic_buf_desc_init_data);
 
         // Hsan: set split_mode to 1 to construct the unpacked reference buffer (used @ MD)
         ref_pic_buf_desc_init_data.split_mode = EB_TRUE;
         EB_NEW(*downscaled_reference_picture_ptr,
-               eb_picture_buffer_desc_ctor,
+               svt_picture_buffer_desc_ctor,
                (EbPtr)&ref_pic_buf_desc_init_data);
     } else {
         // Hsan: set split_mode to 0 to as 8BIT input
         ref_pic_buf_desc_init_data.split_mode = EB_FALSE;
         EB_NEW(*downscaled_reference_picture_ptr,
-               eb_picture_buffer_desc_ctor,
+               svt_picture_buffer_desc_ctor,
                (EbPtr)&ref_pic_buf_desc_init_data);
     }
 
@@ -1186,7 +1183,7 @@ static EbErrorType allocate_downscaled_source_reference_pics(EbPictureBufferDesc
     initData.top_padding        = picture_ptr_for_reference->origin_y;
     initData.bot_padding        = picture_ptr_for_reference->origin_y;
 
-    EB_NEW(*input_padded_picture_ptr, eb_picture_buffer_desc_ctor, (EbPtr)&initData);
+    EB_NEW(*input_padded_picture_ptr, svt_picture_buffer_desc_ctor, (EbPtr)&initData);
 
     initData.buffer_enable_mask = PICTURE_BUFFER_DESC_LUMA_MASK;
     initData.max_width          = spr_params.encoding_width >> 1;
@@ -1199,7 +1196,7 @@ static EbErrorType allocate_downscaled_source_reference_pics(EbPictureBufferDesc
     initData.top_padding        = picture_ptr_for_reference->origin_y >> 1;
     initData.bot_padding        = picture_ptr_for_reference->origin_y >> 1;
 
-    EB_NEW(*quarter_decimated_picture_ptr, eb_picture_buffer_desc_ctor, (EbPtr)&initData);
+    EB_NEW(*quarter_decimated_picture_ptr, svt_picture_buffer_desc_ctor, (EbPtr)&initData);
 
     initData.buffer_enable_mask = PICTURE_BUFFER_DESC_LUMA_MASK;
     initData.max_width          = spr_params.encoding_width >> 2;
@@ -1212,7 +1209,7 @@ static EbErrorType allocate_downscaled_source_reference_pics(EbPictureBufferDesc
     initData.top_padding        = picture_ptr_for_reference->origin_y >> 2;
     initData.bot_padding        = picture_ptr_for_reference->origin_y >> 2;
 
-    EB_NEW(*sixteenth_decimated_picture_ptr, eb_picture_buffer_desc_ctor, (EbPtr)&initData);
+    EB_NEW(*sixteenth_decimated_picture_ptr, svt_picture_buffer_desc_ctor, (EbPtr)&initData);
 
     if(down_sampling_method_me_search == ME_FILTERED_DOWNSAMPLED){
 
@@ -1227,7 +1224,7 @@ static EbErrorType allocate_downscaled_source_reference_pics(EbPictureBufferDesc
         initData.top_padding        = picture_ptr_for_reference->origin_y >> 1;
         initData.bot_padding        = picture_ptr_for_reference->origin_y >> 1;
 
-        EB_NEW(*quarter_filtered_picture_ptr, eb_picture_buffer_desc_ctor, (EbPtr)&initData);
+        EB_NEW(*quarter_filtered_picture_ptr, svt_picture_buffer_desc_ctor, (EbPtr)&initData);
 
         initData.buffer_enable_mask = PICTURE_BUFFER_DESC_LUMA_MASK;
         initData.max_width          = spr_params.encoding_width >> 2;
@@ -1240,7 +1237,7 @@ static EbErrorType allocate_downscaled_source_reference_pics(EbPictureBufferDesc
         initData.top_padding        = picture_ptr_for_reference->origin_y >> 2;
         initData.bot_padding        = picture_ptr_for_reference->origin_y >> 2;
 
-        EB_NEW(*sixteenth_filtered_picture_ptr, eb_picture_buffer_desc_ctor, (EbPtr)&initData);
+        EB_NEW(*sixteenth_filtered_picture_ptr, svt_picture_buffer_desc_ctor, (EbPtr)&initData);
 
     }
 
@@ -1268,17 +1265,10 @@ void scale_source_references(SequenceControlSet *scs_ptr,
 
     for (uint8_t list_index = REF_LIST_0; list_index <= num_of_list_to_search; ++list_index) {
         uint8_t ref_pic_index;
-#if ON_OFF_FEATURE_MRP
-        uint8_t num_of_ref_pic_to_search = (pcs_ptr->slice_type == P_SLICE)
-                                           ? pcs_ptr->mrp_ctrls.ref_list0_count_try
-                                           : (list_index == REF_LIST_0) ? pcs_ptr->mrp_ctrls.ref_list0_count_try
-                                                                        : pcs_ptr->mrp_ctrls.ref_list1_count_try;
-#else
         uint8_t num_of_ref_pic_to_search = (pcs_ptr->slice_type == P_SLICE)
                                            ? pcs_ptr->ref_list0_count
                                            : (list_index == REF_LIST_0) ? pcs_ptr->ref_list0_count
                                                                         : pcs_ptr->ref_list1_count;
-#endif
         for (ref_pic_index = 0; ref_pic_index < num_of_ref_pic_to_search; ++ref_pic_index) {
 
             reference_object = (EbPaReferenceObject *) pcs_ptr->ref_pa_pic_ptr_array[list_index][ref_pic_index]
@@ -1426,17 +1416,10 @@ void scale_rec_references(PictureControlSet *pcs_ptr,
 
     for (uint8_t list_index = REF_LIST_0; list_index <= num_of_list_to_search; ++list_index) {
         uint8_t ref_pic_index;
-#if ON_OFF_FEATURE_MRP
-        uint8_t num_of_ref_pic_to_search = (ppcs_ptr->slice_type == P_SLICE)
-                                           ? ppcs_ptr->mrp_ctrls.ref_list0_count_try
-                                           : (list_index == REF_LIST_0) ? ppcs_ptr->mrp_ctrls.ref_list0_count_try
-                                                                        : ppcs_ptr->mrp_ctrls.ref_list1_count_try;
-#else
         uint8_t num_of_ref_pic_to_search = (ppcs_ptr->slice_type == P_SLICE)
                                            ? ppcs_ptr->ref_list0_count
                                            : (list_index == REF_LIST_0) ? ppcs_ptr->ref_list0_count
                                                                         : ppcs_ptr->ref_list1_count;
-#endif
         for (ref_pic_index = 0; ref_pic_index < num_of_ref_pic_to_search; ++ref_pic_index) {
 
             reference_object = (EbReferenceObject *) pcs_ptr->ref_pic_ptr_array[list_index][ref_pic_index]

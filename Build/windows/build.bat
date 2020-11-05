@@ -1,5 +1,13 @@
+::
 :: Copyright(c) 2019 Intel Corporation
-:: SPDX-License-Identifier: BSD-2-Clause-Patent
+::
+:: This source code is subject to the terms of the BSD 2 Clause License and
+:: the Alliance for Open Media Patent License 1.0. If the BSD 2 Clause License
+:: was not distributed with this source code in the LICENSE file, you can
+:: obtain it at www.aomedia.org/license/software. If the Alliance for Open
+:: Media Patent License 1.0 was not distributed with this source code in the
+:: PATENTS file, you can obtain it at www.aomedia.org/license/patent.
+::
 @echo off
 
 setlocal
@@ -133,7 +141,10 @@ if -%1-==-- (
 ) else if /I "%1"=="nobuild" (
     set "build=n"
     shift
-) else (
+) else if /I "%1"=="c-only" (
+    set "cmake_eflags=%cmake_eflags% -DCOMPILE_C_ONLY=ON"
+    shift
+)  else (
     echo Unknown argument "%1"
     call :help
 )
@@ -141,6 +152,6 @@ goto :args
 
 :help
     echo Batch file to build SVT-AV1 on Windows
-    echo Usage: build.bat [2019^|2017^|2015^|clean] [release^|debug] [nobuild] [test] [shared^|static]
+    echo Usage: build.bat [2019^|2017^|2015^|clean] [release^|debug] [nobuild] [test] [shared^|static] [c-only]
     exit
 goto :EOF

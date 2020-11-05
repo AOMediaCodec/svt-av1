@@ -1,6 +1,12 @@
 /*
 * Copyright(c) 2019 Intel Corporation
-* SPDX - License - Identifier: BSD - 2 - Clause - Patent
+*
+* This source code is subject to the terms of the BSD 2 Clause License and
+* the Alliance for Open Media Patent License 1.0. If the BSD 2 Clause License
+* was not distributed with this source code in the LICENSE file, you can
+* obtain it at https://www.aomedia.org/license/software-license. If the Alliance for Open
+* Media Patent License 1.0 was not distributed with this source code in the
+* PATENTS file, you can obtain it at https://www.aomedia.org/license/patent-license.
 */
 
 #ifndef EbModeDecisionConfigurationProcess_h
@@ -61,11 +67,7 @@ typedef struct ModeDecisionConfigurationContext {
     uint8_t                qp_index;
 
     // Multi - Mode signal(s)
-#if REMOVE_MR_MACRO
     EbEncMode adp_level;
-#else
-    uint8_t adp_level;
-#endif
 } ModeDecisionConfigurationContext;
 
 /**************************************

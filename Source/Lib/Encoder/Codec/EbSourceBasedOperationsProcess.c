@@ -1,6 +1,12 @@
 /*
 * Copyright(c) 2019 Intel Corporation
-* SPDX - License - Identifier: BSD - 2 - Clause - Patent
+*
+* This source code is subject to the terms of the BSD 2 Clause License and
+* the Alliance for Open Media Patent License 1.0. If the BSD 2 Clause License
+* was not distributed with this source code in the LICENSE file, you can
+* obtain it at https://www.aomedia.org/license/software-license. If the Alliance for Open
+* Media Patent License 1.0 was not distributed with this source code in the
+* PATENTS file, you can obtain it at https://www.aomedia.org/license/patent-license.
 */
 
 #include "EbPictureControlSet.h"
@@ -9,7 +15,7 @@
 #include "EbSourceBasedOperationsProcess.h"
 #include "EbInitialRateControlResults.h"
 #include "EbPictureDemuxResults.h"
-#ifdef ARCH_X86
+#ifdef ARCH_X86_64
 #include <emmintrin.h>
 #endif
 #include "EbEncHandle.h"
@@ -46,9 +52,9 @@ EbErrorType source_based_operations_context_ctor(EbThreadContext *  thread_conte
     thread_context_ptr->priv  = context_ptr;
     thread_context_ptr->dctor = source_based_operations_context_dctor;
 
-    context_ptr->initial_rate_control_results_input_fifo_ptr = eb_system_resource_get_consumer_fifo(
+    context_ptr->initial_rate_control_results_input_fifo_ptr = svt_system_resource_get_consumer_fifo(
         enc_handle_ptr->initial_rate_control_results_resource_ptr, index);
-    context_ptr->picture_demux_results_output_fifo_ptr = eb_system_resource_get_producer_fifo(
+    context_ptr->picture_demux_results_output_fifo_ptr = svt_system_resource_get_producer_fifo(
         enc_handle_ptr->picture_demux_results_resource_ptr, index);
     return EB_ErrorNone;
 }
@@ -125,12 +131,12 @@ void *source_based_operations_kernel(void *input_ptr) {
             SbParams *sb_params      = &pcs_ptr->sb_params_array[sb_index];
             EbBool    is_complete_sb = sb_params->is_complete_sb;
             uint8_t * y_mean_ptr     = pcs_ptr->y_mean[sb_index];
-#ifdef ARCH_X86
+#ifdef ARCH_X86_64
             _mm_prefetch((const char *)y_mean_ptr, _MM_HINT_T0);
 #endif
             uint8_t *cr_mean_ptr = pcs_ptr->cr_mean[sb_index];
             uint8_t *cb_mean_ptr = pcs_ptr->cb_mean[sb_index];
-#ifdef ARCH_X86
+#ifdef ARCH_X86_64
             _mm_prefetch((const char *)cr_mean_ptr, _MM_HINT_T0);
             _mm_prefetch((const char *)cb_mean_ptr, _MM_HINT_T0);
 #endif
@@ -146,8 +152,8 @@ void *source_based_operations_kernel(void *input_ptr) {
         derive_picture_activity_statistics(pcs_ptr);
 
         // Get Empty Results Object
-        eb_get_empty_object(context_ptr->picture_demux_results_output_fifo_ptr,
-                            &out_results_wrapper_ptr);
+        svt_get_empty_object(context_ptr->picture_demux_results_output_fifo_ptr,
+                             &out_results_wrapper_ptr);
 
         PictureDemuxResults *out_results_ptr = (PictureDemuxResults *)
                                                    out_results_wrapper_ptr->object_ptr;
@@ -155,10 +161,10 @@ void *source_based_operations_kernel(void *input_ptr) {
         out_results_ptr->picture_type    = EB_PIC_INPUT;
 
         // Release the Input Results
-        eb_release_object(in_results_wrapper_ptr);
+        svt_release_object(in_results_wrapper_ptr);
 
         // Post the Full Results Object
-        eb_post_full_object(out_results_wrapper_ptr);
+        svt_post_full_object(out_results_wrapper_ptr);
     }
     return NULL;
 }

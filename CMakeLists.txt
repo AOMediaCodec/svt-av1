@@ -1,6 +1,12 @@
 #
 # Copyright(c) 2018 Intel Corporation
-# SPDX - License - Identifier: BSD - 2 - Clause - Patent
+#
+# This source code is subject to the terms of the BSD 2 Clause License and
+# the Alliance for Open Media Patent License 1.0. If the BSD 2 Clause License
+# was not distributed with this source code in the LICENSE file, you can
+# obtain it at https://www.aomedia.org/license/software-license. If the Alliance for Open
+# Media Patent License 1.0 was not distributed with this source code in the
+# PATENTS file, you can obtain it at https://www.aomedia.org/license/patent-license.
 #
 
 cmake_minimum_required(VERSION 3.5)
@@ -10,7 +16,7 @@ if("${CMAKE_CURRENT_SOURCE_DIR}" STREQUAL "${CMAKE_CURRENT_BINARY_DIR}")
                     "Please use the Build folder or create your own.")
 endif()
 
-project(svt-av1 VERSION 0.8.4
+project(svt-av1 VERSION 0.8.5
     LANGUAGES C CXX)
 
 set(CMAKE_C_VISIBILITY_PRESET hidden)
@@ -23,8 +29,21 @@ if(NOT CMAKE_SIZEOF_VOID_P EQUAL 8)
     message(WARNING "32-bit is not supported")
 endif()
 
-if(CMAKE_SYSTEM_PROCESSOR MATCHES "(x86)|(X86)|(amd64)|(AMD64)")
-    set(X86 TRUE)
+option(COMPILE_C_ONLY "Compile only C code with no simds (autodetect, default off for x86)" OFF)
+
+file(WRITE ${CMAKE_BINARY_DIR}/conftest.c "
+#if defined(_M_IX86) || defined(_M_X64) || defined(__i386__) || defined(__x86_64__)
+#else
+#error \"Non-x86\"
+#endif
+int main() {}
+")
+
+try_compile(X86 ${CMAKE_BINARY_DIR} ${CMAKE_BINARY_DIR}/conftest.c)
+
+message(STATUS "x86 detected: ${X86}")
+
+if(NOT COMPILE_C_ONLY AND X86)
     find_program(YASM_EXE yasm)
     option(ENABLE_NASM "Use nasm if available (Uses yasm by default if found)" OFF)
     if(YASM_EXE AND NOT CMAKE_ASM_NASM_COMPILER MATCHES "yasm" AND NOT ENABLE_NASM)
@@ -45,8 +64,7 @@ if(CMAKE_SYSTEM_PROCESSOR MATCHES "(x86)|(X86)|(amd64)|(AMD64)")
         endif()
     endif()
     enable_language(ASM_NASM)
-else()
-    set(X86 FALSE)
+    add_definitions(-DARCH_X86_64=1)
 endif()
 
 include(GNUInstallDirs)
@@ -117,7 +135,7 @@ else()
         set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} --coverage")
     endif()
     if(MINGW)
-        list(APPEND flags_to_test -mxsave)
+        list(APPEND flags_to_test -mxsave -fno-asynchronous-unwind-tables)
     else()
         list(APPEND flags_to_test -fstack-protector-strong -D_FORTIFY_SOURCE=2)
     endif()
@@ -214,6 +232,16 @@ macro(ASM_COMPILE_TO_TARGET target)
         endforeach()
     endif()
 endmacro()
+
+add_subdirectory(third_party/safestringlib)
+
+set_property(DIRECTORY .
+    APPEND
+    PROPERTY COMPILE_DEFINITIONS
+        $<$<BOOL:${HAVE_STRCPY_S}>:HAVE_STRCPY_S=1>
+        $<$<BOOL:${HAVE_STRNCPY_S}>:HAVE_STRNCPY_S=1>
+        $<$<BOOL:${HAVE_STRNLEN_S}>:HAVE_STRNLEN_S=1>
+        $<$<BOOL:${WIN32}>:_WIN32_WINNT=0x0601>)
 
 # Add Subdirectories
 add_subdirectory(Source/Lib/Common)

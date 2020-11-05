@@ -612,7 +612,6 @@ set_default_svt_configuration (EbSvtAv1EncConfiguration * svt_config)
   svt_config->intra_period_length = PROP_GOP_SIZE_DEFAULT - 1;
   svt_config->intra_refresh_type = PROP_INTRA_REFRESH_DEFAULT;
   svt_config->enc_mode = PROP_ENCMODE_DEFAULT;
-  svt_config->snd_pass_enc_mode = PROP_ENCMODE_DEFAULT + 1;
   svt_config->frame_rate = 25;
   svt_config->frame_rate_denominator = 1;
   svt_config->frame_rate_numerator = 25;
@@ -634,21 +633,25 @@ set_default_svt_configuration (EbSvtAv1EncConfiguration * svt_config)
   svt_config->film_grain_denoise_strength = FALSE;
   svt_config->enable_warped_motion = FALSE;
   svt_config->enable_global_motion = TRUE;
-  svt_config->cdef_mode = -1;
+  svt_config->cdef_level = -1;
   svt_config->enable_restoration_filtering = -1;
   svt_config->sg_filter_mode = -1;
   svt_config->wn_filter_mode = -1;
+  #if 0 //!REMOVE_EDGE_SKIP_ANGLE_INTRA
   svt_config->edge_skp_angle_intra = -1;
+  #endif
   svt_config->intra_angle_delta = -1;
   svt_config->inter_intra_compound = -1;
   svt_config->enable_paeth = -1;
   svt_config->enable_smooth = -1;
   svt_config->enable_mfmv = -1;
   svt_config->enable_redundant_blk = -1;
-  svt_config->spatial_sse_fl = -1;
+  svt_config->spatial_sse_full_loop_level = -1;
   svt_config->over_bndry_blk = -1;
   svt_config->new_nearest_comb_inject = -1;
+  #if 0 //!REMOVE_REF_FOR_RECT_PART
   svt_config->prune_ref_rec_part = -1;
+  #endif
   svt_config->nsq_table = -1;
   svt_config->frame_end_cdf_update = -1;
   svt_config->pred_me = -1;
@@ -657,7 +660,7 @@ set_default_svt_configuration (EbSvtAv1EncConfiguration * svt_config)
   svt_config->set_chroma_mode = -1;
   svt_config->disable_cfl_flag = -1;
   svt_config->obmc_level = 1;
-  svt_config->enable_rdoq = -1;
+  svt_config->rdoq_level = -1;
   svt_config->filter_intra_level = 1;
   svt_config->enable_intra_edge_filter = -1;
   svt_config->pic_based_rate_est = -1;
@@ -671,7 +674,7 @@ set_default_svt_configuration (EbSvtAv1EncConfiguration * svt_config)
   svt_config->search_area_width = 16;
   svt_config->search_area_height = 7;
   svt_config->enable_hbd_mode_decision = 1;
-  svt_config->enable_palette = -1;
+  svt_config->palette_level = -1;
   // HME parameters
   svt_config->number_hme_search_region_in_width = 2;
   svt_config->number_hme_search_region_in_height = 2;
@@ -704,7 +707,7 @@ set_default_svt_configuration (EbSvtAv1EncConfiguration * svt_config)
   svt_config->unrestricted_motion_vector = 1;
 
   // alt-ref
-  svt_config->enable_altrefs = TRUE;
+  svt_config->tf_level = 1;
   svt_config->altref_strength = 5;
   svt_config->altref_nframes = 7;
   svt_config->enable_overlays = FALSE;
@@ -714,13 +717,6 @@ set_default_svt_configuration (EbSvtAv1EncConfiguration * svt_config)
   svt_config->superres_denom = 8;
   svt_config->superres_kf_denom = 8;
   svt_config->superres_qthres = 43;
-
-  svt_config->sq_weight = 100;
-
-  svt_config->md_stage_1_cand_prune_th = 75;
-  svt_config->md_stage_1_class_prune_th = 100;
-  svt_config->md_stage_2_3_cand_prune_th = 15;
-  svt_config->md_stage_2_3_class_prune_th = 25;
 
   // latency
   svt_config->injector_frame_rate = PROP_SPEEDCONTROL_DEFAULT;
@@ -1170,7 +1166,7 @@ plugin_init (GstPlugin * plugin)
 #define PACKAGE_NAME "SVT-AV1 Encoder plugin for GStreamer"
 #endif
 #ifndef GST_PACKAGE_ORIGIN
-#define GST_PACKAGE_ORIGIN "https://github.com/OpenVisualCloud"
+#define GST_PACKAGE_ORIGIN "https://github.com/AOMediaCodec"
 #endif
 
 GST_PLUGIN_DEFINE (GST_VERSION_MAJOR,

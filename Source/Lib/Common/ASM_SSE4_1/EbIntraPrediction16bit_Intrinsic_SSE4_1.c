@@ -1,12 +1,18 @@
 /*
 * Copyright(c) 2019 Intel Corporation
-* SPDX - License - Identifier: BSD - 2 - Clause - Patent
+*
+* This source code is subject to the terms of the BSD 2 Clause License and
+* the Alliance for Open Media Patent License 1.0. If the BSD 2 Clause License
+* was not distributed with this source code in the LICENSE file, you can
+* obtain it at https://www.aomedia.org/license/software-license. If the Alliance for Open
+* Media Patent License 1.0 was not distributed with this source code in the
+* PATENTS file, you can obtain it at https://www.aomedia.org/license/patent-license.
 */
 
 #include "EbDefinitions.h"
 #include <smmintrin.h>
 
-void eb_av1_filter_intra_edge_sse4_1(uint8_t *p, int32_t sz, int32_t strength) {
+void svt_av1_filter_intra_edge_sse4_1(uint8_t *p, int32_t sz, int32_t strength) {
     if (!strength) return;
 
     DECLARE_ALIGNED(16, static const int8_t, kern[3][16]) = {
@@ -104,7 +110,7 @@ void eb_av1_filter_intra_edge_sse4_1(uint8_t *p, int32_t sz, int32_t strength) {
     }
 }
 
-void eb_av1_filter_intra_edge_high_sse4_1(uint16_t *p, int32_t sz, int32_t strength) {
+void svt_av1_filter_intra_edge_high_sse4_1(uint16_t *p, int32_t sz, int32_t strength) {
     if (!strength) return;
 
     DECLARE_ALIGNED(16, static const int16_t, kern[3][8]) = {
@@ -194,7 +200,7 @@ void eb_av1_filter_intra_edge_high_sse4_1(uint16_t *p, int32_t sz, int32_t stren
     }
 }
 
-void eb_av1_upsample_intra_edge_sse4_1(uint8_t *p, int32_t sz) {
+void svt_av1_upsample_intra_edge_sse4_1(uint8_t *p, int32_t sz) {
     // interpolate half-sample positions
     assert(sz <= 24);
 

@@ -1,17 +1,13 @@
 /*
 * Copyright(c) 2019 Intel Corporation
-* SPDX - License - Identifier: BSD - 2 - Clause - Patent
-*/
-
-/*
 * Copyright (c) 2016, Alliance for Open Media. All rights reserved
 *
 * This source code is subject to the terms of the BSD 2 Clause License and
 * the Alliance for Open Media Patent License 1.0. If the BSD 2 Clause License
 * was not distributed with this source code in the LICENSE file, you can
-* obtain it at www.aomedia.org/license/software. If the Alliance for Open
+* obtain it at https://www.aomedia.org/license/software-license. If the Alliance for Open
 * Media Patent License 1.0 was not distributed with this source code in the
-* PATENTS file, you can obtain it at www.aomedia.org/license/patent.
+* PATENTS file, you can obtain it at https://www.aomedia.org/license/patent-license.
 */
 
 #ifndef EbEntropyCoding_h
@@ -55,7 +51,6 @@ extern EbErrorType encode_slice_finish(EntropyCoder *entropy_coder_ptr);
 extern EbErrorType reset_entropy_coder(EncodeContext *encode_context_ptr,
                                        EntropyCoder *entropy_coder_ptr, uint32_t qp,
                                        EB_SLICE slice_type);
-#if MD_FRAME_CONTEXT_MEM_OPT
 EbErrorType av1_txb_estimate_coeff_bits(
     struct ModeDecisionContext *md_context, uint8_t allow_update_cdf, FRAME_CONTEXT *ec_ctx,
     PictureControlSet *pcs_ptr, struct ModeDecisionCandidateBuffer *candidate_buffer_ptr,
@@ -64,16 +59,6 @@ EbErrorType av1_txb_estimate_coeff_bits(
     uint64_t *y_txb_coeff_bits, uint64_t *cb_txb_coeff_bits, uint64_t *cr_txb_coeff_bits,
     TxSize txsize, TxSize txsize_uv, TxType tx_type, TxType tx_type_uv,
     COMPONENT_TYPE component_type);
-#else
-EbErrorType av1_txb_estimate_coeff_bits(
-    struct ModeDecisionContext *md_context, uint8_t allow_update_cdf, FRAME_CONTEXT *ec_ctx,
-    PictureControlSet *pcs_ptr, struct ModeDecisionCandidateBuffer *candidate_buffer_ptr,
-    uint32_t txb_origin_index, uint32_t txb_chroma_origin_index, EntropyCoder *entropy_coder_ptr,
-    EbPictureBufferDesc *coeff_buffer_sb, uint32_t y_eob, uint32_t cb_eob, uint32_t cr_eob,
-    uint64_t *y_txb_coeff_bits, uint64_t *cb_txb_coeff_bits, uint64_t *cr_txb_coeff_bits,
-    TxSize txsize, TxSize txsize_uv, TxType tx_type, TxType tx_type_uv,
-    COMPONENT_TYPE component_type);
-#endif
 
 //**********************************************************************************************************//
 //onyxc_int.h
@@ -122,13 +107,13 @@ struct AomWriteBitBuffer {
     uint32_t bit_offset;
 };
 
-int32_t  eb_aom_wb_is_byte_aligned(const struct AomWriteBitBuffer *wb);
-uint32_t eb_aom_wb_bytes_written(const struct AomWriteBitBuffer *wb);
+int32_t  svt_aom_wb_is_byte_aligned(const struct AomWriteBitBuffer *wb);
+uint32_t svt_aom_wb_bytes_written(const struct AomWriteBitBuffer *wb);
 
-void eb_aom_wb_write_bit(struct AomWriteBitBuffer *wb, int32_t bit);
-void eb_aom_wb_write_literal(struct AomWriteBitBuffer *wb, int32_t data, int32_t bits);
+void svt_aom_wb_write_bit(struct AomWriteBitBuffer *wb, int32_t bit);
+void svt_aom_wb_write_literal(struct AomWriteBitBuffer *wb, int32_t data, int32_t bits);
 
-void eb_aom_wb_write_inv_signed_literal(struct AomWriteBitBuffer *wb, int32_t data, int32_t bits);
+void svt_aom_wb_write_inv_signed_literal(struct AomWriteBitBuffer *wb, int32_t data, int32_t bits);
 //*******************************************************************************************//
 // Bitstream.h
 struct AomWriteBitBuffer;
@@ -148,11 +133,11 @@ void get_txb_ctx(PictureControlSet *pcs_ptr, const int32_t plane,
                  uint32_t blk_origin_y, const BlockSize plane_bsize, const TxSize tx_size,
                  int16_t *const txb_skip_ctx, int16_t *const dc_sign_ctx);
 
-extern int32_t eb_av1_get_reference_mode_context(uint32_t blk_origin_x, uint32_t blk_origin_y,
-                                                 NeighborArrayUnit *mode_type_neighbor_array,
-                                                 NeighborArrayUnit *inter_pred_dir_neighbor_array);
+extern int32_t svt_av1_get_reference_mode_context(uint32_t blk_origin_x, uint32_t blk_origin_y,
+                                                  NeighborArrayUnit *mode_type_neighbor_array,
+                                                  NeighborArrayUnit *inter_pred_dir_neighbor_array);
 
-extern int32_t eb_av1_get_comp_reference_type_context(
+extern int32_t svt_av1_get_comp_reference_type_context(
     uint32_t blk_origin_x, uint32_t blk_origin_y, NeighborArrayUnit *mode_type_neighbor_array,
     NeighborArrayUnit *inter_pred_dir_neighbor_array);
 
@@ -167,51 +152,51 @@ extern void av1_collect_neighbors_ref_counts_new(MacroBlockD *const xd);
 // Returns a context number for the given MB prediction signal
 // Signal the first reference frame for a compound mode be either
 // GOLDEN/LAST3, or LAST/LAST2.
-extern int32_t eb_av1_get_pred_context_comp_ref_p(const MacroBlockD *xd);
+extern int32_t svt_av1_get_pred_context_comp_ref_p(const MacroBlockD *xd);
 
 // Returns a context number for the given MB prediction signal
 // Signal the first reference frame for a compound mode be LAST,
 // conditioning on that it is known either LAST/LAST2.
-extern int32_t eb_av1_get_pred_context_comp_ref_p1(const MacroBlockD *xd);
+extern int32_t svt_av1_get_pred_context_comp_ref_p1(const MacroBlockD *xd);
 
 // Returns a context number for the given MB prediction signal
 // Signal the first reference frame for a compound mode be GOLDEN,
 // conditioning on that it is known either GOLDEN or LAST3.
-extern int32_t eb_av1_get_pred_context_comp_ref_p2(const MacroBlockD *xd);
+extern int32_t svt_av1_get_pred_context_comp_ref_p2(const MacroBlockD *xd);
 
 // Signal the 2nd reference frame for a compound mode be either
 // ALTREF, or ALTREF2/BWDREF.
-extern int32_t eb_av1_get_pred_context_comp_bwdref_p(const MacroBlockD *xd);
+extern int32_t svt_av1_get_pred_context_comp_bwdref_p(const MacroBlockD *xd);
 
 // Signal the 2nd reference frame for a compound mode be either
 // ALTREF2 or BWDREF.
-extern int32_t eb_av1_get_pred_context_comp_bwdref_p1(const MacroBlockD *xd);
+extern int32_t svt_av1_get_pred_context_comp_bwdref_p1(const MacroBlockD *xd);
 // == Context functions for single ref ==
 //
 // For the bit to signal whether the single reference is a forward reference
 // frame or a backward reference frame.
-extern int32_t eb_av1_get_pred_context_single_ref_p1(const MacroBlockD *xd);
+extern int32_t svt_av1_get_pred_context_single_ref_p1(const MacroBlockD *xd);
 
 // For the bit to signal whether the single reference is ALTREF_FRAME or
 // non-ALTREF backward reference frame, knowing that it shall be either of
 // these 2 choices.
-extern int32_t eb_av1_get_pred_context_single_ref_p2(const MacroBlockD *xd);
+extern int32_t svt_av1_get_pred_context_single_ref_p2(const MacroBlockD *xd);
 
 // For the bit to signal whether the single reference is LAST3/GOLDEN or
 // LAST2/LAST, knowing that it shall be either of these 2 choices.
-extern int32_t eb_av1_get_pred_context_single_ref_p3(const MacroBlockD *xd);
+extern int32_t svt_av1_get_pred_context_single_ref_p3(const MacroBlockD *xd);
 
 // For the bit to signal whether the single reference is LAST2_FRAME or
 // LAST_FRAME, knowing that it shall be either of these 2 choices.
-extern int32_t eb_av1_get_pred_context_single_ref_p4(const MacroBlockD *xd);
+extern int32_t svt_av1_get_pred_context_single_ref_p4(const MacroBlockD *xd);
 
 // For the bit to signal whether the single reference is GOLDEN_FRAME or
 // LAST3_FRAME, knowing that it shall be either of these 2 choices.
-extern int32_t eb_av1_get_pred_context_single_ref_p5(const MacroBlockD *xd);
+extern int32_t svt_av1_get_pred_context_single_ref_p5(const MacroBlockD *xd);
 
 // For the bit to signal whether the single reference is ALTREF2_FRAME or
 // BWDREF_FRAME, knowing that it shall be either of these 2 choices.
-extern int32_t eb_av1_get_pred_context_single_ref_p6(const MacroBlockD *xd);
+extern int32_t svt_av1_get_pred_context_single_ref_p6(const MacroBlockD *xd);
 
 extern EbErrorType write_frame_header_av1(Bitstream *bitstream_ptr, SequenceControlSet *scs_ptr,
                                           PictureControlSet *pcs_ptr, uint8_t show_existing);
@@ -227,8 +212,8 @@ MotionMode motion_mode_allowed(const PictureControlSet *pcs_ptr, const BlkStruct
 int is_masked_compound_type(COMPOUND_TYPE type);
 
 
-int32_t eb_aom_count_primitive_subexpfin(uint16_t n, uint16_t k, uint16_t v);
-int32_t eb_aom_count_primitive_refsubexpfin(uint16_t n, uint16_t k, uint16_t ref, uint16_t v);
+int32_t svt_aom_count_primitive_subexpfin(uint16_t n, uint16_t k, uint16_t v);
+int32_t svt_aom_count_primitive_refsubexpfin(uint16_t n, uint16_t k, uint16_t ref, uint16_t v);
 
 #ifdef __cplusplus
 }

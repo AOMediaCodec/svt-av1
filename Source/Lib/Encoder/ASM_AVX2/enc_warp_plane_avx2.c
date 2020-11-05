@@ -4,18 +4,18 @@
  * This source code is subject to the terms of the BSD 2 Clause License and
  * the Alliance for Open Media Patent License 1.0. If the BSD 2 Clause License
  * was not distributed with this source code in the LICENSE file, you can
- * obtain it at www.aomedia.org/license/software. If the Alliance for Open
+ * obtain it at https://www.aomedia.org/license/software-license. If the Alliance for Open
  * Media Patent License 1.0 was not distributed with this source code in the
- * PATENTS file, you can obtain it at www.aomedia.org/license/patent.
+ * PATENTS file, you can obtain it at https://www.aomedia.org/license/patent-license.
  */
 
 #include <immintrin.h>
 #include "aom_dsp_rtcd.h"
 #include "EbEncWarpedMotion.h"
 
-int64_t eb_av1_calc_frame_error_avx2(const uint8_t *const ref, int ref_stride,
-                                     const uint8_t *const dst, int p_width, int p_height,
-                                     int dst_stride) {
+int64_t svt_av1_calc_frame_error_avx2(const uint8_t *const ref, int ref_stride,
+                                      const uint8_t *const dst, int p_width, int p_height,
+                                      int dst_stride) {
     int64_t sum_error = 0;
     int     i, j;
     __m256i row_error, col_error;

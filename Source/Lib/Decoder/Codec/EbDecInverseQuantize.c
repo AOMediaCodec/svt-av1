@@ -1,17 +1,13 @@
 /*
 * Copyright(c) 2019 Netflix, Inc.
-* SPDX - License - Identifier: BSD - 2 - Clause - Patent
-*/
-
-/*
 * Copyright (c) 2016, Alliance for Open Media. All rights reserved
 *
 * This source code is subject to the terms of the BSD 2 Clause License and
 * the Alliance for Open Media Patent License 1.0. If the BSD 2 Clause License
 * was not distributed with this source code in the LICENSE file, you can
-* obtain it at www.aomedia.org/license/software. If the Alliance for Open
+* obtain it at https://www.aomedia.org/license/software-license. If the Alliance for Open
 * Media Patent License 1.0 was not distributed with this source code in the
-* PATENTS file, you can obtain it at www.aomedia.org/license/patent.
+* PATENTS file, you can obtain it at https://www.aomedia.org/license/patent-license.
 */
 
 #include "EbDefinitions.h"
@@ -28,11 +24,11 @@
 
 // Same wrapper(av1_ac/dc_quant_qtx) available in .c file of encoder
 static INLINE int16_t get_dc_quant(int32_t qindex, int32_t delta, AomBitDepth bit_depth) {
-    return eb_av1_dc_quant_q3(qindex, delta, bit_depth);
+    return svt_av1_dc_quant_q3(qindex, delta, bit_depth);
 }
 
 static INLINE int16_t get_ac_quant(int32_t qindex, int32_t delta, AomBitDepth bit_depth) {
-    return eb_av1_ac_quant_q3(qindex, delta, bit_depth);
+    return svt_av1_ac_quant_q3(qindex, delta, bit_depth);
 }
 
 // Called in read_frame_header_obu() -> av1_decode_frame_headers_and_setup() -> read_uncompressed_header()

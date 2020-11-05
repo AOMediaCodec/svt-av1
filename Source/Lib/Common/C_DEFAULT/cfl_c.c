@@ -1,6 +1,12 @@
 /*
 * Copyright(c) 2019 Intel Corporation
-* SPDX - License - Identifier: BSD - 2 - Clause - Patent
+*
+* This source code is subject to the terms of the BSD 2 Clause License and
+* the Alliance for Open Media Patent License 1.0. If the BSD 2 Clause License
+* was not distributed with this source code in the LICENSE file, you can
+* obtain it at https://www.aomedia.org/license/software-license. If the Alliance for Open
+* Media Patent License 1.0 was not distributed with this source code in the
+* PATENTS file, you can obtain it at https://www.aomedia.org/license/patent-license.
 */
 
 #include "EbDefinitions.h"
@@ -13,7 +19,7 @@ int32_t scaled_luma_q6 = alpha_q3 * pred_buf_q3;
 return ROUND_POWER_OF_TWO_SIGNED(scaled_luma_q6, 6);
 }
 
-void eb_cfl_predict_lbd_c(
+void svt_cfl_predict_lbd_c(
         const int16_t *pred_buf_q3,
         uint8_t *pred,// AMIR ADDED
         int32_t pred_stride,
@@ -34,7 +40,7 @@ void eb_cfl_predict_lbd_c(
     }
 }
 
-void eb_cfl_predict_hbd_c(
+void svt_cfl_predict_hbd_c(
         const int16_t *pred_buf_q3,
         uint16_t *pred,// AMIR ADDED
         int32_t pred_stride,

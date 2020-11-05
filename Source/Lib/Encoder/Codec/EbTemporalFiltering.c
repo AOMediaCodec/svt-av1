@@ -1,20 +1,14 @@
 /*
-* Copyright(c) 2019 Netflix, Inc.
-* SPDX - License - Identifier: BSD - 2 - Clause - Patent
-*/
-/*
-* Copyright(c) 2019 Intel Corporation
-* SPDX - License - Identifier: BSD - 2 - Clause - Patent
-*/
-/*
+ * Copyright(c) 2019 Netflix, Inc.
+ * Copyright(c) 2019 Intel Corporation
  * Copyright (c) 2016, Alliance for Open Media. All rights reserved
  *
  * This source code is subject to the terms of the BSD 2 Clause License and
  * the Alliance for Open Media Patent License 1.0. If the BSD 2 Clause License
  * was not distributed with this source code in the LICENSE file, you can
- * obtain it at www.aomedia.org/license/software. If the Alliance for Open
+ * obtain it at https://www.aomedia.org/license/software-license. If the Alliance for Open
  * Media Patent License 1.0 was not distributed with this source code in the
- * PATENTS file, you can obtain it at www.aomedia.org/license/patent.
+ * PATENTS file, you can obtain it at https://www.aomedia.org/license/patent-license.
  */
 
 #include <stdlib.h>
@@ -30,7 +24,7 @@
 #include "EbPictureAnalysisProcess.h"
 #include "EbMcp.h"
 #include "av1me.h"
-#ifdef ARCH_X86
+#ifdef ARCH_X86_64
 #include <xmmintrin.h>
 #endif
 #include "EbObject.h"
@@ -384,10 +378,6 @@ static void create_me_context_and_picture_control(
     int buffer_index =
         (input_picture_ptr_central->origin_y + sb_origin_y) * input_picture_ptr_central->stride_y +
         input_picture_ptr_central->origin_x + sb_origin_x;
-#if !REMOVE_UNUSED_CODE
-    // set search type
-    context_ptr->me_context_ptr->hme_search_type = HME_RECTANGULAR;
-#endif
     // set search method
     context_ptr->me_context_ptr->hme_search_method = FULL_SAD_SEARCH;
 
@@ -397,12 +387,12 @@ static void create_me_context_and_picture_control(
 
     // populate src block buffers: sb_buffer, quarter_sb_buffer and sixteenth_sb_buffer
     for (sb_row = 0; sb_row < BLOCK_SIZE_64; sb_row++) {
-        eb_memcpy((&(context_ptr->me_context_ptr->sb_buffer[sb_row * BLOCK_SIZE_64])),
-                  (&(input_picture_ptr_central
+        svt_memcpy((&(context_ptr->me_context_ptr->sb_buffer[sb_row * BLOCK_SIZE_64])),
+                   (&(input_picture_ptr_central
                          ->buffer_y[buffer_index + sb_row * input_picture_ptr_central->stride_y])),
-                  BLOCK_SIZE_64 * sizeof(uint8_t));
+                   BLOCK_SIZE_64 * sizeof(uint8_t));
     }
-#ifdef ARCH_X86
+#ifdef ARCH_X86_64
     {
         uint8_t *src_ptr = &(padded_pic_ptr->buffer_y[buffer_index]);
 
@@ -425,10 +415,10 @@ static void create_me_context_and_picture_control(
                    quarter_pic_ptr->origin_x + (sb_origin_x >> ss_x);
 
     for (sb_row = 0; sb_row < (sb_height >> ss_y); sb_row++) {
-        eb_memcpy((&(context_ptr->me_context_ptr->quarter_sb_buffer
+        svt_memcpy((&(context_ptr->me_context_ptr->quarter_sb_buffer
                          [sb_row * context_ptr->me_context_ptr->quarter_sb_buffer_stride])),
-                  (&(quarter_pic_ptr->buffer_y[buffer_index + sb_row * quarter_pic_ptr->stride_y])),
-                  (sb_width >> ss_x) * sizeof(uint8_t));
+                   (&(quarter_pic_ptr->buffer_y[buffer_index + sb_row * quarter_pic_ptr->stride_y])),
+                   (sb_width >> ss_x) * sizeof(uint8_t));
     }
 
     // Load the 1/16 decimated SB from the 1/16 decimated input to the 1/16 intermediate SB buffer
@@ -442,13 +432,13 @@ static void create_me_context_and_picture_control(
 
         if (context_ptr->me_context_ptr->hme_search_method == FULL_SAD_SEARCH) {
             for (sb_row = 0; sb_row < (sb_height >> 2); sb_row += 1) {
-                eb_memcpy(local_ptr, frame_ptr, (sb_width >> 2) * sizeof(uint8_t));
+                svt_memcpy(local_ptr, frame_ptr, (sb_width >> 2) * sizeof(uint8_t));
                 local_ptr += 16;
                 frame_ptr += sixteenth_pic_ptr->stride_y;
             }
         } else {
             for (sb_row = 0; sb_row < (sb_height >> 2); sb_row += 2) {
-                eb_memcpy(local_ptr, frame_ptr, (sb_width >> 2) * sizeof(uint8_t));
+                svt_memcpy(local_ptr, frame_ptr, (sb_width >> 2) * sizeof(uint8_t));
                 local_ptr += 16;
                 frame_ptr += sixteenth_pic_ptr->stride_y << 1;
             }
@@ -960,20 +950,12 @@ static void apply_filtering_central_highbd(uint16_t **pred_16bit, uint32_t **acc
 *   point will be modified.
 ***************************************************************************************************/
 void svt_av1_apply_temporal_filter_planewise_c(
-#if TF_IMP
     struct MeContext *context_ptr, const uint8_t *y_src, int y_src_stride, const uint8_t *y_pre,
     int y_pre_stride, const uint8_t *u_src, const uint8_t *v_src, int uv_src_stride,
     const uint8_t *u_pre, const uint8_t *v_pre, int uv_pre_stride, unsigned int block_width,
     unsigned int block_height, int ss_x, int ss_y, const double *noise_levels,
     const int decay_control, uint32_t *y_accum, uint16_t *y_count, uint32_t *u_accum,
     uint16_t *u_count, uint32_t *v_accum, uint16_t *v_count) {
-#else
-    const uint8_t *y_src, int y_src_stride, const uint8_t *y_pre, int y_pre_stride,
-    const uint8_t *u_src, const uint8_t *v_src, int uv_src_stride, const uint8_t *u_pre,
-    const uint8_t *v_pre, int uv_pre_stride, unsigned int block_width, unsigned int block_height,
-    int ss_x, int ss_y, const double *noise_levels, const int decay_control, uint32_t *y_accum,
-    uint16_t *y_count, uint32_t *u_accum, uint16_t *u_count, uint32_t *v_accum, uint16_t *v_count) {
-#endif
     unsigned int       i, j, k, m;
     int                idx, idy;
     uint64_t           sum_square_diff;
@@ -1015,7 +997,6 @@ void svt_av1_apply_temporal_filter_planewise_c(
                     ++num_ref_pixels;
                 }
             }
-#if TF_IMP
             // Combine window error and block error, and normalize it.
             double window_error = (double)sum_square_diff / num_ref_pixels;
 
@@ -1055,7 +1036,7 @@ void svt_av1_apply_temporal_filter_planewise_c(
                 mv.col = context_ptr->tf_32x32_mv_x[idx_32x32];
                 mv.row = context_ptr->tf_32x32_mv_y[idx_32x32];
             }
-            const double distance = sqrt(pow(mv.row, 2) + pow(mv.col, 2));
+            const float distance = sqrtf(powf(mv.row, 2) + powf(mv.col, 2));
             const double distance_threshold =
                 (double)AOMMAX(context_ptr->min_frame_size * TF_SEARCH_DISTANCE_THRESHOLD, 1);
             const double d_factor = AOMMAX(distance / distance_threshold, 1);
@@ -1063,15 +1044,7 @@ void svt_av1_apply_temporal_filter_planewise_c(
             // Compute filter weight.
             double scaled_diff =
                 AOMMIN(combined_error * d_factor / (2*n_decay*n_decay) / q_decay / s_decay, 7);
-            int adjusted_weight = (int)(exp(-scaled_diff) * TF_WEIGHT_SCALE);
-#else
-            // Control factor for non-local mean approach.
-            double r = (double)decay_control * (0.7 + log(noise_levels[0] + 1.0));
-
-            double scaled_diff =
-                AOMMAX(-(double)(sum_square_diff / num_ref_pixels) / (2 * r * r), -15.0);
-            int adjusted_weight = (int)(exp(scaled_diff) * TF_PLANEWISE_FILTER_WEIGHT_SCALE);
-#endif
+            int adjusted_weight = (int)(expf((float)(-scaled_diff)) * TF_WEIGHT_SCALE);
             k = i * y_pre_stride + j;
             y_count[k] += adjusted_weight;
             y_accum[k] += adjusted_weight * pixel_value;
@@ -1109,7 +1082,6 @@ void svt_av1_apply_temporal_filter_planewise_c(
                 }
 
                 m = (i >> ss_y) * uv_pre_stride + (j >> ss_x);
-#if TF_IMP
             // Combine window error and block error, and normalize it.
                 window_error = (double)u_sum_square_diff / num_ref_pixels;
                 combined_error =
@@ -1122,17 +1094,10 @@ void svt_av1_apply_temporal_filter_planewise_c(
                 // Compute filter weight.
                 scaled_diff =
                     AOMMIN(combined_error * d_factor / (2*n_decay*n_decay) / q_decay / s_decay, 7);
-                adjusted_weight = (int)(exp(-scaled_diff) * TF_WEIGHT_SCALE);
-#else
-                r = (double)decay_control * (0.7 + log(noise_levels[1] + 1.0));
-                scaled_diff =
-                    AOMMAX(-(double)(u_sum_square_diff / num_ref_pixels) / (2 * r * r), -15.0);
-                adjusted_weight = (int)(exp(scaled_diff) * TF_PLANEWISE_FILTER_WEIGHT_SCALE);
-#endif
+                adjusted_weight = (int)(expf((float)(-scaled_diff)) * TF_WEIGHT_SCALE);
                 u_count[m] += adjusted_weight;
                 u_accum[m] += adjusted_weight * u_pixel_value;
 
-#if TF_IMP
                 // Combine window error and block error, and normalize it.
                 window_error = (double)v_sum_square_diff / num_ref_pixels;
                 combined_error =
@@ -1146,20 +1111,14 @@ void svt_av1_apply_temporal_filter_planewise_c(
                 // Compute filter weight.
                 scaled_diff =
                 AOMMIN(combined_error * d_factor / (2 * n_decay*n_decay) / q_decay / s_decay, 7);
-                adjusted_weight = (int)(exp(-scaled_diff) * TF_WEIGHT_SCALE);
-#else
-                r = (double)decay_control * (0.7 + log(noise_levels[2] + 1.0));
-
-                scaled_diff =
-                    AOMMAX(-(double)(v_sum_square_diff / num_ref_pixels) / (2 * r * r), -15.0);
-                adjusted_weight = (int)(exp(scaled_diff) * TF_PLANEWISE_FILTER_WEIGHT_SCALE);
-#endif
+                adjusted_weight = (int)(expf((float)(-scaled_diff)) * TF_WEIGHT_SCALE);
                 v_count[m] += adjusted_weight;
                 v_accum[m] += adjusted_weight * v_pixel_value;
             }
         }
     }
 }
+
 /***************************************************************************************************
 * Applies temporal filter plane by plane for hbd
 * Inputs:
@@ -1177,20 +1136,12 @@ void svt_av1_apply_temporal_filter_planewise_c(
 *   point will be modified.
 ***************************************************************************************************/
 void svt_av1_apply_temporal_filter_planewise_hbd_c(
-#if TF_IMP
     struct MeContext *context_ptr, const uint16_t *y_src, int y_src_stride, const uint16_t *y_pre,
     int y_pre_stride, const uint16_t *u_src, const uint16_t *v_src, int uv_src_stride,
     const uint16_t *u_pre, const uint16_t *v_pre, int uv_pre_stride, unsigned int block_width,
     unsigned int block_height, int ss_x, int ss_y, const double *noise_levels,
     const int decay_control, uint32_t *y_accum, uint16_t *y_count, uint32_t *u_accum,
-    uint16_t *u_count, uint32_t *v_accum, uint16_t *v_count) {
-#else
-    const uint16_t *y_src, int y_src_stride, const uint16_t *y_pre, int y_pre_stride,
-    const uint16_t *u_src, const uint16_t *v_src, int uv_src_stride, const uint16_t *u_pre,
-    const uint16_t *v_pre, int uv_pre_stride, unsigned int block_width, unsigned int block_height,
-    int ss_x, int ss_y, const double *noise_levels, const int decay_control, uint32_t *y_accum,
-    uint16_t *y_count, uint32_t *u_accum, uint16_t *u_count, uint32_t *v_accum, uint16_t *v_count) {
-#endif
+    uint16_t *u_count, uint32_t *v_accum, uint16_t *v_count, uint32_t encoder_bit_depth ) {
     unsigned int       i, j, k, m;
     int                idx, idy;
     uint64_t           sum_square_diff;
@@ -1232,10 +1183,9 @@ void svt_av1_apply_temporal_filter_planewise_hbd_c(
                     ++num_ref_pixels;
                 }
             }
-#if TF_IMP
             // Combine window error and block error, and normalize it.
             // Scale down the difference for high bit depth input.
-            sum_square_diff >>= 4;
+            sum_square_diff >>= ((encoder_bit_depth - 8) * 2);
             double window_error = (double)sum_square_diff / num_ref_pixels;
 
             const int subblock_idx = (i >= block_height / 2) * 2 + (j >= block_width / 2);
@@ -1276,7 +1226,7 @@ void svt_av1_apply_temporal_filter_planewise_hbd_c(
                 mv.col = context_ptr->tf_32x32_mv_x[idx_32x32];
                 mv.row = context_ptr->tf_32x32_mv_y[idx_32x32];
             }
-            const double distance = sqrt(pow(mv.row, 2) + pow(mv.col, 2));
+            const float  distance = sqrtf(powf(mv.row, 2) + powf(mv.col, 2));
             const double distance_threshold =
                 (double)AOMMAX(context_ptr->min_frame_size * TF_SEARCH_DISTANCE_THRESHOLD, 1);
             const double d_factor = AOMMAX(distance / distance_threshold, 1);
@@ -1284,17 +1234,7 @@ void svt_av1_apply_temporal_filter_planewise_hbd_c(
             // Compute filter weight.
             double scaled_diff =
                 AOMMIN(combined_error * d_factor / (2 * n_decay*n_decay) / q_decay / s_decay, 7);
-            int adjusted_weight = (int)(exp(-scaled_diff) * TF_WEIGHT_SCALE);
-#else
-            // Control factor for non-local mean approach.
-            double r = (double)decay_control * (0.7 + log(noise_levels[0] + 1.0));
-
-            // Scale down the difference for high bit depth input.
-            sum_square_diff >>= 4;
-            double scaled_diff =
-                AOMMAX(-(double)(sum_square_diff / num_ref_pixels) / (2 * r * r), -15.0);
-            int adjusted_weight = (int)(exp(scaled_diff) * TF_PLANEWISE_FILTER_WEIGHT_SCALE);
-#endif
+            int adjusted_weight = (int)(expf((float)-scaled_diff) * TF_WEIGHT_SCALE);
             k = i * y_pre_stride + j;
             y_count[k] += adjusted_weight;
             y_accum[k] += adjusted_weight * pixel_value;
@@ -1332,10 +1272,9 @@ void svt_av1_apply_temporal_filter_planewise_hbd_c(
                 }
 
                 m = (i >> ss_y) * uv_pre_stride + (j >> ss_x);
-#if TF_IMP
                 // Scale down the difference for high bit depth input.
-                u_sum_square_diff >>= 4;
-                v_sum_square_diff >>= 4;
+                u_sum_square_diff >>= ((encoder_bit_depth - 8) * 2);
+                v_sum_square_diff >>= ((encoder_bit_depth - 8) * 2);
                 // Combine window error and block error, and normalize it.
                 window_error = (double)u_sum_square_diff / num_ref_pixels;
                 combined_error =
@@ -1348,20 +1287,10 @@ void svt_av1_apply_temporal_filter_planewise_hbd_c(
                 // Compute filter weight.
                 scaled_diff =
                     AOMMIN(combined_error * d_factor / (2 * n_decay*n_decay) / q_decay / s_decay, 7);
-                adjusted_weight = (int)(exp(-scaled_diff) * TF_WEIGHT_SCALE);
-#else
-                r = (double)decay_control * (0.7 + log(noise_levels[1] + 1.0));
-                // Scale down the difference for high bit depth input.
-                u_sum_square_diff >>= 4;
-                v_sum_square_diff >>= 4;
-                scaled_diff =
-                    AOMMAX(-(double)(u_sum_square_diff / num_ref_pixels) / (2 * r * r), -15.0);
-                adjusted_weight = (int)(exp(scaled_diff) * TF_PLANEWISE_FILTER_WEIGHT_SCALE);
-#endif
+                adjusted_weight = (int)(expf((float)-scaled_diff) * TF_WEIGHT_SCALE);
                 u_count[m] += adjusted_weight;
                 u_accum[m] += adjusted_weight * u_pixel_value;
 
-#if TF_IMP
                 // Combine window error and block error, and normalize it.
                 window_error = (double)v_sum_square_diff / num_ref_pixels;
                 combined_error =
@@ -1375,14 +1304,7 @@ void svt_av1_apply_temporal_filter_planewise_hbd_c(
                 // Compute filter weight.
                 scaled_diff =
                     AOMMIN(combined_error * d_factor / (2 * n_decay*n_decay) / q_decay / s_decay, 7);
-                adjusted_weight = (int)(exp(-scaled_diff) * TF_WEIGHT_SCALE);
-#else
-                r = (double)decay_control * (0.7 + log(noise_levels[2] + 1.0));
-
-                scaled_diff =
-                    AOMMAX(-(double)(v_sum_square_diff / num_ref_pixels) / (2 * r * r), -15.0);
-                adjusted_weight = (int)(exp(scaled_diff) * TF_PLANEWISE_FILTER_WEIGHT_SCALE);
-#endif
+                adjusted_weight = (int)(expf((float)-scaled_diff) * TF_WEIGHT_SCALE);
                 v_count[m] += adjusted_weight;
                 v_accum[m] += adjusted_weight * v_pixel_value;
             }
@@ -1410,15 +1332,11 @@ void svt_av1_apply_temporal_filter_planewise_hbd_c(
 *   point will be modified.
 ***************************************************************************************************/
 static void apply_filtering_block_plane_wise(
-#if TF_IMP
     MeContext *context_ptr, int block_row, int block_col, EbByte *src, uint16_t **src_16bit,
     EbByte *pred,
-#else
-    int block_row, int block_col, EbByte *src, uint16_t **src_16bit, EbByte *pred,
-#endif
     uint16_t **pred_16bit, uint32_t **accum, uint16_t **count, uint32_t *stride,
     uint32_t *stride_pred, int block_width, int block_height, uint32_t ss_x, uint32_t ss_y,
-    const double *noise_levels, const int decay_control, EbBool is_highbd) {
+    const double *noise_levels, const int decay_control, uint32_t encoder_bit_depth) {
     int blk_h = block_height;
     int blk_w = block_width;
     int offset_src_buffer_Y = block_row * blk_h * stride[C_Y] + block_col * blk_w;
@@ -1444,7 +1362,7 @@ static void apply_filtering_block_plane_wise(
     count_ptr[C_U] = count[C_U] + offset_block_buffer_U;
     count_ptr[C_V] = count[C_V] + offset_block_buffer_V;
 
-    if (!is_highbd) {
+    if (encoder_bit_depth == 8) {
         uint8_t *src_ptr[COLOR_CHANNELS] = {
             src[C_Y] + offset_src_buffer_Y,
             src[C_U] + offset_src_buffer_U,
@@ -1458,9 +1376,7 @@ static void apply_filtering_block_plane_wise(
         };
 
         svt_av1_apply_temporal_filter_planewise(
-#if TF_IMP
             context_ptr,
-#endif
             src_ptr[C_Y],
             stride[C_Y],
             pred_ptr[C_Y],
@@ -1499,9 +1415,7 @@ static void apply_filtering_block_plane_wise(
         // Apply the temporal filtering strategy
         // TODO(any): avx2 version should also support high bit-depth.
         svt_av1_apply_temporal_filter_planewise_hbd(
-#if TF_IMP
             context_ptr,
-#endif
             src_ptr_16bit[C_Y],
             stride[C_Y],
             pred_ptr_16bit[C_Y],
@@ -1523,7 +1437,8 @@ static void apply_filtering_block_plane_wise(
             accum_ptr[C_U],
             count_ptr[C_U],
             accum_ptr[C_V],
-            count_ptr[C_V]);
+            count_ptr[C_V],
+            encoder_bit_depth);
     }
 }
 uint32_t get_mds_idx(uint32_t orgx, uint32_t orgy, uint32_t size, uint32_t use_128x128);
@@ -1617,17 +1532,10 @@ static void tf_16x16_sub_pel_search(PictureParentControlSet *pcs_ptr, MeContext 
             mv_unit.mv->y = mv_unit.mv->y << 1;
 
             context_ptr->tf_16x16_block_error[idx_32x32 * 4 + idx_16x16] = INT_MAX;
-#if !PERFORM_SUB_PEL_TF
-            signed short best_mv_x = 0;
-            signed short best_mv_y = 0;
-#endif
             signed short mv_x = (_MVXT(context_ptr->p_best_mv16x16[mv_index])) << 1;
             signed short mv_y = (_MVYT(context_ptr->p_best_mv16x16[mv_index])) << 1;
-#if PERFORM_SUB_PEL_TF
             signed short best_mv_x = mv_x;
             signed short best_mv_y = mv_y;
-#endif
-#if PERFORM_SUB_PEL_TF
             // Perform 1/2 Pel MV Refinement
             for (signed short i = -4; i <= 4; i = i + 4) {
                 for (signed short j = -4; j <= 4; j = j + 4) {
@@ -1773,8 +1681,7 @@ static void tf_16x16_sub_pel_search(PictureParentControlSet *pcs_ptr, MeContext 
             mv_x = best_mv_x;
             mv_y = best_mv_y;
             // Perform 1/8 Pel MV Refinement
-#endif
-
+            if (context_ptr->high_precision)
             for (signed short i = -1; i <= 1; i++) {
                 for (signed short j = -1; j <= 1; j++) {
                     mv_unit.mv->x = mv_x + i;
@@ -1932,18 +1839,10 @@ static void tf_32x32_sub_pel_search(PictureParentControlSet *pcs_ptr, MeContext 
         mv_unit.mv->y = mv_unit.mv->y << 1;
 
         context_ptr->tf_32x32_block_error[idx_32x32] = INT_MAX;
-#if !PERFORM_SUB_PEL_TF
-
-        signed short best_mv_x = 0;
-        signed short best_mv_y = 0;
-#endif
         signed short mv_x = (_MVXT(context_ptr->p_best_mv32x32[mv_index])) << 1;
         signed short mv_y = (_MVYT(context_ptr->p_best_mv32x32[mv_index])) << 1;
-#if PERFORM_SUB_PEL_TF
         signed short best_mv_x = mv_x;
         signed short best_mv_y = mv_y;
-#endif
-#if PERFORM_SUB_PEL_TF
         // Perform 1/2 Pel MV Refinement
         for (signed short i = -4; i <= 4; i = i + 4) {
             for (signed short j = -4; j <= 4; j = j + 4) {
@@ -2087,8 +1986,7 @@ static void tf_32x32_sub_pel_search(PictureParentControlSet *pcs_ptr, MeContext 
         mv_x = best_mv_x;
         mv_y = best_mv_y;
         // Perform 1/8 Pel MV Refinement
-#endif
-
+        if (context_ptr->high_precision)
         for (signed short i = -1; i <= 1; i++) {
             for (signed short j = -1; j <= 1; j++) {
                 mv_unit.mv->x = mv_x + i;
@@ -2675,14 +2573,6 @@ static EbErrorType produce_temporally_filtered_pic(
                                      INPUT_SIZE_480p_RANGE)
                     ? 3
                     : 4;
-                if (picture_control_set_ptr_central->scs_ptr->use_input_stat_file &&
-                    picture_control_set_ptr_central->temporal_layer_index == 0 &&
-                    noise_levels[0] > 0.5 &&
-                    ((picture_control_set_ptr_central->referenced_area_avg < 20 &&
-                      picture_control_set_ptr_central->slice_type == 2) ||
-                     (picture_control_set_ptr_central->referenced_area_avg < 30 &&
-                      picture_control_set_ptr_central->slice_type != 2)))
-                    decay_control--;
                 // Decrease the filter strength for low QPs
                 if (picture_control_set_ptr_central->scs_ptr->static_config.qp <= ALT_REF_QP_THRESH)
                     decay_control--;
@@ -2720,7 +2610,7 @@ static EbErrorType produce_temporally_filtered_pic(
                                                              ss_y,
                                                              noise_levels,
                                                              decay_control,
-                                                             is_highbd);
+                                                             encoder_bit_depth);
                         }
                     }
                 }
@@ -2758,13 +2648,8 @@ static EbErrorType produce_temporally_filtered_pic(
 // function from libaom
 // Standard bit depht input (=8 bits) to estimate the noise, I don't think there needs to be two methods for this
 // Operates on the Y component only
-#if NOISE_BASED_TF_FRAMES
 double estimate_noise(const uint8_t *src, uint16_t width, uint16_t height,
     uint16_t stride_y) {
-#else
-static double estimate_noise(const uint8_t *src, uint16_t width, uint16_t height,
-                             uint16_t stride_y) {
-#endif
     int64_t sum = 0;
     int64_t num = 0;
 
@@ -2800,13 +2685,8 @@ static double estimate_noise(const uint8_t *src, uint16_t width, uint16_t height
 }
 
 // Noise estimation for highbd
-#if NOISE_BASED_TF_FRAMES
 double estimate_noise_highbd(const uint16_t *src, int width, int height, int stride,
     int bd) {
-#else
-static double estimate_noise_highbd(const uint16_t *src, int width, int height, int stride,
-                                    int bd) {
-#endif
     int64_t sum = 0;
     int64_t num = 0;
 
@@ -2860,23 +2740,6 @@ static void adjust_filter_strength(PictureParentControlSet *picture_control_set_
             noiselevel_adj = 0;
         else
             noiselevel_adj = 1;
-        if (picture_control_set_ptr_central->scs_ptr->use_input_stat_file &&
-#if UNIFY_SC_NSC
-            picture_control_set_ptr_central->temporal_layer_index == 0) {
-#else
-            picture_control_set_ptr_central->temporal_layer_index == 0 &&
-            picture_control_set_ptr_central->sc_content_detected == 0) {
-#endif
-            if (noiselevel_adj < 0) {
-                if ((picture_control_set_ptr_central->referenced_area_avg < 20 &&
-                     picture_control_set_ptr_central->slice_type == 2) ||
-                    (picture_control_set_ptr_central->referenced_area_avg < 30 &&
-                     picture_control_set_ptr_central->slice_type != 2)) {
-                    noiselevel_adj = CLIP3(-2, 0, noiselevel_adj - 1);
-                } else
-                    noiselevel_adj = 0;
-            }
-        }
         adj_strength += noiselevel_adj;
     }
     // Decrease the filter strength for low QPs
@@ -2929,9 +2792,9 @@ void pad_and_decimate_filtered_pic(
                          input_picture_ptr->origin_x,
                          input_picture_ptr->origin_y);
         for (uint32_t row = 0; row < input_picture_ptr->height; row++)
-            eb_memcpy(pa + row * padded_pic_ptr->stride_y,
-                      in + row * input_picture_ptr->stride_y,
-                      sizeof(uint8_t) * input_picture_ptr->width);
+            svt_memcpy(pa + row * padded_pic_ptr->stride_y,
+                       in + row * input_picture_ptr->stride_y,
+                       sizeof(uint8_t) * input_picture_ptr->width);
     }
     generate_padding(&(padded_pic_ptr->buffer_y[C_Y]),
                      padded_pic_ptr->stride_y,
@@ -3073,90 +2936,9 @@ EbErrorType svt_av1_init_temporal_filtering(
     uint32_t ss_y = picture_control_set_ptr_central->scs_ptr->subsampling_y;
     double *noise_levels = &(picture_control_set_ptr_central->noise_levels[0]);
     //only one performs any picture based prep
-    eb_block_on_mutex(picture_control_set_ptr_central->temp_filt_mutex);
+    svt_block_on_mutex(picture_control_set_ptr_central->temp_filt_mutex);
     if (picture_control_set_ptr_central->temp_filt_prep_done == 0) {
         picture_control_set_ptr_central->temp_filt_prep_done = 1;
-#if !NOISE_BASED_TF_FRAMES
-        // allocate 16 bit buffer
-        if (is_highbd) {
-            EB_MALLOC_ARRAY(picture_control_set_ptr_central->altref_buffer_highbd[C_Y],
-                            central_picture_ptr->luma_size);
-            EB_MALLOC_ARRAY(picture_control_set_ptr_central->altref_buffer_highbd[C_U],
-                            central_picture_ptr->chroma_size);
-            EB_MALLOC_ARRAY(picture_control_set_ptr_central->altref_buffer_highbd[C_V],
-                            central_picture_ptr->chroma_size);
-
-            // pack byte buffers to 16 bit buffer
-            pack_highbd_pic(central_picture_ptr,
-                            picture_control_set_ptr_central->altref_buffer_highbd,
-                            ss_x,
-                            ss_y,
-                            EB_TRUE);
-            // Estimate source noise level
-            uint16_t *altref_buffer_highbd_start[COLOR_CHANNELS];
-            altref_buffer_highbd_start[C_Y] =
-                picture_control_set_ptr_central->altref_buffer_highbd[C_Y] +
-                central_picture_ptr->origin_y * central_picture_ptr->stride_y +
-                central_picture_ptr->origin_x;
-
-            altref_buffer_highbd_start[C_U] =
-                picture_control_set_ptr_central->altref_buffer_highbd[C_U] +
-                (central_picture_ptr->origin_y >> ss_y) * central_picture_ptr->stride_bit_inc_cb +
-                (central_picture_ptr->origin_x >> ss_x);
-
-            altref_buffer_highbd_start[C_V] =
-                picture_control_set_ptr_central->altref_buffer_highbd[C_V] +
-                (central_picture_ptr->origin_y >> ss_y) * central_picture_ptr->stride_bit_inc_cr +
-                (central_picture_ptr->origin_x >> ss_x);
-
-            noise_levels[0] = estimate_noise_highbd(altref_buffer_highbd_start[C_Y], // Y only
-                central_picture_ptr->width,
-                central_picture_ptr->height,
-                central_picture_ptr->stride_y,
-                encoder_bit_depth);
-
-            noise_levels[1] = estimate_noise_highbd(altref_buffer_highbd_start[C_U], // U only
-                (central_picture_ptr->width >> 1),
-                (central_picture_ptr->height >> 1),
-                central_picture_ptr->stride_cb,
-                encoder_bit_depth);
-
-            noise_levels[2] = estimate_noise_highbd(altref_buffer_highbd_start[C_V], // V only
-                (central_picture_ptr->width >> 1),
-                (central_picture_ptr->height >> 1),
-                central_picture_ptr->stride_cb,
-                encoder_bit_depth);
-
-        }
-        else {
-            EbByte buffer_y = central_picture_ptr->buffer_y +
-                central_picture_ptr->origin_y * central_picture_ptr->stride_y +
-                central_picture_ptr->origin_x;
-            EbByte buffer_u =
-                central_picture_ptr->buffer_cb +
-                (central_picture_ptr->origin_y >> ss_y) * central_picture_ptr->stride_cb +
-                (central_picture_ptr->origin_x >> ss_x);
-            EbByte buffer_v =
-                central_picture_ptr->buffer_cr +
-                (central_picture_ptr->origin_y >> ss_x) * central_picture_ptr->stride_cr +
-                (central_picture_ptr->origin_x >> ss_x);
-
-            noise_levels[0] = estimate_noise(buffer_y, // Y
-                central_picture_ptr->width,
-                central_picture_ptr->height,
-                central_picture_ptr->stride_y);
-
-            noise_levels[1] = estimate_noise(buffer_u, // U
-                (central_picture_ptr->width >> ss_x),
-                (central_picture_ptr->height >> ss_y),
-                central_picture_ptr->stride_cb);
-
-            noise_levels[2] = estimate_noise(buffer_v, // V
-                (central_picture_ptr->width >> ss_x),
-                (central_picture_ptr->height >> ss_y),
-                central_picture_ptr->stride_cr);
-        }
-#endif
         // adjust filter parameter based on the estimated noise of the picture
         adjust_filter_strength(picture_control_set_ptr_central,
                                noise_levels[0],
@@ -3190,12 +2972,10 @@ EbErrorType svt_av1_init_temporal_filtering(
             save_src_pic_buffers(picture_control_set_ptr_central, ss_y, is_highbd);
         }
     }
-    eb_release_mutex(picture_control_set_ptr_central->temp_filt_mutex);
-#if TF_IMP
+    svt_release_mutex(picture_control_set_ptr_central->temp_filt_mutex);
     me_context_ptr->me_context_ptr->min_frame_size = MIN(picture_control_set_ptr_central->aligned_height, picture_control_set_ptr_central->aligned_width);
     // index of the central source frame
    // index_center = picture_control_set_ptr_central->past_altref_nframes;
-#endif
     // populate source frames picture buffer list
     EbPictureBufferDesc *list_input_picture_ptr[ALTREF_MAX_NFRAMES] = {NULL};
     for (int i = 0; i < (picture_control_set_ptr_central->past_altref_nframes +
@@ -3215,7 +2995,7 @@ EbErrorType svt_av1_init_temporal_filtering(
                                     segment_index,
                                     is_highbd);
 
-    eb_block_on_mutex(picture_control_set_ptr_central->temp_filt_mutex);
+    svt_block_on_mutex(picture_control_set_ptr_central->temp_filt_mutex);
     picture_control_set_ptr_central->temp_filt_seg_acc++;
 
     if (!is_highbd) {
@@ -3291,10 +3071,10 @@ EbErrorType svt_av1_init_temporal_filtering(
             2;
 
         // signal that temp filt is done
-        eb_post_semaphore(picture_control_set_ptr_central->temp_filt_done_semaphore);
+        svt_post_semaphore(picture_control_set_ptr_central->temp_filt_done_semaphore);
     }
 
-    eb_release_mutex(picture_control_set_ptr_central->temp_filt_mutex);
+    svt_release_mutex(picture_control_set_ptr_central->temp_filt_mutex);
 
     return EB_ErrorNone;
 }

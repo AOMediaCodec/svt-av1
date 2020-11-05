@@ -1,17 +1,13 @@
 /*
 * Copyright(c) 2019 Intel Corporation
-* SPDX - License - Identifier: BSD - 2 - Clause - Patent
-*/
-
-/*
 * Copyright (c) 2016, Alliance for Open Media. All rights reserved
 *
 * This source code is subject to the terms of the BSD 2 Clause License and
 * the Alliance for Open Media Patent License 1.0. If the BSD 2 Clause License
 * was not distributed with this source code in the LICENSE file, you can
-* obtain it at www.aomedia.org/license/software. If the Alliance for Open
+* obtain it at https://www.aomedia.org/license/software-license. If the Alliance for Open
 * Media Patent License 1.0 was not distributed with this source code in the
-* PATENTS file, you can obtain it at www.aomedia.org/license/patent.
+* PATENTS file, you can obtain it at https://www.aomedia.org/license/patent-license.
 */
 
 #ifndef EbInvTransforms_h
@@ -292,7 +288,6 @@ static INLINE int32_t round_shift(int64_t value, int32_t bit) {
     assert(bit >= 1);
     return (int32_t)((value + (1ll << (bit - 1))) >> bit);
 }
-#if TRANSFORM_FIX_0
 static INLINE int32_t half_btf(int32_t w0, int32_t in0, int32_t w1, int32_t in1,
     int bit) {
     int64_t result_64 = (int64_t)(w0 * in0) + (int64_t)(w1 * in1);
@@ -316,15 +311,6 @@ static INLINE int32_t half_btf(int32_t w0, int32_t in0, int32_t w1, int32_t in1,
 #endif
     return (int32_t)(intermediate >> bit);
 }
-#else
-static INLINE int32_t half_btf(int32_t w0, int32_t in0, int32_t w1, int32_t in1, int32_t bit) {
-    int64_t result_64 = (int64_t)(w0 * in0) + (int64_t)(w1 * in1);
-#if CONFIG_COEFFICIENT_RANGE_CHECKING
-    assert(result_64 >= INT32_MIN && result_64 <= INT32_MAX);
-#endif
-    return round_shift(result_64, bit);
-}
-#endif
 static INLINE int32_t get_rect_tx_log_ratio(int32_t col, int32_t row) {
     if (col == row) return 0;
     if (col > row) {
@@ -339,7 +325,7 @@ static INLINE int32_t get_rect_tx_log_ratio(int32_t col, int32_t row) {
     return 0; // Invalid
 }
 
-void eb_av1_round_shift_array_c(int32_t *arr, int32_t size, int32_t bit);
+void svt_av1_round_shift_array_c(int32_t *arr, int32_t size, int32_t bit);
 
 
 static const BlockSize txsize_to_bsize[TX_SIZES_ALL] = {
@@ -386,7 +372,7 @@ static const int8_t txsize_log2_minus4[TX_SIZES_ALL] = {
         5, // TX_64X16
 };
 
-int16_t eb_av1_ac_quant_qtx(int32_t qindex, int32_t delta, AomBitDepth bit_depth);
+int16_t svt_av1_ac_quant_qtx(int32_t qindex, int32_t delta, AomBitDepth bit_depth);
 
 #ifdef __cplusplus
 }

@@ -4,9 +4,9 @@
  * This source code is subject to the terms of the BSD 2 Clause License and
  * the Alliance for Open Media Patent License 1.0. If the BSD 2 Clause License
  * was not distributed with this source code in the LICENSE file, you can
- * obtain it at www.aomedia.org/license/software. If the Alliance for Open
+ * obtain it at https://www.aomedia.org/license/software-license. If the Alliance for Open
  * Media Patent License 1.0 was not distributed with this source code in the
- * PATENTS file, you can obtain it at www.aomedia.org/license/patent.
+ * PATENTS file, you can obtain it at https://www.aomedia.org/license/patent-license.
  */
 
 #include <tmmintrin.h>
@@ -16,7 +16,7 @@
 
 #include "synonyms.h"
 
-void aom_var_filter_block2d_bil_first_pass_ssse3(const uint8_t *a, uint16_t *b,
+void svt_aom_var_filter_block2d_bil_first_pass_ssse3(const uint8_t *a, uint16_t *b,
                                                  unsigned int src_pixels_per_line,
                                                  unsigned int pixel_step,
                                                  unsigned int output_height,
@@ -81,7 +81,7 @@ void aom_var_filter_block2d_bil_first_pass_ssse3(const uint8_t *a, uint16_t *b,
     }
 }
 
-void aom_var_filter_block2d_bil_second_pass_ssse3(
+void svt_aom_var_filter_block2d_bil_second_pass_ssse3(
     const uint16_t *a, uint8_t *b, unsigned int src_pixels_per_line, unsigned int pixel_step,
     unsigned int output_height, unsigned int output_width, const uint8_t *filter) {
     const int16_t round   = (1 << FILTER_BITS) >> 1;

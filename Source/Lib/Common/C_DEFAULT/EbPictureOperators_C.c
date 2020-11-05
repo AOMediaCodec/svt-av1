@@ -1,6 +1,12 @@
 /*
 * Copyright(c) 2019 Intel Corporation
-* SPDX - License - Identifier: BSD - 2 - Clause - Patent
+*
+* This source code is subject to the terms of the BSD 2 Clause License and
+* the Alliance for Open Media Patent License 1.0. If the BSD 2 Clause License
+* was not distributed with this source code in the LICENSE file, you can
+* obtain it at https://www.aomedia.org/license/software-license. If the Alliance for Open
+* Media Patent License 1.0 was not distributed with this source code in the
+* PATENTS file, you can obtain it at https://www.aomedia.org/license/patent-license.
 */
 
 #include "EbPictureOperators_C.h"
@@ -9,9 +15,9 @@
 /*********************************
 * Picture Average
 *********************************/
-void picture_average_kernel_c(EbByte src0, uint32_t src0_stride, EbByte src1, uint32_t src1_stride,
-                              EbByte dst, uint32_t dst_stride, uint32_t area_width,
-                              uint32_t area_height) {
+void svt_picture_average_kernel_c(EbByte src0, uint32_t src0_stride, EbByte src1,
+                                  uint32_t src1_stride, EbByte dst, uint32_t dst_stride,
+                                  uint32_t area_width, uint32_t area_height) {
     uint32_t x, y;
 
     for (y = 0; y < area_height; y++) {
@@ -22,7 +28,7 @@ void picture_average_kernel_c(EbByte src0, uint32_t src0_stride, EbByte src1, ui
     }
 }
 
-void picture_average_kernel1_line_c(EbByte src0, EbByte src1, EbByte dst, uint32_t areaWidth) {
+void svt_picture_average_kernel1_line_c(EbByte src0, EbByte src1, EbByte dst, uint32_t areaWidth) {
     uint32_t i;
     for (i = 0; i < areaWidth; i++) dst[i] = (src0[i] + src1[i] + 1) / 2;
 }
@@ -30,7 +36,7 @@ void picture_average_kernel1_line_c(EbByte src0, EbByte src1, EbByte dst, uint32
 /*********************************
 * Picture Copy Kernel
 *********************************/
-void eb_memcpy_c(void  *dst_ptr, void  const*src_ptr, size_t size)
+void svt_memcpy_c(void  *dst_ptr, void  const*src_ptr, size_t size)
 {
     memcpy(dst_ptr, src_ptr, size);
 }
@@ -46,7 +52,7 @@ void picture_copy_kernel(EbByte src, uint32_t src_stride, EbByte dst, uint32_t d
     dst_stride *= bytes_per_sample;
 
     while (sample_count < sample_total_count) {
-        eb_memcpy_c(dst, src, copy_length);
+        svt_memcpy_c(dst, src, copy_length);
         src += src_stride;
         dst += dst_stride;
         sample_count += area_width;
@@ -57,10 +63,10 @@ void picture_copy_kernel(EbByte src, uint32_t src_stride, EbByte dst, uint32_t d
 
 // C equivalents
 
-uint64_t spatial_full_distortion_kernel_c(uint8_t *input, uint32_t input_offset,
-                                          uint32_t input_stride, uint8_t *recon,
-                                          int32_t recon_offset, uint32_t recon_stride,
-                                          uint32_t area_width, uint32_t area_height) {
+uint64_t svt_spatial_full_distortion_kernel_c(uint8_t *input, uint32_t input_offset,
+                                              uint32_t input_stride, uint8_t *recon,
+                                              int32_t recon_offset, uint32_t recon_stride,
+                                              uint32_t area_width, uint32_t area_height) {
     uint64_t spatial_distortion = 0;
     input += input_offset;
     recon += recon_offset;

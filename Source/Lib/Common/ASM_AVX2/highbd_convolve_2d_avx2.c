@@ -4,9 +4,9 @@
  * This source code is subject to the terms of the BSD 2 Clause License and
  * the Alliance for Open Media Patent License 1.0. If the BSD 2 Clause License
  * was not distributed with this source code in the LICENSE file, you can
- * obtain it at www.aomedia.org/license/software. If the Alliance for Open
+ * obtain it at https://www.aomedia.org/license/software-license. If the Alliance for Open
  * Media Patent License 1.0 was not distributed with this source code in the
- * PATENTS file, you can obtain it at www.aomedia.org/license/patent.
+ * PATENTS file, you can obtain it at https://www.aomedia.org/license/patent-license.
  */
 
 #include <immintrin.h>
@@ -19,12 +19,12 @@
 #include "synonyms.h"
 #include "convolve.h"
 
-void eb_av1_highbd_convolve_2d_sr_avx2(const uint16_t *src, int32_t src_stride, uint16_t *dst,
-                                       int32_t dst_stride, int32_t w, int32_t h,
-                                       const InterpFilterParams *filter_params_x,
-                                       const InterpFilterParams *filter_params_y,
-                                       const int32_t subpel_x_q4, const int32_t subpel_y_q4,
-                                       ConvolveParams *conv_params, int32_t bd) {
+void svt_av1_highbd_convolve_2d_sr_avx2(const uint16_t *src, int32_t src_stride, uint16_t *dst,
+                                        int32_t dst_stride, int32_t w, int32_t h,
+                                        const InterpFilterParams *filter_params_x,
+                                        const InterpFilterParams *filter_params_y,
+                                        const int32_t subpel_x_q4, const int32_t subpel_y_q4,
+                                        ConvolveParams *conv_params, int32_t bd) {
     DECLARE_ALIGNED(32, int16_t, im_block[(MAX_SB_SIZE + MAX_FILTER_TAP) * 8]);
     int32_t               im_h      = h + filter_params_y->taps - 1;
     int32_t               im_stride = 8;
@@ -209,12 +209,12 @@ static INLINE void copy_128(const uint16_t *src, uint16_t *dst) {
     _mm256_storeu_si256((__m256i *)(dst + 7 * 16), s[7]);
 }
 
-void eb_av1_highbd_convolve_2d_copy_sr_avx2(const uint16_t *src, int32_t src_stride, uint16_t *dst,
-                                            int32_t dst_stride, int32_t w, int32_t h,
-                                            const InterpFilterParams *filter_params_x,
-                                            const InterpFilterParams *filter_params_y,
-                                            const int32_t subpel_x_q4, const int32_t subpel_y_q4,
-                                            ConvolveParams *conv_params, int32_t bd) {
+void svt_av1_highbd_convolve_2d_copy_sr_avx2(const uint16_t *src, int32_t src_stride, uint16_t *dst,
+                                             int32_t dst_stride, int32_t w, int32_t h,
+                                             const InterpFilterParams *filter_params_x,
+                                             const InterpFilterParams *filter_params_y,
+                                             const int32_t subpel_x_q4, const int32_t subpel_y_q4,
+                                             ConvolveParams *conv_params, int32_t bd) {
     (void)filter_params_x;
     (void)filter_params_y;
     (void)subpel_x_q4;
@@ -224,10 +224,10 @@ void eb_av1_highbd_convolve_2d_copy_sr_avx2(const uint16_t *src, int32_t src_str
 
     if (w == 2) {
         do {
-            eb_memcpy_intrin_sse(dst, src, 2 * sizeof(*src));
+            svt_memcpy_intrin_sse(dst, src, 2 * sizeof(*src));
             src += src_stride;
             dst += dst_stride;
-            eb_memcpy_intrin_sse(dst, src, 2 * sizeof(*src));
+            svt_memcpy_intrin_sse(dst, src, 2 * sizeof(*src));
             src += src_stride;
             dst += dst_stride;
             h -= 2;

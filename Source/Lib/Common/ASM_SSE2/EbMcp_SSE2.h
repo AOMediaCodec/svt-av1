@@ -1,6 +1,12 @@
 /*
 * Copyright(c) 2019 Intel Corporation
-* SPDX - License - Identifier: BSD - 2 - Clause - Patent
+*
+* This source code is subject to the terms of the BSD 2 Clause License and
+* the Alliance for Open Media Patent License 1.0. If the BSD 2 Clause License
+* was not distributed with this source code in the LICENSE file, you can
+* obtain it at https://www.aomedia.org/license/software-license. If the Alliance for Open
+* Media Patent License 1.0 was not distributed with this source code in the
+* PATENTS file, you can obtain it at https://www.aomedia.org/license/patent-license.
 */
 
 #ifndef EBMCP_SSE2_H
@@ -12,7 +18,6 @@
 extern "C" {
 #endif
 #define USE_PRE_COMPUTE 0
-extern EB_ALIGN(16) const int16_t intra_prediction_const_sse2[344];
 /**************************************************
     * Assembly Declarations
     **************************************************/
@@ -20,7 +25,7 @@ extern void picture_copy_kernel_sse2(EbByte src, uint32_t src_stride, EbByte dst
                                      uint32_t dst_stride, uint32_t area_width,
                                      uint32_t area_height);
 
-void picture_average_kernel_sse2(EbByte src0, uint32_t src0_stride, EbByte src1,
+void svt_picture_average_kernel_sse2(EbByte src0, uint32_t src0_stride, EbByte src1,
                                  uint32_t src1_stride, EbByte dst, uint32_t dst_stride,
                                  uint32_t area_width, uint32_t area_height);
 

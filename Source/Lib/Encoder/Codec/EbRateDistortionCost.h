@@ -1,6 +1,12 @@
 /*
 * Copyright(c) 2019 Intel Corporation
-* SPDX - License - Identifier: BSD - 2 - Clause - Patent
+*
+* This source code is subject to the terms of the BSD 2 Clause License and
+* the Alliance for Open Media Patent License 1.0. If the BSD 2 Clause License
+* was not distributed with this source code in the LICENSE file, you can
+* obtain it at https://www.aomedia.org/license/software-license. If the Alliance for Open
+* Media Patent License 1.0 was not distributed with this source code in the
+* PATENTS file, you can obtain it at https://www.aomedia.org/license/patent-license.
 */
 
 #ifndef EbRateDistortionCost_h
@@ -20,12 +26,12 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-extern uint64_t eb_av1_cost_coeffs_txb(uint8_t allow_update_cdf, FRAME_CONTEXT *ec_ctx,
-                                       struct ModeDecisionCandidateBuffer *candidate_buffer_ptr,
-                                       const TranLow *const qcoeff, uint16_t eob,
-                                       PlaneType plane_type, TxSize transform_size,
-                                       TxType transform_type, int16_t txb_skip_ctx,
-                                       int16_t dc_sign_ctx, EbBool reduced_transform_set_flag);
+extern uint64_t svt_av1_cost_coeffs_txb(uint8_t allow_update_cdf, FRAME_CONTEXT *ec_ctx,
+                                        struct ModeDecisionCandidateBuffer *candidate_buffer_ptr,
+                                        const TranLow *const qcoeff, uint16_t eob,
+                                        PlaneType plane_type, TxSize transform_size,
+                                        TxType transform_type, int16_t txb_skip_ctx,
+                                        int16_t dc_sign_ctx, EbBool reduced_transform_set_flag);
 
 extern void coding_loop_context_generation(
     ModeDecisionContext *context_ptr, BlkStruct *blk_ptr, uint32_t blk_origin_x,
@@ -120,7 +126,7 @@ extern uint64_t av1_intra_fast_cost(BlkStruct *blk_ptr, ModeDecisionCandidate *c
                                     PictureControlSet *pcs_ptr, CandidateMv *ref_mv_stack,
                                     const BlockGeom *blk_geom, uint32_t miRow, uint32_t miCol,
                                     uint8_t enable_inter_intra,
-                                    EbBool full_cost_shut_fast_rate_flag, uint8_t md_pass,
+                                    uint8_t md_pass,
                                     uint32_t left_neighbor_mode, uint32_t top_neighbor_mode);
 
 extern uint64_t av1_inter_fast_cost(BlkStruct *blk_ptr, ModeDecisionCandidate *candidate_ptr,
@@ -129,7 +135,7 @@ extern uint64_t av1_inter_fast_cost(BlkStruct *blk_ptr, ModeDecisionCandidate *c
                                     PictureControlSet *pcs_ptr, CandidateMv *ref_mv_stack,
                                     const BlockGeom *blk_geom, uint32_t miRow, uint32_t miCol,
                                     uint8_t enable_inter_intra,
-                                    EbBool full_cost_shut_fast_rate_flag, uint8_t md_pass,
+                                    uint8_t md_pass,
                                     uint32_t left_neighbor_mode, uint32_t top_neighbor_mode);
 
 extern EbErrorType av1_intra_full_cost(PictureControlSet *pcs_ptr, ModeDecisionContext *context_ptr,
@@ -150,6 +156,9 @@ extern EbErrorType av1_inter_full_cost(PictureControlSet *pcs_ptr, ModeDecisionC
 extern uint64_t    get_tx_size_bits(ModeDecisionCandidateBuffer *candidateBuffer,
                                     ModeDecisionContext *context_ptr, PictureControlSet *pcs_ptr,
                                     uint8_t tx_depth, EbBool block_has_coeff);
+
+MvJointType svt_av1_get_mv_joint(const MV *mv);
+
 #ifdef __cplusplus
 }
 #endif

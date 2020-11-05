@@ -27,6 +27,9 @@ jobs:
       fail-fast: false
       matrix:
         include:
+          - packages: gcc-4.8 g++-4.8
+            CC: gcc-4.8
+            CXX: g++-4.8
           - packages: gcc-7 g++-7
             CC: gcc-7
             CXX: g++-7
@@ -51,8 +54,8 @@ jobs:
     env:
       CC: ccache ${{ matrix.CC }}
       CXX: ccache ${{ matrix.CXX }}
-      CFLAGS: -Werror ${{ matrix.CFLAGS }}
-      CXXFLAGS: -Werror ${{ matrix.CXXFLAGS }}
+      CFLAGS: -Werror -Wshadow ${{ matrix.CFLAGS }}
+      CXXFLAGS: -Werror -Wshadow ${{ matrix.CXXFLAGS }}
     steps:
       - uses: actions/checkout@v2
       - name: Cache ccache files
@@ -71,7 +74,7 @@ jobs:
       - name: Install dependencies
         run: |
           [ -d ~/.ccache ] && sudo chown -R "$USER": ~/.ccache
-          echo "::set-env name=CCACHE_DIR::$HOME/.ccache"
+          printf '%s\n' "CCACHE_DIR=$HOME/.ccache" >> $GITHUB_ENV
           sudo apt-get update
           sudo apt-get install -y ${{ env.native_deps }} ${{ matrix.packages }}
       - name: Configure SVT-AV1

@@ -4,9 +4,9 @@
  * This source code is subject to the terms of the BSD 2 Clause License and
  * the Alliance for Open Media Patent License 1.0. If the BSD 2 Clause License
  * was not distributed with this source code in the LICENSE file, you can
- * obtain it at www.aomedia.org/license/software. If the Alliance for Open
+ * obtain it at https://www.aomedia.org/license/software-license. If the Alliance for Open
  * Media Patent License 1.0 was not distributed with this source code in the
- * PATENTS file, you can obtain it at www.aomedia.org/license/patent.
+ * PATENTS file, you can obtain it at https://www.aomedia.org/license/patent-license.
  */
 #include "EbDefinitions.h"
 #include <assert.h>
@@ -23,22 +23,6 @@ extern "C" {
 }
 #endif
 
-#if !REMOVE_UNUSED_CODE
-uint32_t eb_aom_get_mb_ss_sse2(const int16_t *src) {
-    __m128i vsum = _mm_setzero_si128();
-    int32_t i;
-
-    for (i = 0; i < 32; ++i) {
-        const __m128i v = xx_loadu_128(src);
-        vsum            = _mm_add_epi32(vsum, _mm_madd_epi16(v, v));
-        src += 8;
-    }
-
-    vsum = _mm_add_epi32(vsum, _mm_srli_si128(vsum, 8));
-    vsum = _mm_add_epi32(vsum, _mm_srli_si128(vsum, 4));
-    return _mm_cvtsi128_si32(vsum);
-}
-#endif
 // Can handle 128 pixels' diff sum (such as 8x16 or 16x8)
 // Slightly faster than variance_final_256_pel_sse2()
 // diff sum of 128 pixels can still fit in 16bit integer
@@ -102,11 +86,11 @@ static INLINE void variance8_sse2(const uint8_t *src, const int src_stride, cons
 }
 
 #define AOM_VAR_NO_LOOP_SSE2(bw, bh, bits, max_pixels)                           \
-    unsigned int eb_aom_variance##bw##x##bh##_sse2(const uint8_t *src,           \
-                                                   int            src_stride,    \
-                                                   const uint8_t *ref,           \
-                                                   int            ref_stride,    \
-                                                   unsigned int * sse) {          \
+    unsigned int svt_aom_variance##bw##x##bh##_sse2(const uint8_t *src,          \
+                                                    int            src_stride,   \
+                                                    const uint8_t *ref,          \
+                                                    int            ref_stride,   \
+                                                    unsigned int * sse) {        \
         __m128i vsse = _mm_setzero_si128();                                      \
         __m128i vsum;                                                            \
         int     sum = 0;                                                         \
@@ -262,10 +246,10 @@ static INLINE const InterpFilterParams *av1_get_filter(int subpel_search) {
     }
 }
 
-void eb_aom_upsampled_pred_sse2(MacroBlockD *xd, const struct AV1Common *const cm, int mi_row,
-                                int mi_col, const MV *const mv, uint8_t *comp_pred, int width,
-                                int height, int subpel_x_q3, int subpel_y_q3, const uint8_t *ref,
-                                int ref_stride, int subpel_search) {
+void svt_aom_upsampled_pred_sse2(MacroBlockD *xd, const struct AV1Common *const cm, int mi_row,
+                                 int mi_col, const MV *const mv, uint8_t *comp_pred, int width,
+                                 int height, int subpel_x_q3, int subpel_y_q3, const uint8_t *ref,
+                                 int ref_stride, int subpel_search) {
     (void)xd;
     (void)cm;
     (void)mi_row;
@@ -321,11 +305,11 @@ void eb_aom_upsampled_pred_sse2(MacroBlockD *xd, const struct AV1Common *const c
     } else if (!subpel_y_q3) {
         const int16_t *const kernel =
             av1_get_interp_filter_subpel_kernel(*filter, subpel_x_q3 << 1);
-        eb_aom_convolve8_horiz(ref, ref_stride, comp_pred, width, kernel, 16, NULL, -1, width, height);
+        svt_aom_convolve8_horiz(ref, ref_stride, comp_pred, width, kernel, 16, NULL, -1, width, height);
     } else if (!subpel_x_q3) {
         const int16_t *const kernel =
             av1_get_interp_filter_subpel_kernel(*filter, subpel_y_q3 << 1);
-        eb_aom_convolve8_vert(ref, ref_stride, comp_pred, width, NULL, -1, kernel, 16, width, height);
+        svt_aom_convolve8_vert(ref, ref_stride, comp_pred, width, NULL, -1, kernel, 16, width, height);
     } else {
         DECLARE_ALIGNED(16, uint8_t, temp[((MAX_SB_SIZE * 2 + 16) + 16) * MAX_SB_SIZE]);
         const int16_t *const kernel_x =
@@ -338,17 +322,17 @@ void eb_aom_upsampled_pred_sse2(MacroBlockD *xd, const struct AV1Common *const c
         uint8_t *temp_start_vert     = temp + MAX_SB_SIZE * ((filter->taps >> 1) - 1);
         int      intermediate_height = (((height - 1) * 8 + subpel_y_q3) >> 3) + filter_taps;
         assert(intermediate_height <= (MAX_SB_SIZE * 2 + 16) + 16);
-        eb_aom_convolve8_horiz(ref_start,
-                               ref_stride,
-                               temp_start_horiz,
-                               MAX_SB_SIZE,
-                               kernel_x,
-                               16,
-                               NULL,
-                               -1,
-                               width,
-                               intermediate_height);
-        eb_aom_convolve8_vert(
+        svt_aom_convolve8_horiz(ref_start,
+                                ref_stride,
+                                temp_start_horiz,
+                                MAX_SB_SIZE,
+                                kernel_x,
+                                16,
+                                NULL,
+                                -1,
+                                width,
+                                intermediate_height);
+        svt_aom_convolve8_vert(
             temp_start_vert, MAX_SB_SIZE, comp_pred, width, NULL, -1, kernel_y, 16, width, height);
     }
 }

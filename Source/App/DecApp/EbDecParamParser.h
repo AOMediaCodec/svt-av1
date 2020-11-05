@@ -1,6 +1,12 @@
 /*
 * Copyright(c) 2019 Netflix, Inc.
-* SPDX - License - Identifier: BSD - 2 - Clause - Patent
+*
+* This source code is subject to the terms of the BSD 2 Clause License and
+* the Alliance for Open Media Patent License 1.0. If the BSD 2 Clause License
+* was not distributed with this source code in the LICENSE file, you can
+* obtain it at https://www.aomedia.org/license/software-license. If the Alliance for Open
+* Media Patent License 1.0 was not distributed with this source code in the
+* PATENTS file, you can obtain it at https://www.aomedia.org/license/patent-license.
 */
 
 // Command line argument parsing
@@ -46,8 +52,6 @@
 #define FILM_GRAIN_TOKEN "-skip-film-grain"
 #define ANNEX_B_TOKEN "-annex-b"
 #define MAX_NUM_TOKENS 200
-
-#define EB_STRCMP(target, token) strcmp(target, token)
 
 /**********************************
  * Config Entry Struct

@@ -1,14 +1,20 @@
 /*
- * Copyright(c) 2019 Netflix, Inc.
- * SPDX - License - Identifier: BSD - 2 - Clause - Patent
- */
+* Copyright(c) 2019 Netflix, Inc.
+*
+* This source code is subject to the terms of the BSD 2 Clause License and
+* the Alliance for Open Media Patent License 1.0. If the BSD 2 Clause License
+* was not distributed with this source code in the LICENSE file, you can
+* obtain it at https://www.aomedia.org/license/software-license. If the Alliance for Open
+* Media Patent License 1.0 was not distributed with this source code in the
+* PATENTS file, you can obtain it at https://www.aomedia.org/license/patent-license.
+*/
 
 /******************************************************************************
  * @file PaletteModeUtilTest.cc
  *
  * @brief Unit test for util functions in palette mode:
- * - eb_av1_count_colors
- * - eb_av1_count_colors_highbd
+ * - svt_av1_count_colors
+ * - svt_av1_count_colors_highbd
  * - av1_k_means_dim1
  * - av1_k_means_dim2
  *
@@ -38,15 +44,15 @@ using svt_av1_test_tool::SVTRandom;
 
 namespace {
 
-extern "C" int eb_av1_count_colors(const uint8_t *src, int stride, int rows,
-                                   int cols, int *val_count);
-extern "C" int eb_av1_count_colors_highbd(uint16_t *src, int stride, int rows,
-                                          int cols, int bit_depth, int *val_count);
+extern "C" int svt_av1_count_colors(const uint8_t *src, int stride, int rows,
+                                    int cols, int *val_count);
+extern "C" int svt_av1_count_colors_highbd(uint16_t *src, int stride, int rows,
+                                           int cols, int bit_depth, int *val_count);
 
 /**
  * @brief Unit test for counting colors:
- * - eb_av1_count_colors
- * - eb_av1_count_colors_highbd
+ * - svt_av1_count_colors
+ * - svt_av1_count_colors_highbd
  *
  * Test strategy:
  * Feeds the random value both into test function and the vector without
@@ -64,7 +70,7 @@ class ColorCountTest : public ::testing::Test {
   protected:
     ColorCountTest() : rnd_(16, false) {
         input_ =
-            (Sample *)eb_aom_memalign(32, MAX_PALETTE_SQUARE * sizeof(Sample));
+            (Sample *)svt_aom_memalign(32, MAX_PALETTE_SQUARE * sizeof(Sample));
         bd_ = 8;
         ref_.clear();
         val_count_ = nullptr;
@@ -72,7 +78,7 @@ class ColorCountTest : public ::testing::Test {
 
     ~ColorCountTest() {
         if (input_) {
-            eb_aom_free(input_);
+            svt_aom_free(input_);
             input_ = nullptr;
         }
         aom_clear_system_state();
@@ -95,14 +101,14 @@ class ColorCountTest : public ::testing::Test {
 
     void run_test(size_t times) {
         const int max_colors = (1 << bd_);
-        val_count_ = (int *)eb_aom_memalign(32, max_colors * sizeof(int));
+        val_count_ = (int *)svt_aom_memalign(32, max_colors * sizeof(int));
         for (size_t i = 0; i < times; i++) {
             prepare_data();
             ASSERT_EQ(count_color(), ref_.size())
                 << "color count failed at: " << i;
         }
         if (val_count_) {
-            eb_aom_free(val_count_);
+            svt_aom_free(val_count_);
             val_count_ = nullptr;
         }
     }
@@ -123,7 +129,7 @@ class ColorCountLbdTest : public ColorCountTest<uint8_t> {
         const int max_colors = (1 << bd_);
         memset(val_count_, 0, max_colors * sizeof(int));
         unsigned int colors =
-            (unsigned int)eb_av1_count_colors(input_, 64, 64, 64, val_count_);
+            (unsigned int)svt_av1_count_colors(input_, 64, 64, 64, val_count_);
         return colors;
     }
 };
@@ -137,7 +143,7 @@ class ColorCountHbdTest : public ColorCountTest<uint16_t> {
     unsigned int count_color() override {
         const int max_colors = (1 << bd_);
         memset(val_count_, 0, max_colors * sizeof(int));
-        unsigned int colors = (unsigned int)eb_av1_count_colors_highbd(
+        unsigned int colors = (unsigned int)svt_av1_count_colors_highbd(
             input_, 64, 64, 64, bd_, val_count_);
         return colors;
     }
@@ -197,6 +203,7 @@ class KMeansTest : public ::testing::TestWithParam<int> {
     int prepare_data(const int max_colors) {
         memset(data_, 0, MAX_PALETTE_SQUARE * sizeof(int));
         uint8_t *palette = new uint8_t[max_colors];
+        assert(max_colors > 0);
         for (int i = 0; i < max_colors; i++)
             palette[i] = rnd_.random();
         uint8_t tmp[MAX_PALETTE_SQUARE] = {0};
@@ -204,7 +211,7 @@ class KMeansTest : public ::testing::TestWithParam<int> {
             data_[i] = tmp[i] = palette[rnd_.random() % max_colors];
         delete[] palette;
         int val_count[MAX_PALETTE_SQUARE] = {0};
-        return eb_av1_count_colors(tmp, 64, 64, 64, val_count);
+        return svt_av1_count_colors(tmp, 64, 64, 64, val_count);
     }
 
     void run_test(size_t times) {
@@ -252,7 +259,7 @@ class KMeansTest : public ::testing::TestWithParam<int> {
         vector<uint16_t>::iterator it =
             std::unique(val_vec.begin(), val_vec.end());
         val_vec.erase(it, val_vec.end());
-        return (const int)val_vec.size();
+        return (int)val_vec.size();
     }
 
     void run_test_2d(size_t times) {
@@ -476,7 +483,7 @@ class Av1KMeansDim : public ::testing::WithParamInterface<Av1KMeansDimParam>,
 
         prepare_data();
 
-        eb_start_time(&start_time_seconds, &start_time_useconds);
+        svt_av1_get_time(&start_time_seconds, &start_time_useconds);
 
         for (uint64_t i = 0; i < num_loop; i++) {
             for (int k = PALETTE_MIN_SIZE; k <= PALETTE_MAX_SIZE; k++) {
@@ -484,7 +491,7 @@ class Av1KMeansDim : public ::testing::WithParamInterface<Av1KMeansDimParam>,
             }
         }
 
-        eb_start_time(&middle_time_seconds, &middle_time_useconds);
+        svt_av1_get_time(&middle_time_seconds, &middle_time_useconds);
 
         for (uint64_t i = 0; i < num_loop; i++) {
             for (int k = PALETTE_MIN_SIZE; k <= PALETTE_MAX_SIZE; k++) {
@@ -492,20 +499,18 @@ class Av1KMeansDim : public ::testing::WithParamInterface<Av1KMeansDimParam>,
             }
         }
 
-        eb_start_time(&finish_time_seconds, &finish_time_useconds);
+        svt_av1_get_time(&finish_time_seconds, &finish_time_useconds);
 
         check_output();
 
-        eb_compute_overall_elapsed_time_ms(start_time_seconds,
-                                      start_time_useconds,
-                                      middle_time_seconds,
-                                      middle_time_useconds,
-                                      &time_c);
-        eb_compute_overall_elapsed_time_ms(middle_time_seconds,
-                                      middle_time_useconds,
-                                      finish_time_seconds,
-                                      finish_time_useconds,
-                                      &time_o);
+        time_c = svt_av1_compute_overall_elapsed_time_ms(start_time_seconds,
+                                                         start_time_useconds,
+                                                         middle_time_seconds,
+                                                         middle_time_useconds);
+        time_o = svt_av1_compute_overall_elapsed_time_ms(middle_time_seconds,
+                                                         middle_time_useconds,
+                                                         finish_time_seconds,
+                                                         finish_time_useconds);
 
         printf("    speedup %5.2fx\n", time_c / time_o);
     }

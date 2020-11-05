@@ -1,6 +1,12 @@
 /*
 * Copyright(c) 2019 Intel Corporation
-* SPDX - License - Identifier: BSD - 2 - Clause - Patent
+*
+* This source code is subject to the terms of the BSD 2 Clause License and
+* the Alliance for Open Media Patent License 1.0. If the BSD 2 Clause License
+* was not distributed with this source code in the LICENSE file, you can
+* obtain it at https://www.aomedia.org/license/software-license. If the Alliance for Open
+* Media Patent License 1.0 was not distributed with this source code in the
+* PATENTS file, you can obtain it at https://www.aomedia.org/license/patent-license.
 */
 
 #ifndef EbUtility_h
@@ -119,21 +125,16 @@ typedef struct CodedBlockStats {
     uint8_t  depth;
     uint8_t  size;
     uint8_t  size_log2;
-#if FIX_WARNINGS_WIN
     uint8_t origin_x;
     uint8_t origin_y;
-#else
-    uint16_t origin_x;
-    uint16_t origin_y;
-#endif
     uint8_t  cu_num_in_depth;
     uint8_t  parent32x32_index;
 } CodedBlockStats;
 
-extern void* eb_aom_memalign(size_t align, size_t size);
-extern void* eb_aom_malloc(size_t size);
-extern void  eb_aom_free(void* memblk);
-extern void* eb_aom_memset16(void* dest, int32_t val, size_t length);
+extern void* svt_aom_memalign(size_t align, size_t size);
+extern void* svt_aom_malloc(size_t size);
+extern void  svt_aom_free(void* memblk);
+extern void* svt_aom_memset16(void* dest, int32_t val, size_t length);
 
 extern uint64_t log2f_high_precision(uint64_t x, uint8_t precision);
 
@@ -145,8 +146,6 @@ extern const CodedBlockStats* get_coded_blk_stats(const uint32_t cu_idx);
 #define TU_ORIGIN_ADJUST(cu_origin, cu_size, offset) ((((cu_size) * (offset)) >> 2) + (cu_origin))
 #define TU_SIZE_ADJUST(cu_size, tuDepth) ((cu_size) >> (tuDepth))
 
-extern uint64_t log2f_64(uint64_t x);
-
 /****************************
      * MACROS
      ****************************/
@@ -157,9 +156,7 @@ extern uint64_t log2f_64(uint64_t x);
 //**************************************************
 // MACROS
 //**************************************************
-#if NICS_CLEANUP
 #define DIVIDE_AND_ROUND(x, y) (((x) + ((y) >> 1)) / (y))
-#endif
 #define MAX(x, y) ((x) > (y) ? (x) : (y))
 #define MIN(x, y) ((x) < (y) ? (x) : (y))
 #define MEDIAN(a, b, c)                   ((a)>(b)?(a)>?(b)>?(b)::(a):(b)>?(a)>?(a)::(b))
@@ -210,8 +207,6 @@ extern uint64_t log2f_64(uint64_t x);
     (x) |= ((x) >> 16);             \
     (x) += 1;                       \
     MULTI_LINE_MACRO_END
-
-
 #define LOG2F_8(x)               \
     (((x) < 0x0002u)             \
          ? 0u                    \
@@ -285,12 +280,21 @@ typedef enum MinigopIndex {
 // Right shift that replicates gcc's implementation
 
 static inline int gcc_right_shift(int a, unsigned shift) {
+    if (!a)
+        return 0;
     if (a > 0)
         return a >> shift;
     static const unsigned sbit = 1u << (sizeof(sbit) * CHAR_BIT - 1);
     a                          = (unsigned)a >> shift;
     while (shift) a |= sbit >> shift--;
     return a ^ sbit;
+}
+
+static INLINE int convert_to_trans_prec(int allow_hp, int coor) {
+    if (allow_hp)
+        return ROUND_POWER_OF_TWO_SIGNED(coor, WARPEDMODEL_PREC_BITS - 3);
+    else
+        return ROUND_POWER_OF_TWO_SIGNED(coor, WARPEDMODEL_PREC_BITS - 2) * 2;
 }
 
 #ifdef __cplusplus

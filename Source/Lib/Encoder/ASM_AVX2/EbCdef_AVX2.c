@@ -1,6 +1,12 @@
 /*
 * Copyright(c) 2019 Intel Corporation
-* SPDX - License - Identifier: BSD - 2 - Clause - Patent
+*
+* This source code is subject to the terms of the BSD 2 Clause License and
+* the Alliance for Open Media Patent License 1.0. If the BSD 2 Clause License
+* was not distributed with this source code in the LICENSE file, you can
+* obtain it at https://www.aomedia.org/license/software-license. If the Alliance for Open
+* Media Patent License 1.0 was not distributed with this source code in the
+* PATENTS file, you can obtain it at https://www.aomedia.org/license/patent-license.
 */
 
 #include "EbDefinitions.h"
@@ -22,9 +28,9 @@
 
 /* Search for the best luma+chroma strength to add as an option, knowing we
 already selected nb_strengths options. */
-uint64_t search_one_dual_avx2(int *lev0, int *lev1, int nb_strengths,
-                              uint64_t (**mse)[TOTAL_STRENGTHS], int sb_count,
-                              int start_gi, int end_gi) {
+uint64_t svt_search_one_dual_avx2(int *lev0, int *lev1, int nb_strengths,
+                                  uint64_t (**mse)[TOTAL_STRENGTHS], int sb_count,
+                                  int start_gi, int end_gi) {
     DECLARE_ALIGNED(32, uint64_t, tot_mse[TOTAL_STRENGTHS][TOTAL_STRENGTHS]);
     uint64_t best_tot_mse = (uint64_t)1 << 62;
     int      best_id0     = 0;
@@ -265,7 +271,7 @@ static INLINE uint64_t sum64(const __m256i src) {
 }
 
 /* Compute MSE only on the blocks we filtered. */
-uint64_t compute_cdef_dist_avx2(const uint16_t *dst, int32_t dstride, const uint16_t *src,
+uint64_t compute_cdef_dist_16bit_avx2(const uint16_t *dst, int32_t dstride, const uint16_t *src,
                                 const CdefList *dlist, int32_t cdef_count, BlockSize bsize,
                                 int32_t coeff_shift, int32_t pli) {
     uint64_t sum;

@@ -1,7 +1,13 @@
 /*
- * Copyright(c) 2019 Netflix, Inc.
- * SPDX - License - Identifier: BSD - 2 - Clause - Patent
- */
+* Copyright(c) 2019 Netflix, Inc.
+*
+* This source code is subject to the terms of the BSD 2 Clause License and
+* the Alliance for Open Media Patent License 1.0. If the BSD 2 Clause License
+* was not distributed with this source code in the LICENSE file, you can
+* obtain it at https://www.aomedia.org/license/software-license. If the Alliance for Open
+* Media Patent License 1.0 was not distributed with this source code in the
+* PATENTS file, you can obtain it at https://www.aomedia.org/license/patent-license.
+*/
 
 /******************************************************************************
  * @file subtract_avg_cfl_test.cc
@@ -80,8 +86,8 @@ class CflSubAvgTest : public ::testing::TestWithParam<TxSize> {
         memset(data_ref_, 0, sizeof(data_ref_));
 
         /** get test and reference function */
-        sub_avg_tst_ = eb_get_subtract_average_fn_avx2(tx_size_);
-        sub_avg_ref_ = eb_get_subtract_average_fn_c(tx_size_);
+        sub_avg_tst_ = svt_get_subtract_average_fn_avx2(tx_size_);
+        sub_avg_ref_ = svt_get_subtract_average_fn_c(tx_size_);
     }
 
     virtual ~CflSubAvgTest() {

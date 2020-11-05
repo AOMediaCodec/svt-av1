@@ -1,7 +1,13 @@
 /*
- * Copyright(c) 2019 Netflix, Inc.
- * SPDX - License - Identifier: BSD - 2 - Clause - Patent
- */
+* Copyright(c) 2019 Netflix, Inc.
+*
+* This source code is subject to the terms of the BSD 2 Clause License and
+* the Alliance for Open Media Patent License 1.0. If the BSD 2 Clause License
+* was not distributed with this source code in the LICENSE file, you can
+* obtain it at https://www.aomedia.org/license/software-license. If the Alliance for Open
+* Media Patent License 1.0 was not distributed with this source code in the
+* PATENTS file, you can obtain it at https://www.aomedia.org/license/patent-license.
+*/
 
 /******************************************************************************
  * @file TemporalFilterTest.cc
@@ -93,25 +99,25 @@ class TemporalFilterTest : public ::testing::Test,
         stride_[2] = width_ >> 1;
 
         source = reinterpret_cast<uint8_t *>(
-            eb_aom_memalign(32, BLK_PELS * COLOR_CHANNELS));
+            svt_aom_memalign(32, BLK_PELS * COLOR_CHANNELS));
         predictor = reinterpret_cast<uint8_t *>(
-            eb_aom_memalign(32, BLK_PELS * COLOR_CHANNELS));
+            svt_aom_memalign(32, BLK_PELS * COLOR_CHANNELS));
         hbd_source = reinterpret_cast<uint16_t *>(
-            eb_aom_memalign(32, sizeof(uint16_t) * BLK_PELS * COLOR_CHANNELS));
+            svt_aom_memalign(32, sizeof(uint16_t) * BLK_PELS * COLOR_CHANNELS));
         hbd_predictor = reinterpret_cast<uint16_t *>(
-            eb_aom_memalign(32, sizeof(uint16_t) * BLK_PELS * COLOR_CHANNELS));
+            svt_aom_memalign(32, sizeof(uint16_t) * BLK_PELS * COLOR_CHANNELS));
         accumulator_1_ = reinterpret_cast<uint32_t *>(
-            eb_aom_memalign(16, sizeof(uint32_t) * BLK_PELS * COLOR_CHANNELS));
+            svt_aom_memalign(16, sizeof(uint32_t) * BLK_PELS * COLOR_CHANNELS));
         accumulator_2_ = reinterpret_cast<uint32_t *>(
-            eb_aom_memalign(16, sizeof(uint32_t) * BLK_PELS * COLOR_CHANNELS));
+            svt_aom_memalign(16, sizeof(uint32_t) * BLK_PELS * COLOR_CHANNELS));
         accumulator_3_ = reinterpret_cast<uint32_t *>(
-            eb_aom_memalign(16, sizeof(uint32_t) * BLK_PELS * COLOR_CHANNELS));
+            svt_aom_memalign(16, sizeof(uint32_t) * BLK_PELS * COLOR_CHANNELS));
         counter_1_ = reinterpret_cast<uint16_t *>(
-            eb_aom_memalign(16, sizeof(uint16_t) * BLK_PELS * COLOR_CHANNELS));
+            svt_aom_memalign(16, sizeof(uint16_t) * BLK_PELS * COLOR_CHANNELS));
         counter_2_ = reinterpret_cast<uint16_t *>(
-            eb_aom_memalign(16, sizeof(uint16_t) * BLK_PELS * COLOR_CHANNELS));
+            svt_aom_memalign(16, sizeof(uint16_t) * BLK_PELS * COLOR_CHANNELS));
         counter_3_ = reinterpret_cast<uint16_t *>(
-            eb_aom_memalign(16, sizeof(uint16_t) * BLK_PELS * COLOR_CHANNELS));
+            svt_aom_memalign(16, sizeof(uint16_t) * BLK_PELS * COLOR_CHANNELS));
         memset(accumulator_1_,
                0,
                BLK_PELS * COLOR_CHANNELS * sizeof(accumulator_1_[0]));
@@ -161,25 +167,25 @@ class TemporalFilterTest : public ::testing::Test,
 
     ~TemporalFilterTest() {
         if (source)
-            eb_aom_free(source);
+            svt_aom_free(source);
         if (predictor)
-            eb_aom_free(predictor);
+            svt_aom_free(predictor);
         if (hbd_source)
-            eb_aom_free(hbd_source);
+            svt_aom_free(hbd_source);
         if (hbd_predictor)
-            eb_aom_free(hbd_predictor);
+            svt_aom_free(hbd_predictor);
         if (accumulator_1_)
-            eb_aom_free(accumulator_1_);
+            svt_aom_free(accumulator_1_);
         if (accumulator_2_)
-            eb_aom_free(accumulator_2_);
+            svt_aom_free(accumulator_2_);
         if (accumulator_3_)
-            eb_aom_free(accumulator_3_);
+            svt_aom_free(accumulator_3_);
         if (counter_1_)
-            eb_aom_free(counter_1_);
+            svt_aom_free(counter_1_);
         if (counter_2_)
-            eb_aom_free(counter_2_);
+            svt_aom_free(counter_2_);
         if (counter_3_)
-            eb_aom_free(counter_3_);
+            svt_aom_free(counter_3_);
     }
 
   protected:

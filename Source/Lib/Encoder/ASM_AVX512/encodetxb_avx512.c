@@ -1,7 +1,14 @@
 /*
 * Copyright(c) 2019 Intel Corporation
-* SPDX - License - Identifier: BSD - 2 - Clause - Patent
+*
+* This source code is subject to the terms of the BSD 2 Clause License and
+* the Alliance for Open Media Patent License 1.0. If the BSD 2 Clause License
+* was not distributed with this source code in the LICENSE file, you can
+* obtain it at https://www.aomedia.org/license/software-license. If the Alliance for Open
+* Media Patent License 1.0 was not distributed with this source code in the
+* PATENTS file, you can obtain it at https://www.aomedia.org/license/patent-license.
 */
+
 #include "EbDefinitions.h"
 
 #ifndef NON_AVX512_SUPPORT
@@ -35,8 +42,8 @@ static INLINE __m512i txb_init_levels_64_avx512(const TranLow *const coeff) {
     return _mm512_permutexvar_epi32(idx, abs_8);
 }
 
-void eb_av1_txb_init_levels_avx512(const TranLow *const coeff, const int32_t width,
-                                   const int32_t height, uint8_t *const levels) {
+void svt_av1_txb_init_levels_avx512(const TranLow *const coeff, const int32_t width,
+                                    const int32_t height, uint8_t *const levels) {
     const TranLow *cf      = coeff;
     const __m128i  x_zeros = _mm_setzero_si128();
     uint8_t *      ls      = levels;

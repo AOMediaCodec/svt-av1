@@ -1,17 +1,13 @@
 /*
 * Copyright(c) 2019 Intel Corporation
-* SPDX - License - Identifier: BSD - 2 - Clause - Patent
-*/
-
-/*
 * Copyright (c) 2016, Alliance for Open Media. All rights reserved
 *
 * This source code is subject to the terms of the BSD 2 Clause License and
 * the Alliance for Open Media Patent License 1.0. If the BSD 2 Clause License
 * was not distributed with this source code in the LICENSE file, you can
-* obtain it at www.aomedia.org/license/software. If the Alliance for Open
+* obtain it at https://www.aomedia.org/license/software-license. If the Alliance for Open
 * Media Patent License 1.0 was not distributed with this source code in the
-* PATENTS file, you can obtain it at www.aomedia.org/license/patent.
+* PATENTS file, you can obtain it at https://www.aomedia.org/license/patent-license.
 */
 
 #include <stdlib.h>
@@ -36,11 +32,7 @@ static void output_bitstream_unit_dctor(EbPtr p) {
 EbErrorType output_bitstream_unit_ctor(OutputBitstreamUnit *bitstream_ptr, uint32_t buffer_size) {
     bitstream_ptr->dctor = output_bitstream_unit_dctor;
     if (buffer_size) {
-#if OUTPUT_MEM_OPT
         bitstream_ptr->size = buffer_size;
-#else
-        bitstream_ptr->size = buffer_size / sizeof(uint32_t);
-#endif
         EB_MALLOC_ARRAY(bitstream_ptr->buffer_begin_av1, bitstream_ptr->size);
         bitstream_ptr->buffer_av1 = bitstream_ptr->buffer_begin_av1;
     } else {
@@ -69,25 +61,25 @@ EbErrorType output_bitstream_reset(OutputBitstreamUnit *bitstream_ptr) {
 /********************************************************************************************************************************/
 /********************************************************************************************************************************/
 // daalaboolwriter.c
-void eb_aom_daala_start_encode(DaalaWriter *br, uint8_t *source) {
+void svt_aom_daala_start_encode(DaalaWriter *br, uint8_t *source) {
     br->buffer = source;
     br->pos    = 0;
-    eb_od_ec_enc_init(&br->ec, 62025);
+    svt_od_ec_enc_init(&br->ec, 62025);
 }
 
-int32_t eb_aom_daala_stop_encode(DaalaWriter *br) {
+int32_t svt_aom_daala_stop_encode(DaalaWriter *br) {
     int32_t  nb_bits;
     uint32_t daala_bytes = 0;
     uint8_t *daala_data;
-    daala_data = eb_od_ec_enc_done(&br->ec, &daala_bytes);
-    nb_bits    = eb_od_ec_enc_tell(&br->ec);
-    if (eb_memcpy != NULL)
-        eb_memcpy(br->buffer, daala_data, daala_bytes);
+    daala_data = svt_od_ec_enc_done(&br->ec, &daala_bytes);
+    nb_bits    = svt_od_ec_enc_tell(&br->ec);
+    if (svt_memcpy != NULL)
+        svt_memcpy(br->buffer, daala_data, daala_bytes);
     else
-        eb_memcpy_c(br->buffer, daala_data, daala_bytes);
+        svt_memcpy_c(br->buffer, daala_data, daala_bytes);
 
     br->pos = daala_bytes;
-    eb_od_ec_enc_clear(&br->ec);
+    svt_od_ec_enc_clear(&br->ec);
     return nb_bits;
 }
 
@@ -175,8 +167,8 @@ static void od_ec_enc_normalize(OdEcEnc *enc, OdEcWindow low, unsigned rng) {
 
 /*Initializes the encoder.
 size: The initial size of the buffer, in bytes.*/
-void eb_od_ec_enc_init(OdEcEnc *enc, uint32_t size) {
-    eb_od_ec_enc_reset(enc);
+void svt_od_ec_enc_init(OdEcEnc *enc, uint32_t size) {
+    svt_od_ec_enc_reset(enc);
     enc->buf     = (uint8_t *)malloc(sizeof(*enc->buf) * size);
     enc->storage = size;
     if (size > 0 && enc->buf == NULL) {
@@ -192,7 +184,7 @@ void eb_od_ec_enc_init(OdEcEnc *enc, uint32_t size) {
 }
 
 /*Reinitializes the encoder.*/
-void eb_od_ec_enc_reset(OdEcEnc *enc) {
+void svt_od_ec_enc_reset(OdEcEnc *enc) {
     enc->offs = 0;
     enc->low  = 0;
     enc->rng  = 0x8000;
@@ -207,7 +199,7 @@ void eb_od_ec_enc_reset(OdEcEnc *enc) {
 }
 
 /*Frees the buffers used by the encoder.*/
-void eb_od_ec_enc_clear(OdEcEnc *enc) {
+void svt_od_ec_enc_clear(OdEcEnc *enc) {
     free(enc->precarry_buf);
     free(enc->buf);
 }
@@ -252,7 +244,7 @@ static void od_ec_encode_q15(OdEcEnc *enc, unsigned fl, unsigned fh, int32_t s, 
 /*Encode a single binary value.
 val: The value to encode (0 or 1).
 f: The probability that the val is one, scaled by 32768.*/
-void eb_od_ec_encode_bool_q15(OdEcEnc *enc, int32_t val, unsigned f) {
+void svt_od_ec_encode_bool_q15(OdEcEnc *enc, int32_t val, unsigned f) {
     OdEcWindow l;
     unsigned   r;
     unsigned   v;
@@ -280,7 +272,7 @@ The values must be monotonically decreasing, and icdf[nsyms - 1] must
 be 0.
 nsyms: The number of symbols in the alphabet.
 This should be at most 16.*/
-void eb_od_ec_encode_cdf_q15(OdEcEnc *enc, int32_t s, const uint16_t *icdf, int32_t nsyms) {
+void svt_od_ec_encode_cdf_q15(OdEcEnc *enc, int32_t s, const uint16_t *icdf, int32_t nsyms) {
     (void)nsyms;
     assert(s >= 0);
     assert(s < nsyms);
@@ -288,7 +280,7 @@ void eb_od_ec_encode_cdf_q15(OdEcEnc *enc, int32_t s, const uint16_t *icdf, int3
     od_ec_encode_q15(enc, s > 0 ? icdf[s - 1] : OD_ICDF(0), icdf[s], s, nsyms);
 }
 
-uint8_t *eb_od_ec_enc_done(OdEcEnc *enc, uint32_t *nbytes) {
+uint8_t *svt_od_ec_enc_done(OdEcEnc *enc, uint32_t *nbytes) {
     uint8_t *  out;
     uint32_t   storage;
     uint16_t * buf;
@@ -303,7 +295,7 @@ uint8_t *eb_od_ec_enc_done(OdEcEnc *enc, uint32_t *nbytes) {
     {
         uint32_t tell;
         /* Don't count the 1 bit we lose to raw bits as overhead. */
-        tell = eb_od_ec_enc_tell(enc) - 1;
+        tell = svt_od_ec_enc_tell(enc) - 1;
         SVT_ERROR("overhead: %f%%\n", 100 * (tell - enc->entropy) / enc->entropy);
         SVT_ERROR("efficiency: %f bits/symbol\n", (double)tell / enc->nb_symbols);
     }
@@ -384,7 +376,7 @@ earlier call, even after encoding more data, if there is an encoding error
 Return: The number of bits.
 This will always be slightly larger than the exact value (e.g., all
 rounding error is in the positive direction).*/
-int32_t eb_od_ec_enc_tell(const OdEcEnc *enc) {
+int32_t svt_od_ec_enc_tell(const OdEcEnc *enc) {
     /*The 10 here counteracts the offset of -9 baked into cnt, and adds 1 extra
     bit, which we reserve for terminating the stream.*/
     return (enc->cnt + 10) + enc->offs * 8;

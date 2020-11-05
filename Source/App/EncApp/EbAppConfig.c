@@ -1,6 +1,12 @@
 ﻿/*
 * Copyright(c) 2019 Intel Corporation
-* SPDX - License - Identifier: BSD - 2 - Clause - Patent
+*
+* This source code is subject to the terms of the BSD 2 Clause License and
+* the Alliance for Open Media Patent License 1.0. If the BSD 2 Clause License
+* was not distributed with this source code in the LICENSE file, you can
+* obtain it at https://www.aomedia.org/license/software-license. If the Alliance for Open
+* Media Patent License 1.0 was not distributed with this source code in the
+* PATENTS file, you can obtain it at https://www.aomedia.org/license/patent-license.
 */
 
 #include <stdio.h>
@@ -8,16 +14,19 @@
 #include <string.h>
 #include <sys/stat.h>
 
-#include "EbAppString.h"
 #include "EbAppConfig.h"
+#include "EbAppContext.h"
 #include "EbAppInputy4m.h"
-
 #ifdef _WIN32
 #include <windows.h>
 #include <io.h>
 #else
 #include <unistd.h>
 #include <sys/file.h>
+#endif
+
+#if !defined(_WIN32) || !defined(HAVE_STRNLEN_S)
+#include "safe_str_lib.h"
 #endif
 
 /**********************************
@@ -41,14 +50,14 @@
 #define PASSES_TOKEN "--passes"
 #define INPUT_STAT_FILE_TOKEN "-input-stat-file"
 #define OUTPUT_STAT_FILE_TOKEN "-output-stat-file"
-
 #define STAT_FILE_TOKEN "-stat-file"
 #define INPUT_PREDSTRUCT_FILE_TOKEN "-pred-struct-file"
 #define WIDTH_TOKEN "-w"
 #define HEIGHT_TOKEN "-h"
 #define NUMBER_OF_PICTURES_TOKEN "-n"
 #define BUFFERED_INPUT_TOKEN "-nb"
-#define NO_PROGRESS_TOKEN "--no-progress"
+#define NO_PROGRESS_TOKEN "--no-progress" // tbd if it should be removed
+#define PROGRESS_TOKEN "--progress"
 #define BASE_LAYER_SWITCH_MODE_TOKEN "-base-layer-switch-mode" // no Eval
 #define QP_TOKEN "-q"
 #define USE_QP_FILE_TOKEN "-use-q-file"
@@ -61,59 +70,38 @@
 #define ENCODER_COLOR_FORMAT "-color-format"
 #define INPUT_COMPRESSED_TEN_BIT_FORMAT "-compressed-ten-bit-format"
 #define ENCMODE_TOKEN "-enc-mode"
-#define ENCMODE2P_TOKEN "-enc-mode-2p"
 #define HIERARCHICAL_LEVELS_TOKEN "-hierarchical-levels" // no Eval
 #define PRED_STRUCT_TOKEN "-pred-struct"
 #define INTRA_PERIOD_TOKEN "-intra-period"
 #define PROFILE_TOKEN "-profile"
 #define TIER_TOKEN "-tier"
 #define LEVEL_TOKEN "-level"
-#define LATENCY_MODE "-latency-mode" // no Eval
 #define FILM_GRAIN_TOKEN "-film-grain"
 #define INTRA_REFRESH_TYPE_TOKEN "-irefresh-type" // no Eval
 #define LOOP_FILTER_DISABLE_TOKEN "-dlf"
-#define CDEF_MODE_TOKEN "-cdef-mode"
+#define CDEF_LEVEL_TOKEN "-cdef-level"
 #define RESTORATION_ENABLE_TOKEN "-restoration-filtering"
 #define SG_FILTER_MODE_TOKEN "-sg-filter-mode"
 #define WN_FILTER_MODE_TOKEN "-wn-filter-mode"
-#if 0//!REMOVE_COMBINE_CLASS12
-#define CLASS_12_TOKEN "-class-12"
-#endif
-#define EDGE_SKIP_ANGLE_INTRA_TOKEN "-intra-edge-skp"
 #define INTRA_ANGLE_DELTA_TOKEN "-intra-angle-delta"
 #define INTER_INTRA_COMPOUND_TOKEN "-interintra-comp"
 #define PAETH_TOKEN "-paeth"
 #define SMOOTH_TOKEN "-smooth"
 #define MFMV_ENABLE_TOKEN "-mfmv"
 #define REDUNDANT_BLK_TOKEN "-redundant-blk"
-#define SPATIAL_SSE_FL_TOKEN "-spatial-sse-fl"
-#if 0//!REMOVE_ME_SUBPEL_CODE
-#define SUBPEL_TOKEN "-subpel"
-#endif
+#define SPATIAL_SSE_FL_TOKEN "-spatial-sse-full-loop-level"
 #define OVR_BNDRY_BLK_TOKEN "-over-bndry-blk"
 #define NEW_NEAREST_COMB_INJECT_TOKEN "-new-nrst-near-comb"
-#if 0//!SHUT_ME_CAND_SORTING
-#define PRUNE_UNIPRED_ME_TOKEN "-prune-unipred-me"
-#endif
-#define PRUNE_REF_REC_PART_TOKEN "-prune-ref-rec-part"
 #define NSQ_TABLE_TOKEN "-nsq-table-use"
 #define FRAME_END_CDF_UPDATE_TOKEN "-framend-cdf-upd-mode"
 #define LOCAL_WARPED_ENABLE_TOKEN "-local-warp"
 #define GLOBAL_MOTION_ENABLE_TOKEN "-global-motion"
-#if 1 // OBMC_CLI
 #define OBMC_TOKEN "-obmc-level"
-#else
-#define OBMC_TOKEN "-obmc"
-#endif
-#define RDOQ_TOKEN "-rdoq"
+#define RDOQ_TOKEN "-rdoq-level"
 #define PRED_ME_TOKEN "-pred-me"
 #define BIPRED_3x3_TOKEN "-bipred-3x3"
 #define COMPOUND_LEVEL_TOKEN "-compound"
-#if 1 // FILTER_INTRA_CLI
 #define FILTER_INTRA_TOKEN "-filter-intra-level"
-#else
-#define FILTER_INTRA_TOKEN "-filter-intra"
-#endif
 #define INTRA_EDGE_FILTER_TOKEN "-intra-edge-filter"
 #define PIC_BASED_RATE_EST_TOKEN "-pic-based-rate-est"
 #define PIC_BASED_RATE_EST_NEW_TOKEN "--enable-pic-based-rate-est"
@@ -125,20 +113,10 @@
 #define EXT_BLOCK "-ext-block"
 #define SEARCH_AREA_WIDTH_TOKEN "-search-w"
 #define SEARCH_AREA_HEIGHT_TOKEN "-search-h"
-#define NUM_HME_SEARCH_WIDTH_TOKEN "-num-hme-w"
-#define NUM_HME_SEARCH_HEIGHT_TOKEN "-num-hme-h"
-#define HME_SRCH_T_L0_WIDTH_TOKEN "-hme-tot-l0-w"
-#define HME_SRCH_T_L0_HEIGHT_TOKEN "-hme-tot-l0-h"
-#define HME_LEVEL0_WIDTH "-hme-l0-w"
-#define HME_LEVEL0_HEIGHT "-hme-l0-h"
-#define HME_LEVEL1_WIDTH "-hme-l1-w"
-#define HME_LEVEL1_HEIGHT "-hme-l1-h"
-#define HME_LEVEL2_WIDTH "-hme-l2-w"
-#define HME_LEVEL2_HEIGHT "-hme-l2-h"
 #define SCREEN_CONTENT_TOKEN "-scm"
 #define INTRABC_MODE_TOKEN "-intrabc-mode"
 // --- start: ALTREF_FILTERING_SUPPORT
-#define ENABLE_ALTREFS "-enable-altrefs"
+#define TF_LEVEL "-tf-level"
 #define ALTREF_STRENGTH "-altref-strength"
 #define ALTREF_NFRAMES "-altref-nframes"
 #define ENABLE_OVERLAYS "-enable-overlays"
@@ -150,19 +128,21 @@
 #define SUPERRES_QTHRES "-superres-qthres"
 // --- end: SUPER-RESOLUTION SUPPORT
 #define HBD_MD_ENABLE_TOKEN "-hbd-md"
-#define PALETTE_TOKEN "-palette"
-#define OLPD_REFINEMENT_TOKEN "-olpd-refinement"
+#define PALETTE_TOKEN "-palette-level"
 #define HDR_INPUT_TOKEN "-hdr"
 #define RATE_CONTROL_ENABLE_TOKEN "-rc"
 #define TARGET_BIT_RATE_TOKEN "-tbr"
 #define MAX_QP_TOKEN "-max-qp"
 #define VBV_BUFSIZE_TOKEN "-vbv-bufsize"
 #define MIN_QP_TOKEN "-min-qp"
+#define VBR_BIAS_PCT_TOKEN "-bias-pct"
+#define VBR_MIN_SECTION_PCT_TOKEN "-minsection-pct"
+#define VBR_MAX_SECTION_PCT_TOKEN "-maxsection-pct"
+#define UNDER_SHOOT_PCT_TOKEN "-undershoot-pct"
+#define OVER_SHOOT_PCT_TOKEN "-overshoot-pct"
 #define ADAPTIVE_QP_ENABLE_TOKEN "-adaptive-quantization"
 #define LOOK_AHEAD_DIST_TOKEN "-lad"
-#if 1//TPL_LA
 #define ENABLE_TPL_LA_TOKEN "-enable-tpl-la"
-#endif
 #define SUPER_BLOCK_SIZE_TOKEN "-sb-size"
 #define TILE_ROW_TOKEN "-tile-rows"
 #define TILE_COL_TOKEN "-tile-columns"
@@ -208,32 +188,22 @@
 
 #define STAT_REPORT_NEW_TOKEN "--enable-stat-report"
 #define RESTORATION_ENABLE_NEW_TOKEN "--enable-restoration-filtering"
-#define EDGE_SKIP_ANGLE_INTRA_NEW_TOKEN "--enable-intra-edge-skp"
 #define INTER_INTRA_COMPOUND_NEW_TOKEN "--enable-interintra-comp"
 #define FRAC_SEARCH_64_NEW_TOKEN "--enable-frac-search-64"
 #define MFMV_ENABLE_NEW_TOKEN "--enable-mfmv"
 #define REDUNDANT_BLK_NEW_TOKEN "--enable-redundant-blk"
-#define SPATIAL_SSE_FL_NEW_TOKEN "--enable-spatial-sse-fl"
+#define SPATIAL_SSE_FL_NEW_TOKEN "--enable-spatial-sse-full-loop-level"
 #define OVR_BNDRY_BLK_NEW_TOKEN "--enable-over-bndry-blk"
 #define NEW_NEAREST_COMB_INJECT_NEW_TOKEN "--enable-new-nrst-near-comb"
 #define NX4_4XN_MV_INJECT_NEW_TOKEN "--enable-nx4-4xn-mv-inject"
-#if 0//!SHUT_ME_CAND_SORTING
-#define PRUNE_UNIPRED_ME_NEW_TOKEN "--enable-prune-unipred-me"
-#endif
-#define PRUNE_REF_REC_PART_NEW_TOKEN "--enable-prune-ref-rec-part"
 #define NSQ_TABLE_NEW_TOKEN "--enable-nsq-table-use"
 #define FRAME_END_CDF_UPDATE_NEW_TOKEN "--enable-framend-cdf-upd-mode"
 #define LOCAL_WARPED_ENABLE_NEW_TOKEN "--enable-local-warp"
 #define GLOBAL_MOTION_ENABLE_NEW_TOKEN "--enable-global-motion"
-#define RDOQ_NEW_TOKEN "--enable-rdoq"
-#if 1 // FILTER_INTRA_CLI
+#define RDOQ_NEW_TOKEN "--rdoq-level"
 #define FILTER_INTRA_NEW_TOKEN "--filter-intra-level"
-#else
-#define FILTER_INTRA_NEW_TOKEN "--enable-filter-intra"
-#endif
 #define HDR_INPUT_NEW_TOKEN "--enable-hdr"
 #define ADAPTIVE_QP_ENABLE_NEW_TOKEN "--aq-mode"
-
 #define INPUT_FILE_LONG_TOKEN "--input"
 #define OUTPUT_BITSTREAM_LONG_TOKEN "--output"
 #define OUTPUT_RECON_LONG_TOKEN "--recon"
@@ -243,15 +213,12 @@
 #define QP_LONG_TOKEN "--qp"
 #define CLASS_12_NEW_TOKEN "--enable-class-12"
 #define LOOP_FILTER_DISABLE_NEW_TOKEN "--disable-dlf"
-
 #define DISABLE_CFL_NEW_TOKEN "--disable-cfl"
 #define INTRA_EDGE_FILTER_NEW_TOKEN "--enable-intra-edge-filter"
 #define INTRA_ANGLE_DELTA_NEW_TOKEN "--enable-intra-angle-delta"
 #define PAETH_NEW_TOKEN "--enable-paeth"
 #define SMOOTH_NEW_TOKEN "--enable-smooth"
-#if 1//ON_OFF_FEATURE_MRP
 #define MRP_LEVEL_TOKEN "--mrp-level"
-#endif
 
 #ifdef _WIN32
 static HANDLE get_file_handle(FILE* fp)
@@ -282,18 +249,6 @@ static EbBool fopen_and_lock(FILE** file, const char* name, EbBool write)
 #endif
     fprintf(stderr, "ERROR: locking %s failed, is it used by other encoder?\n", name);
     return EB_FALSE;
-}
-
-static void unlock_and_fclose(FILE* file)
-{
-    if (!file)
-        return;
-
-#ifdef _WIN32
-    HANDLE handle = get_file_handle(file);
-    UnlockFile(handle, 0, 0, MAXDWORD, MAXDWORD);
-#endif
-    fclose(file);
 }
 
 /**********************************
@@ -332,9 +287,9 @@ static void set_pred_struct_file(const char *value, EbConfig *cfg) {
 
     if (cfg->input_pred_struct_filename) { free(cfg->input_pred_struct_filename); }
     cfg->input_pred_struct_filename = (char *)malloc(strlen(value) + 1);
-    EB_STRCPY(cfg->input_pred_struct_filename, strlen(value) + 1, value);
+    strcpy_s(cfg->input_pred_struct_filename, strlen(value) + 1, value);
 
-    cfg->enable_manual_pred_struct = EB_TRUE;
+    cfg->config.enable_manual_pred_struct = EB_TRUE;
 };
 
 static void set_cfg_stream_file(const char *value, EbConfig *cfg) {
@@ -378,29 +333,18 @@ static void set_passes(const char* value, EbConfig *cfg) {
     return;
 }
 
-static void set_input_stat_file(const char *value, EbConfig *cfg) {
-    if (cfg->input_stat_file) { unlock_and_fclose(cfg->input_stat_file); }
-    fopen_and_lock(&cfg->input_stat_file, value, EB_FALSE);
-};
-static void set_output_stat_file(const char *value, EbConfig *cfg) {
-    if (cfg->output_stat_file) { unlock_and_fclose(cfg->output_stat_file); }
-    fopen_and_lock(&cfg->output_stat_file, value, EB_TRUE);
-};
-static void set_snd_pass_enc_mode(const char *value, EbConfig *cfg) {
-    cfg->snd_pass_enc_mode = (uint8_t)strtoul(value, NULL, 0);
-};
 static void set_cfg_stat_file(const char *value, EbConfig *cfg) {
     if (cfg->stat_file) { fclose(cfg->stat_file); }
     FOPEN(cfg->stat_file, value, "wb");
 };
 static void set_stat_report(const char *value, EbConfig *cfg) {
-    cfg->stat_report = (uint8_t)strtoul(value, NULL, 0);
+    cfg->config.stat_report = (uint8_t)strtoul(value, NULL, 0);
 };
 static void set_cfg_source_width(const char *value, EbConfig *cfg) {
-    cfg->source_width = strtoul(value, NULL, 0);
+    cfg->config.source_width = strtoul(value, NULL, 0);
 };
 static void set_cfg_source_height(const char *value, EbConfig *cfg) {
-    cfg->source_height = strtoul(value, NULL, 0);
+    cfg->config.source_height = strtoul(value, NULL, 0);
 };
 static void set_cfg_frames_to_be_encoded(const char *value, EbConfig *cfg) {
     cfg->frames_to_be_encoded = strtol(value, NULL, 0);
@@ -408,328 +352,276 @@ static void set_cfg_frames_to_be_encoded(const char *value, EbConfig *cfg) {
 static void set_buffered_input(const char *value, EbConfig *cfg) {
     cfg->buffered_input = strtol(value, NULL, 0);
 };
-static void set_no_progress(const char*value, EbConfig *cfg) {
-    cfg->no_progress = (EbBool)strtoul(value, NULL, 0);
+static void set_no_progress(const char *value, EbConfig *cfg) {
+    switch (value ? *value : '1') {
+    case '0': cfg->progress = 1; break; // equal to --progress 1
+    default: cfg->progress = 0; break; // equal to --progress 0
+    }
+}
+static void set_progress(const char *value, EbConfig *cfg) {
+    switch (value ? *value : '1') {
+    case '0': cfg->progress = 0; break; // no progress printed
+    case '2': cfg->progress = 2; break; // aomenc style progress
+    default: cfg->progress = 1; break; // default progress
+    }
 }
 static void set_frame_rate(const char *value, EbConfig *cfg) {
-    cfg->frame_rate = strtoul(value, NULL, 0);
-    if (cfg->frame_rate <= 1000)
-        cfg->frame_rate <<= 16;
+    cfg->config.frame_rate = strtoul(value, NULL, 0);
+    if (cfg->config.frame_rate <= 1000)
+        cfg->config.frame_rate <<= 16;
 }
 
 static void set_frame_rate_numerator(const char *value, EbConfig *cfg) {
-    cfg->frame_rate_numerator = strtoul(value, NULL, 0);
+    cfg->config.frame_rate_numerator = strtoul(value, NULL, 0);
 };
 static void set_frame_rate_denominator(const char *value, EbConfig *cfg) {
-    cfg->frame_rate_denominator = strtoul(value, NULL, 0);
+    cfg->config.frame_rate_denominator = strtoul(value, NULL, 0);
 };
 static void set_encoder_bit_depth(const char *value, EbConfig *cfg) {
-    cfg->encoder_bit_depth = strtoul(value, NULL, 0);
+    cfg->config.encoder_bit_depth = strtoul(value, NULL, 0);
 }
 static void set_encoder_16bit_pipeline(const char *value, EbConfig *cfg) {
-    cfg->is_16bit_pipeline = (EbBool)strtoul(value, NULL, 0);
+    cfg->config.is_16bit_pipeline = (EbBool)strtoul(value, NULL, 0);
 }
 static void set_encoder_color_format(const char *value, EbConfig *cfg) {
-    cfg->encoder_color_format = strtoul(value, NULL, 0);
+    cfg->config.encoder_color_format = (EbColorFormat)strtoul(value, NULL, 0);
 }
 static void set_compressed_ten_bit_format(const char *value, EbConfig *cfg) {
-    cfg->compressed_ten_bit_format = strtoul(value, NULL, 0);
+    cfg->config.compressed_ten_bit_format = strtoul(value, NULL, 0);
 }
 static void set_enc_mode(const char *value, EbConfig *cfg) {
-    cfg->enc_mode = (uint8_t)strtoul(value, NULL, 0);
+    cfg->config.enc_mode = (uint8_t)strtoul(value, NULL, 0);
 };
 static void set_cfg_intra_period(const char *value, EbConfig *cfg) {
-    cfg->intra_period = strtol(value, NULL, 0);
+    cfg->config.intra_period_length = strtol(value, NULL, 0);
 };
 static void set_cfg_intra_refresh_type(const char *value, EbConfig *cfg) {
-    cfg->intra_refresh_type = strtol(value, NULL, 0);
+    cfg->config.intra_refresh_type = strtol(value, NULL, 0);
 };
 static void set_hierarchical_levels(const char *value, EbConfig *cfg) {
-    cfg->hierarchical_levels = strtol(value, NULL, 0);
+    cfg->config.hierarchical_levels = strtol(value, NULL, 0);
 };
 static void set_cfg_pred_structure(const char *value, EbConfig *cfg) {
-    cfg->pred_structure = strtol(value, NULL, 0);
+    cfg->config.pred_structure = (uint8_t)strtol(value, NULL, 0);
 };
-static void set_cfg_qp(const char *value, EbConfig *cfg) { cfg->qp = strtoul(value, NULL, 0); };
+static void set_cfg_qp(const char *value, EbConfig *cfg) { cfg->config.qp = strtoul(value, NULL, 0); };
 static void set_cfg_use_qp_file(const char *value, EbConfig *cfg) {
-    cfg->use_qp_file = (EbBool)strtol(value, NULL, 0);
+    cfg->config.use_qp_file = (EbBool)strtol(value, NULL, 0);
 };
 static void set_cfg_film_grain(const char *value, EbConfig *cfg) {
-    cfg->film_grain_denoise_strength = strtol(value, NULL, 0);
+    cfg->config.film_grain_denoise_strength = strtol(value, NULL, 0);
 }; //not bool to enable possible algorithm extension in the future
 static void set_disable_dlf_flag(const char *value, EbConfig *cfg) {
-    cfg->disable_dlf_flag = (EbBool)strtoul(value, NULL, 0);
+    cfg->config.disable_dlf_flag = (EbBool)strtoul(value, NULL, 0);
 };
 static void set_enable_local_warped_motion_flag(const char *value, EbConfig *cfg) {
-    cfg->enable_warped_motion = strtol(value, NULL, 0);
+    cfg->config.enable_warped_motion = strtol(value, NULL, 0);
 };
 static void set_enable_global_motion_flag(const char *value, EbConfig *cfg) {
-    cfg->enable_global_motion = (EbBool)strtoul(value, NULL, 0);
+    cfg->config.enable_global_motion = (EbBool)strtoul(value, NULL, 0);
 };
-static void set_cdef_mode(const char *value, EbConfig *cfg) {
-    cfg->cdef_mode = strtol(value, NULL, 0);
+static void set_cdef_level(const char *value, EbConfig *cfg) {
+    cfg->config.cdef_level = strtol(value, NULL, 0);
 };
 static void set_enable_restoration_filter_flag(const char *value, EbConfig *cfg) {
-    cfg->enable_restoration_filtering = strtol(value, NULL, 0);
+    cfg->config.enable_restoration_filtering = strtol(value, NULL, 0);
 };
 static void set_sg_filter_mode(const char *value, EbConfig *cfg) {
-    cfg->sg_filter_mode = strtol(value, NULL, 0);
+    cfg->config.sg_filter_mode = strtol(value, NULL, 0);
 };
 static void set_wn_filter_mode(const char *value, EbConfig *cfg) {
-    cfg->wn_filter_mode = strtol(value, NULL, 0);
-};
-#if 0//!REMOVE_COMBINE_CLASS12
-static void set_class_12_flag(const char *value, EbConfig *cfg) {
-    cfg->combine_class_12 = strtol(value, NULL, 0);
-};
-#endif
-static void set_edge_skip_angle_intra_flag(const char *value, EbConfig *cfg) {
-    cfg->edge_skp_angle_intra = strtol(value, NULL, 0);
+    cfg->config.wn_filter_mode = strtol(value, NULL, 0);
 };
 static void set_intra_angle_delta_flag(const char *value, EbConfig *cfg) {
-    cfg->intra_angle_delta = strtol(value, NULL, 0);
+    cfg->config.intra_angle_delta = strtol(value, NULL, 0);
 };
 static void set_interintra_compound_flag(const char *value, EbConfig *cfg) {
-    cfg->inter_intra_compound = strtol(value, NULL, 0);
+    cfg->config.inter_intra_compound = strtol(value, NULL, 0);
 };
 static void set_enable_paeth_flag(const char *value, EbConfig *cfg) {
-    cfg->enable_paeth = strtol(value, NULL, 0);
+    cfg->config.enable_paeth = strtol(value, NULL, 0);
 };
 static void set_enable_smooth_flag(const char *value, EbConfig *cfg) {
-    cfg->enable_smooth = strtol(value, NULL, 0);
+    cfg->config.enable_smooth = strtol(value, NULL, 0);
 };
-#if 1//ON_OFF_FEATURE_MRP
 static void set_mrp_level(const char *value, EbConfig *cfg) {
-    cfg->mrp_level = strtol(value, NULL, 0);
+    cfg->config.mrp_level = strtol(value, NULL, 0);
 };
-#endif
 static void set_enable_mfmv_flag(const char *value, EbConfig *cfg) {
-    cfg->enable_mfmv = strtol(value, NULL, 0);
+    cfg->config.enable_mfmv = strtol(value, NULL, 0);
 };
 static void set_enable_redundant_blk_flag(const char *value, EbConfig *cfg) {
-    cfg->enable_redundant_blk = strtol(value, NULL, 0);
+    cfg->config.enable_redundant_blk = strtol(value, NULL, 0);
 };
-static void set_spatial_sse_fl_flag(const char *value, EbConfig *cfg) {
-    cfg->spatial_sse_fl = strtol(value, NULL, 0);
+static void set_spatial_sse_full_loop_level_flag(const char *value, EbConfig *cfg) {
+    cfg->config.spatial_sse_full_loop_level = strtol(value, NULL, 0);
 };
-#if 0//!REMOVE_ME_SUBPEL_CODE
-static void set_enable_sub_pel_flag(const char *value, EbConfig *cfg) {
-    cfg->enable_subpel = strtol(value, NULL, 0);
-};
-#endif
 static void set_over_bndry_blk_flag(const char *value, EbConfig *cfg) {
-    cfg->over_bndry_blk = strtol(value, NULL, 0);
+    cfg->config.over_bndry_blk = strtol(value, NULL, 0);
 };
 static void set_new_nearest_comb_inject_flag(const char *value, EbConfig *cfg) {
-    cfg->new_nearest_comb_inject = strtol(value, NULL, 0);
-};
-#if 0//!SHUT_ME_CAND_SORTING
-static void set_prune_unipred_me_flag(const char *value, EbConfig *cfg) {
-    cfg->prune_unipred_me = strtol(value, NULL, 0);
-};
-#endif
-static void set_prune_ref_rec_part_flag(const char *value, EbConfig *cfg) {
-    cfg->prune_ref_rec_part = strtol(value, NULL, 0);
+    cfg->config.new_nearest_comb_inject = strtol(value, NULL, 0);
 };
 static void set_nsq_table_flag(const char *value, EbConfig *cfg) {
-    cfg->nsq_table = strtol(value, NULL, 0);
+    cfg->config.nsq_table = strtol(value, NULL, 0);
 };
 static void set_frame_end_cdf_update_flag(const char *value, EbConfig *cfg) {
-    cfg->frame_end_cdf_update = strtol(value, NULL, 0);
+    cfg->config.frame_end_cdf_update = strtol(value, NULL, 0);
 };
 static void set_chroma_mode(const char *value, EbConfig *cfg) {
-    cfg->set_chroma_mode = strtol(value, NULL, 0);
+    cfg->config.set_chroma_mode = strtol(value, NULL, 0);
 };
 static void set_disable_cfl_flag(const char *value, EbConfig *cfg) {
-    cfg->disable_cfl_flag = strtol(value, NULL, 0);
+    cfg->config.disable_cfl_flag = strtol(value, NULL, 0);
 };
-#if 1 // OBMC_CLI
 static void set_obmc_level_flag(const char *value, EbConfig *cfg) {
-    cfg->obmc_level = (EbBool)strtoul(value, NULL, 0);
+    cfg->config.obmc_level = (EbBool)strtoul(value, NULL, 0);
 };
-#else
-static void set_enable_obmc_flag(const char *value, EbConfig *cfg) {
-    cfg->enable_obmc = (EbBool)strtoul(value, NULL, 0);
-};
-#endif
-static void set_enable_rdoq_flag(const char *value, EbConfig *cfg) {
-    cfg->enable_rdoq = strtol(value, NULL, 0);
+static void set_rdoq_level_flag(const char *value, EbConfig *cfg) {
+    cfg->config.rdoq_level = strtol(value, NULL, 0);
 };
 static void set_predictive_me_flag(const char *value, EbConfig *cfg) {
-    cfg->pred_me = strtol(value, NULL, 0);
+    cfg->config.pred_me = strtol(value, NULL, 0);
 };
 static void set_bipred3x3inject_flag(const char *value, EbConfig *cfg) {
-    cfg->bipred_3x3_inject = strtol(value, NULL, 0);
+    cfg->config.bipred_3x3_inject = strtol(value, NULL, 0);
 };
 static void set_compound_level_flag(const char *value, EbConfig *cfg) {
-    cfg->compound_level = strtol(value, NULL, 0);
+    cfg->config.compound_level = strtol(value, NULL, 0);
 };
-#if 1 // FILTER_INTRA_CLI
 static void set_filter_intra_level_flag(const char *value, EbConfig *cfg) {
-    cfg->filter_intra_level = (int8_t)strtoul(value, NULL, 0);
+    cfg->config.filter_intra_level = (int8_t)strtoul(value, NULL, 0);
 };
-#else
-static void set_enable_filter_intra_flag(const char *value, EbConfig *cfg) {
-    cfg->enable_filter_intra = (EbBool)strtoul(value, NULL, 0);
-};
-#endif
 static void set_enable_intra_edge_filter_flag(const char *value, EbConfig *cfg) {
-    cfg->enable_intra_edge_filter = strtol(value, NULL, 0);
+    cfg->config.enable_intra_edge_filter = strtol(value, NULL, 0);
 };
 static void set_pic_based_rate_est(const char *value, EbConfig *cfg) {
-    cfg->pic_based_rate_est = strtol(value, NULL, 0);
+    cfg->config.pic_based_rate_est = strtol(value, NULL, 0);
 };
 static void set_enable_hme_flag(const char *value, EbConfig *cfg) {
-    cfg->enable_hme_flag = (EbBool)strtoul(value, NULL, 0);
+    cfg->config.enable_hme_flag = (EbBool)strtoul(value, NULL, 0);
 };
 static void set_enable_hme_level_0_flag(const char *value, EbConfig *cfg) {
-    cfg->enable_hme_level0_flag = (EbBool)strtoul(value, NULL, 0);
+    cfg->config.enable_hme_level0_flag = (EbBool)strtoul(value, NULL, 0);
 };
 static void set_tile_row(const char *value, EbConfig *cfg) {
-    cfg->tile_rows = strtoul(value, NULL, 0);
+    cfg->config.tile_rows = strtoul(value, NULL, 0);
 };
 static void set_tile_col(const char *value, EbConfig *cfg) {
-    cfg->tile_columns = strtoul(value, NULL, 0);
+    cfg->config.tile_columns = strtoul(value, NULL, 0);
 };
 static void set_scene_change_detection(const char *value, EbConfig *cfg) {
-    cfg->scene_change_detection = strtoul(value, NULL, 0);
+    cfg->config.scene_change_detection = strtoul(value, NULL, 0);
 }
 static void set_look_ahead_distance(const char *value, EbConfig *cfg) {
-    cfg->look_ahead_distance = strtoul(value, NULL, 0);
+    cfg->config.look_ahead_distance = strtoul(value, NULL, 0);
 };
-#if 1//TPL_LA
 static void set_enable_tpl_la(const char *value, EbConfig *cfg) {
-    cfg->enable_tpl_la = strtoul(value, NULL, 0);
+    cfg->config.enable_tpl_la = (uint8_t)strtoul(value, NULL, 0);
 };
-#endif
 static void set_rate_control_mode(const char *value, EbConfig *cfg) {
-    cfg->rate_control_mode = strtoul(value, NULL, 0);
+    cfg->config.rate_control_mode = strtoul(value, NULL, 0);
 };
 static void set_target_bit_rate(const char *value, EbConfig *cfg) {
-    cfg->target_bit_rate = 1000 * strtoul(value, NULL, 0);
+    cfg->config.target_bit_rate = 1000 * strtoul(value, NULL, 0);
 };
 static void set_vbv_buf_size(const char *value, EbConfig *cfg) {
-    cfg->vbv_bufsize = 1000 * strtoul(value, NULL, 0);
+    cfg->config.vbv_bufsize = 1000 * strtoul(value, NULL, 0);
 };
 static void set_max_qp_allowed(const char *value, EbConfig *cfg) {
-    cfg->max_qp_allowed = strtoul(value, NULL, 0);
+    cfg->config.max_qp_allowed = strtoul(value, NULL, 0);
 };
 static void set_min_qp_allowed(const char *value, EbConfig *cfg) {
-    cfg->min_qp_allowed = strtoul(value, NULL, 0);
+    cfg->config.min_qp_allowed = strtoul(value, NULL, 0);
+};
+static void set_vbr_bias_pct(const char *value, EbConfig *cfg) {
+    cfg->config.vbr_bias_pct = strtoul(value, NULL, 0);
+};
+static void set_vbr_min_section_pct(const char *value, EbConfig *cfg) {
+    cfg->config.vbr_min_section_pct = strtoul(value, NULL, 0);
+};
+static void set_vbr_max_section_pct(const char *value, EbConfig *cfg) {
+    cfg->config.vbr_max_section_pct = strtoul(value, NULL, 0);
+};
+static void set_under_shoot_pct(const char *value, EbConfig *cfg) {
+    cfg->config.under_shoot_pct = strtoul(value, NULL, 0);
+};
+static void set_over_shoot_pct(const char *value, EbConfig *cfg) {
+    cfg->config.over_shoot_pct = strtoul(value, NULL, 0);
 };
 static void set_adaptive_quantization(const char *value, EbConfig *cfg) {
-    cfg->enable_adaptive_quantization = (EbBool)strtol(value, NULL, 0);
+    cfg->config.enable_adaptive_quantization = (EbBool)strtol(value, NULL, 0);
 };
 static void set_enable_hme_level_1_flag(const char *value, EbConfig *cfg) {
-    cfg->enable_hme_level1_flag = (EbBool)strtoul(value, NULL, 0);
+    cfg->config.enable_hme_level1_flag = (EbBool)strtoul(value, NULL, 0);
 };
 static void set_enable_hme_level_2_flag(const char *value, EbConfig *cfg) {
-    cfg->enable_hme_level2_flag = (EbBool)strtoul(value, NULL, 0);
+    cfg->config.enable_hme_level2_flag = (EbBool)strtoul(value, NULL, 0);
 };
 static void set_cfg_search_area_width(const char *value, EbConfig *cfg) {
-    cfg->search_area_width = strtoul(value, NULL, 0);
+    cfg->config.search_area_width = strtoul(value, NULL, 0);
 };
 static void set_cfg_search_area_height(const char *value, EbConfig *cfg) {
-    cfg->search_area_height = strtoul(value, NULL, 0);
-};
-static void set_cfg_number_hme_search_region_in_width(const char *value, EbConfig *cfg) {
-    cfg->number_hme_search_region_in_width = strtoul(value, NULL, 0);
-};
-static void set_cfg_number_hme_search_region_in_height(const char *value, EbConfig *cfg) {
-    cfg->number_hme_search_region_in_height = strtoul(value, NULL, 0);
-};
-static void set_cfg_hme_level_0_total_search_area_width(const char *value, EbConfig *cfg) {
-    cfg->hme_level0_total_search_area_width = strtoul(value, NULL, 0);
-};
-static void set_cfg_hme_level_0_total_search_area_height(const char *value, EbConfig *cfg) {
-    cfg->hme_level0_total_search_area_height = strtoul(value, NULL, 0);
+    cfg->config.search_area_height = strtoul(value, NULL, 0);
 };
 static void set_cfg_use_default_me_hme(const char *value, EbConfig *cfg) {
-    cfg->use_default_me_hme = (EbBool)strtol(value, NULL, 0);
+    cfg->config.use_default_me_hme = (EbBool)strtol(value, NULL, 0);
 };
 static void set_enable_ext_block_flag(const char *value, EbConfig *cfg) {
-    cfg->ext_block_flag = (EbBool)strtoul(value, NULL, 0);
-};
-static void set_hme_level_0_search_area_in_width_array(const char *value, EbConfig *cfg) {
-    cfg->hme_level0_search_area_in_width_array[cfg->hme_level0_column_index++] =
-        strtoul(value, NULL, 0);
-};
-static void set_hme_level_0_search_area_in_height_array(const char *value, EbConfig *cfg) {
-    cfg->hme_level0_search_area_in_height_array[cfg->hme_level0_row_index++] =
-        strtoul(value, NULL, 0);
-};
-static void set_hme_level_1_search_area_in_width_array(const char *value, EbConfig *cfg) {
-    cfg->hme_level1_search_area_in_width_array[cfg->hme_level1_column_index++] =
-        strtoul(value, NULL, 0);
-};
-static void set_hme_level_1_search_area_in_height_array(const char *value, EbConfig *cfg) {
-    cfg->hme_level1_search_area_in_height_array[cfg->hme_level1_row_index++] =
-        strtoul(value, NULL, 0);
-};
-static void set_hme_level_2_search_area_in_width_array(const char *value, EbConfig *cfg) {
-    cfg->hme_level2_search_area_in_width_array[cfg->hme_level2_column_index++] =
-        strtoul(value, NULL, 0);
-};
-static void set_hme_level_2_search_area_in_height_array(const char *value, EbConfig *cfg) {
-    cfg->hme_level2_search_area_in_height_array[cfg->hme_level2_row_index++] =
-        strtoul(value, NULL, 0);
+    cfg->config.ext_block_flag = (EbBool)strtoul(value, NULL, 0);
 };
 static void set_screen_content_mode(const char *value, EbConfig *cfg) {
-    cfg->screen_content_mode = strtoul(value, NULL, 0);
+    cfg->config.screen_content_mode = strtoul(value, NULL, 0);
 };
 static void set_intrabc_mode(const char *value, EbConfig *cfg) {
-    cfg->intrabc_mode = strtol(value, NULL, 0);
+    cfg->config.intrabc_mode = strtol(value, NULL, 0);
 };
 // --- start: ALTREF_FILTERING_SUPPORT
-static void set_enable_altrefs(const char *value, EbConfig *cfg) {
-    cfg->enable_altrefs = (EbBool)strtoul(value, NULL, 0);
+static void set_tf_level(const char *value, EbConfig *cfg) {
+    cfg->config.tf_level = (int8_t)strtoul(value, NULL, 0);
 };
 static void set_altref_strength(const char *value, EbConfig *cfg) {
-    cfg->altref_strength = (uint8_t)strtoul(value, NULL, 0);
+    cfg->config.altref_strength = (uint8_t)strtoul(value, NULL, 0);
 };
 static void set_altref_n_frames(const char *value, EbConfig *cfg) {
-    cfg->altref_nframes = (uint8_t)strtoul(value, NULL, 0);
+    cfg->config.altref_nframes = (uint8_t)strtoul(value, NULL, 0);
 };
 static void set_enable_overlays(const char *value, EbConfig *cfg) {
-    cfg->enable_overlays = (EbBool)strtoul(value, NULL, 0);
+    cfg->config.enable_overlays = (EbBool)strtoul(value, NULL, 0);
 };
 // --- end: ALTREF_FILTERING_SUPPORT
 // --- start: SUPER-RESOLUTION SUPPORT
 static void set_superres_mode(const char *value, EbConfig *cfg) {
-    cfg->superres_mode = (SUPERRES_MODE)strtoul(value, NULL, 0);
+    cfg->config.superres_mode = (SUPERRES_MODE)strtoul(value, NULL, 0);
 };
 static void set_superres_denom(const char *value, EbConfig *cfg) {
-    cfg->superres_denom = (uint8_t)strtoul(value, NULL, 0);
+    cfg->config.superres_denom = (uint8_t)strtoul(value, NULL, 0);
 };
 static void set_superres_kf_denom(const char *value, EbConfig *cfg) {
-    cfg->superres_kf_denom = (uint8_t)strtoul(value, NULL, 0);
+    cfg->config.superres_kf_denom = (uint8_t)strtoul(value, NULL, 0);
 };
 static void set_superres_qthres(const char *value, EbConfig *cfg) {
-    cfg->superres_qthres = (uint8_t)strtoul(value, NULL, 0);
+    cfg->config.superres_qthres = (uint8_t)strtoul(value, NULL, 0);
 };
 // --- end: SUPER-RESOLUTION SUPPORT
 static void set_enable_hbd_mode_decision(const char *value, EbConfig *cfg) {
-#if 1 //CHANGE_HBD_MODE
-    cfg->enable_hbd_mode_decision = (uint8_t)strtoul(value, NULL, 0);
-#else
-    cfg->enable_hbd_mode_decision = (int8_t)strtoul(value, NULL, 0);
-#endif
+    cfg->config.enable_hbd_mode_decision = (uint8_t)strtoul(value, NULL, 0);
 };
-static void set_enable_palette(const char *value, EbConfig *cfg) {
-    cfg->enable_palette = (int32_t)strtol(value, NULL, 0);
+static void set_palette_level(const char *value, EbConfig *cfg) {
+    cfg->config.palette_level = (int32_t)strtoul(value, NULL, 0);
 };
 static void set_high_dynamic_range_input(const char *value, EbConfig *cfg) {
-    cfg->high_dynamic_range_input = strtol(value, NULL, 0);
+    cfg->config.high_dynamic_range_input = strtol(value, NULL, 0);
 };
 static void set_profile(const char *value, EbConfig *cfg) {
-    cfg->profile = strtol(value, NULL, 0);
+    cfg->config.profile = strtol(value, NULL, 0);
 };
-static void set_tier(const char *value, EbConfig *cfg) { cfg->tier = strtol(value, NULL, 0); };
+static void set_tier(const char *value, EbConfig *cfg) { cfg->config.tier = strtol(value, NULL, 0); };
 static void set_level(const char *value, EbConfig *cfg) {
-    if (strtoul(value, NULL, 0) != 0 || EB_STRCMP(value, "0") == 0)
-        cfg->level = (uint32_t)(10 * strtod(value, NULL));
+    if (strtoul(value, NULL, 0) != 0 || strcmp(value, "0") == 0)
+        cfg->config.level = (uint32_t)(10 * strtod(value, NULL));
     else
-        cfg->level = 9999999;
+        cfg->config.level = 9999999;
 };
 static void set_injector(const char *value, EbConfig *cfg) {
     cfg->injector = strtol(value, NULL, 0);
@@ -742,9 +634,6 @@ static void set_injector_frame_rate(const char *value, EbConfig *cfg) {
     if (cfg->injector_frame_rate <= 1000)
         cfg->injector_frame_rate <<= 16;
 }
-static void set_latency_mode(const char *value, EbConfig *cfg) {
-    cfg->latency_mode = (uint8_t)strtol(value, NULL, 0);
-};
 static void set_asm_type(const char *value, EbConfig *cfg) {
     const struct {
         const char *name;
@@ -779,51 +668,26 @@ static void set_asm_type(const char *value, EbConfig *cfg) {
     uint32_t       i;
 
     for (i = 0; i < para_map_size; ++i) {
-        if (EB_STRCMP(value, param_maps[i].name) == 0) {
-            cfg->cpu_flags_limit = param_maps[i].flags;
+        if (strcmp(value, param_maps[i].name) == 0) {
+            cfg->config.use_cpu_flags = param_maps[i].flags;
             return;
         }
     }
 
-    cfg->cpu_flags_limit = CPU_FLAGS_INVALID;
+    cfg->config.use_cpu_flags = CPU_FLAGS_INVALID;
 };
 static void set_logical_processors(const char *value, EbConfig *cfg) {
-    cfg->logical_processors = (uint32_t)strtoul(value, NULL, 0);
+    cfg->config.logical_processors = (uint32_t)strtoul(value, NULL, 0);
 };
 static void set_unpin_execution(const char *value, EbConfig *cfg) {
-    cfg->unpin = (uint32_t)strtoul(value, NULL, 0);
+    cfg->config.unpin = (uint32_t)strtoul(value, NULL, 0);
 };
 static void set_target_socket(const char *value, EbConfig *cfg) {
-    cfg->target_socket = (int32_t)strtol(value, NULL, 0);
+    cfg->config.target_socket = (int32_t)strtol(value, NULL, 0);
 };
 static void set_unrestricted_motion_vector(const char *value, EbConfig *cfg) {
-    cfg->unrestricted_motion_vector = (EbBool)strtol(value, NULL, 0);
+    cfg->config.unrestricted_motion_vector = (EbBool)strtol(value, NULL, 0);
 };
-
-static void set_square_weight(const char *value, EbConfig *cfg) {
-    cfg->sq_weight = (uint64_t)strtoul(value, NULL, 0);
-    if (cfg->sq_weight == 0) cfg->sq_weight = (uint32_t)~0;
-}
-
-static void set_md_stage_1_class_prune_th(const char *value, EbConfig *cfg) {
-    cfg->md_stage_1_class_prune_th = (uint64_t)strtoul(value, NULL, 0);
-    if (cfg->md_stage_1_class_prune_th == 0) cfg->md_stage_1_class_prune_th = (uint64_t)~0;
-}
-
-static void set_md_stage_1_cand_prune_th(const char *value, EbConfig *cfg) {
-    cfg->md_stage_1_cand_prune_th = (uint64_t)strtoul(value, NULL, 0);
-    if (cfg->md_stage_1_cand_prune_th == 0) cfg->md_stage_1_cand_prune_th = (uint64_t)~0;
-}
-
-static void set_md_stage_2_3_class_prune_th(const char *value, EbConfig *cfg) {
-    cfg->md_stage_2_3_class_prune_th = (uint64_t)strtoul(value, NULL, 0);
-    if (cfg->md_stage_2_3_class_prune_th == 0) cfg->md_stage_2_3_class_prune_th = (uint64_t)~0;
-}
-
-static void set_md_stage_2_3_cand_prune_th(const char *value, EbConfig *cfg) {
-    cfg->md_stage_2_3_cand_prune_th = (uint64_t)strtoul(value, NULL, 0);
-    if (cfg->md_stage_2_3_cand_prune_th == 0) cfg->md_stage_2_3_cand_prune_th = (uint64_t)~0;
-}
 
 enum CfgType {
     SINGLE_INPUT, // Configuration parameters that have only 1 value input
@@ -877,7 +741,16 @@ ConfigEntry config_entry_global_options[] = {
      set_cfg_frames_to_be_encoded},
 
     {SINGLE_INPUT, BUFFERED_INPUT_TOKEN, "Buffer n input frames", set_buffered_input},
-    {SINGLE_INPUT, NO_PROGRESS_TOKEN, "Do not print out progress", set_no_progress},
+    {SINGLE_INPUT,
+     PROGRESS_TOKEN,
+     "Change verbosity of the output (0: no progress is printed, 1: default, 2: aomenc style "
+     "machine parsable output)",
+     set_progress},
+    {SINGLE_INPUT,
+     NO_PROGRESS_TOKEN,
+     "Do not print out progress, if set to 1 it is equivalent to `" PROGRESS_TOKEN
+     " 0`, else  `" PROGRESS_TOKEN " 1`",
+     set_no_progress},
     {SINGLE_INPUT,
      ENCODER_COLOR_FORMAT,
      "Set encoder color format(EB_YUV400, EB_YUV420, EB_YUV422, EB_YUV444)",
@@ -898,7 +771,10 @@ ConfigEntry config_entry_global_options[] = {
      set_frame_rate_denominator},
     //{SINGLE_INPUT, ENCODER_BIT_DEPTH, "Bit depth for codec(8 or 10)", set_encoder_bit_depth},
     {SINGLE_INPUT, INPUT_DEPTH_TOKEN, "Bit depth for codec(8 or 10)", set_encoder_bit_depth},
-    {SINGLE_INPUT, ENCODER_16BIT_PIPELINE, "Bit depth for enc-dec(0: lbd[default], 1: hbd)", set_encoder_16bit_pipeline},
+    {SINGLE_INPUT,
+     ENCODER_16BIT_PIPELINE,
+     "Bit depth for enc-dec(0: lbd[default], 1: hbd)",
+     set_encoder_16bit_pipeline},
     //{SINGLE_INPUT, LEVEL_TOKEN, "Level", set_level},
     {SINGLE_INPUT,
      HIERARCHICAL_LEVELS_TOKEN,
@@ -925,17 +801,20 @@ ConfigEntry config_entry_global_options[] = {
     {SINGLE_INPUT, THREAD_MGMNT, "number of logical processors to be used", set_logical_processors},
     {SINGLE_INPUT,
      UNPIN_TOKEN,
-    "Allows the execution to be pined/unpined to/from a specific number of cores \n"
-    "The combinational use of --unpin with --lp results in memory reduction while allowing the execution to work on any of the cores and not restrict it to specific cores \n"
-    "--unpin is overwritten to 0 when --ss is set to 0 or 1. ( 0: OFF ,1: ON [default]) \n"
-    "Example: 72 core machine: \n"
-    "72 jobs x -- lp 1 -- unpin 1 \n"
-    "36 jobs x -- lp 2 -- unpin 1 \n"
-    "18 jobs x -- lp 4 -- unpin 1 ",
+     "Allows the execution to be pined/unpined to/from a specific number of cores \n"
+     "The combinational use of --unpin with --lp results in memory reduction while allowing the "
+     "execution to work on any of the cores and not restrict it to specific cores \n"
+     "--unpin is overwritten to 0 when --ss is set to 0 or 1. ( 0: OFF ,1: ON [default]) \n"
+     "Example: 72 core machine: \n"
+     "72 jobs x -- lp 1 -- unpin 1 \n"
+     "36 jobs x -- lp 2 -- unpin 1 \n"
+     "18 jobs x -- lp 4 -- unpin 1 ",
      set_unpin_execution},
-    {SINGLE_INPUT, TARGET_SOCKET, "Specify  which socket the encoder runs on"
-    "--unpin is overwritten to 0 when --ss is set to 0 or 1",
-    set_target_socket},
+    {SINGLE_INPUT,
+     TARGET_SOCKET,
+     "Specify  which socket the encoder runs on"
+     "--unpin is overwritten to 0 when --ss is set to 0 or 1",
+     set_target_socket},
     // Termination
     {SINGLE_INPUT, NULL, NULL, NULL}};
 
@@ -963,6 +842,8 @@ ConfigEntry config_entry_rc[] = {
      "Set adaptive QP level(0: OFF ,1: variance base using segments ,2: Deltaq pred efficiency)",
      set_adaptive_quantization},
     {SINGLE_INPUT, VBV_BUFSIZE_TOKEN, "VBV buffer size", set_vbv_buf_size},
+    {SINGLE_INPUT, UNDER_SHOOT_PCT_TOKEN, "Datarate undershoot (min) target (%)", set_under_shoot_pct},
+    {SINGLE_INPUT, OVER_SHOOT_PCT_TOKEN, "Datarate overshoot (max) target (%)", set_over_shoot_pct},
     // Termination
     {SINGLE_INPUT, NULL, NULL, NULL}};
 ConfigEntry config_entry_2p[] = {
@@ -970,41 +851,26 @@ ConfigEntry config_entry_2p[] = {
     {SINGLE_INPUT, PASS_TOKEN, "Multipass bitrate control (1: first pass, generates stats file , 2: second pass, uses stats file)", set_pass},
     {SINGLE_INPUT, TWO_PASS_STATS_TOKEN, "Filename for 2 pass stats(\"svtav1_2pass.log\" : [Default])", set_two_pass_stats},
     {SINGLE_INPUT, PASSES_TOKEN, "Number of passes (1: one pass encode, 2: two passes encode)", set_passes},
-    {SINGLE_INPUT, OUTPUT_STAT_FILE_TOKEN, "First pass stat file output", set_output_stat_file},
-    {SINGLE_INPUT,
-     INPUT_STAT_FILE_TOKEN,
-     "Input the first pass output to the second pass",
-     set_input_stat_file},
-    {SINGLE_INPUT,
-     ENCMODE2P_TOKEN,
-     "Use Hme/Me settings of the second pass'encoder mode in the first pass",
-     set_snd_pass_enc_mode},
+    {SINGLE_INPUT, VBR_BIAS_PCT_TOKEN, "CBR/VBR bias (0=CBR, 100=VBR)", set_vbr_bias_pct},
+    {SINGLE_INPUT, VBR_MIN_SECTION_PCT_TOKEN, "GOP min bitrate (% of target)", set_vbr_min_section_pct},
+    {SINGLE_INPUT, VBR_MAX_SECTION_PCT_TOKEN, "GOP max bitrate (% of target)", set_vbr_max_section_pct},
     // Termination
     {SINGLE_INPUT, NULL, NULL, NULL}};
 ConfigEntry config_entry_intra_refresh[] = {
-    // File I/O
-    //{SINGLE_INPUT,
-    // INTRA_PERIOD_TOKEN,
-    //"Intra period interval(frames) (-2: No intra update, -1: default intra period or [0-255])",
-    // set_cfg_intra_period},
     {SINGLE_INPUT,
      KEYINT_TOKEN,
-     "Intra period interval(frames) (-2: No intra update, -1: default intra period or [0-255])",
+     "Intra period interval(frames) (-2: default intra period , -1: No intra update or [0 - 2^31-2]; [-2-255] if RateControlMode >= 1)",
      set_cfg_intra_period},
     {SINGLE_INPUT,
      INTRA_REFRESH_TYPE_TOKEN,
-     "Intra refresh type (1: CRA (Open GOP)2: IDR (Closed GOP))",
+     "Intra refresh type (1: CRA (Open GOP), 2: IDR (Closed GOP)[default])",
      set_tile_row},
     // Termination
     {SINGLE_INPUT, NULL, NULL, NULL}};
 ConfigEntry config_entry_specific[] = {
     // Prediction Structure
     //{SINGLE_INPUT, ENCMODE_TOKEN, "Encoder mode/Preset used[0-8]", set_enc_mode},
-#if 1//REMOVE_MR_MACRO
     {SINGLE_INPUT, PRESET_TOKEN, "Encoder mode/Preset used[-2,-1,0,..,8]", set_enc_mode},
-#else
-    {SINGLE_INPUT, PRESET_TOKEN, "Encoder mode/Preset used[0-8]", set_enc_mode},
-#endif
     {SINGLE_INPUT,
      INPUT_COMPRESSED_TEN_BIT_FORMAT,
      "Offline packing of the 2bits: requires two bits packed input (0: OFF[default], 1: ON)",
@@ -1024,10 +890,10 @@ ConfigEntry config_entry_specific[] = {
      "Disable loop filter(0: loop filter enabled[default] ,1: loop filter disabled)",
      set_disable_dlf_flag},
     // CDEF
-    {SINGLE_INPUT,
-     CDEF_MODE_TOKEN,
-     "CDEF Mode, 0: OFF, 1-5: ON with 2,4,8,16,64 step refinement, -1: DEFAULT",
-     set_cdef_mode},
+     {SINGLE_INPUT,
+     CDEF_LEVEL_TOKEN,
+     "CDEF Level, 0: OFF, 1-5: ON with 64,16,8,4,1 step refinement, -1: DEFAULT",
+     set_cdef_level},
     // RESTORATION
     {SINGLE_INPUT,
      RESTORATION_ENABLE_NEW_TOKEN,
@@ -1042,12 +908,17 @@ ConfigEntry config_entry_specific[] = {
      "Wiener filter mode (0:OFF, 1: 3-Tap luma/ 3-Tap chroma, 2: 5-Tap luma/ 5-Tap chroma, 3: "
      "7-Tap luma/ 7-Tap chroma, -1: DEFAULT)",
      set_wn_filter_mode},
-#if 1//ON_OFF_FEATURE_MRP
     {SINGLE_INPUT,
      MRP_LEVEL_TOKEN,
      "Multi reference frame levels( 0: OFF, 1: FULL, 2: Level1 .. 9: Level8,  -1: DEFAULT)",
      set_mrp_level},
-#endif
+    {SINGLE_INPUT, LOOK_AHEAD_DIST_TOKEN,
+    "Set look ahead distance",
+    set_look_ahead_distance},
+    {SINGLE_INPUT,
+    ENABLE_TPL_LA_TOKEN,
+    "RDO based on frame temporal dependency (0: off, 1: backward source based)",
+    set_enable_tpl_la},
     {SINGLE_INPUT,
      MFMV_ENABLE_NEW_TOKEN,
      "Enable motion field motion vector( 0: OFF, 1: ON, -1: DEFAULT)",
@@ -1057,16 +928,10 @@ ConfigEntry config_entry_specific[] = {
      "Use the same md results(mode, residual , cost,etc..)as the previously processed identical "
      "block(0: OFF, 1: ON, -1: DEFAULT)",
      set_enable_redundant_blk_flag},
-    {SINGLE_INPUT,
-     SPATIAL_SSE_FL_NEW_TOKEN,
-     "Enable spatial sse full loop(0: OFF, 1: ON, -1: DEFAULT)",
-     set_spatial_sse_fl_flag},
-#if 0//!REMOVE_ME_SUBPEL_CODE
-    {SINGLE_INPUT,
-     SUBPEL_TOKEN,
-     "Enable subpel(0: OFF, 1: ON, -1: DEFAULT)",
-     set_enable_sub_pel_flag},
-#endif
+     {SINGLE_INPUT,
+      SPATIAL_SSE_FL_NEW_TOKEN,
+      "Enable spatial sse full loop(0: OFF, 1: ON, -1: DEFAULT)",
+      set_spatial_sse_full_loop_level_flag},
     {SINGLE_INPUT,
      OVR_BNDRY_BLK_NEW_TOKEN,
      "Enable over boundary block mode (0: OFF, 1: ON, -1: DEFAULT)",
@@ -1075,16 +940,6 @@ ConfigEntry config_entry_specific[] = {
      NEW_NEAREST_COMB_INJECT_NEW_TOKEN,
      "Enable new nearest near comb injection (0: OFF, 1: ON, -1: DEFAULT)",
      set_new_nearest_comb_inject_flag},
-#if 0//!SHUT_ME_CAND_SORTING
-    {SINGLE_INPUT,
-     PRUNE_UNIPRED_ME_NEW_TOKEN,
-     "Enable prune unipred at me (0: OFF, 1: ON, -1: DEFAULT)",
-     set_prune_unipred_me_flag},
-#endif
-    {SINGLE_INPUT,
-     PRUNE_REF_REC_PART_NEW_TOKEN,
-     "Enable prune ref frame for rec partitions (0: OFF, 1: ON, -1: DEFAULT)",
-     set_prune_ref_rec_part_flag},
     {SINGLE_INPUT,
      NSQ_TABLE_NEW_TOKEN,
      "Enable nsq table (0: OFF, 1: ON, -1: DEFAULT)",
@@ -1111,18 +966,6 @@ ConfigEntry config_entry_specific[] = {
      GLOBAL_MOTION_ENABLE_NEW_TOKEN,
      "Enable global motion (0: OFF, 1: ON [default])",
      set_enable_global_motion_flag},
- #if 0//!REMOVE_COMBINE_CLASS12
-    // CLASS 12
-    {SINGLE_INPUT,
-     CLASS_12_NEW_TOKEN,
-     "Enable combine MD Class1&2 (0: OFF, 1: ON, -1: DEFAULT)",
-     set_class_12_flag},
-#endif
-    // EDGE SKIP ANGLE INTRA
-    {SINGLE_INPUT,
-     EDGE_SKIP_ANGLE_INTRA_NEW_TOKEN,
-     "Enable intra edge filtering (0: OFF, 1: ON (default))",
-     set_edge_skip_angle_intra_flag},
     // INTRA ANGLE DELTA
     {SINGLE_INPUT,
      INTRA_ANGLE_DELTA_TOKEN,
@@ -1144,29 +987,18 @@ ConfigEntry config_entry_specific[] = {
      "Enable smooth (0: OFF, 1: ON, -1: DEFAULT)",
      set_enable_smooth_flag},
     // OBMC
-#if 1 // OBMC_CLI
      {SINGLE_INPUT, OBMC_TOKEN, "OBMC Level(0: OFF, 1: Fully ON, 2 and 3 are faster levels, -1: DEFAULT)", set_obmc_level_flag},
-#else
-    {SINGLE_INPUT, OBMC_TOKEN, "Enable OBMC(0: OFF, 1: ON[default]) ", set_enable_obmc_flag},
-#endif
     // RDOQ
     {SINGLE_INPUT,
      RDOQ_NEW_TOKEN,
      "Enable RDOQ (0: OFF, 1: ON, -1: DEFAULT)",
-     set_enable_rdoq_flag},
+     set_rdoq_level_flag},
 
     // Filter Intra
-#if 1 // FILTER_INTRA_CLI
     {SINGLE_INPUT,
      FILTER_INTRA_NEW_TOKEN,
      "Enable filter intra prediction mode (0: OFF, 1: ON [default])",
      set_filter_intra_level_flag},
-#else
-    {SINGLE_INPUT,
-     FILTER_INTRA_NEW_TOKEN,
-     "Enable filter intra prediction mode (0: OFF, 1: ON [default])",
-     set_enable_filter_intra_flag},
-#endif
 
     // Edge Intra Filter
     {SINGLE_INPUT,
@@ -1229,23 +1061,6 @@ ConfigEntry config_entry_specific[] = {
      SEARCH_AREA_HEIGHT_TOKEN,
      "Set search area in height[1-256]",
      set_cfg_search_area_height},
-    // HME Parameters
-    {SINGLE_INPUT,
-     NUM_HME_SEARCH_WIDTH_TOKEN,
-     "Set hierarchical motion estimation search region in Width",
-     set_cfg_number_hme_search_region_in_width},
-    {SINGLE_INPUT,
-     NUM_HME_SEARCH_HEIGHT_TOKEN,
-     "Set hierarchical motion estimation search region in height",
-     set_cfg_number_hme_search_region_in_height},
-    {SINGLE_INPUT,
-     HME_SRCH_T_L0_WIDTH_TOKEN,
-     "Set hierarchical motion estimation level0 total search area in Width",
-     set_cfg_hme_level_0_total_search_area_width},
-    {SINGLE_INPUT,
-     HME_SRCH_T_L0_HEIGHT_TOKEN,
-     "Set hierarchical motion estimation level0 total search area in height",
-     set_cfg_hme_level_0_total_search_area_height},
     // MD Parameters
     {SINGLE_INPUT,
      SCREEN_CONTENT_TOKEN,
@@ -1262,7 +1077,7 @@ ConfigEntry config_entry_specific[] = {
     {SINGLE_INPUT,
      PALETTE_TOKEN,
      "Set palette prediction mode(-1: default or [0-6])",
-     set_enable_palette},
+     set_palette_level},
     // Optional Features
     {SINGLE_INPUT,
      UNRESTRICTED_MOTION_VECTOR,
@@ -1285,42 +1100,11 @@ ConfigEntry config_entry_specific[] = {
      FILM_GRAIN_TOKEN,
      "Enable film grain(0: OFF[default], 1-50: ON, film-grain denoising strength)",
      set_cfg_film_grain},
-    // HME
-    {ARRAY_INPUT,
-     HME_LEVEL0_WIDTH,
-     "Set hierarchical motion estimation level0 search width (Requires numbers whose sum "
-     "equal the total search width and amount equals the search regions)",
-     set_hme_level_0_search_area_in_width_array},
-    {ARRAY_INPUT,
-     HME_LEVEL0_HEIGHT,
-     "Set hierarchical motion estimation level0 search height (Requires numbers whose sum "
-     "equal the total search height and amount equals the search regions)",
-     set_hme_level_0_search_area_in_height_array},
-    {ARRAY_INPUT,
-     HME_LEVEL1_WIDTH,
-     "Set hierarchical motion estimation level1 search width (Requires numbers whose sum "
-     "equal the total search width and amount equals the search regions)",
-     set_hme_level_1_search_area_in_width_array},
-    {ARRAY_INPUT,
-     HME_LEVEL1_HEIGHT,
-     "Set hierarchical motion estimation level1 search height (Requires numbers whose sum "
-     "equal the total search height and amount equals the search regions)",
-     set_hme_level_1_search_area_in_height_array},
-    {ARRAY_INPUT,
-     HME_LEVEL2_WIDTH,
-     "Set hierarchical motion estimation level2 search width (Requires numbers whose sum "
-     "equal the total search width and amount equals the search regions)",
-     set_hme_level_2_search_area_in_width_array},
-    {ARRAY_INPUT,
-     HME_LEVEL2_HEIGHT,
-     "Set hierarchical motion estimation level2 search height (Requires numbers whose sum "
-     "equal the total search height and amount equals the search regions)",
-     set_hme_level_2_search_area_in_height_array},
     // --- start: ALTREF_FILTERING_SUPPORT
-    {SINGLE_INPUT,
-     ENABLE_ALTREFS,
-     "Enable automatic alt reference frames(0: OFF, 1: ON[default])",
-     set_enable_altrefs},
+     {SINGLE_INPUT,
+      TF_LEVEL,
+      "Set altref level(-1: Default; 0: OFF; 1: ON; 2 and 3: Faster levels)",
+      set_tf_level},
     {SINGLE_INPUT,
      ALTREF_STRENGTH,
      "AltRef filter strength([0-6], default: 5)",
@@ -1332,28 +1116,6 @@ ConfigEntry config_entry_specific[] = {
      "extra reference frame for the base-layer picture(0: OFF[default], 1: ON)",
      set_enable_overlays},
     // --- end: ALTREF_FILTERING_SUPPORT
-    {SINGLE_INPUT,
-     SQ_WEIGHT_TOKEN,
-     "Determines if HA, HB, VA, VB, H4 and V4 shapes could be skipped based on the cost of SQ, H "
-     "and V shapes([75-100], default: 100)",
-     set_square_weight},
-    {SINGLE_INPUT,
-     MDS_1_PRUNE_C_TH,
-     "Set MD Stage 1 prune class threshold[5-200]",
-     set_md_stage_1_class_prune_th},
-    {SINGLE_INPUT,
-     MDS_1_PRUNE_S_TH,
-     "Set MD Stage 1 prune candidate threshold[5,150]",
-     set_md_stage_1_cand_prune_th},
-    {SINGLE_INPUT,
-     MDS_2_3_PRUNE_C_TH,
-     "Set MD Stage 2/3 prune class threshold[5,100]",
-     set_md_stage_2_3_class_prune_th},
-    {SINGLE_INPUT,
-     MDS_2_3_PRUNE_S_TH,
-     "Set MD Stage 2/3 prune candidate threshold[5,50]",
-     set_md_stage_2_3_cand_prune_th},
-
     {SINGLE_INPUT, STAT_REPORT_NEW_TOKEN, "Stat Report", set_stat_report},
     {SINGLE_INPUT,
      INTRA_ANGLE_DELTA_NEW_TOKEN,
@@ -1381,8 +1143,6 @@ ConfigEntry config_entry[] = {
     // two pass
     {SINGLE_INPUT, PASS_TOKEN, "Pass", set_pass},
     {SINGLE_INPUT, TWO_PASS_STATS_TOKEN, "Two pass stat", set_two_pass_stats},
-    {SINGLE_INPUT, INPUT_STAT_FILE_TOKEN, "InputStatFile", set_input_stat_file},
-    {SINGLE_INPUT, OUTPUT_STAT_FILE_TOKEN, "OutputStatFile", set_output_stat_file},
 
     {SINGLE_INPUT, INPUT_PREDSTRUCT_FILE_TOKEN, "PredStructFile", set_pred_struct_file},
     // Picture Dimensions
@@ -1391,9 +1151,9 @@ ConfigEntry config_entry[] = {
     // Prediction Structure
     {SINGLE_INPUT, NUMBER_OF_PICTURES_TOKEN, "FrameToBeEncoded", set_cfg_frames_to_be_encoded},
     {SINGLE_INPUT, BUFFERED_INPUT_TOKEN, "BufferedInput", set_buffered_input},
+    {SINGLE_INPUT, PROGRESS_TOKEN, "Progress", set_progress},
     {SINGLE_INPUT, NO_PROGRESS_TOKEN, "NoProgress", set_no_progress},
     {SINGLE_INPUT, ENCMODE_TOKEN, "EncoderMode", set_enc_mode},
-    {SINGLE_INPUT, ENCMODE2P_TOKEN, "EncoderMode2p", set_snd_pass_enc_mode},
     {SINGLE_INPUT, INTRA_PERIOD_TOKEN, "IntraPeriod", set_cfg_intra_period},
     {SINGLE_INPUT, INTRA_REFRESH_TYPE_TOKEN, "IntraRefreshType", set_cfg_intra_refresh_type},
     {SINGLE_INPUT, FRAME_RATE_TOKEN, "FrameRate", set_frame_rate},
@@ -1423,20 +1183,23 @@ ConfigEntry config_entry[] = {
     {SINGLE_INPUT, STAT_REPORT_TOKEN, "StatReport", set_stat_report},
     {SINGLE_INPUT, RATE_CONTROL_ENABLE_TOKEN, "RateControlMode", set_rate_control_mode},
     {SINGLE_INPUT, LOOK_AHEAD_DIST_TOKEN, "LookAheadDistance", set_look_ahead_distance},
-#if 1//TPL_LA
     {SINGLE_INPUT, ENABLE_TPL_LA_TOKEN, "EnableTplLA", set_enable_tpl_la},
-#endif
     {SINGLE_INPUT, TARGET_BIT_RATE_TOKEN, "TargetBitRate", set_target_bit_rate},
     {SINGLE_INPUT, MAX_QP_TOKEN, "MaxQpAllowed", set_max_qp_allowed},
     {SINGLE_INPUT, MIN_QP_TOKEN, "MinQpAllowed", set_min_qp_allowed},
     {SINGLE_INPUT, VBV_BUFSIZE_TOKEN, "VBVBufSize", set_vbv_buf_size},
     {SINGLE_INPUT, ADAPTIVE_QP_ENABLE_TOKEN, "AdaptiveQuantization", set_adaptive_quantization},
+    {SINGLE_INPUT, VBR_BIAS_PCT_TOKEN, "CBR/VBR bias (0=CBR, 100=VBR)", set_vbr_bias_pct},
+    {SINGLE_INPUT, VBR_MIN_SECTION_PCT_TOKEN, "GOP min bitrate (% of target)", set_vbr_min_section_pct},
+    {SINGLE_INPUT, VBR_MAX_SECTION_PCT_TOKEN, "GOP max bitrate (% of target)", set_vbr_max_section_pct},
+    {SINGLE_INPUT, UNDER_SHOOT_PCT_TOKEN, "Datarate undershoot (min) target (%)", set_under_shoot_pct},
+    {SINGLE_INPUT, OVER_SHOOT_PCT_TOKEN, "Datarate overshoot (max) target (%)", set_over_shoot_pct},
 
     // DLF
     {SINGLE_INPUT, LOOP_FILTER_DISABLE_TOKEN, "LoopFilterDisable", set_disable_dlf_flag},
 
     // CDEF
-    {SINGLE_INPUT, CDEF_MODE_TOKEN, "CDEFMode", set_cdef_mode},
+    {SINGLE_INPUT, CDEF_LEVEL_TOKEN, "CDEFLevel", set_cdef_level},
 
     // RESTORATION
     {SINGLE_INPUT,
@@ -1445,24 +1208,15 @@ ConfigEntry config_entry[] = {
      set_enable_restoration_filter_flag},
     {SINGLE_INPUT, SG_FILTER_MODE_TOKEN, "SelfGuidedFilterMode", set_sg_filter_mode},
     {SINGLE_INPUT, WN_FILTER_MODE_TOKEN, "WienerFilterMode", set_wn_filter_mode},
-#if 1//ON_OFF_FEATURE_MRP
     {SINGLE_INPUT, MRP_LEVEL_TOKEN, "MrpLevel", set_mrp_level},
-#endif
     {SINGLE_INPUT, MFMV_ENABLE_TOKEN, "Mfmv", set_enable_mfmv_flag},
     {SINGLE_INPUT, REDUNDANT_BLK_TOKEN, "RedundantBlock", set_enable_redundant_blk_flag},
-    {SINGLE_INPUT, SPATIAL_SSE_FL_TOKEN, "SpatialSSEfl", set_spatial_sse_fl_flag},
-#if 0//!REMOVE_ME_SUBPEL_CODE
-    {SINGLE_INPUT, SUBPEL_TOKEN, "Subpel", set_enable_sub_pel_flag},
-#endif
+    {SINGLE_INPUT, SPATIAL_SSE_FL_TOKEN, "SpatialSSEfl", set_spatial_sse_full_loop_level_flag},
     {SINGLE_INPUT, OVR_BNDRY_BLK_TOKEN, "OverBoundryBlock", set_over_bndry_blk_flag},
     {SINGLE_INPUT,
      NEW_NEAREST_COMB_INJECT_TOKEN,
      "NewNearestCombInjection",
      set_new_nearest_comb_inject_flag},
-#if 0//!SHUT_ME_CAND_SORTING
-    {SINGLE_INPUT, PRUNE_UNIPRED_ME_TOKEN, "PruneUnipredMe", set_prune_unipred_me_flag},
-#endif
-    {SINGLE_INPUT, PRUNE_REF_REC_PART_TOKEN, "PruneRefRecPart", set_prune_ref_rec_part_flag},
     {SINGLE_INPUT, NSQ_TABLE_TOKEN, "NsqTable", set_nsq_table_flag},
     {SINGLE_INPUT, FRAME_END_CDF_UPDATE_TOKEN, "FrameEndCdfUpdate", set_frame_end_cdf_update_flag},
 
@@ -1477,15 +1231,6 @@ ConfigEntry config_entry[] = {
      set_enable_local_warped_motion_flag},
     // GLOBAL MOTION
     {SINGLE_INPUT, GLOBAL_MOTION_ENABLE_TOKEN, "GlobalMotion", set_enable_global_motion_flag},
-#if 0//!REMOVE_COMBINE_CLASS12
-    // CLASS 12
-    {SINGLE_INPUT, CLASS_12_TOKEN, "CombineClass12", set_class_12_flag},
-#endif
-    // EDGE SKIP ANGLE INTRA
-    {SINGLE_INPUT,
-     EDGE_SKIP_ANGLE_INTRA_TOKEN,
-     "EdgeSkipAngleIntra",
-     set_edge_skip_angle_intra_flag},
     // INTRA ANGLE DELTA
     {SINGLE_INPUT, INTRA_ANGLE_DELTA_TOKEN, "IntraAngleDelta", set_intra_angle_delta_flag},
 
@@ -1496,20 +1241,11 @@ ConfigEntry config_entry[] = {
     // SMOOTH
     {SINGLE_INPUT, SMOOTH_TOKEN, "Smooth", set_enable_smooth_flag},
     // OBMC
-#if 1 // OBMC_CLI
     {SINGLE_INPUT, OBMC_TOKEN, "Obmc", set_obmc_level_flag},
-#else
-    {SINGLE_INPUT, OBMC_TOKEN, "Obmc", set_enable_obmc_flag},
-#endif
     // RDOQ
-    {SINGLE_INPUT, RDOQ_TOKEN, "RDOQ", set_enable_rdoq_flag},
+    {SINGLE_INPUT, RDOQ_TOKEN, "RDOQ", set_rdoq_level_flag},
     // Filter Intra
-#if 1 // FILTER_INTRA_CLI
     {SINGLE_INPUT, FILTER_INTRA_TOKEN, "FilterIntra", set_filter_intra_level_flag},
-#else
-    {SINGLE_INPUT, FILTER_INTRA_TOKEN, "FilterIntra", set_enable_filter_intra_flag},
-#endif
-
     // Edge Intra Filter
     {SINGLE_INPUT, INTRA_EDGE_FILTER_TOKEN, "IntraEdgeFilter", set_enable_intra_edge_filter_flag},
 
@@ -1534,28 +1270,12 @@ ConfigEntry config_entry[] = {
     // ME Parameters
     {SINGLE_INPUT, SEARCH_AREA_WIDTH_TOKEN, "SearchAreaWidth", set_cfg_search_area_width},
     {SINGLE_INPUT, SEARCH_AREA_HEIGHT_TOKEN, "SearchAreaHeight", set_cfg_search_area_height},
-    // HME Parameters
-    {SINGLE_INPUT,
-     NUM_HME_SEARCH_WIDTH_TOKEN,
-     "NumberHmeSearchRegionInWidth",
-     set_cfg_number_hme_search_region_in_width},
-    {SINGLE_INPUT,
-     NUM_HME_SEARCH_HEIGHT_TOKEN,
-     "NumberHmeSearchRegionInHeight",
-     set_cfg_number_hme_search_region_in_height},
-    {SINGLE_INPUT,
-     HME_SRCH_T_L0_WIDTH_TOKEN,
-     "HmeLevel0TotalSearchAreaWidth",
-     set_cfg_hme_level_0_total_search_area_width},
-    {SINGLE_INPUT,
-     HME_SRCH_T_L0_HEIGHT_TOKEN,
-     "HmeLevel0TotalSearchAreaHeight",
-     set_cfg_hme_level_0_total_search_area_height},
+
     // MD Parameters
     {SINGLE_INPUT, SCREEN_CONTENT_TOKEN, "ScreenContentMode", set_screen_content_mode},
     {SINGLE_INPUT, INTRABC_MODE_TOKEN, "IntraBCMode", set_intrabc_mode},
     {SINGLE_INPUT, HBD_MD_ENABLE_TOKEN, "HighBitDepthModeDecision", set_enable_hbd_mode_decision},
-    {SINGLE_INPUT, PALETTE_TOKEN, "PaletteMode", set_enable_palette},
+    {SINGLE_INPUT, PALETTE_TOKEN, "PaletteLevel", set_palette_level},
     // Thread Management
     {SINGLE_INPUT, THREAD_MGMNT, "LogicalProcessors", set_logical_processors},
     {SINGLE_INPUT, UNPIN_TOKEN, "UnpinExecution", set_unpin_execution},
@@ -1576,37 +1296,11 @@ ConfigEntry config_entry[] = {
     {SINGLE_INPUT, PROFILE_TOKEN, "Profile", set_profile},
     {SINGLE_INPUT, TIER_TOKEN, "Tier", set_tier},
     {SINGLE_INPUT, LEVEL_TOKEN, "Level", set_level},
-    {SINGLE_INPUT, LATENCY_MODE, "LatencyMode", set_latency_mode},
     {SINGLE_INPUT, FILM_GRAIN_TOKEN, "FilmGrain", set_cfg_film_grain},
     // Asm Type
     {SINGLE_INPUT, ASM_TYPE_TOKEN, "Asm", set_asm_type},
-    // HME
-    {ARRAY_INPUT,
-     HME_LEVEL0_WIDTH,
-     "HmeLevel0SearchAreaInWidth",
-     set_hme_level_0_search_area_in_width_array},
-    {ARRAY_INPUT,
-     HME_LEVEL0_HEIGHT,
-     "HmeLevel0SearchAreaInHeight",
-     set_hme_level_0_search_area_in_height_array},
-    {ARRAY_INPUT,
-     HME_LEVEL1_WIDTH,
-     "HmeLevel1SearchAreaInWidth",
-     set_hme_level_1_search_area_in_width_array},
-    {ARRAY_INPUT,
-     HME_LEVEL1_HEIGHT,
-     "HmeLevel1SearchAreaInHeight",
-     set_hme_level_1_search_area_in_height_array},
-    {ARRAY_INPUT,
-     HME_LEVEL2_WIDTH,
-     "HmeLevel2SearchAreaInWidth",
-     set_hme_level_2_search_area_in_width_array},
-    {ARRAY_INPUT,
-     HME_LEVEL2_HEIGHT,
-     "HmeLevel2SearchAreaInHeight",
-     set_hme_level_2_search_area_in_height_array},
     // --- start: ALTREF_FILTERING_SUPPORT
-    {SINGLE_INPUT, ENABLE_ALTREFS, "EnableAltRefs", set_enable_altrefs},
+    {SINGLE_INPUT, TF_LEVEL, "TfLevel", set_tf_level},
     {SINGLE_INPUT, ALTREF_STRENGTH, "AltRefStrength", set_altref_strength},
     {SINGLE_INPUT, ALTREF_NFRAMES, "AltRefNframes", set_altref_n_frames},
     {SINGLE_INPUT, ENABLE_OVERLAYS, "EnableOverlays", set_enable_overlays},
@@ -1617,25 +1311,13 @@ ConfigEntry config_entry[] = {
     {SINGLE_INPUT, SUPERRES_KF_DENOM, "SuperresKfDenom", set_superres_kf_denom},
     {SINGLE_INPUT, SUPERRES_QTHRES, "SuperresQthres", set_superres_qthres},
 
-    {SINGLE_INPUT, SQ_WEIGHT_TOKEN, "SquareWeight", set_square_weight},
-    {SINGLE_INPUT, MDS_1_PRUNE_C_TH, "MdFastPruneClassThreshold", set_md_stage_1_class_prune_th},
-    {SINGLE_INPUT, MDS_1_PRUNE_S_TH, "MdFastPruneCandThreshold", set_md_stage_1_cand_prune_th},
-    {SINGLE_INPUT,
-     MDS_2_3_PRUNE_C_TH,
-     "MdFullPruneClassThreshold",
-     set_md_stage_2_3_class_prune_th},
-    {SINGLE_INPUT, MDS_2_3_PRUNE_S_TH, "MdFullPruneCandThreshold", set_md_stage_2_3_cand_prune_th},
     // double dash
-#if 1//REMOVE_MR_MACRO
     {SINGLE_INPUT, PRESET_TOKEN, "Encoder mode/Preset used[-2,-1,0,..,8]", set_enc_mode},
-#else
-    {SINGLE_INPUT, PRESET_TOKEN, "Encoder mode/Preset used[0-8]", set_enc_mode},
-#endif
     {SINGLE_INPUT, QP_FILE_NEW_TOKEN, "Path to Qp file", set_cfg_qp_file},
     {SINGLE_INPUT, INPUT_DEPTH_TOKEN, "Bit depth for codec(8 or 10)", set_encoder_bit_depth},
     {SINGLE_INPUT,
      KEYINT_TOKEN,
-     "Intra period interval(frames) (-2: No intra update, -1: default intra period or [0-255])",
+     "Intra period interval(frames) (-2: default intra period, -1: No intra update or [0 - 2^31-2]; [-2 - 255] if RateControlMode>=1)",
      set_cfg_intra_period},
     {SINGLE_INPUT,
      LOOKAHEAD_NEW_TOKEN,
@@ -1648,26 +1330,18 @@ ConfigEntry config_entry[] = {
      "Restoration Filter",
      set_enable_restoration_filter_flag},
     {SINGLE_INPUT,
-     EDGE_SKIP_ANGLE_INTRA_NEW_TOKEN,
-     "Edge Skip Angle Intra",
-     set_edge_skip_angle_intra_flag},
-    {SINGLE_INPUT,
      INTER_INTRA_COMPOUND_NEW_TOKEN,
      "Inter Intra Compound",
      set_interintra_compound_flag},
     //{SINGLE_INPUT, FRAC_SEARCH_64_NEW_TOKEN, "FracSearch64", ??}, // todo
     {SINGLE_INPUT, MFMV_ENABLE_NEW_TOKEN, "Mfmv token with double dash", set_enable_mfmv_flag},
     {SINGLE_INPUT, REDUNDANT_BLK_NEW_TOKEN, "Redundant Block", set_enable_redundant_blk_flag},
-    {SINGLE_INPUT, SPATIAL_SSE_FL_NEW_TOKEN, "Spatial SSE fl", set_spatial_sse_fl_flag},
+    {SINGLE_INPUT, SPATIAL_SSE_FL_NEW_TOKEN, "Spatial SSE fl", set_spatial_sse_full_loop_level_flag},
     {SINGLE_INPUT, OVR_BNDRY_BLK_NEW_TOKEN, "Over Boundry Block", set_over_bndry_blk_flag},
     {SINGLE_INPUT,
      NEW_NEAREST_COMB_INJECT_NEW_TOKEN,
      "New Nearest Comb Injection",
      set_new_nearest_comb_inject_flag},
-#if 0//!SHUT_ME_CAND_SORTING
-    {SINGLE_INPUT, PRUNE_UNIPRED_ME_NEW_TOKEN, "Prune Uni pred Me", set_prune_unipred_me_flag},
-#endif
-    {SINGLE_INPUT, PRUNE_REF_REC_PART_NEW_TOKEN, "Prune Ref Rec Part", set_prune_ref_rec_part_flag},
     {SINGLE_INPUT, NSQ_TABLE_NEW_TOKEN, "Nsq Table", set_nsq_table_flag},
     {SINGLE_INPUT,
      FRAME_END_CDF_UPDATE_NEW_TOKEN,
@@ -1675,15 +1349,11 @@ ConfigEntry config_entry[] = {
      set_frame_end_cdf_update_flag},
     {SINGLE_INPUT,
      LOCAL_WARPED_ENABLE_NEW_TOKEN,
-     "Local Warped Motion",
+     "Local Warped Motion [0 = OFF, 1 = ON, -1 = DEFAULT]",
      set_enable_local_warped_motion_flag},
     {SINGLE_INPUT, GLOBAL_MOTION_ENABLE_NEW_TOKEN, "Global Motion", set_enable_global_motion_flag},
-    {SINGLE_INPUT, RDOQ_NEW_TOKEN, "RDOQ double dash token", set_enable_rdoq_flag},
-#if 1 // FILTER_INTRA_CLI
+    {SINGLE_INPUT, RDOQ_NEW_TOKEN, "RDOQ double dash token", set_rdoq_level_flag},
     {SINGLE_INPUT, FILTER_INTRA_NEW_TOKEN, "Filter Intra", set_filter_intra_level_flag},
-#else
-    {SINGLE_INPUT, FILTER_INTRA_NEW_TOKEN, "Filter Intra", set_enable_filter_intra_flag},
-#endif
     {SINGLE_INPUT, HDR_INPUT_NEW_TOKEN, "High Dynamic Range Input", set_high_dynamic_range_input},
     {SINGLE_INPUT,
      ADAPTIVE_QP_ENABLE_NEW_TOKEN,
@@ -1718,158 +1388,30 @@ ConfigEntry config_entry[] = {
 /**********************************
  * Constructor
  **********************************/
-void eb_config_ctor(EbConfig *config_ptr) {
-    memset(config_ptr, 0, sizeof(*config_ptr));
+EbConfig * eb_config_ctor(EncodePass pass) {
+    EbConfig *config_ptr = (EbConfig *)calloc(1, sizeof(EbConfig));
+    if (!config_ptr)
+        return NULL;
+
+    if (pass == ENCODE_FIRST_PASS)
+        config_ptr->pass = 1;
+    else if (pass == ENCODE_LAST_PASS)
+        config_ptr->pass = 2;
+
     config_ptr->error_log_file         = stderr;
-    config_ptr->frame_rate             = 30 << 16;
-    config_ptr->encoder_bit_depth      = 8;
-    config_ptr->is_16bit_pipeline = 0;
-    config_ptr->encoder_color_format   = 1; //EB_YUV420
     config_ptr->buffered_input         = -1;
-
-    config_ptr->qp                  = 50;
-    config_ptr->use_qp_file         = EB_FALSE;
-    config_ptr->look_ahead_distance = (uint32_t)~0;
-#if 1//TPL_LA
-    config_ptr->enable_tpl_la       = 0;
-#endif
-    config_ptr->target_bit_rate     = 7000000;
-    config_ptr->max_qp_allowed      = 63;
-    config_ptr->min_qp_allowed      = 10;
-
-    config_ptr->enable_adaptive_quantization              = 2;
-    config_ptr->enc_mode                                  = MAX_ENC_PRESET;
-    config_ptr->snd_pass_enc_mode                         = MAX_ENC_PRESET + 1;
-    config_ptr->intra_period                              = -2;
-    config_ptr->intra_refresh_type                        = 1;
-    config_ptr->hierarchical_levels                       = 4;
-    config_ptr->pred_structure                            = 2;
-    config_ptr->enable_global_motion                      = EB_TRUE;
-    config_ptr->no_progress                               = EB_FALSE;
-    config_ptr->enable_warped_motion                      = DEFAULT;
-    config_ptr->cdef_mode                                 = DEFAULT;
-    config_ptr->enable_restoration_filtering              = DEFAULT;
-    config_ptr->sg_filter_mode                            = DEFAULT;
-    config_ptr->wn_filter_mode                            = DEFAULT;
-#if 0//!REMOVE_COMBINE_CLASS12
-    config_ptr->combine_class_12                          = DEFAULT;
-#endif
-    config_ptr->edge_skp_angle_intra                      = DEFAULT;
-    config_ptr->intra_angle_delta                         = DEFAULT;
-    config_ptr->inter_intra_compound                      = DEFAULT;
-    config_ptr->enable_paeth                              = DEFAULT;
-    config_ptr->enable_smooth                             = DEFAULT;
-#if 1//ON_OFF_FEATURE_MRP
-    config_ptr->mrp_level                                 = DEFAULT;
-#endif
-    config_ptr->enable_mfmv                               = DEFAULT;
-    config_ptr->enable_redundant_blk                      = DEFAULT;
-    config_ptr->spatial_sse_fl                            = DEFAULT;
-#if 0//!REMOVE_ME_SUBPEL_CODE
-    config_ptr->enable_subpel                             = DEFAULT;
-#endif
-    config_ptr->over_bndry_blk                            = DEFAULT;
-    config_ptr->new_nearest_comb_inject                   = DEFAULT;
-#if 0//!SHUT_ME_CAND_SORTING
-    config_ptr->prune_unipred_me                          = DEFAULT;
-#endif
-    config_ptr->prune_ref_rec_part                        = DEFAULT;
-    config_ptr->nsq_table                                 = DEFAULT;
-    config_ptr->frame_end_cdf_update                      = DEFAULT;
-    config_ptr->set_chroma_mode                           = DEFAULT;
-    config_ptr->disable_cfl_flag                          = DEFAULT;
-#if  1//OBMC_CLI
-    config_ptr->obmc_level                                = DEFAULT;
-#else
-    config_ptr->enable_obmc                               = EB_TRUE;
-#endif
-    config_ptr->enable_rdoq                               = DEFAULT;
-    config_ptr->pred_me                                   = DEFAULT;
-    config_ptr->bipred_3x3_inject                         = DEFAULT;
-    config_ptr->compound_level                            = DEFAULT;
-#if 1//FILTER_INTRA_CLI
-    config_ptr->filter_intra_level                        = DEFAULT;
-#else
-    config_ptr->enable_filter_intra                       = EB_TRUE;
-#endif
-    config_ptr->enable_intra_edge_filter                  = DEFAULT;
-    config_ptr->pic_based_rate_est                        = DEFAULT;
-    config_ptr->use_default_me_hme                        = EB_TRUE;
-    config_ptr->enable_hme_flag                           = EB_TRUE;
-    config_ptr->enable_hme_level0_flag                    = EB_TRUE;
-    config_ptr->search_area_width                         = 16;
-    config_ptr->search_area_height                        = 7;
-    config_ptr->number_hme_search_region_in_width         = 2;
-    config_ptr->number_hme_search_region_in_height        = 2;
-    config_ptr->hme_level0_total_search_area_width        = 64;
-    config_ptr->hme_level0_total_search_area_height       = 25;
-    config_ptr->hme_level0_search_area_in_width_array[0]  = 32;
-    config_ptr->hme_level0_search_area_in_width_array[1]  = 32;
-    config_ptr->hme_level0_search_area_in_height_array[0] = 12;
-    config_ptr->hme_level0_search_area_in_height_array[1] = 13;
-    config_ptr->hme_level1_search_area_in_width_array[0]  = 1;
-    config_ptr->hme_level1_search_area_in_width_array[1]  = 1;
-    config_ptr->hme_level1_search_area_in_height_array[0] = 1;
-    config_ptr->hme_level1_search_area_in_height_array[1] = 1;
-    config_ptr->hme_level2_search_area_in_width_array[0]  = 1;
-    config_ptr->hme_level2_search_area_in_width_array[1]  = 1;
-    config_ptr->hme_level2_search_area_in_height_array[0] = 1;
-    config_ptr->hme_level2_search_area_in_height_array[1] = 1;
-#if 1 //ENABLE_SC_DETECTOR
-    config_ptr->screen_content_mode                       = 2;
-#else
-    config_ptr->screen_content_mode                       = 0;
-#endif
-#if 1 //CHANGE_HBD_MODE
-    config_ptr->enable_hbd_mode_decision                  = DEFAULT;
-#else
-    config_ptr->enable_hbd_mode_decision                  = 2;
-#endif
-    config_ptr->intrabc_mode                              = DEFAULT;
-    config_ptr->enable_palette                            = -1;
-    config_ptr->injector_frame_rate                       = 60 << 16;
-
-    // ASM Type
-    config_ptr->cpu_flags_limit = CPU_FLAGS_ALL;
-
-    config_ptr->unpin     = 1;
-    config_ptr->target_socket = -1;
-
-    config_ptr->unrestricted_motion_vector = EB_TRUE;
-
-    // --- start: ALTREF_FILTERING_SUPPORT
-    config_ptr->enable_altrefs  = EB_TRUE;
-    config_ptr->altref_strength = 5;
-#if 1//NOISE_BASED_TF_FRAMES
-    config_ptr->altref_nframes = 13;
-#else
-    config_ptr->altref_nframes  = 7;
-#endif
-    // --- end: ALTREF_FILTERING_SUPPORT
-
-    // start - super-resolution support
-    config_ptr->superres_mode     = SUPERRES_NONE; // disabled
-    config_ptr->superres_denom    = 8; // no scaling
-    config_ptr->superres_kf_denom = 8; // no scaling
-    config_ptr->superres_qthres   = 43; // random threshold for now
-    // end - super-resolution support
-
-    config_ptr->sq_weight = 100;
-
-    config_ptr->md_stage_1_cand_prune_th    = 75;
-    config_ptr->md_stage_1_class_prune_th   = 100;
-    config_ptr->md_stage_2_3_cand_prune_th  = 15;
-    config_ptr->md_stage_2_3_class_prune_th = 25;
 
     config_ptr->pass = DEFAULT;
 
-    return;
+    return config_ptr;
 }
 
 /**********************************
  * Destructor
  **********************************/
 void eb_config_dtor(EbConfig *config_ptr) {
+    if (!config_ptr)
+        return;
     // Close any files that are open
     if (config_ptr->config_file) {
         fclose(config_ptr->config_file);
@@ -1915,16 +1457,37 @@ void eb_config_dtor(EbConfig *config_ptr) {
         fclose(config_ptr->stat_file);
         config_ptr->stat_file = (FILE *)NULL;
     }
-    if (config_ptr->input_stat_file) {
-        unlock_and_fclose(config_ptr->input_stat_file);
-        config_ptr->input_stat_file = (FILE *)NULL;
-    }
-    if (config_ptr->output_stat_file) {
-        unlock_and_fclose(config_ptr->output_stat_file);
-        config_ptr->output_stat_file = (FILE *)NULL;
-    }
     free((void*)config_ptr->stats);
+    free(config_ptr);
     return;
+}
+
+EbErrorType enc_channel_ctor(EncChannel* c, EncodePass pass) {
+    c->config = eb_config_ctor(pass);
+    if (!c->config)
+        return EB_ErrorInsufficientResources;
+    c->app_callback = (EbAppContext *)malloc(sizeof(EbAppContext));
+    if (!c->app_callback)
+        return EB_ErrorInsufficientResources;
+    memset(c->app_callback, 0, sizeof(EbAppContext));
+    c->exit_cond        = APP_ExitConditionError;
+    c->exit_cond_output = APP_ExitConditionError;
+    c->exit_cond_recon  = APP_ExitConditionError;
+    c->exit_cond_input  = APP_ExitConditionError;
+    c->active = EB_FALSE;
+    return svt_av1_enc_init_handle(
+        &c->app_callback ->svt_encoder_handle, c->app_callback, &c->config->config);
+}
+
+void enc_channel_dctor(EncChannel* c, uint32_t inst_cnt)
+{
+    EbAppContext* ctx = c->app_callback;
+    if (ctx && ctx->svt_encoder_handle) {
+        svt_av1_enc_deinit(ctx->svt_encoder_handle);
+        de_init_encoder(ctx, inst_cnt);
+    }
+    eb_config_dtor(c->config);
+    free(c->app_callback);
 }
 
 /**********************************
@@ -1983,7 +1546,7 @@ static void set_config_value(EbConfig *config, const char *name, const char *val
     int32_t i = 0;
 
     while (config_entry[i].name != NULL) {
-        if (EB_STRCMP(config_entry[i].name, name) == 0)
+        if (strcmp(config_entry[i].name, name) == 0)
             (*config_entry[i].scf)((const char *)value, config);
         ++i;
     }
@@ -2028,7 +1591,7 @@ static void parse_config_file(EbConfig *config, char *buffer, int32_t size) {
                                  ? CONFIG_FILE_MAX_VAR_LEN - 1
                                  : arg_len[0];
                 // Copy the variable name
-                EB_STRNCPY(var_name, CONFIG_FILE_MAX_VAR_LEN, argv[0], arg_len[0]);
+                strncpy_s(var_name, CONFIG_FILE_MAX_VAR_LEN, argv[0], arg_len[0]);
                 // Null terminate the variable name
                 var_name[arg_len[0]] = CONFIG_FILE_NULL_CHAR;
 
@@ -2041,7 +1604,7 @@ static void parse_config_file(EbConfig *config, char *buffer, int32_t size) {
                             ? CONFIG_FILE_MAX_VAR_LEN - 1
                             : arg_len[value_index + 2];
                     // Copy the variable name
-                    EB_STRNCPY(var_value[value_index],
+                    strncpy_s(var_value[value_index],
                                CONFIG_FILE_MAX_VAR_LEN,
                                argv[value_index + 2],
                                arg_len[value_index + 2]);
@@ -2068,8 +1631,9 @@ static int32_t find_token(int32_t argc, char *const argv[], char const *token, c
     int32_t return_error = -1;
 
     while ((argc > 0) && (return_error != 0)) {
-        return_error = EB_STRCMP(argv[--argc], token);
-        if (return_error == 0) { EB_STRCPY(configStr, COMMAND_LINE_MAX_SIZE, argv[argc + 1]); }
+        return_error = strcmp(argv[--argc], token);
+        if (return_error == 0 && configStr)
+            strcpy_s(configStr, COMMAND_LINE_MAX_SIZE, argv[argc + 1]);
     }
 
     return return_error;
@@ -2117,6 +1681,97 @@ static int32_t read_config_file(EbConfig *config, char *config_path, uint32_t in
     return return_error;
 }
 
+/* get config->rc_twopass_stats_in from config->input_stat_file */
+EbBool load_twopass_stats_in(EbConfig *cfg)
+{
+    EbSvtAv1EncConfiguration* config = &cfg->config;
+#ifdef _WIN32
+    int fd = _fileno(cfg->input_stat_file);
+    struct _stat file_stat;
+    int ret = _fstat(fd, &file_stat);
+#else
+    int fd = fileno(cfg->input_stat_file);
+    struct stat file_stat;
+    int ret = fstat(fd, &file_stat);
+#endif
+    if (ret) {
+        return EB_FALSE;
+    }
+    config->rc_twopass_stats_in.buf = malloc(file_stat.st_size);
+    if (config->rc_twopass_stats_in.buf) {
+        config->rc_twopass_stats_in.sz = (uint64_t)file_stat.st_size;
+        if (fread(config->rc_twopass_stats_in.buf, 1, file_stat.st_size,
+            cfg->input_stat_file) != (size_t)file_stat.st_size) {
+            return EB_FALSE;
+        }
+    }
+    return config->rc_twopass_stats_in.buf != NULL;
+}
+
+/* set two passes stats information to EbConfig
+ */
+EbErrorType set_two_passes_stats(EbConfig *config, EncodePass pass,
+    const SvtAv1FixedBuf* rc_twopass_stats_in, uint32_t channel_number)
+{
+    switch (pass) {
+        case ENCODE_SINGLE_PASS: {
+            const char* stats = config->stats ? config->stats : "svtav1_2pass.log";
+            if (config->pass == 1) {
+                if (!fopen_and_lock(&config->output_stat_file, stats, EB_TRUE)) {
+                    fprintf(config->error_log_file,
+                        "Error instance %u: can't open stats file %s for write \n",
+                        channel_number + 1, stats);
+                    return EB_ErrorBadParameter;
+                }
+                config->config.rc_firstpass_stats_out = EB_TRUE;
+            } else if (config->pass == 2) {
+                if (!fopen_and_lock(&config->input_stat_file, stats, EB_FALSE)) {
+                    fprintf(config->error_log_file,
+                        "Error instance %u: can't read stats file %s for read\n",
+                        channel_number + 1, stats);
+                    return EB_ErrorBadParameter;
+                }
+                if (!load_twopass_stats_in(config)) {
+                    fprintf(config->error_log_file,
+                        "Error instance %u: can't load file %s\n",
+                        channel_number + 1, stats);
+                    return EB_ErrorBadParameter;
+                }
+            }
+            break;
+        }
+        case ENCODE_FIRST_PASS: {
+            // for combined two passes,
+            // we only ouptut first pass stats when user explicitly set the --stats
+            if (config->stats) {
+                if (!fopen_and_lock(&config->output_stat_file, config->stats, EB_TRUE)) {
+                    fprintf(config->error_log_file,
+                        "Error instance %u: can't open stats file %s for write \n",
+                        channel_number + 1, config->stats);
+                    return EB_ErrorBadParameter;
+                }
+            }
+            config->config.rc_firstpass_stats_out = EB_TRUE;
+            break;
+        }
+        case ENCODE_LAST_PASS: {
+            if (!rc_twopass_stats_in->sz) {
+                fprintf(config->error_log_file,
+                        "Error instance %u: bug, combined 2passes need stats in for second pass \n",
+                        channel_number + 1);
+                return EB_ErrorBadParameter;
+            }
+            config->config.rc_twopass_stats_in = *rc_twopass_stats_in;
+            break;
+        }
+        default: {
+            assert(0);
+            break;
+        }
+    }
+    return EB_ErrorNone;
+}
+
 /******************************************
 * Verify Settings
 ******************************************/
@@ -2153,14 +1808,14 @@ static EbErrorType verify_settings(EbConfig *config, uint32_t channel_number) {
         return_error = EB_ErrorBadParameter;
     }
 
-    if (config->use_qp_file == EB_TRUE && config->qp_file == NULL) {
+    if (config->config.use_qp_file == EB_TRUE && config->qp_file == NULL) {
         fprintf(config->error_log_file,
                 "Error instance %u: Could not find QP file, UseQpFile is set to 1\n",
                 channel_number + 1);
         return_error = EB_ErrorBadParameter;
     }
 
-    if (config->encoder_color_format != 1) {
+    if (config->config.encoder_color_format != 1) {
         fprintf(config->error_log_file,
                 "Error instance %u: Only support 420 now \n",
                 channel_number + 1);
@@ -2188,11 +1843,11 @@ static EbErrorType verify_settings(EbConfig *config, uint32_t channel_number) {
     }
 
     // target_socket
-    if (config->target_socket != -1 && config->target_socket != 0 && config->target_socket != 1) {
+    if (config->config.target_socket != -1 && config->config.target_socket != 0 && config->config.target_socket != 1) {
         fprintf(config->error_log_file,
                 "Error instance %u: Invalid target_socket [-1 - 1], your input: %d\n",
                 channel_number + 1,
-                config->target_socket);
+                config->config.target_socket);
         return_error = EB_ErrorBadParameter;
     }
 
@@ -2224,24 +1879,26 @@ static EbErrorType verify_settings(EbConfig *config, uint32_t channel_number) {
                 channel_number + 1);
         return EB_ErrorBadParameter;
     }
-
-    const char* stats = config->stats ? config->stats : "svtav1_2pass.log";
-    if (pass == 1) {
-        if (!fopen_and_lock(&config->output_stat_file, stats, EB_TRUE)) {
+    if (pass != DEFAULT || config->input_stat_file || config->output_stat_file) {
+        if (config->config.hierarchical_levels != 4) {
             fprintf(config->error_log_file,
-                "Error instance %u: can't open stats file %s for write \n",
-                channel_number + 1, stats);
+                "Error instance %u: 2 pass encode for hierarchical_levels %u is not supported\n",
+                channel_number + 1, config->config.hierarchical_levels);
             return EB_ErrorBadParameter;
         }
-    } else if (pass == 2) {
-        if (!fopen_and_lock(&config->input_stat_file, stats, EB_FALSE)) {
+        if (config->config.enable_overlays) {
             fprintf(config->error_log_file,
-                "Error instance %u: can't read stats file %s for read\n",
-                channel_number + 1, stats);
+                "Error instance %u: 2 pass encode for overlays is not supported\n",
+                channel_number + 1);
+            return EB_ErrorBadParameter;
+        }
+        if (config->config.intra_refresh_type != 2) {
+            fprintf(config->error_log_file,
+                "Error instance %u: 2 pass encode for intra_refresh_type %u is not supported\n",
+                channel_number + 1,config->config.intra_refresh_type);
             return EB_ErrorBadParameter;
         }
     }
-
     return return_error;
 }
 
@@ -2253,29 +1910,29 @@ int32_t find_token_multiple_inputs(int32_t argc, char *const argv[], const char 
     int32_t return_error = -1;
     int32_t done         = 0;
     while ((argc > 0) && (return_error != 0)) {
-        return_error = EB_STRCMP(argv[--argc], token);
+        return_error = strcmp(argv[--argc], token);
         if (return_error == 0) {
             for (unsigned count = 0; count < MAX_CHANNEL_NUMBER; ++count) {
                 if (done == 0) {
                     if (argv[argc + count + 1]) {
                         if (strtoul(argv[argc + count + 1], NULL, 0) != 0 ||
-                            EB_STRCMP(argv[argc + count + 1], "0") == 0) {
-                            EB_STRCPY(
+                            strcmp(argv[argc + count + 1], "0") == 0) {
+                            strcpy_s(
                                 configStr[count], COMMAND_LINE_MAX_SIZE, argv[argc + count + 1]);
                         } else if (argv[argc + count + 1][0] != '-') {
-                            EB_STRCPY(
+                            strcpy_s(
                                 configStr[count], COMMAND_LINE_MAX_SIZE, argv[argc + count + 1]);
                         } else {
-                            EB_STRCPY(configStr[count], COMMAND_LINE_MAX_SIZE, " ");
+                            strcpy_s(configStr[count], COMMAND_LINE_MAX_SIZE, " ");
                             done = 1;
                         }
                     } else {
-                        EB_STRCPY(configStr[count], COMMAND_LINE_MAX_SIZE, " ");
+                        strcpy_s(configStr[count], COMMAND_LINE_MAX_SIZE, " ");
                         done = 1;
                         //return return_error;
                     }
                 } else
-                    EB_STRCPY(configStr[count], COMMAND_LINE_MAX_SIZE, " ");
+                    strcpy_s(configStr[count], COMMAND_LINE_MAX_SIZE, " ");
             }
         }
     }
@@ -2283,180 +1940,135 @@ int32_t find_token_multiple_inputs(int32_t argc, char *const argv[], const char 
     return return_error;
 }
 
-uint32_t check_long(ConfigEntry config_entry, ConfigEntry config_entry_next) {
-    if (config_entry_next.name == NULL) { return 0; }
-    if (EB_STRCMP(config_entry.name, config_entry_next.name) == 0) { return 1; }
-    return 0;
+static int check_long(ConfigEntry cfg_entry, ConfigEntry cfg_entry_next) {
+    return cfg_entry_next.name ? !strcmp(cfg_entry.name, cfg_entry_next.name) : 0;
 }
 
 uint32_t get_help(int32_t argc, char *const argv[]) {
     char config_string[COMMAND_LINE_MAX_SIZE];
-    if (find_token(argc, argv, HELP_TOKEN, config_string) == 0 ||
-        find_token(argc, argv, HELP_LONG_TOKEN, config_string) == 0) {
-        int32_t options_token_index        = -1;
-        int32_t global_options_token_index = -1;
-        int32_t rc_token_index             = -1;
-        int32_t two_p_token_index          = -1;
-        int32_t kf_token_index             = -1;
-        int32_t sp_token_index             = -1;
-        //fprintf(stderr, "\n%-25s\t%-25s\n", "TOKEN", "DESCRIPTION");
-        //fprintf(stderr, "%-25s\t%-25s\n", "-nch", "NumberOfChannels");
-        const char *empty_string         = "";
-        fprintf(stderr,
-                "Usage: SvtAv1EncApp <options> -b dst_filename -i src_filename\n");
-        fprintf(stderr, "\n%-25s\n", "Examples:");
-        fprintf(stderr, "\n%-25s", "Two passes encode:");
-        fprintf(stderr, "\n\t%s", "SvtAv1EncApp <--stats svtav1_2pass.log> --pass 1 -b dst_filename -i src_filename");
-        fprintf(stderr, "\n\t%s", "SvtAv1EncApp <--stats svtav1_2pass.log> --pass 2 -b dst_filename -i src_filename");
-        fprintf(stderr, "\n    Or a combined cli:");
-        fprintf(stderr, "\n\t%s\n", "SvtAv1EncApp <--stats svtav1_2pass.log> --passes 2 -b dst_filename -i src_filename");
-        fprintf(stderr, "\n%-25s\n", "Options:");
-        while (config_entry_options[++options_token_index].token != NULL) {
-            uint32_t check = check_long(
-                config_entry_options[options_token_index],
-                config_entry_options
-                    [options_token_index +
-                     1]); // this only works if short and long token are one after another
-            if (check == 1) {
-                fprintf(stderr,
-                        "\t%-5s\t%-25s\t%-25s\n",
-                        config_entry_options[options_token_index].token,
-                        config_entry_options[options_token_index + 1].token,
-                        config_entry_options[options_token_index].name);
-                options_token_index++;
-            } else
-                fprintf(stderr,
-                        *(config_entry_options[options_token_index].token + 1) == '-'
-                            ? "\t%-5s\t%-25s\t%-25s\n"
-                            : "\t%-5s\t-%-25s\t%-25s\n",
-                        empty_string,
-                        config_entry_options[options_token_index].token,
-                        config_entry_options[options_token_index].name);
-        }
-        fprintf(stderr, "\n%-25s\n", "Encoder Global Options:");
-        while (config_entry_global_options[++global_options_token_index].token != NULL) {
-            uint32_t check =
-                check_long(config_entry_global_options[global_options_token_index],
-                           config_entry_global_options[global_options_token_index + 1]);
-            if (check == 1) {
-                fprintf(stderr,
-                        "\t%-5s\t%-25s\t%-25s\n",
-                        config_entry_global_options[global_options_token_index].token,
-                        config_entry_global_options[global_options_token_index + 1].token,
-                        config_entry_global_options[global_options_token_index].name);
-                global_options_token_index++;
-            } else {
-                fprintf(stderr,
-                        *(config_entry_global_options[global_options_token_index].token + 1) == '-'
-                            ? "\t%-5s\t%-25s\t%-25s\n"
-                            : "\t%-5s\t-%-25s\t%-25s\n",
-                        empty_string,
-                        config_entry_global_options[global_options_token_index].token,
-                        config_entry_global_options[global_options_token_index].name);
-            }
-        }
-        fprintf(stderr, "\n%-25s\n", "Rate Control Options:");
-        while (config_entry_rc[++rc_token_index].token != NULL) {
-            uint32_t check =
-                check_long(config_entry_rc[rc_token_index], config_entry_rc[rc_token_index + 1]);
-            if (check == 1) {
-                fprintf(stderr,
-                        "\t%-5s\t%-25s\t%-25s\n",
-                        config_entry_rc[rc_token_index].token,
-                        config_entry_rc[rc_token_index + 1].token,
-                        config_entry_rc[rc_token_index].name);
-                rc_token_index++;
-            } else {
-                fprintf(stderr,
-                        *(config_entry_rc[rc_token_index].token + 1) == '-'
-                            ? "\t%-5s\t%-25s\t%-25s\n"
-                            : "\t%-5s\t-%-25s\t%-25s\n",
-                        empty_string,
-                        config_entry_rc[rc_token_index].token,
-                        config_entry_rc[rc_token_index].name);
-            }
-        }
-        fprintf(stderr, "\n%-25s\n", "Twopass Options:");
-        while (config_entry_2p[++two_p_token_index].token != NULL) {
-            uint32_t check = check_long(config_entry_2p[two_p_token_index],
-                                        config_entry_2p[two_p_token_index + 1]);
-            if (check == 1) {
-                fprintf(stderr,
-                        "\t%-5s\t%-25s\t%-25s\n",
-                        config_entry_2p[two_p_token_index].token,
-                        config_entry_2p[two_p_token_index + 1].token,
-                        config_entry_2p[two_p_token_index].name);
-                two_p_token_index++;
-            } else
-                fprintf(stderr,
-                        *(config_entry_2p[two_p_token_index].token + 1) == '-'
-                            ? "\t%-5s\t%-25s\t%-25s\n"
-                            : "\t%-5s\t-%-25s\t%-25s\n",
-                        empty_string,
-                        config_entry_2p[two_p_token_index].token,
-                        config_entry_2p[two_p_token_index].name);
-        }
-        fprintf(stderr, "\n%-25s\n", "Keyframe Placement Options:");
-        while (config_entry_intra_refresh[++kf_token_index].token != NULL) {
-            uint32_t check = check_long(config_entry_intra_refresh[kf_token_index],
-                                        config_entry_intra_refresh[kf_token_index + 1]);
-            if (check == 1) {
-                fprintf(stderr,
-                        "\t%-5s\t%-25s\t%-25s\n",
-                        config_entry_intra_refresh[kf_token_index].token,
-                        config_entry_intra_refresh[kf_token_index + 1].token,
-                        config_entry_intra_refresh[kf_token_index].name);
-                kf_token_index++;
-            } else
-                fprintf(stderr,
-                        *(config_entry_intra_refresh[kf_token_index].token + 1) == '-'
-                            ? "\t%-5s\t%-25s\t%-25s\n"
-                            : "\t%-5s\t-%-25s\t%-25s\n",
-                        empty_string,
-                        config_entry_intra_refresh[kf_token_index].token,
-                        config_entry_intra_refresh[kf_token_index].name);
-        }
-        fprintf(stderr, "\n%-25s\n", "AV1 Specific Options:");
-        while (config_entry_specific[++sp_token_index].token != NULL) {
-            uint32_t check = check_long(config_entry_specific[sp_token_index],
-                                        config_entry_specific[sp_token_index + 1]);
-            if (check == 1) {
-                fprintf(stderr,
-                        "\t%-5s\t%-25s\t%-25s\n",
-                        config_entry_specific[sp_token_index].token,
-                        config_entry_specific[sp_token_index + 1].token,
-                        config_entry_specific[sp_token_index].name);
-                sp_token_index++;
-            } else
-                fprintf(stderr,
-                        *(config_entry_specific[sp_token_index].token + 1) == '-'
-                            ? "\t%-5s\t%-25s\t%-25s\n"
-                            : "\t%-5s\t-%-25s\t%-25s\n",
-                        empty_string,
-                        config_entry_specific[sp_token_index].token,
-                        config_entry_specific[sp_token_index].name);
-        }
-        return 1;
-    } else
+    if (find_token(argc, argv, HELP_TOKEN, config_string) &&
+        find_token(argc, argv, HELP_LONG_TOKEN, config_string))
         return 0;
+
+    printf(
+        "Usage: SvtAv1EncApp <options> -b dst_filename -i src_filename\n\n"
+        "Examples:\n"
+        "Two passes encode:\n"
+        "    SvtAv1EncApp <--stats svtav1_2pass.log> --pass 1 -b dst_filename -i src_filename\n"
+        "    SvtAv1EncApp <--stats svtav1_2pass.log> --pass 2 -b dst_filename -i src_filename\n"
+        "Or a combined cli:\n"
+        "    SvtAv1EncApp <--stats svtav1_2pass.log> --passes 2 -b dst_filename -i src_filename\n"
+        "\nOptions:\n");
+    for (ConfigEntry *options_token_index = config_entry_options; options_token_index->token;
+         ++options_token_index) {
+        // this only works if short and long token are one after another
+        switch (check_long(*options_token_index, options_token_index[1])) {
+        case 1:
+            printf("  %s, %-25s    %-25s\n",
+                   options_token_index->token,
+                   options_token_index[1].token,
+                   options_token_index->name);
+            ++options_token_index;
+            break;
+        default:
+            printf(options_token_index->token[1] == '-' ? "      %-25s    %-25s\n"
+                                                        : "      -%-25s   %-25s\n",
+                   options_token_index->token,
+                   options_token_index->name);
+        }
+    }
+    printf("\nEncoder Global Options:\n");
+    for (ConfigEntry *global_options_token_index = config_entry_global_options;
+         global_options_token_index->token;
+         ++global_options_token_index) {
+        switch (check_long(*global_options_token_index, global_options_token_index[1])) {
+        case 1:
+            printf("  %s, %-25s    %-25s\n",
+                   global_options_token_index->token,
+                   global_options_token_index[1].token,
+                   global_options_token_index->name);
+            ++global_options_token_index;
+            break;
+        default:
+            printf(global_options_token_index->token[1] == '-' ? "      %-25s    %-25s\n"
+                                                               : "      -%-25s   %-25s\n",
+                   global_options_token_index->token,
+                   global_options_token_index->name);
+        }
+    }
+    printf("\nRate Control Options:\n");
+    for (ConfigEntry *rc_token_index = config_entry_rc; rc_token_index->token; ++rc_token_index) {
+        switch (check_long(*rc_token_index, rc_token_index[1])) {
+        case 1:
+            printf("  %s, %-25s    %-25s\n",
+                   rc_token_index->token,
+                   rc_token_index[1].token,
+                   rc_token_index->name);
+            ++rc_token_index;
+            break;
+        default:
+            printf(rc_token_index->token[1] == '-' ? "      %-25s    %-25s\n"
+                                                   : "      -%-25s   %-25s\n",
+                   rc_token_index->token,
+                   rc_token_index->name);
+        }
+    }
+    printf("\nTwopass Options:\n");
+    for (ConfigEntry *two_p_token_index = config_entry_2p; two_p_token_index->token;
+         ++two_p_token_index) {
+        switch (check_long(*two_p_token_index, two_p_token_index[1])) {
+        case 1:
+            printf("  %s, %-25s    %-25s\n",
+                   two_p_token_index->token,
+                   two_p_token_index[1].token,
+                   two_p_token_index->name);
+            ++two_p_token_index;
+            break;
+        default:
+            printf(two_p_token_index->token[1] == '-' ? "      %-25s    %-25s\n"
+                                                      : "      -%-25s   %-25s\n",
+                   two_p_token_index->token,
+                   two_p_token_index->name);
+        }
+    }
+    printf("\nKeyframe Placement Options:\n");
+    for (ConfigEntry *kf_token_index = config_entry_intra_refresh; kf_token_index->token;
+         ++kf_token_index) {
+        switch (check_long(*kf_token_index, kf_token_index[1])) {
+        case 1:
+            printf("  %s, %-25s    %-25s\n",
+                   kf_token_index->token,
+                   kf_token_index[1].token,
+                   kf_token_index->name);
+            ++kf_token_index;
+            break;
+        default:
+            printf(kf_token_index->token[1] == '-' ? "      %-25s    %-25s\n"
+                                                   : "      -%-25s   %-25s\n",
+                   kf_token_index->token,
+                   kf_token_index->name);
+        }
+    }
+    printf("\nAV1 Specific Options:\n");
+    for (ConfigEntry *sp_token_index = config_entry_specific; sp_token_index->token;
+         ++sp_token_index) {
+        switch (check_long(*sp_token_index, sp_token_index[1])) {
+        case 1:
+            printf("  %s, %-25s    %-25s\n",
+                   sp_token_index->token,
+                   sp_token_index[1].token,
+                   sp_token_index->name);
+            ++sp_token_index;
+            break;
+        default:
+            printf(sp_token_index->token[1] == '-' ? "      %-25s    %-25s\n"
+                                                   : "      -%-25s   %-25s\n",
+                   sp_token_index->token,
+                   sp_token_index->name);
+        }
+    }
+    return 1;
 }
-//uint32_t get_help(int32_t argc, char *const argv[]) {
-//    char config_string[COMMAND_LINE_MAX_SIZE];
-//    if (find_token(argc, argv, HELP_TOKEN, config_string) == 0) {
-//        int32_t token_index = -1;
-//
-//        fprintf(stderr, "\n%-25s\t%-25s\t%s\n\n", "TOKEN", "DESCRIPTION", "INPUT TYPE");
-//        fprintf(stderr, "%-25s\t%-25s\t%s\n", "-nch", "NumberOfChannels", "Single input");
-//        while (config_entry[++token_index].token != NULL)
-//            fprintf(stderr,
-//                    "%-25s\t%-25s\t%s\n",
-//                    config_entry[token_index].token,
-//                    config_entry[token_index].name,
-//                    config_entry[token_index].type ? "Array input" : "Single input");
-//        return 1;
-//    } else
-//        return 0;
-//}
 
 /******************************************************
 * Get the number of channels and validate it with input
@@ -2517,20 +2129,29 @@ uint32_t get_passes(int32_t argc, char *const argv[], EncodePass pass[MAX_ENCODE
         pass[0] = ENCODE_SINGLE_PASS;
         return 1;
     }
-    if (check_two_pass_conflicts(argc, argv))
-        return 0;
 
     int preset = MAX_ENC_PRESET;
     if (find_token(argc, argv, PRESET_TOKEN, config_string) == 0
         || find_token(argc, argv, ENCMODE_TOKEN, config_string) == 0) {
         preset = strtol(config_string, NULL, 0);
     }
-    if (preset > 4) {
+    int rc_mode = 0;
+#if FIX_RC_TOKEN
+    if (find_token(argc, argv, RATE_CONTROL_ENABLE_TOKEN, config_string) == 0 ||
+        find_token(argc, argv, "--rc", config_string) == 0 )
+#else
+    if (find_token(argc, argv, RATE_CONTROL_ENABLE_TOKEN, config_string) == 0 )
+#endif
+        rc_mode = strtol(config_string, NULL, 0);
+
+    if (preset > 3 && rc_mode == 0) {
         fprintf(stderr,
-            "\nWarn: --passes 2 for preset > 4 is not supported yet, force single pass\n\n");
+            "\nWarn: --passes 2 CRF for preset > 3 is not supported yet, force single pass\n\n");
         pass[0] = ENCODE_SINGLE_PASS;
         return 1;
     }
+    if (check_two_pass_conflicts(argc, argv))
+        return 0;
 
     pass[0] = ENCODE_FIRST_PASS;
     pass[1] = ENCODE_LAST_PASS;
@@ -2540,7 +2161,7 @@ uint32_t get_passes(int32_t argc, char *const argv[], EncodePass pass[MAX_ENCODE
 void mark_token_as_read(const char *token, char *cmd_copy[], int32_t *cmd_token_cnt) {
     int32_t cmd_copy_index;
     for (cmd_copy_index = 0; cmd_copy_index < *(cmd_token_cnt); ++cmd_copy_index) {
-        if (!EB_STRCMP(cmd_copy[cmd_copy_index], token))
+        if (!strcmp(cmd_copy[cmd_copy_index], token))
             cmd_copy[cmd_copy_index] = cmd_copy[--(*cmd_token_cnt)];
     }
 }
@@ -2573,12 +2194,12 @@ int32_t compute_frames_to_be_encoded(EbConfig *config) {
     }
 
     frame_size = config->input_padded_width * config->input_padded_height; // Luma
-    frame_size += 2 * (frame_size >> (3 - config->encoder_color_format)); // Add Chroma
-    frame_size = frame_size << ((config->encoder_bit_depth == 10) ? 1 : 0);
+    frame_size += 2 * (frame_size >> (3 - config->config.encoder_color_format)); // Add Chroma
+    frame_size = frame_size << ((config->config.encoder_bit_depth == 10) ? 1 : 0);
 
     if (frame_size == 0) return -1;
 
-    if (config->encoder_bit_depth == 10 && config->compressed_ten_bit_format == 1)
+    if (config->config.encoder_bit_depth == 10 && config->config.compressed_ten_bit_format == 1)
         frame_count = (int32_t)(2 * ((double)file_size / frame_size) / 1.25);
     else
         frame_count = (int32_t)(file_size / frame_size);
@@ -2606,7 +2227,7 @@ static int32_t parse_pred_struct_file(EbConfig *config, char *buffer, int32_t si
     int32_t  entry_num            = 0;
     int32_t  display_order = 0, num_ref_list0 = 0, num_ref_list1 = 0;
     int32_t  idx_ref_list0 = 0, idx_ref_list1 = 0;
-
+    EbSvtAv1EncConfiguration* cfg = &config->config;
     // Keep looping until we process the entire file
     while (size--) {
         comment_section_flag =
@@ -2628,10 +2249,10 @@ static int32_t parse_pred_struct_file(EbConfig *config, char *buffer, int32_t si
                                  ? CONFIG_FILE_MAX_VAR_LEN - 1
                                  : arg_len[0];
                 // Copy the variable name
-                EB_STRNCPY(var_name, CONFIG_FILE_MAX_VAR_LEN, argv[0], arg_len[0]);
+                strncpy_s(var_name, CONFIG_FILE_MAX_VAR_LEN, argv[0], arg_len[0]);
                 // Null terminate the variable name
                 var_name[arg_len[0]] = CONFIG_FILE_NULL_CHAR;
-                if (EB_STRCMP(var_name, "PredStructEntry")) { continue; }
+                if (strcmp(var_name, "PredStructEntry")) { continue; }
 
                 ++entry_num;
                 idx_ref_list0 = idx_ref_list1 = num_ref_list0 = num_ref_list1 = 0;
@@ -2645,7 +2266,7 @@ static int32_t parse_pred_struct_file(EbConfig *config, char *buffer, int32_t si
                             ? CONFIG_FILE_MAX_VAR_LEN - 1
                             : arg_len[value_index + 2];
                     // Copy the variable name
-                    EB_STRNCPY(var_value[value_index],
+                    strncpy_s(var_value[value_index],
                                CONFIG_FILE_MAX_VAR_LEN,
                                argv[value_index + 2],
                                arg_len[value_index + 2]);
@@ -2658,15 +2279,15 @@ static int32_t parse_pred_struct_file(EbConfig *config, char *buffer, int32_t si
                         if (display_order >= (1 << (MAX_HIERARCHICAL_LEVEL - 1))) { return -1; }
                         break;
                     case 1:
-                        config->pred_struct[display_order].decode_order =
+                        cfg->pred_struct[display_order].decode_order =
                             strtoul(var_value[value_index], NULL, 0);
-                        if (config->pred_struct[display_order].decode_order >=
+                        if (cfg->pred_struct[display_order].decode_order >=
                             (1 << (MAX_HIERARCHICAL_LEVEL - 1))) {
                             return -1;
                         }
                         break;
                     case 2:
-                        config->pred_struct[display_order].temporal_layer_index =
+                        cfg->pred_struct[display_order].temporal_layer_index =
                             strtoul(var_value[value_index], NULL, 0);
                         break;
                     case 3: num_ref_list0 = strtoul(var_value[value_index], NULL, 0); break;
@@ -2674,13 +2295,13 @@ static int32_t parse_pred_struct_file(EbConfig *config, char *buffer, int32_t si
                     default:
                         if (idx_ref_list0 < num_ref_list0) {
                             if (idx_ref_list0 < REF_LIST_MAX_DEPTH) {
-                                config->pred_struct[display_order].ref_list0[idx_ref_list0] =
+                                cfg->pred_struct[display_order].ref_list0[idx_ref_list0] =
                                     strtoul(var_value[value_index], NULL, 0);
                             }
                             ++idx_ref_list0;
                         } else if (idx_ref_list1 < num_ref_list1) {
                             if (idx_ref_list1 < REF_LIST_MAX_DEPTH - 1) {
-                                config->pred_struct[display_order].ref_list1[idx_ref_list1] =
+                                cfg->pred_struct[display_order].ref_list1[idx_ref_list1] =
                                     strtoul(var_value[value_index], NULL, 0);
                             }
                             ++idx_ref_list1;
@@ -2689,10 +2310,10 @@ static int32_t parse_pred_struct_file(EbConfig *config, char *buffer, int32_t si
                     }
                 }
                 for (; num_ref_list0 < REF_LIST_MAX_DEPTH; ++num_ref_list0) {
-                    config->pred_struct[display_order].ref_list0[num_ref_list0] = 0;
+                    cfg->pred_struct[display_order].ref_list0[num_ref_list0] = 0;
                 }
                 for (; num_ref_list1 < REF_LIST_MAX_DEPTH - 1; ++num_ref_list1) {
-                    config->pred_struct[display_order].ref_list1[num_ref_list1] = 0;
+                    cfg->pred_struct[display_order].ref_list1[num_ref_list1] = 0;
                 }
             }
         }
@@ -2701,7 +2322,7 @@ static int32_t parse_pred_struct_file(EbConfig *config, char *buffer, int32_t si
         new_line_flag        = (*buffer == CONFIG_FILE_NEWLINE_CHAR) ? 1 : 0;
         ++buffer;
     }
-    config->manual_pred_struct_entry_num = entry_num;
+    cfg->manual_pred_struct_entry_num = entry_num;
 
     return 0;
 }
@@ -2763,66 +2384,60 @@ EbErrorType handle_short_tokens(char *string) {
 const char *handle_warnings(const char *token, char *print_message, uint8_t double_dash_token) {
     const char *linked_token = "";
 
-    if (EB_STRCMP(token, ENCMODE_TOKEN) == 0) linked_token = PRESET_TOKEN;
-    if (EB_STRCMP(token, ENCODER_BIT_DEPTH) == 0) linked_token = INPUT_DEPTH_TOKEN;
-    if (EB_STRCMP(token, INTRA_PERIOD_TOKEN) == 0) linked_token = KEYINT_TOKEN;
-    if (EB_STRCMP(token, QP_FILE_TOKEN) == 0) linked_token = QP_FILE_NEW_TOKEN;
-    if (EB_STRCMP(token, LOOK_AHEAD_DIST_TOKEN) == 0) linked_token = LOOKAHEAD_NEW_TOKEN;
+    if (strcmp(token, ENCMODE_TOKEN) == 0) linked_token = PRESET_TOKEN;
+    if (strcmp(token, ENCODER_BIT_DEPTH) == 0) linked_token = INPUT_DEPTH_TOKEN;
+    if (strcmp(token, INTRA_PERIOD_TOKEN) == 0) linked_token = KEYINT_TOKEN;
+    if (strcmp(token, QP_FILE_TOKEN) == 0) linked_token = QP_FILE_NEW_TOKEN;
+    if (strcmp(token, LOOK_AHEAD_DIST_TOKEN) == 0) linked_token = LOOKAHEAD_NEW_TOKEN;
 
-    if (EB_STRCMP(token, STAT_REPORT_TOKEN) == 0) linked_token = STAT_REPORT_NEW_TOKEN;
-    if (EB_STRCMP(token, RESTORATION_ENABLE_TOKEN) == 0)
+    if (strcmp(token, STAT_REPORT_TOKEN) == 0) linked_token = STAT_REPORT_NEW_TOKEN;
+    if (strcmp(token, RESTORATION_ENABLE_TOKEN) == 0)
         linked_token = RESTORATION_ENABLE_NEW_TOKEN;
-    if (EB_STRCMP(token, EDGE_SKIP_ANGLE_INTRA_TOKEN) == 0)
-        linked_token = EDGE_SKIP_ANGLE_INTRA_NEW_TOKEN;
-    if (EB_STRCMP(token, INTER_INTRA_COMPOUND_TOKEN) == 0)
+    if (strcmp(token, INTER_INTRA_COMPOUND_TOKEN) == 0)
         linked_token = INTER_INTRA_COMPOUND_NEW_TOKEN;
-    if (EB_STRCMP(token, MFMV_ENABLE_TOKEN) == 0) linked_token = MFMV_ENABLE_NEW_TOKEN;
-    if (EB_STRCMP(token, REDUNDANT_BLK_TOKEN) == 0) linked_token = REDUNDANT_BLK_NEW_TOKEN;
-    if (EB_STRCMP(token, SPATIAL_SSE_FL_TOKEN) == 0) linked_token = SPATIAL_SSE_FL_NEW_TOKEN;
-    if (EB_STRCMP(token, OVR_BNDRY_BLK_TOKEN) == 0) linked_token = OVR_BNDRY_BLK_NEW_TOKEN;
-    if (EB_STRCMP(token, NEW_NEAREST_COMB_INJECT_TOKEN) == 0)
+    if (strcmp(token, MFMV_ENABLE_TOKEN) == 0) linked_token = MFMV_ENABLE_NEW_TOKEN;
+    if (strcmp(token, REDUNDANT_BLK_TOKEN) == 0) linked_token = REDUNDANT_BLK_NEW_TOKEN;
+    if (strcmp(token, SPATIAL_SSE_FL_TOKEN) == 0) linked_token = SPATIAL_SSE_FL_NEW_TOKEN;
+    if (strcmp(token, OVR_BNDRY_BLK_TOKEN) == 0) linked_token = OVR_BNDRY_BLK_NEW_TOKEN;
+    if (strcmp(token, NEW_NEAREST_COMB_INJECT_TOKEN) == 0)
         linked_token = NEW_NEAREST_COMB_INJECT_NEW_TOKEN;
-#if 0//!SHUT_ME_CAND_SORTING
-    if (EB_STRCMP(token, PRUNE_UNIPRED_ME_TOKEN) == 0) linked_token = PRUNE_UNIPRED_ME_NEW_TOKEN;
-#endif
-    if (EB_STRCMP(token, PRUNE_REF_REC_PART_TOKEN) == 0)
-        linked_token = PRUNE_REF_REC_PART_NEW_TOKEN;
-    if (EB_STRCMP(token, NSQ_TABLE_TOKEN) == 0) linked_token = NSQ_TABLE_NEW_TOKEN;
-    if (EB_STRCMP(token, FRAME_END_CDF_UPDATE_TOKEN) == 0)
+    if (strcmp(token, NSQ_TABLE_TOKEN) == 0) linked_token = NSQ_TABLE_NEW_TOKEN;
+    if (strcmp(token, FRAME_END_CDF_UPDATE_TOKEN) == 0)
         linked_token = FRAME_END_CDF_UPDATE_NEW_TOKEN;
-    if (EB_STRCMP(token, LOCAL_WARPED_ENABLE_TOKEN) == 0)
+    if (strcmp(token, LOCAL_WARPED_ENABLE_TOKEN) == 0)
         linked_token = LOCAL_WARPED_ENABLE_NEW_TOKEN;
-    if (EB_STRCMP(token, GLOBAL_MOTION_ENABLE_TOKEN) == 0)
+    if (strcmp(token, GLOBAL_MOTION_ENABLE_TOKEN) == 0)
         linked_token = GLOBAL_MOTION_ENABLE_NEW_TOKEN;
-    if (EB_STRCMP(token, RDOQ_TOKEN) == 0) linked_token = RDOQ_NEW_TOKEN;
-    if (EB_STRCMP(token, FILTER_INTRA_TOKEN) == 0) linked_token = FILTER_INTRA_NEW_TOKEN;
-    if (EB_STRCMP(token, HDR_INPUT_TOKEN) == 0) linked_token = HDR_INPUT_NEW_TOKEN;
-    if (EB_STRCMP(token, ADAPTIVE_QP_ENABLE_TOKEN) == 0)
+    if (strcmp(token, RDOQ_TOKEN) == 0) linked_token = RDOQ_NEW_TOKEN;
+    if (strcmp(token, FILTER_INTRA_TOKEN) == 0) linked_token = FILTER_INTRA_NEW_TOKEN;
+    if (strcmp(token, HDR_INPUT_TOKEN) == 0) linked_token = HDR_INPUT_NEW_TOKEN;
+    if (strcmp(token, ADAPTIVE_QP_ENABLE_TOKEN) == 0)
         linked_token = ADAPTIVE_QP_ENABLE_NEW_TOKEN;
 
-    if (EB_STRCMP(token, DISABLE_CFL_TOKEN) == 0) linked_token = DISABLE_CFL_NEW_TOKEN;
-    if (EB_STRCMP(token, INTRA_EDGE_FILTER_TOKEN) == 0) linked_token = INTRA_EDGE_FILTER_NEW_TOKEN;
-    if (EB_STRCMP(token, INTRA_ANGLE_DELTA_TOKEN) == 0) linked_token = INTRA_ANGLE_DELTA_NEW_TOKEN;
-    if (EB_STRCMP(token, PAETH_TOKEN) == 0) linked_token = PAETH_NEW_TOKEN;
-    if (EB_STRCMP(token, SMOOTH_TOKEN) == 0) linked_token = SMOOTH_NEW_TOKEN;
-    if (EB_STRCMP(token, PIC_BASED_RATE_EST_TOKEN) == 0) linked_token = PIC_BASED_RATE_EST_NEW_TOKEN;
-    if (EB_STRCMP(token, INPUT_STAT_FILE_TOKEN) == 0) linked_token = TWO_PASS_STATS_TOKEN;
-    if (EB_STRCMP(token, OUTPUT_STAT_FILE_TOKEN) == 0) linked_token = TWO_PASS_STATS_TOKEN;
+    if (strcmp(token, DISABLE_CFL_TOKEN) == 0) linked_token = DISABLE_CFL_NEW_TOKEN;
+    if (strcmp(token, INTRA_EDGE_FILTER_TOKEN) == 0) linked_token = INTRA_EDGE_FILTER_NEW_TOKEN;
+    if (strcmp(token, INTRA_ANGLE_DELTA_TOKEN) == 0) linked_token = INTRA_ANGLE_DELTA_NEW_TOKEN;
+    if (strcmp(token, PAETH_TOKEN) == 0) linked_token = PAETH_NEW_TOKEN;
+    if (strcmp(token, SMOOTH_TOKEN) == 0) linked_token = SMOOTH_NEW_TOKEN;
+    if (strcmp(token, PIC_BASED_RATE_EST_TOKEN) == 0) linked_token = PIC_BASED_RATE_EST_NEW_TOKEN;
 
-    if (EB_STRLEN(linked_token, WARNING_LENGTH) > 1) {
+    if (strnlen_s(linked_token, WARNING_LENGTH) > 1) {
         const char *message_str = " will be deprecated soon, please use ";
-        EB_STRCPY(print_message, WARNING_LENGTH, token);
-        EB_STRCPY(
-            print_message + EB_STRLEN(print_message, WARNING_LENGTH), WARNING_LENGTH, message_str);
-        EB_STRCPY(
-            print_message + EB_STRLEN(print_message, WARNING_LENGTH), WARNING_LENGTH, linked_token);
+        size_t offset;
+        strcpy_s(print_message, WARNING_LENGTH, token);
+        offset = strnlen_s(print_message, WARNING_LENGTH);
+        strcpy_s(print_message + offset, WARNING_LENGTH - offset, message_str);
+        offset = strnlen_s(print_message, WARNING_LENGTH);
+        strcpy_s(print_message + offset, WARNING_LENGTH - offset, linked_token);
         return print_message;
     } else if (double_dash_token == 0) {
-        const char *message_str = " will be deprecated soon, please use -";
-        EB_STRCPY(print_message, WARNING_LENGTH, token);
-        EB_STRCPY(
-            print_message + EB_STRLEN(print_message, WARNING_LENGTH), WARNING_LENGTH, message_str);
-        EB_STRCPY(print_message + EB_STRLEN(print_message, WARNING_LENGTH), WARNING_LENGTH, token);
+       const char *message_str = " will be deprecated soon, please use -";
+        size_t offset;
+        strcpy_s(print_message, WARNING_LENGTH, token);
+        offset = strnlen_s(print_message, WARNING_LENGTH);
+        strcpy_s(print_message + offset, WARNING_LENGTH - offset, message_str);
+        offset = strnlen_s(print_message, WARNING_LENGTH);
+        strcpy_s(print_message + offset, WARNING_LENGTH - offset, token);
         return print_message;
     }
     return "";
@@ -2831,10 +2446,10 @@ const char *handle_warnings(const char *token, char *print_message, uint8_t doub
 /******************************************
 * Read Command Line
 ******************************************/
-EbErrorType read_command_line(int32_t argc, char *const argv[], EbConfig **configs,
-                              uint32_t num_channels, EbErrorType *return_errors,
+EbErrorType read_command_line(int32_t argc, char *const argv[], EncChannel *channels,
+                              uint32_t num_channels,
                               char *warning_str[WARNING_LENGTH]) {
-    EbErrorType return_error = EB_ErrorBadParameter;
+    EbErrorType return_error = EB_ErrorNone;
     char        config_string[COMMAND_LINE_MAX_SIZE]; // for one input options
     char *      config_strings[MAX_CHANNEL_NUMBER]; // for multiple input options
     char *      cmd_copy[MAX_NUM_TOKENS]; // keep track of extra tokens
@@ -2864,18 +2479,20 @@ EbErrorType read_command_line(int32_t argc, char *const argv[], EbConfig **confi
         mark_token_as_read(CONFIG_FILE_TOKEN, cmd_copy, &cmd_token_cnt);
         // Parse the config file
         for (index = 0; index < num_channels; ++index) {
-            return_errors[index] =
-                (EbErrorType)read_config_file(configs[index], config_strings[index], index);
-            return_error = (EbErrorType)(return_error & return_errors[index]);
+            EncChannel* c = channels + index;
+            c->return_error =
+                (EbErrorType)read_config_file(c->config, config_strings[index], index);
+            return_error = (EbErrorType)(return_error & c->return_error);
         }
     } else if (find_token_multiple_inputs(argc, argv, CONFIG_FILE_LONG_TOKEN, config_strings) ==
                0) {
         mark_token_as_read(CONFIG_FILE_LONG_TOKEN, cmd_copy, &cmd_token_cnt);
         // Parse the config file
         for (index = 0; index < num_channels; ++index) {
-            return_errors[index] =
-                (EbErrorType)read_config_file(configs[index], config_strings[index], index);
-            return_error = (EbErrorType)(return_error & return_errors[index]);
+            EncChannel* c = channels + index;
+            c->return_error =
+                (EbErrorType)read_config_file(c->config, config_strings[index], index);
+            return_error = (EbErrorType)(return_error & c->return_error);
         }
     } else {
         if (find_token(argc, argv, CONFIG_FILE_TOKEN, config_string) == 0) {
@@ -2897,7 +2514,7 @@ EbErrorType read_command_line(int32_t argc, char *const argv[], EbConfig **confi
             char message[WARNING_LENGTH] = "";
             // concat strings with '-'
             char concat_str[WARNING_LENGTH] = "-";
-            EB_STRCPY(concat_str + 1, sizeof(concat_str), config_entry[token_index].token);
+            strcpy_s(concat_str + 1, sizeof(concat_str) - 1, config_entry[token_index].token);
             if (find_token_multiple_inputs(
                     argc, argv, config_entry[token_index].token, config_strings) == 0) {
                 //Warning for one dash
@@ -2905,15 +2522,16 @@ EbErrorType read_command_line(int32_t argc, char *const argv[], EbConfig **confi
                     *(config_entry[token_index].token + 1) != '-' && // check for --
                     return_result_error != EB_ErrorBadParameter) {
                     handle_warnings(config_entry[token_index].token, message, 0);
-                    EB_STRCPY(warning_str[++warning_index], WARNING_LENGTH, message);
+                    strcpy_s(warning_str[++warning_index], WARNING_LENGTH, message);
                 }
                 // When a token is found mark it as found in the temp token buffer
                 mark_token_as_read(config_entry[token_index].token, cmd_copy, &cmd_token_cnt);
 
                 // Fill up the values corresponding to each channel
                 for (index = 0; index < num_channels; ++index) {
-                    if (EB_STRCMP(config_strings[index], " "))
-                        (*config_entry[token_index].scf)(config_strings[index], configs[index]);
+                    EncChannel* c = channels + index;
+                    if (strcmp(config_strings[index], " "))
+                        (*config_entry[token_index].scf)(config_strings[index], c->config);
                     else
                         break;
                 }
@@ -2921,11 +2539,11 @@ EbErrorType read_command_line(int32_t argc, char *const argv[], EbConfig **confi
                        0) { // handle double dash
                 handle_warnings(config_entry[token_index].token, message, 1);
                 // handle warnings for new tokens
-                if (EB_STRLEN(message, sizeof(message) > 1)) {
+                if (strnlen_s(message, sizeof(message) > 1)) {
                     char double_dash_warning[WARNING_LENGTH] = "-";
-                    EB_STRCPY(double_dash_warning + 1,
+                    strcpy_s(double_dash_warning + 1,
                               sizeof(double_dash_warning), message);
-                    EB_STRCPY(warning_str[++warning_index], WARNING_LENGTH, double_dash_warning);
+                    strcpy_s(warning_str[++warning_index], WARNING_LENGTH, double_dash_warning);
                     warning_index++;
                 }
                 return_result_error = handle_short_tokens(concat_str);
@@ -2934,8 +2552,9 @@ EbErrorType read_command_line(int32_t argc, char *const argv[], EbConfig **confi
 
                 // Fill up the values corresponding to each channel
                 for (index = 0; index < num_channels; ++index) {
-                    if (EB_STRCMP(config_strings[index], " "))
-                        (*config_entry[token_index].scf)(config_strings[index], configs[index]);
+                    EncChannel* c = channels + index;
+                    if (strcmp(config_strings[index], " "))
+                        (*config_entry[token_index].scf)(config_strings[index], c->config);
                     else
                         break;
                 }
@@ -2950,184 +2569,27 @@ EbErrorType read_command_line(int32_t argc, char *const argv[], EbConfig **confi
     /***************************************************************************************************/
 
     for (index = 0; index < num_channels; ++index) {
-        if ((configs[index])->y4m_input == EB_TRUE) {
-            ret_y4m = read_y4m_header(configs[index]);
+        EncChannel* c = channels + index;
+        if (c->config->y4m_input == EB_TRUE) {
+            ret_y4m = read_y4m_header(c->config);
             if (ret_y4m == EB_ErrorBadParameter) {
                 fprintf(stderr, "Error found when reading the y4m file parameters.\n");
                 return EB_ErrorBadParameter;
             }
         }
     }
-
     /***************************************************************************************************/
     /*******************************   Parse manual prediction structure  ******************************/
     /***************************************************************************************************/
     for (index = 0; index < num_channels; ++index) {
-        if ((configs[index])->enable_manual_pred_struct == EB_TRUE) {
-            return_errors[index] = (EbErrorType)read_pred_struct_file(configs[index], configs[index]->input_pred_struct_filename, index);
-            return_error = (EbErrorType)(return_error & return_errors[index]);
+        EncChannel* c = channels + index;
+        EbConfig* config = c->config;
+        if (config->config.enable_manual_pred_struct == EB_TRUE) {
+            c->return_error = (EbErrorType)read_pred_struct_file(
+                config, config->input_pred_struct_filename, index);
+            return_error = (EbErrorType)(return_error & c->return_error);
         }
     }
-
-    /***************************************************************************************************/
-    /***********   Find SPECIAL configuration parameter tokens and call respective functions  **********/
-    /***************************************************************************************************/
-    // Parse command line for search region at level 0 width token
-    if (!find_token_multiple_inputs(argc, argv, HME_LEVEL0_WIDTH, config_strings) ||
-        !find_token_multiple_inputs(argc, argv, "-" HME_LEVEL0_WIDTH, config_strings)) {
-        uint32_t last_index = 0;
-        uint32_t done = 1;
-
-        mark_token_as_read(HME_LEVEL0_WIDTH, cmd_copy, &cmd_token_cnt);
-        mark_token_as_read("-" HME_LEVEL0_WIDTH, cmd_copy, &cmd_token_cnt);
-
-        for (index = 0; done && (index < num_channels); ++index) {
-            configs[index]->hme_level0_column_index = 0;
-            for (uint32_t input_index = last_index;
-                 input_index < configs[index]->number_hme_search_region_in_width + last_index;
-                 ++input_index) {
-                if (EB_STRCMP(config_strings[input_index], " "))
-                    set_hme_level_0_search_area_in_width_array(config_strings[input_index],
-                                                               configs[index]);
-                else {
-                    done = 0;
-                    break;
-                }
-            }
-            last_index += configs[index]->number_hme_search_region_in_width;
-        }
-    }
-
-    //// Parse command line for search region at level 0 height token
-    if (!find_token_multiple_inputs(argc, argv, HME_LEVEL0_HEIGHT, config_strings) ||
-        !find_token_multiple_inputs(argc, argv, "-" HME_LEVEL0_HEIGHT, config_strings)) {
-        uint32_t last_index = 0;
-        uint32_t done = 1;
-
-        mark_token_as_read(HME_LEVEL0_HEIGHT, cmd_copy, &cmd_token_cnt);
-        mark_token_as_read("-" HME_LEVEL0_HEIGHT, cmd_copy, &cmd_token_cnt);
-
-        for (index = 0; done && (index < num_channels); ++index) {
-            configs[index]->hme_level0_row_index = 0;
-            for (uint32_t input_index = last_index;
-                 input_index < configs[index]->number_hme_search_region_in_height + last_index;
-                 ++input_index) {
-                if (EB_STRCMP(config_strings[input_index], " "))
-                    set_hme_level_0_search_area_in_height_array(config_strings[input_index],
-                                                                configs[index]);
-                else {
-                    done = 0;
-                    break;
-                }
-            }
-            last_index += configs[index]->number_hme_search_region_in_height;
-        }
-    }
-
-    // Parse command line for search region at level 1 Height token
-    if (!find_token_multiple_inputs(argc, argv, HME_LEVEL1_HEIGHT, config_strings) ||
-        !find_token_multiple_inputs(argc, argv, "-" HME_LEVEL1_HEIGHT, config_strings)) {
-        uint32_t last_index = 0;
-        uint32_t done = 1;
-
-        mark_token_as_read(HME_LEVEL1_HEIGHT, cmd_copy, &cmd_token_cnt);
-        mark_token_as_read("-" HME_LEVEL1_HEIGHT, cmd_copy, &cmd_token_cnt);
-
-        for (index = 0; done && (index < num_channels); ++index) {
-            configs[index]->hme_level1_row_index = 0;
-            for (uint32_t input_index = last_index;
-                 input_index < configs[index]->number_hme_search_region_in_height + last_index;
-                 ++input_index) {
-                if (EB_STRCMP(config_strings[input_index], " "))
-                    set_hme_level_1_search_area_in_height_array(config_strings[input_index],
-                                                                configs[index]);
-                else {
-                    done = 0;
-                    break;
-                }
-            }
-            last_index += configs[index]->number_hme_search_region_in_height;
-        }
-    }
-
-    // Parse command line for search region at level 1 width token
-    if (!find_token_multiple_inputs(argc, argv, HME_LEVEL1_WIDTH, config_strings) ||
-        !find_token_multiple_inputs(argc, argv, "-" HME_LEVEL1_WIDTH, config_strings)) {
-        uint32_t last_index = 0;
-        uint32_t done = 1;
-
-        mark_token_as_read(HME_LEVEL1_WIDTH, cmd_copy, &cmd_token_cnt);
-        mark_token_as_read("-" HME_LEVEL1_WIDTH, cmd_copy, &cmd_token_cnt);
-
-        for (index = 0; done && (index < num_channels); ++index) {
-            configs[index]->hme_level1_column_index = 0;
-            for (uint32_t input_index = last_index;
-                 input_index < configs[index]->number_hme_search_region_in_width + last_index;
-                 ++input_index) {
-                if (EB_STRCMP(config_strings[input_index], " "))
-                    set_hme_level_1_search_area_in_width_array(config_strings[input_index],
-                                                               configs[index]);
-                else {
-                    done = 0;
-                    break;
-                }
-            }
-            last_index += configs[index]->number_hme_search_region_in_width;
-        }
-    }
-
-    // Parse command line for search region at level 2 width token
-    if (!find_token_multiple_inputs(argc, argv, HME_LEVEL2_WIDTH, config_strings) ||
-        !find_token_multiple_inputs(argc, argv, "-" HME_LEVEL2_WIDTH, config_strings)) {
-        uint32_t last_index = 0;
-        uint32_t done = 1;
-
-        mark_token_as_read(HME_LEVEL2_WIDTH, cmd_copy, &cmd_token_cnt);
-        mark_token_as_read("-" HME_LEVEL2_WIDTH, cmd_copy, &cmd_token_cnt);
-
-        for (index = 0; done && (index < num_channels); ++index) {
-            configs[index]->hme_level2_column_index = 0;
-            for (uint32_t input_index = last_index;
-                 input_index < configs[index]->number_hme_search_region_in_width + last_index;
-                 ++input_index) {
-                if (EB_STRCMP(config_strings[input_index], " "))
-                    set_hme_level_2_search_area_in_width_array(config_strings[input_index],
-                                                               configs[index]);
-                else {
-                    done = 0;
-                    break;
-                }
-            }
-            last_index += configs[index]->number_hme_search_region_in_width;
-        }
-    }
-
-    // Parse command line for search region at level 2 height token
-    if (!find_token_multiple_inputs(argc, argv, HME_LEVEL2_HEIGHT, config_strings) ||
-        !find_token_multiple_inputs(argc, argv, "-" HME_LEVEL2_HEIGHT, config_strings)) {
-        uint32_t last_index = 0;
-        uint32_t done = 1;
-
-        mark_token_as_read(HME_LEVEL2_HEIGHT, cmd_copy, &cmd_token_cnt);
-        mark_token_as_read("-" HME_LEVEL2_HEIGHT, cmd_copy, &cmd_token_cnt);
-
-        for (index = 0; done && (index < num_channels); ++index) {
-            configs[index]->hme_level2_row_index = 0;
-            for (uint32_t input_index = last_index;
-                 input_index < configs[index]->number_hme_search_region_in_height + last_index;
-                 ++input_index) {
-                if (EB_STRCMP(config_strings[input_index], " "))
-                    set_hme_level_2_search_area_in_height_array(config_strings[input_index],
-                                                                configs[index]);
-                else {
-                    done = 0;
-                    break;
-                }
-            }
-            last_index += configs[index]->number_hme_search_region_in_height;
-        }
-    }
-
     /***************************************************************************************************/
     /**************************************   Verify configuration parameters   ************************/
     /***************************************************************************************************/
@@ -3135,36 +2597,38 @@ EbErrorType read_command_line(int32_t argc, char *const argv[], EbConfig **confi
     if (return_error == 0) {
         return_error = EB_ErrorBadParameter;
         for (index = 0; index < num_channels; ++index) {
-            if (return_errors[index] == EB_ErrorNone) {
-                return_errors[index] = verify_settings(configs[index], index);
+            EncChannel* c = channels + index;
+            if (c->return_error == EB_ErrorNone) {
+                EbConfig* config = c->config;
+                c->return_error = verify_settings(config, index);
 
                 // Assuming no errors, add padding to width and height
-                if (return_errors[index] == EB_ErrorNone) {
-                    configs[index]->input_padded_width = configs[index]->source_width;
-                    configs[index]->input_padded_height = configs[index]->source_height;
+                if (c->return_error == EB_ErrorNone) {
+                    config->input_padded_width = config->config.source_width;
+                    config->input_padded_height = config->config.source_height;
                 }
 
                 // Assuming no errors, set the frames to be encoded to the number of frames in the input yuv
-                if (return_errors[index] == EB_ErrorNone &&
-                    configs[index]->frames_to_be_encoded == 0)
-                    configs[index]->frames_to_be_encoded =
-                        compute_frames_to_be_encoded(configs[index]);
+                if (c->return_error == EB_ErrorNone &&
+                    config->frames_to_be_encoded == 0)
+                    config->frames_to_be_encoded =
+                        compute_frames_to_be_encoded(config);
 
                 // For pipe input it is fine if we have -1 here (we will update on end of stream)
-                if (configs[index]->frames_to_be_encoded == -1
-                    && configs[index]->input_file != stdin
-                    && !configs[index]->input_file_is_fifo) {
-                    fprintf(configs[index]->error_log_file,
+                if (config->frames_to_be_encoded == -1
+                    && config->input_file != stdin
+                    && !config->input_file_is_fifo) {
+                    fprintf(config->error_log_file,
                             "Error instance %u: Input yuv does not contain enough frames \n",
                             index + 1);
-                    return_errors[index] = EB_ErrorBadParameter;
+                    c->return_error = EB_ErrorBadParameter;
                 }
 
                 // Force the injector latency mode, and injector frame rate when speed control is on
-                if (return_errors[index] == EB_ErrorNone && configs[index]->speed_control_flag == 1)
-                    configs[index]->injector = 1;
+                if (c->return_error == EB_ErrorNone && config->speed_control_flag == 1)
+                    config->injector = 1;
             }
-            return_error = (EbErrorType)(return_error & return_errors[index]);
+            return_error = (EbErrorType)(return_error & c->return_error);
         }
     }
 

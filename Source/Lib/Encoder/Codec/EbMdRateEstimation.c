@@ -1,17 +1,13 @@
 /*
 * Copyright(c) 2019 Intel Corporation
-* SPDX - License - Identifier: BSD - 2 - Clause - Patent
-*/
-
-/*
 * Copyright (c) 2016, Alliance for Open Media. All rights reserved
 *
 * This source code is subject to the terms of the BSD 2 Clause License and
 * the Alliance for Open Media Patent License 1.0. If the BSD 2 Clause License
 * was not distributed with this source code in the LICENSE file, you can
-* obtain it at www.aomedia.org/license/software. If the Alliance for Open
+* obtain it at https://www.aomedia.org/license/software-license. If the Alliance for Open
 * Media Patent License 1.0 was not distributed with this source code in the
-* PATENTS file, you can obtain it at www.aomedia.org/license/patent.
+* PATENTS file, you can obtain it at https://www.aomedia.org/license/patent-license.
 */
 
 #include <stdlib.h>
@@ -21,6 +17,7 @@
 #include "filter.h"
 #include "EbEntropyCoding.h"
 #include "EbBitstreamUnit.h"
+#include "EbRateDistortionCost.h"
 
 static INLINE int32_t get_interinter_wedge_bits(BlockSize sb_type) {
     const int32_t wbits = get_wedge_params_bits(sb_type);
@@ -342,12 +339,12 @@ MvClassType av1_get_mv_class(int32_t z, int32_t *offset) {
     return c;
 }
 
-//void eb_av1_build_nmv_cost_table(int32_t *mvjoint, int32_t *mvcost[2],
+//void svt_av1_build_nmv_cost_table(int32_t *mvjoint, int32_t *mvcost[2],
 //    const NmvContext *ctx,
 //    MvSubpelPrecision precision)
 
-void eb_av1_build_nmv_cost_table(int32_t *mvjoint, int32_t *mvcost[2], const NmvContext *ctx,
-                                 MvSubpelPrecision precision);
+void svt_av1_build_nmv_cost_table(int32_t *mvjoint, int32_t *mvcost[2], const NmvContext *ctx,
+                                  MvSubpelPrecision precision);
 
 /**************************************************************************
 * av1_estimate_mv_rate()
@@ -367,10 +364,10 @@ void av1_estimate_mv_rate(PictureControlSet *      pcs_ptr,
     nmvcost_hp[0] = &md_rate_estimation_array->nmv_costs_hp[0][MV_MAX];
     nmvcost_hp[1] = &md_rate_estimation_array->nmv_costs_hp[1][MV_MAX];
 
-    eb_av1_build_nmv_cost_table(md_rate_estimation_array->nmv_vec_cost, //out
-                                frm_hdr->allow_high_precision_mv ? nmvcost_hp : nmvcost, //out
-                                &fc->nmvc,
-                                frm_hdr->allow_high_precision_mv);
+    svt_av1_build_nmv_cost_table(md_rate_estimation_array->nmv_vec_cost, //out
+                                 frm_hdr->allow_high_precision_mv ? nmvcost_hp : nmvcost, //out
+                                 &fc->nmvc,
+                                 frm_hdr->allow_high_precision_mv);
     md_rate_estimation_array->nmvcoststack[0] =
         frm_hdr->allow_high_precision_mv ? &md_rate_estimation_array->nmv_costs_hp[0][MV_MAX]
                                          : &md_rate_estimation_array->nmv_costs[0][MV_MAX];
@@ -380,7 +377,7 @@ void av1_estimate_mv_rate(PictureControlSet *      pcs_ptr,
     if (frm_hdr->allow_intrabc) {
         int32_t *dvcost[2] = {&md_rate_estimation_array->dv_cost[0][MV_MAX],
                               &md_rate_estimation_array->dv_cost[1][MV_MAX]};
-        eb_av1_build_nmv_cost_table(
+        svt_av1_build_nmv_cost_table(
             md_rate_estimation_array->dv_joint_cost, dvcost, &fc->ndvc, MV_SUBPEL_NONE);
     }
 }
@@ -565,7 +562,7 @@ static INLINE InterpFilter av1_extract_interp_filter(InterpFilters filters, int3
 * 2 - intra/--, --/intra
 * 3 - intra/intra
  ******************************************************************************/
-int eb_av1_get_intra_inter_context(const MacroBlockD *xd) {
+int svt_av1_get_intra_inter_context(const MacroBlockD *xd) {
     const MbModeInfo *const above_mbmi = xd->above_mbmi;
     const MbModeInfo *const left_mbmi  = xd->left_mbmi;
     const int               has_above  = xd->up_available;
@@ -684,14 +681,13 @@ static void update_mv_component_stats(int comp, NmvComponent *mvcomp, MvSubpelPr
     }
 }
 
-MvJointType av1_get_mv_joint(const MV *mv);
 /*******************************************************************************
  * Updates all the mv stats/CDF for the current block
  ******************************************************************************/
 static void av1_update_mv_stats(const MV *mv, const MV *ref, NmvContext *mvctx,
                                 MvSubpelPrecision precision) {
     const MV          diff = {mv->row - ref->row, mv->col - ref->col};
-    const MvJointType j    = av1_get_mv_joint(&diff);
+    const MvJointType j    = svt_av1_get_mv_joint(&diff);
 
     update_cdf(mvctx->joints_cdf, j, MV_JOINTS);
 
@@ -777,16 +773,8 @@ static AOM_INLINE void sum_intra_stats(PictureControlSet *pcs_ptr, BlkStruct *bl
     } else {
         update_cdf(fc->y_mode_cdf[size_group_lookup[bsize]], y_mode, INTRA_MODES);
     }
-#if SB_MEM_OPT
     if (blk_ptr->use_intrabc == 0 &&
-#else
-    if (xd->use_intrabc == 0 &&
-#endif
-#if FILTER_INTRA_CLI
         av1_filter_intra_allowed(pcs_ptr->parent_pcs_ptr->scs_ptr->seq_header.filter_intra_level,
-#else
-        av1_filter_intra_allowed(pcs_ptr->parent_pcs_ptr->scs_ptr->seq_header.enable_filter_intra,
-#endif
                                  bsize,
                                  blk_ptr->palette_info.pmi.palette_size[0],
                                  y_mode)) {
@@ -874,7 +862,7 @@ void update_stats(PictureControlSet *pcs_ptr, BlkStruct *blk_ptr, int mi_row, in
         return;
     const int inter_block = is_inter_block(&mbmi->block_mi);
     if (!seg_ref_active) {
-        update_cdf(fc->intra_inter_cdf[eb_av1_get_intra_inter_context(xd)], inter_block, 2);
+        update_cdf(fc->intra_inter_cdf[svt_av1_get_intra_inter_context(xd)], inter_block, 2);
         // If the segment reference feature is enabled we have only a single
         // reference frame allowed for the segment so exclude it from
         // the reference frame counts used to work out probabilities.

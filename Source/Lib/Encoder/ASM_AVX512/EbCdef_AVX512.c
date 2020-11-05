@@ -1,7 +1,14 @@
 /*
 * Copyright(c) 2019 Intel Corporation
-* SPDX - License - Identifier: BSD - 2 - Clause - Patent
+*
+* This source code is subject to the terms of the BSD 2 Clause License and
+* the Alliance for Open Media Patent License 1.0. If the BSD 2 Clause License
+* was not distributed with this source code in the LICENSE file, you can
+* obtain it at https://www.aomedia.org/license/software-license. If the Alliance for Open
+* Media Patent License 1.0 was not distributed with this source code in the
+* PATENTS file, you can obtain it at https://www.aomedia.org/license/patent-license.
 */
+
 #include "EbDefinitions.h"
 
 #ifndef NON_AVX512_SUPPORT
@@ -12,9 +19,9 @@
 #include "EbMemory_AVX2.h"
 #include "synonyms_avx512.h"
 
-uint64_t search_one_dual_avx512(int *lev0, int *lev1, int nb_strengths,
-                                uint64_t (**mse)[TOTAL_STRENGTHS], int sb_count,
-                                int start_gi, int end_gi) {
+uint64_t svt_search_one_dual_avx512(int *lev0, int *lev1, int nb_strengths,
+                                    uint64_t (**mse)[TOTAL_STRENGTHS], int sb_count,
+                                    int start_gi, int end_gi) {
     const int start        = start_gi & ~7;
     uint64_t  best_tot_mse = (uint64_t)1 << 63;
     int32_t   best_id0     = 0;

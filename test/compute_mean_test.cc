@@ -1,18 +1,24 @@
 /*
- * Copyright(c) 2019 Netflix, Inc.
- * SPDX - License - Identifier: BSD - 2 - Clause - Patent
- */
+* Copyright(c) 2019 Netflix, Inc.
+*
+* This source code is subject to the terms of the BSD 2 Clause License and
+* the Alliance for Open Media Patent License 1.0. If the BSD 2 Clause License
+* was not distributed with this source code in the LICENSE file, you can
+* obtain it at https://www.aomedia.org/license/software-license. If the Alliance for Open
+* Media Patent License 1.0 was not distributed with this source code in the
+* PATENTS file, you can obtain it at https://www.aomedia.org/license/patent-license.
+*/
 
 /******************************************************************************
  * @file compute_mean_test.cc
  *
  * @brief Unit test for compute mean function:
  * - compute_mean8x8_sse2_intrin
- * - compute_mean_of_squared_values8x8_sse2_intrin
+ * - svt_compute_mean_of_squared_values8x8_sse2_intrin
  * - compute_sub_mean8x8_sse2_intrin
  * - compute_subd_mean_of_squared_values8x8_sse2_intrin
  * - compute_mean8x8_avx2_intrin
- * - compute_interm_var_four8x8_avx2_intrin
+ * - svt_compute_interm_var_four8x8_avx2_intrin
  *
  * @author Cidana-Edmond,Cidana-Ivy
  *
@@ -26,8 +32,8 @@
 /**
  * @brief Unit test for compute mean function:
  * - compute_mean8x8_sse2_intrin
- * - compute_mean_of_squared_values8x8_sse2_intrin
- * - compute_sub_mean8x8_sse2_intrin
+ * - svt_compute_mean_of_squared_values8x8_sse2_intrin
+ * - svt_compute_sub_mean8x8_sse2_intrin
  * - compute_subd_mean_of_squared_values8x8_sse2_intrin
  * - compute_mean8x8_avx2_intrin
  *
@@ -74,39 +80,6 @@ static const uint8_t* prepare_data_8x8(uint8_t* data, SVTRandom* rnd) {
     }
     return data;
 }
-#if !REMOVE_ME_SUBPEL_CODE
-TEST(ComputeMeanTest, run_compute_mean_test) {
-    SVTRandom rnd[2] = {
-        SVTRandom(8, false),  /**< random generator of normal test vector */
-        SVTRandom(0xE0, 0xFF) /**< random generator of boundary test vector */
-    };
-    uint8_t input_data[block_size];
-
-    for (size_t vi = 0; vi < 2; vi++) {
-        for (int i = 0; i < test_times; i++) {
-            // prepare data
-            prepare_data_8x8(input_data, &rnd[vi]);
-
-            // compute mean
-            uint64_t output_sse2_tst =
-                compute_mean8x8_sse2_intrin(input_data, 8, 8, 8);
-            uint64_t output_avx2_tst =
-                compute_mean8x8_avx2_intrin(input_data, 8, 8, 8);
-            uint64_t output_c_ref = compute_mean_c(input_data, 8, 8, 8);
-
-            // compare results
-            ASSERT_EQ(output_sse2_tst, output_c_ref)
-                << test_name[vi] << "[" << i << "] "
-                << "compute mean with asm SSE2 failed!\n"
-                << print_data(input_data, 8, 8);
-            ASSERT_EQ(output_avx2_tst, output_c_ref)
-                << test_name[vi] << "[" << i << "] "
-                << "compute mean with asm AVX2 failed!\n"
-                << print_data(input_data, 8, 8);
-        }
-    }
-}
-#endif
 TEST(ComputeMeanTest, run_compute_mean_squared_values_test) {
     SVTRandom rnd[2] = {
         SVTRandom(8, false),  /**< random generator of normal test vector */
@@ -121,10 +94,10 @@ TEST(ComputeMeanTest, run_compute_mean_squared_values_test) {
 
             // compute mean
             uint64_t output_sse2_tst =
-                compute_mean_of_squared_values8x8_sse2_intrin(
+                svt_compute_mean_of_squared_values8x8_sse2_intrin(
                     input_data, 8, 8, 8);
             uint64_t output_c_ref =
-                compute_mean_squared_values_c(input_data, 8, 8, 8);
+                svt_compute_mean_squared_values_c(input_data, 8, 8, 8);
 
             // compare results
             ASSERT_EQ(output_sse2_tst, output_c_ref)
@@ -149,8 +122,8 @@ TEST(ComputeMeanTest, run_compute_sub_mean_test) {
 
             // compute mean
             uint64_t output_sse2_tst =
-                compute_sub_mean8x8_sse2_intrin(input_data, 8);
-            uint64_t output_c_ref = compute_sub_mean_8x8_c(input_data, 8);
+                svt_compute_sub_mean8x8_sse2_intrin(input_data, 8);
+            uint64_t output_c_ref = svt_compute_sub_mean_8x8_c(input_data, 8);
 
             // compare results
             ASSERT_EQ(output_sse2_tst, output_c_ref)
@@ -205,11 +178,11 @@ TEST(ComputeMeanTest, run_compute_mean_avx2_test) {
         uint64_t output_sse2_squared_tst =
             compute_subd_mean_of_squared_values8x8_sse2_intrin(input_data, 8);
         uint64_t output_sse2_tst =
-            compute_sub_mean8x8_sse2_intrin(input_data, 8);
+            svt_compute_sub_mean8x8_sse2_intrin(input_data, 8);
 
         uint64_t output_avx2_tst[4] = {0};
         uint64_t output_avx2_squared_tst[4] = {0};
-        compute_interm_var_four8x8_avx2_intrin(
+        svt_compute_interm_var_four8x8_avx2_intrin(
             input_data, 8, output_avx2_tst, output_avx2_squared_tst);
 
         // compare results

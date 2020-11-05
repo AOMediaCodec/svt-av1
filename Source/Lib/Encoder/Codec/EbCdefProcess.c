@@ -1,17 +1,13 @@
 /*
 * Copyright(c) 2019 Intel Corporation
-* SPDX - License - Identifier: BSD - 2 - Clause - Patent
-*/
-
-/*
 * Copyright (c) 2016, Alliance for Open Media. All rights reserved
 *
 * This source code is subject to the terms of the BSD 2 Clause License and
 * the Alliance for Open Media Patent License 1.0. If the BSD 2 Clause License
 * was not distributed with this source code in the LICENSE file, you can
-* obtain it at www.aomedia.org/license/software. If the Alliance for Open
+* obtain it at https://www.aomedia.org/license/software-license. If the Alliance for Open
 * Media Patent License 1.0 was not distributed with this source code in the
-* PATENTS file, you can obtain it at www.aomedia.org/license/patent.
+* PATENTS file, you can obtain it at https://www.aomedia.org/license/patent-license.
 */
 
 #include <stdlib.h>
@@ -32,21 +28,21 @@
 void copy_sb8_16(uint16_t *dst, int32_t dstride, const uint8_t *src, int32_t src_voffset,
                  int32_t src_hoffset, int32_t sstride, int32_t vsize, int32_t hsize);
 
-void *  eb_aom_memalign(size_t align, size_t size);
-void    eb_aom_free(void *memblk);
-void *  eb_aom_malloc(size_t size);
-int32_t eb_sb_all_skip(PictureControlSet *pcs_ptr, const Av1Common *const cm, int32_t mi_row,
-                       int32_t mi_col);
-int32_t eb_sb_compute_cdef_list(PictureControlSet *pcs_ptr, const Av1Common *const cm,
-                                int32_t mi_row, int32_t mi_col, CdefList *dlist, BlockSize bs);
+void *  svt_aom_memalign(size_t align, size_t size);
+void    svt_aom_free(void *memblk);
+void *  svt_aom_malloc(size_t size);
+int32_t svt_sb_all_skip(PictureControlSet *pcs_ptr, const Av1Common *const cm, int32_t mi_row,
+                        int32_t mi_col);
+int32_t svt_sb_compute_cdef_list(PictureControlSet *pcs_ptr, const Av1Common *const cm,
+                                 int32_t mi_row, int32_t mi_col, CdefList *dlist, BlockSize bs);
 void    finish_cdef_search(EncDecContext *context_ptr, PictureControlSet *pcs_ptr,
                            int32_t selected_strength_cnt[64]);
 void    av1_cdef_frame16bit(EncDecContext *context_ptr, SequenceControlSet *scs_ptr,
                             PictureControlSet *pCs);
-void    eb_av1_cdef_frame(EncDecContext *context_ptr, SequenceControlSet *scs_ptr,
-                          PictureControlSet *pCs);
-void    eb_av1_loop_restoration_save_boundary_lines(const Yv12BufferConfig *frame, Av1Common *cm,
-                                                    int32_t after_cdef);
+void    svt_av1_cdef_frame(EncDecContext *context_ptr, SequenceControlSet *scs_ptr,
+                           PictureControlSet *pCs);
+void    svt_av1_loop_restoration_save_boundary_lines(const Yv12BufferConfig *frame, Av1Common *cm,
+                                                     int32_t after_cdef);
 
 /**************************************
  * Cdef Context
@@ -74,9 +70,9 @@ EbErrorType cdef_context_ctor(EbThreadContext *  thread_context_ptr,
 
     // Input/Output System Resource Manager FIFOs
     context_ptr->cdef_input_fifo_ptr =
-        eb_system_resource_get_consumer_fifo(enc_handle_ptr->dlf_results_resource_ptr, index);
+        svt_system_resource_get_consumer_fifo(enc_handle_ptr->dlf_results_resource_ptr, index);
     context_ptr->cdef_output_fifo_ptr =
-        eb_system_resource_get_producer_fifo(enc_handle_ptr->cdef_results_resource_ptr, index);
+        svt_system_resource_get_producer_fifo(enc_handle_ptr->cdef_results_resource_ptr, index);
 
     return EB_ErrorNone;
 }
@@ -201,9 +197,9 @@ void cdef_seg_search(PictureControlSet *pcs_ptr, SequenceControlSet *scs_ptr,
             }
 
             // No filtering if the entire filter block is skipped
-            if (eb_sb_all_skip(pcs_ptr, cm, fbr * MI_SIZE_64X64, fbc * MI_SIZE_64X64)) continue;
+            if (svt_sb_all_skip(pcs_ptr, cm, fbr * MI_SIZE_64X64, fbc * MI_SIZE_64X64)) continue;
 
-            cdef_count = eb_sb_compute_cdef_list(
+            cdef_count = svt_sb_compute_cdef_list(
                 pcs_ptr, cm, fbr * MI_SIZE_64X64, fbc * MI_SIZE_64X64, dlist, bs);
 
             for (pli = 0; pli < num_planes; pli++) {
@@ -224,14 +220,14 @@ void cdef_seg_search(PictureControlSet *pcs_ptr, SequenceControlSet *scs_ptr,
                             stride_src[pli],
                             ysize,
                             xsize);
-                gi_step  = get_cdef_gi_step(ppcs->cdef_filter_mode);
+                gi_step = get_cdef_gi_step(ppcs->cdef_level);
                 mid_gi   = ppcs->cdf_ref_frame_strength;
-                start_gi = ppcs->use_ref_frame_cdef_strength && ppcs->cdef_filter_mode == 1
+                start_gi = ppcs->use_ref_frame_cdef_strength && ppcs->cdef_level == 5
                                ? (AOMMAX(0, mid_gi - gi_step))
                                : 0;
                 end_gi = ppcs->use_ref_frame_cdef_strength
                              ? AOMMIN(total_strengths, mid_gi + gi_step)
-                             : ppcs->cdef_filter_mode == 1 ? 8 : total_strengths;
+                             : ppcs->cdef_level == 5 ? 8 : total_strengths;
 
                 for (gi = start_gi; gi < end_gi; gi++) {
                     int32_t  threshold;
@@ -242,25 +238,25 @@ void cdef_seg_search(PictureControlSet *pcs_ptr, SequenceControlSet *scs_ptr,
                     average are outside the frame. We could change the filter instead, but it would add special cases for any future vectorization. */
                     sec_strength = gi % CDEF_SEC_STRENGTHS;
 
-                    eb_cdef_filter_fb(tmp_dst,
-                                      NULL,
-                                      CDEF_BSTRIDE,
-                                      in,
-                                      xdec[pli],
-                                      ydec[pli],
-                                      dir,
-                                      &dirinit,
-                                      var,
-                                      pli,
-                                      dlist,
-                                      cdef_count,
-                                      threshold,
-                                      sec_strength + (sec_strength == 3),
-                                      pri_damping,
-                                      sec_damping,
-                                      coeff_shift);
+                    svt_cdef_filter_fb(tmp_dst,
+                                       NULL,
+                                       CDEF_BSTRIDE,
+                                       in,
+                                       xdec[pli],
+                                       ydec[pli],
+                                       dir,
+                                       &dirinit,
+                                       var,
+                                       pli,
+                                       dlist,
+                                       cdef_count,
+                                       threshold,
+                                       sec_strength + (sec_strength == 3),
+                                       pri_damping,
+                                       sec_damping,
+                                       coeff_shift);
 
-                    curr_mse = eb_compute_cdef_dist_8bit(
+                    curr_mse = svt_compute_cdef_dist_8bit(
                         ref_coeff[pli] +
                             (fbr * MI_SIZE_64X64 << mi_high_l2[pli]) * stride_ref[pli] +
                             (fbc * MI_SIZE_64X64 << mi_wide_l2[pli]),
@@ -401,9 +397,9 @@ void cdef_seg_search16bit(PictureControlSet *pcs_ptr, SequenceControlSet *scs_pt
             }
 
             // No filtering if the entire filter block is skipped
-            if (eb_sb_all_skip(pcs_ptr, cm, fbr * MI_SIZE_64X64, fbc * MI_SIZE_64X64)) continue;
+            if (svt_sb_all_skip(pcs_ptr, cm, fbr * MI_SIZE_64X64, fbc * MI_SIZE_64X64)) continue;
 
-            cdef_count = eb_sb_compute_cdef_list(
+            cdef_count = svt_sb_compute_cdef_list(
                 pcs_ptr, cm, fbr * MI_SIZE_64X64, fbc * MI_SIZE_64X64, dlist, bs);
 
             for (pli = 0; pli < num_planes; pli++) {
@@ -424,14 +420,14 @@ void cdef_seg_search16bit(PictureControlSet *pcs_ptr, SequenceControlSet *scs_pt
                              stride_src[pli],
                              ysize,
                              xsize);
-                gi_step  = get_cdef_gi_step(ppcs->cdef_filter_mode);
-                mid_gi   = ppcs->cdf_ref_frame_strength;
-                start_gi = ppcs->use_ref_frame_cdef_strength && ppcs->cdef_filter_mode == 1
-                               ? (AOMMAX(0, mid_gi - gi_step))
-                               : 0;
+                gi_step = get_cdef_gi_step(ppcs->cdef_level);
+                mid_gi = ppcs->cdf_ref_frame_strength;
+                start_gi = ppcs->use_ref_frame_cdef_strength && ppcs->cdef_level == 5
+                                ? (AOMMAX(0, mid_gi - gi_step))
+                                : 0;
                 end_gi = ppcs->use_ref_frame_cdef_strength
-                             ? AOMMIN(total_strengths, mid_gi + gi_step)
-                             : ppcs->cdef_filter_mode == 1 ? 8 : total_strengths;
+                                ? AOMMIN(total_strengths, mid_gi + gi_step)
+                                : ppcs->cdef_level == 5 ? 8 : total_strengths;
 
                 for (gi = start_gi; gi < end_gi; gi++) {
                     int32_t  threshold;
@@ -442,25 +438,25 @@ void cdef_seg_search16bit(PictureControlSet *pcs_ptr, SequenceControlSet *scs_pt
                     average are outside the frame. We could change the filter instead, but it would add special cases for any future vectorization. */
                     sec_strength = gi % CDEF_SEC_STRENGTHS;
 
-                    eb_cdef_filter_fb(NULL,
-                                      tmp_dst,
-                                      CDEF_BSTRIDE,
-                                      in,
-                                      xdec[pli],
-                                      ydec[pli],
-                                      dir,
-                                      &dirinit,
-                                      var,
-                                      pli,
-                                      dlist,
-                                      cdef_count,
-                                      threshold,
-                                      sec_strength + (sec_strength == 3),
-                                      pri_damping,
-                                      sec_damping,
-                                      coeff_shift);
+                    svt_cdef_filter_fb(NULL,
+                                       tmp_dst,
+                                       CDEF_BSTRIDE,
+                                       in,
+                                       xdec[pli],
+                                       ydec[pli],
+                                       dir,
+                                       &dirinit,
+                                       var,
+                                       pli,
+                                       dlist,
+                                       cdef_count,
+                                       threshold,
+                                       sec_strength + (sec_strength == 3),
+                                       pri_damping,
+                                       sec_damping,
+                                       coeff_shift);
 
-                    curr_mse = eb_compute_cdef_dist(
+                    curr_mse = svt_compute_cdef_dist_16bit(
                         ref_coeff[pli] +
                             (fbr * MI_SIZE_64X64 << mi_high_l2[pli]) * stride_ref[pli] +
                             (fbc * MI_SIZE_64X64 << mi_wide_l2[pli]),
@@ -516,7 +512,7 @@ void *cdef_kernel(void *input_ptr) {
         Av1Common *cm       = pcs_ptr->parent_pcs_ptr->av1_cm;
         frm_hdr             = &pcs_ptr->parent_pcs_ptr->frm_hdr;
 
-        if (scs_ptr->seq_header.enable_cdef && pcs_ptr->parent_pcs_ptr->cdef_filter_mode) {
+        if (scs_ptr->seq_header.cdef_level && pcs_ptr->parent_pcs_ptr->cdef_level) {
             if (scs_ptr->static_config.is_16bit_pipeline || is_16bit)
                 cdef_seg_search16bit(pcs_ptr, scs_ptr, dlf_results_ptr->segment_index);
             else
@@ -524,12 +520,12 @@ void *cdef_kernel(void *input_ptr) {
         }
 
         //all seg based search is done. update total processed segments. if all done, finish the search and perfrom application.
-        eb_block_on_mutex(pcs_ptr->cdef_search_mutex);
+        svt_block_on_mutex(pcs_ptr->cdef_search_mutex);
 
         pcs_ptr->tot_seg_searched_cdef++;
         if (pcs_ptr->tot_seg_searched_cdef == pcs_ptr->cdef_segments_total_count) {
             // SVT_LOG("    CDEF all seg here  %i\n", pcs_ptr->picture_number);
-            if (scs_ptr->seq_header.enable_cdef && pcs_ptr->parent_pcs_ptr->cdef_filter_mode) {
+            if (scs_ptr->seq_header.cdef_level && pcs_ptr->parent_pcs_ptr->cdef_level) {
                 int32_t selected_strength_cnt[64] = {0};
                 finish_cdef_search(0, pcs_ptr, selected_strength_cnt);
 
@@ -539,7 +535,7 @@ void *cdef_kernel(void *input_ptr) {
                     if (scs_ptr->static_config.is_16bit_pipeline || is_16bit)
                         av1_cdef_frame16bit(0, scs_ptr, pcs_ptr);
                     else
-                        eb_av1_cdef_frame(0, scs_ptr, pcs_ptr);
+                        svt_av1_cdef_frame(0, scs_ptr, pcs_ptr);
                 }
             } else {
                 frm_hdr->cdef_params.cdef_bits             = 0;
@@ -551,30 +547,30 @@ void *cdef_kernel(void *input_ptr) {
             //restoration prep
 
             if (scs_ptr->seq_header.enable_restoration) {
-                eb_av1_loop_restoration_save_boundary_lines(cm->frame_to_show, cm, 1);
+                svt_av1_loop_restoration_save_boundary_lines(cm->frame_to_show, cm, 1);
 
                 //are these still needed here?/!!!
-                eb_extend_frame(cm->frame_to_show->buffers[0],
-                                cm->frame_to_show->crop_widths[0],
-                                cm->frame_to_show->crop_heights[0],
-                                cm->frame_to_show->strides[0],
-                                RESTORATION_BORDER,
-                                RESTORATION_BORDER,
-                                scs_ptr->static_config.is_16bit_pipeline || is_16bit);
-                eb_extend_frame(cm->frame_to_show->buffers[1],
-                                cm->frame_to_show->crop_widths[1],
-                                cm->frame_to_show->crop_heights[1],
-                                cm->frame_to_show->strides[1],
-                                RESTORATION_BORDER,
-                                RESTORATION_BORDER,
-                                scs_ptr->static_config.is_16bit_pipeline || is_16bit);
-                eb_extend_frame(cm->frame_to_show->buffers[2],
-                                cm->frame_to_show->crop_widths[1],
-                                cm->frame_to_show->crop_heights[1],
-                                cm->frame_to_show->strides[1],
-                                RESTORATION_BORDER,
-                                RESTORATION_BORDER,
-                                scs_ptr->static_config.is_16bit_pipeline || is_16bit);
+                svt_extend_frame(cm->frame_to_show->buffers[0],
+                                 cm->frame_to_show->crop_widths[0],
+                                 cm->frame_to_show->crop_heights[0],
+                                 cm->frame_to_show->strides[0],
+                                 RESTORATION_BORDER,
+                                 RESTORATION_BORDER,
+                                 scs_ptr->static_config.is_16bit_pipeline || is_16bit);
+                svt_extend_frame(cm->frame_to_show->buffers[1],
+                                 cm->frame_to_show->crop_widths[1],
+                                 cm->frame_to_show->crop_heights[1],
+                                 cm->frame_to_show->strides[1],
+                                 RESTORATION_BORDER,
+                                 RESTORATION_BORDER,
+                                 scs_ptr->static_config.is_16bit_pipeline || is_16bit);
+                svt_extend_frame(cm->frame_to_show->buffers[2],
+                                 cm->frame_to_show->crop_widths[1],
+                                 cm->frame_to_show->crop_heights[1],
+                                 cm->frame_to_show->strides[1],
+                                 RESTORATION_BORDER,
+                                 RESTORATION_BORDER,
+                                 scs_ptr->static_config.is_16bit_pipeline || is_16bit);
             }
 
             pcs_ptr->rest_segments_column_count = scs_ptr->rest_segment_column_count;
@@ -586,18 +582,18 @@ void *cdef_kernel(void *input_ptr) {
             for (segment_index = 0; segment_index < pcs_ptr->rest_segments_total_count;
                  ++segment_index) {
                 // Get Empty Cdef Results to Rest
-                eb_get_empty_object(context_ptr->cdef_output_fifo_ptr, &cdef_results_wrapper_ptr);
+                svt_get_empty_object(context_ptr->cdef_output_fifo_ptr, &cdef_results_wrapper_ptr);
                 cdef_results_ptr = (struct CdefResults *)cdef_results_wrapper_ptr->object_ptr;
                 cdef_results_ptr->pcs_wrapper_ptr = dlf_results_ptr->pcs_wrapper_ptr;
                 cdef_results_ptr->segment_index   = segment_index;
                 // Post Cdef Results
-                eb_post_full_object(cdef_results_wrapper_ptr);
+                svt_post_full_object(cdef_results_wrapper_ptr);
             }
         }
-        eb_release_mutex(pcs_ptr->cdef_search_mutex);
+        svt_release_mutex(pcs_ptr->cdef_search_mutex);
 
         // Release Dlf Results
-        eb_release_object(dlf_results_wrapper_ptr);
+        svt_release_object(dlf_results_wrapper_ptr);
     }
 
     return NULL;

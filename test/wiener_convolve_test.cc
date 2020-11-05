@@ -1,7 +1,13 @@
 /*
- * Copyright(c) 2019 Netflix, Inc.
- * SPDX - License - Identifier: BSD - 2 - Clause - Patent
- */
+* Copyright(c) 2019 Netflix, Inc.
+*
+* This source code is subject to the terms of the BSD 2 Clause License and
+* the Alliance for Open Media Patent License 1.0. If the BSD 2 Clause License
+* was not distributed with this source code in the LICENSE file, you can
+* obtain it at https://www.aomedia.org/license/software-license. If the Alliance for Open
+* Media Patent License 1.0 was not distributed with this source code in the
+* PATENTS file, you can obtain it at https://www.aomedia.org/license/patent-license.
+*/
 
 /******************************************************************************
  * @file wiener_convolve_test.cc
@@ -34,8 +40,8 @@
 
 /**
  * @brief Unit test of wiener convolbe add source:
- * - eb_av1_wiener_convolve_add_src_avx2
- * - eb_av1_highbd_wiener_convolve_add_src_avx2
+ * - svt_av1_wiener_convolve_add_src_avx2
+ * - svt_av1_highbd_wiener_convolve_add_src_avx2
  *
  * Test strategy:
  * Verify this assembly code by comparing with reference c implementation.
@@ -100,14 +106,14 @@ static const BlkSize test_block_size_table[] = {BlkSize(96, 96),
 static const int test_tap_table[] = {7, 5, 3};
 
 static const WienerConvolveFunc wiener_convolve_func_table[] = {
-    eb_av1_wiener_convolve_add_src_avx2,
+    svt_av1_wiener_convolve_add_src_avx2,
 #ifndef NON_AVX512_SUPPORT
-    eb_av1_wiener_convolve_add_src_avx512
+    svt_av1_wiener_convolve_add_src_avx512
 #endif
 };
 
 static const HbdWienerConvolveFunc hbd_wiener_convolve_func_table[] = {
-    eb_av1_highbd_wiener_convolve_add_src_avx2,
+    svt_av1_highbd_wiener_convolve_add_src_avx2,
 };
 
 template <typename Sample, typename FuncType, typename ParamType>
@@ -131,19 +137,19 @@ class AV1WienerConvolveTest : public ::testing::TestWithParam<ParamType> {
 
     void TearDown() override {
         if (input_) {
-            eb_aom_free(input_);
+            svt_aom_free(input_);
             input_ = nullptr;
         }
         if (output_) {
-            eb_aom_free(output_);
+            svt_aom_free(output_);
             output_ = nullptr;
         }
         if (output_tst_) {
-            eb_aom_free(output_tst_);
+            svt_aom_free(output_tst_);
             output_tst_ = nullptr;
         }
         if (output_ref_) {
-            eb_aom_free(output_ref_);
+            svt_aom_free(output_ref_);
             output_ref_ = nullptr;
         }
         aom_clear_system_state();
@@ -152,16 +158,16 @@ class AV1WienerConvolveTest : public ::testing::TestWithParam<ParamType> {
   protected:
     void malloc_data() {
         input_ = reinterpret_cast<Sample*>(
-            eb_aom_memalign(32, input_stride * h * sizeof(Sample)));
+            svt_aom_memalign(32, input_stride * h * sizeof(Sample)));
         ASSERT_NE(input_, nullptr) << "create input buffer failed!";
         output_ = reinterpret_cast<Sample*>(
-            eb_aom_memalign(32, output_stride * h * sizeof(Sample)));
+            svt_aom_memalign(32, output_stride * h * sizeof(Sample)));
         ASSERT_NE(output_, nullptr) << "create output buffer failed!";
         output_tst_ = reinterpret_cast<Sample*>(
-            eb_aom_memalign(32, output_stride * h * sizeof(Sample)));
+            svt_aom_memalign(32, output_stride * h * sizeof(Sample)));
         ASSERT_NE(output_tst_, nullptr) << "create test output buffer failed!";
         output_ref_ = reinterpret_cast<Sample*>(
-            eb_aom_memalign(32, output_stride * h * sizeof(Sample)));
+            svt_aom_memalign(32, output_stride * h * sizeof(Sample)));
         ASSERT_NE(output_ref_, nullptr) << "create ref output buffer failed!";
     }
 
@@ -328,7 +334,7 @@ class AV1WienerConvolveLbdTest
         // Choose random locations within the source block
         int offset_r = 3 + pseudo_uniform(h - out_h_ - 7);
         int offset_c = 3 + pseudo_uniform(input_stride - out_w_ - 7);
-        eb_av1_wiener_convolve_add_src_c(
+        svt_av1_wiener_convolve_add_src_c(
             input + offset_r * input_stride + offset_c,
             input_stride,
             output_ref_,
@@ -371,10 +377,10 @@ class AV1WienerConvolveLbdTest
 
         const uint64_t num_loop = 10000000000 / (out_w_ * out_h_);
 
-        eb_start_time(&start_time_seconds, &start_time_useconds);
+        svt_av1_get_time(&start_time_seconds, &start_time_useconds);
 
         for (uint64_t i = 0; i < num_loop; i++) {
-            eb_av1_wiener_convolve_add_src_c(
+            svt_av1_wiener_convolve_add_src_c(
                 input + offset_r * input_stride + offset_c,
                 input_stride,
                 output_ref_,
@@ -386,7 +392,7 @@ class AV1WienerConvolveLbdTest
                 &params);
         }
 
-        eb_start_time(&middle_time_seconds, &middle_time_useconds);
+        svt_av1_get_time(&middle_time_seconds, &middle_time_useconds);
 
         for (uint64_t i = 0; i < num_loop; i++) {
             func_tst_(input + offset_r * input_stride + offset_c,
@@ -400,17 +406,15 @@ class AV1WienerConvolveLbdTest
                       &params);
         }
 
-        eb_start_time(&finish_time_seconds, &finish_time_useconds);
-        eb_compute_overall_elapsed_time_ms(start_time_seconds,
-                                           start_time_useconds,
-                                           middle_time_seconds,
-                                           middle_time_useconds,
-                                           &time_c);
-        eb_compute_overall_elapsed_time_ms(middle_time_seconds,
-                                           middle_time_useconds,
-                                           finish_time_seconds,
-                                           finish_time_useconds,
-                                           &time_o);
+        svt_av1_get_time(&finish_time_seconds, &finish_time_useconds);
+        time_c = svt_av1_compute_overall_elapsed_time_ms(start_time_seconds,
+                                                         start_time_useconds,
+                                                         middle_time_seconds,
+                                                         middle_time_useconds);
+        time_o = svt_av1_compute_overall_elapsed_time_ms(middle_time_seconds,
+                                                         middle_time_useconds,
+                                                         finish_time_seconds,
+                                                         finish_time_useconds);
 
         printf("convolve(%3dx%3d, tap %d): %6.2f\n",
                out_w_,
@@ -440,7 +444,7 @@ class AV1WienerConvolveHbdTest
         // Choose random locations within the source block
         int offset_r = 3 + pseudo_uniform(h - out_h_ - 7);
         int offset_c = 3 + pseudo_uniform(input_stride - out_w_ - 7);
-        eb_av1_highbd_wiener_convolve_add_src_c(
+        svt_av1_highbd_wiener_convolve_add_src_c(
             input + offset_r * input_stride + offset_c,
             input_stride,
             out_ref,

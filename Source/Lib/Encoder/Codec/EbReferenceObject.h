@@ -1,6 +1,12 @@
 /*
 * Copyright(c) 2019 Intel Corporation
-* SPDX - License - Identifier: BSD - 2 - Clause - Patent
+*
+* This source code is subject to the terms of the BSD 2 Clause License and
+* the Alliance for Open Media Patent License 1.0. If the BSD 2 Clause License
+* was not distributed with this source code in the LICENSE file, you can
+* obtain it at https://www.aomedia.org/license/software-license. If the Alliance for Open
+* Media Patent License 1.0 was not distributed with this source code in the
+* PATENTS file, you can obtain it at https://www.aomedia.org/license/patent-license.
 */
 
 #ifndef EbReferenceObject_h
@@ -41,35 +47,17 @@ typedef struct EbReferenceObject {
     StatStruct           stat_struct;
     EbHandle             referenced_area_mutex;
     uint64_t             referenced_area_avg;
-#if TPL_1PASS_IMP
     double               r0;
-#endif
-#if ADAPTIVE_NSQ_CR
     uint32_t ref_part_cnt[NUMBER_OF_SHAPES-1][FB_NUM][SSEG_NUM];
-#endif
-#if ADAPTIVE_DEPTH_CR
-#if SOFT_CYCLES_REDUCTION
     uint32_t ref_pred_depth_count[DEPTH_DELTA_NUM][NUMBER_OF_SHAPES-1];
-#else
-    uint32_t ref_pred_depth_count[DEPTH_DELTA_NUM];
-#endif
-#endif
-#if ADAPTIVE_TXT_CR
     uint32_t ref_txt_cnt[TXT_DEPTH_DELTA_NUM][TX_TYPES];
-#endif
     int32_t              mi_cols;
     int32_t              mi_rows;
 } EbReferenceObject;
 
 typedef struct EbReferenceObjectDescInitData {
     EbPictureBufferDescInitData reference_picture_desc_init_data;
-#if MEM_OPT_10bit
-#if CHANGE_HBD_MODE
     int8_t hbd_mode_decision;
-#else
-    uint8_t hbd_mode_decision;
-#endif
-#endif
 } EbReferenceObjectDescInitData;
 
 typedef struct EbPaReferenceObject {
@@ -100,9 +88,9 @@ typedef struct EbPaReferenceObjectDescInitData {
 /**************************************
  * Extern Function Declarations
  **************************************/
-extern EbErrorType eb_reference_object_creator(EbPtr *object_dbl_ptr, EbPtr object_init_data_ptr);
+extern EbErrorType svt_reference_object_creator(EbPtr *object_dbl_ptr, EbPtr object_init_data_ptr);
 
-extern EbErrorType eb_pa_reference_object_creator(EbPtr *object_dbl_ptr,
-                                                  EbPtr  object_init_data_ptr);
+extern EbErrorType svt_pa_reference_object_creator(EbPtr *object_dbl_ptr,
+                                                   EbPtr  object_init_data_ptr);
 
 #endif //EbReferenceObject_h

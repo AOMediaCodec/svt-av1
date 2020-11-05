@@ -1,7 +1,13 @@
 /*
- * Copyright(c) 2019 Netflix, Inc.
- * SPDX - License - Identifier: BSD - 2 - Clause - Patent
- */
+* Copyright(c) 2019 Netflix, Inc.
+*
+* This source code is subject to the terms of the BSD 2 Clause License and
+* the Alliance for Open Media Patent License 1.0. If the BSD 2 Clause License
+* was not distributed with this source code in the LICENSE file, you can
+* obtain it at https://www.aomedia.org/license/software-license. If the Alliance for Open
+* Media Patent License 1.0 was not distributed with this source code in the
+* PATENTS file, you can obtain it at https://www.aomedia.org/license/patent-license.
+*/
 
 /******************************************************************************
  * @file InvTxfm1dTest.cc
@@ -71,17 +77,17 @@ class AV1InvTxfm1dTest : public ::testing::TestWithParam<InvTxfm1dParam> {
 
     void SetUp() override {
         input_ = reinterpret_cast<int32_t *>(
-            eb_aom_memalign(32, MAX_TX_SIZE * sizeof(int32_t)));
+            svt_aom_memalign(32, MAX_TX_SIZE * sizeof(int32_t)));
         output_ = reinterpret_cast<int32_t *>(
-            eb_aom_memalign(32, MAX_TX_SIZE * sizeof(int32_t)));
+            svt_aom_memalign(32, MAX_TX_SIZE * sizeof(int32_t)));
         inv_output_ = reinterpret_cast<int32_t *>(
-            eb_aom_memalign(32, MAX_TX_SIZE * sizeof(int32_t)));
+            svt_aom_memalign(32, MAX_TX_SIZE * sizeof(int32_t)));
     }
 
     void TearDown() override {
-        eb_aom_free(input_);
-        eb_aom_free(output_);
-        eb_aom_free(inv_output_);
+        svt_aom_free(input_);
+        svt_aom_free(output_);
+        svt_aom_free(inv_output_);
         aom_clear_system_state();
     }
 

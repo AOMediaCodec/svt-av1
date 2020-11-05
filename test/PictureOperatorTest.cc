@@ -1,14 +1,20 @@
 /*
- * Copyright(c) 2019 Netflix, Inc.
- * SPDX - License - Identifier: BSD - 2 - Clause - Patent
- */
+* Copyright(c) 2019 Netflix, Inc.
+*
+* This source code is subject to the terms of the BSD 2 Clause License and
+* the Alliance for Open Media Patent License 1.0. If the BSD 2 Clause License
+* was not distributed with this source code in the LICENSE file, you can
+* obtain it at https://www.aomedia.org/license/software-license. If the Alliance for Open
+* Media Patent License 1.0 was not distributed with this source code in the
+* PATENTS file, you can obtain it at https://www.aomedia.org/license/patent-license.
+*/
 
 /******************************************************************************
  * @file PictureOperatorTest.cc
  *
  * @brief Unit test for PictureOperatorTest functions:
- * - picture_average_kernel_sse2_intrin
- * - picture_average_kernel1_line_sse2_intrin
+ * - svt_picture_average_kernel_sse2_intrin
+ * - svt_picture_average_kernel1_line_sse2_intrin
  * - picture_copy_kernel_sse2
  *
  * @author Cidana-Ivy
@@ -57,8 +63,8 @@ typedef std::tuple<PUSize, TestPattern> TestParam;
 
 /**
  * @brief Unit test for Picture functions in PU size include:
- *  - picture_average_kernel_sse2_intrin
- *  - picture_average_kernel1_line_sse2_intrin
+ *  - svt_picture_average_kernel_sse2_intrin
+ *  - svt_picture_average_kernel1_line_sse2_intrin
  *  - picture_copy_kernel_sse2
  *
  *
@@ -87,23 +93,23 @@ class PictureOperatorTest : public ::testing::Test,
           test_pattern_(TEST_GET_PARAM(1)) {
         tst_size = 2 * MAX_PU_SIZE * MAX_PU_SIZE;
         tst_stride_ = 2 * MAX_PU_SIZE;
-        tst1_aligned_ = (uint8_t *)eb_aom_memalign(8, tst_size);
-        tst2_aligned_ = (uint8_t *)eb_aom_memalign(8, tst_size);
-        dst1_aligned_ = (uint8_t *)eb_aom_memalign(8, tst_size);
-        dst2_aligned_ = (uint8_t *)eb_aom_memalign(8, tst_size);
+        tst1_aligned_ = (uint8_t *)svt_aom_memalign(8, tst_size);
+        tst2_aligned_ = (uint8_t *)svt_aom_memalign(8, tst_size);
+        dst1_aligned_ = (uint8_t *)svt_aom_memalign(8, tst_size);
+        dst2_aligned_ = (uint8_t *)svt_aom_memalign(8, tst_size);
         memset(dst1_aligned_, 0, tst_size * sizeof(dst1_aligned_[0]));
         memset(dst2_aligned_, 0, tst_size * sizeof(dst2_aligned_[0]));
     }
 
     void TearDown() override {
         if (tst1_aligned_)
-            eb_aom_free(tst1_aligned_);
+            svt_aom_free(tst1_aligned_);
         if (tst2_aligned_)
-            eb_aom_free(tst2_aligned_);
+            svt_aom_free(tst2_aligned_);
         if (dst1_aligned_)
-            eb_aom_free(dst1_aligned_);
+            svt_aom_free(dst1_aligned_);
         if (dst2_aligned_)
-            eb_aom_free(dst2_aligned_);
+            svt_aom_free(dst2_aligned_);
     }
 
   protected:
@@ -134,22 +140,22 @@ class PictureOperatorTest : public ::testing::Test,
 
     void run_avg_test() {
         prepare_data();
-        picture_average_kernel_sse2_intrin(tst1_aligned_,
-                                           tst_stride_,
-                                           tst2_aligned_,
-                                           tst_stride_,
-                                           dst1_aligned_,
-                                           tst_stride_,
-                                           pu_width_,
-                                           pu_height_);
-        picture_average_kernel_c(tst1_aligned_,
-                               tst_stride_,
-                               tst2_aligned_,
-                               tst_stride_,
-                               dst2_aligned_,
-                               tst_stride_,
-                               pu_width_,
-                               pu_height_);
+        svt_picture_average_kernel_sse2_intrin(tst1_aligned_,
+                                               tst_stride_,
+                                               tst2_aligned_,
+                                               tst_stride_,
+                                               dst1_aligned_,
+                                               tst_stride_,
+                                               pu_width_,
+                                               pu_height_);
+        svt_picture_average_kernel_c(tst1_aligned_,
+                                     tst_stride_,
+                                     tst2_aligned_,
+                                     tst_stride_,
+                                     dst2_aligned_,
+                                     tst_stride_,
+                                     pu_width_,
+                                     pu_height_);
 
         int fail_pixel_count = 0;
         for (uint16_t j = 0; j < pu_height_; j++) {
@@ -164,9 +170,9 @@ class PictureOperatorTest : public ::testing::Test,
             << "in pu for " << fail_pixel_count << "times,"
             << " at func: [picture average] ";
 
-        picture_average_kernel1_line_sse2_intrin(
+        svt_picture_average_kernel1_line_sse2_intrin(
             tst1_aligned_, tst2_aligned_, dst1_aligned_, pu_width_);
-        picture_average_kernel1_line_c(
+        svt_picture_average_kernel1_line_c(
             tst1_aligned_, tst2_aligned_, dst2_aligned_, pu_width_);
 
         fail_pixel_count = 0;

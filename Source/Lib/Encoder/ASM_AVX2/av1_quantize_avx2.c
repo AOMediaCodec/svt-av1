@@ -4,9 +4,9 @@
  * This source code is subject to the terms of the BSD 2 Clause License and
  * the Alliance for Open Media Patent License 1.0. If the BSD 2 Clause License
  * was not distributed with this source code in the LICENSE file, you can
- * obtain it at www.aomedia.org/license/software. If the Alliance for Open
+ * obtain it at https://www.aomedia.org/license/software-license. If the Alliance for Open
  * Media Patent License 1.0 was not distributed with this source code in the
- * PATENTS file, you can obtain it at www.aomedia.org/license/patent.
+ * PATENTS file, you can obtain it at https://www.aomedia.org/license/patent-license.
  */
 
 #include <immintrin.h>
@@ -124,11 +124,11 @@ static INLINE void quantize(const __m256i *thr, const __m256i *qp, __m256i *c,
     }
 }
 
-void eb_av1_quantize_fp_avx2(const TranLow *coeff_ptr, intptr_t n_coeffs, const int16_t *zbin_ptr,
-                             const int16_t *round_ptr, const int16_t *quant_ptr,
-                             const int16_t *quant_shift_ptr, TranLow *qcoeff_ptr,
-                             TranLow *dqcoeff_ptr, const int16_t *dequant_ptr, uint16_t *eob_ptr,
-                             const int16_t *scan_ptr, const int16_t *iscan_ptr) {
+void svt_av1_quantize_fp_avx2(const TranLow *coeff_ptr, intptr_t n_coeffs, const int16_t *zbin_ptr,
+                              const int16_t *round_ptr, const int16_t *quant_ptr,
+                              const int16_t *quant_shift_ptr, TranLow *qcoeff_ptr,
+                              TranLow *dqcoeff_ptr, const int16_t *dequant_ptr, uint16_t *eob_ptr,
+                              const int16_t *scan_ptr, const int16_t *iscan_ptr) {
     (void)scan_ptr;
     (void)zbin_ptr;
     (void)quant_shift_ptr;
@@ -197,12 +197,12 @@ static INLINE void quantize_32x32(const __m256i *thr, const __m256i *qp, __m256i
     }
 }
 
-void eb_av1_quantize_fp_32x32_avx2(const TranLow *coeff_ptr, intptr_t n_coeffs,
-                                   const int16_t *zbin_ptr, const int16_t *round_ptr,
-                                   const int16_t *quant_ptr, const int16_t *quant_shift_ptr,
-                                   TranLow *qcoeff_ptr, TranLow *dqcoeff_ptr,
-                                   const int16_t *dequant_ptr, uint16_t *eob_ptr,
-                                   const int16_t *scan_ptr, const int16_t *iscan_ptr) {
+void svt_av1_quantize_fp_32x32_avx2(const TranLow *coeff_ptr, intptr_t n_coeffs,
+                                    const int16_t *zbin_ptr, const int16_t *round_ptr,
+                                    const int16_t *quant_ptr, const int16_t *quant_shift_ptr,
+                                    TranLow *qcoeff_ptr, TranLow *dqcoeff_ptr,
+                                    const int16_t *dequant_ptr, uint16_t *eob_ptr,
+                                    const int16_t *scan_ptr, const int16_t *iscan_ptr) {
     (void)scan_ptr;
     (void)zbin_ptr;
     (void)quant_shift_ptr;
@@ -275,12 +275,12 @@ static INLINE void quantize_64x64(const __m256i *thr, const __m256i *qp, __m256i
     }
 }
 
-void eb_av1_quantize_fp_64x64_avx2(const TranLow *coeff_ptr, intptr_t n_coeffs,
-                                   const int16_t *zbin_ptr, const int16_t *round_ptr,
-                                   const int16_t *quant_ptr, const int16_t *quant_shift_ptr,
-                                   TranLow *qcoeff_ptr, TranLow *dqcoeff_ptr,
-                                   const int16_t *dequant_ptr, uint16_t *eob_ptr,
-                                   const int16_t *scan_ptr, const int16_t *iscan_ptr) {
+void svt_av1_quantize_fp_64x64_avx2(const TranLow *coeff_ptr, intptr_t n_coeffs,
+                                    const int16_t *zbin_ptr, const int16_t *round_ptr,
+                                    const int16_t *quant_ptr, const int16_t *quant_shift_ptr,
+                                    TranLow *qcoeff_ptr, TranLow *dqcoeff_ptr,
+                                    const int16_t *dequant_ptr, uint16_t *eob_ptr,
+                                    const int16_t *scan_ptr, const int16_t *iscan_ptr) {
     (void)scan_ptr;
     (void)zbin_ptr;
     (void)quant_shift_ptr;

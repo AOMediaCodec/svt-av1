@@ -4,9 +4,9 @@
  * This source code is subject to the terms of the BSD 2 Clause License and
  * the Alliance for Open Media Patent License 1.0. If the BSD 2 Clause License
  * was not distributed with this source code in the LICENSE file, you can
- * obtain it at www.aomedia.org/license/software. If the Alliance for Open
+ * obtain it at https://www.aomedia.org/license/software-license. If the Alliance for Open
  * Media Patent License 1.0 was not distributed with this source code in the
- * PATENTS file, you can obtain it at www.aomedia.org/license/patent.
+ * PATENTS file, you can obtain it at https://www.aomedia.org/license/patent-license.
  */
 
 #include <immintrin.h>
@@ -2205,11 +2205,11 @@ typedef void (*JntConvolve2dVerTapFunc)(const int16_t *const im_block, const int
                                         const ConvolveParams *const conv_params, uint8_t *dst8,
                                         const int32_t dst8_stride);
 
-void eb_av1_jnt_convolve_2d_avx2(const uint8_t *src, int32_t src_stride, uint8_t *dst8,
-                                 int32_t dst8_stride, int32_t w, int32_t h,
-                                 InterpFilterParams *filter_params_x,
-                                 InterpFilterParams *filter_params_y, const int32_t subpel_x_q4,
-                                 const int32_t subpel_y_q4, ConvolveParams *conv_params) {
+void svt_av1_jnt_convolve_2d_avx2(const uint8_t *src, int32_t src_stride, uint8_t *dst8,
+                                  int32_t dst8_stride, int32_t w, int32_t h,
+                                  InterpFilterParams *filter_params_x,
+                                  InterpFilterParams *filter_params_y, const int32_t subpel_x_q4,
+                                  const int32_t subpel_y_q4, ConvolveParams *conv_params) {
     static const JntConvolve2dHorTapFunc jnt_convolve_2d_hor_tap_func_table[MAX_FILTER_TAP + 1] = {
         NULL,
         NULL,

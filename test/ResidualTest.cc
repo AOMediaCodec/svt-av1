@@ -1,14 +1,20 @@
 /*
- * Copyright(c) 2019 Netflix, Inc.
- * SPDX - License - Identifier: BSD - 2 - Clause - Patent
- */
+* Copyright(c) 2019 Netflix, Inc.
+*
+* This source code is subject to the terms of the BSD 2 Clause License and
+* the Alliance for Open Media Patent License 1.0. If the BSD 2 Clause License
+* was not distributed with this source code in the LICENSE file, you can
+* obtain it at https://www.aomedia.org/license/software-license. If the Alliance for Open
+* Media Patent License 1.0 was not distributed with this source code in the
+* PATENTS file, you can obtain it at https://www.aomedia.org/license/patent-license.
+*/
 
 /******************************************************************************
  * @file ResidualTest.cc
  *
  * @brief Unit test for Residual related functions:
  * - residual_kernel_avx2
- * - residual_kernel16bit_sse2_intrin
+ * - svt_residual_kernel16bit_sse2_intrin
  * - residual_kernel_sub_sampled{w}x{h}_sse_intrin
  *
  * @author Cidana-Ivy, Cidana-Wenyao
@@ -54,21 +60,21 @@ class ResidualTestBase : public ::testing::Test {
     }
 
     void SetUp() override {
-        input_ = (uint8_t *)eb_aom_memalign(8, test_size_);
-        pred_ = (uint8_t *)eb_aom_memalign(8, test_size_);
-        residual1_ = (int16_t *)eb_aom_memalign(16, 2 * test_size_);
-        residual2_ = (int16_t *)eb_aom_memalign(16, 2 * test_size_);
+        input_ = (uint8_t *)svt_aom_memalign(8, test_size_);
+        pred_ = (uint8_t *)svt_aom_memalign(8, test_size_);
+        residual1_ = (int16_t *)svt_aom_memalign(16, 2 * test_size_);
+        residual2_ = (int16_t *)svt_aom_memalign(16, 2 * test_size_);
     }
 
     void TearDown() override {
         if (input_)
-            eb_aom_free(input_);
+            svt_aom_free(input_);
         if (pred_)
-            eb_aom_free(pred_);
+            svt_aom_free(pred_);
         if (residual1_)
-            eb_aom_free(residual1_);
+            svt_aom_free(residual1_);
         if (residual2_)
-            eb_aom_free(residual2_);
+            svt_aom_free(residual2_);
     }
 
   protected:
@@ -86,8 +92,8 @@ class ResidualTestBase : public ::testing::Test {
             break;
         }
         case VAL_RANDOM: {
-            eb_buf_random_u8(input_, test_size_);
-            eb_buf_random_u8(pred_, test_size_);
+            svt_buf_random_u8(input_, test_size_);
+            svt_buf_random_u8(pred_, test_size_);
             break;
         }
         default: break;
@@ -116,15 +122,15 @@ class ResidualTestBase : public ::testing::Test {
     uint32_t test_size_;
 };
 
-typedef void (*residual_kernel8bit_func)(uint8_t *input, uint32_t input_stride,
+typedef void (*svt_residual_kernel8bit_func)(uint8_t *input, uint32_t input_stride,
                                     uint8_t *pred, uint32_t pred_stride,
                                     int16_t *residual, uint32_t residual_stride,
                                     uint32_t area_width, uint32_t area_height);
 
-static const residual_kernel8bit_func residual_kernel8bit_func_table[] = {
-    residual_kernel8bit_avx2,
+static const svt_residual_kernel8bit_func residual_kernel8bit_func_table[] = {
+    svt_residual_kernel8bit_avx2,
 #ifndef NON_AVX512_SUPPORT
-    residual_kernel8bit_avx512
+    svt_residual_kernel8bit_avx512
 #endif
 };
 
@@ -147,15 +153,15 @@ class ResidualKernelTest
         area_height_ = std::get<1>(TEST_GET_PARAM(0));
         input_stride_ = pred_stride_ = residual_stride_ = MAX_SB_SIZE;
         test_size_ = MAX_SB_SQUARE;
-        input16bit_ = (uint16_t *)eb_aom_memalign(16, 2 * test_size_);
-        pred16bit_ = (uint16_t *)eb_aom_memalign(16, 2 * test_size_);
+        input16bit_ = (uint16_t *)svt_aom_memalign(16, 2 * test_size_);
+        pred16bit_ = (uint16_t *)svt_aom_memalign(16, 2 * test_size_);
     }
 
     ~ResidualKernelTest() {
         if (input16bit_)
-            eb_aom_free(input16bit_);
+            svt_aom_free(input16bit_);
         if (pred16bit_)
-            eb_aom_free(pred16bit_);
+            svt_aom_free(pred16bit_);
     }
 
   protected:
@@ -174,8 +180,8 @@ class ResidualKernelTest
             break;
         }
         case VAL_RANDOM: {
-            eb_buf_random_u16(input16bit_, test_size_);
-            eb_buf_random_u16(pred16bit_, test_size_);
+            svt_buf_random_u16(input16bit_, test_size_);
+            svt_buf_random_u16(pred16bit_, test_size_);
             break;
         }
         default: break;
@@ -185,27 +191,27 @@ class ResidualKernelTest
     void run_test() {
         prepare_data();
 
-        residual_kernel8bit_c(input_,
-                          input_stride_,
-                          pred_,
-                          pred_stride_,
-                          residual1_,
-                          residual_stride_,
-                          area_width_,
-                          area_height_);
+        svt_residual_kernel8bit_c(input_,
+                                  input_stride_,
+                                  pred_,
+                                  pred_stride_,
+                                  residual1_,
+                                  residual_stride_,
+                                  area_width_,
+                                  area_height_);
 
         for (int i = 0; i < (int) (sizeof(residual_kernel8bit_func_table) /
                                 sizeof(*residual_kernel8bit_func_table));
              i++) {
-            eb_buf_random_s16(residual2_, test_size_);
+            svt_buf_random_s16(residual2_, test_size_);
             residual_kernel8bit_func_table[i](input_,
-                                         input_stride_,
-                                         pred_,
-                                         pred_stride_,
-                                         residual2_,
-                                         residual_stride_,
-                                         area_width_,
-                                         area_height_);
+                                              input_stride_,
+                                              pred_,
+                                              pred_stride_,
+                                              residual2_,
+                                              residual_stride_,
+                                              area_width_,
+                                              area_height_);
             check_residuals(area_width_, area_height_);
         }
     }
@@ -220,32 +226,31 @@ class ResidualKernelTest
 
         prepare_data();
 
-        eb_start_time(&start_time_seconds, &start_time_useconds);
+        svt_av1_get_time(&start_time_seconds, &start_time_useconds);
 
         for (uint64_t i = 0; i < num_loop; i++) {
-            residual_kernel8bit_c(input_,
-                          input_stride_,
-                          pred_,
-                          pred_stride_,
-                          residual1_,
-                          residual_stride_,
-                          area_width_,
-                          area_height_);
+            svt_residual_kernel8bit_c(input_,
+                                      input_stride_,
+                                      pred_,
+                                      pred_stride_,
+                                      residual1_,
+                                      residual_stride_,
+                                      area_width_,
+                                      area_height_);
         }
 
-        eb_start_time(&middle_time_seconds, &middle_time_useconds);
-        eb_compute_overall_elapsed_time_ms(start_time_seconds,
-                                      start_time_useconds,
-                                      middle_time_seconds,
-                                      middle_time_useconds,
-                                      &time_c);
+        svt_av1_get_time(&middle_time_seconds, &middle_time_useconds);
+        time_c = svt_av1_compute_overall_elapsed_time_ms(start_time_seconds,
+                                                         start_time_useconds,
+                                                         middle_time_seconds,
+                                                         middle_time_useconds);
 
         for (int i = 0; i < (int) (sizeof(residual_kernel8bit_func_table) /
                                 sizeof(*residual_kernel8bit_func_table));
              i++) {
-            eb_buf_random_s16(residual2_, test_size_);
+            svt_buf_random_s16(residual2_, test_size_);
 
-            eb_start_time(&middle_time_seconds, &middle_time_useconds);
+            svt_av1_get_time(&middle_time_seconds, &middle_time_useconds);
 
             for (uint64_t j = 0; j < num_loop; j++) {
                 residual_kernel8bit_func_table[i](input_,
@@ -259,39 +264,64 @@ class ResidualKernelTest
             }
             check_residuals(area_width_, area_height_);
 
-            eb_start_time(&finish_time_seconds, &finish_time_useconds);
-            eb_compute_overall_elapsed_time_ms(middle_time_seconds,
-                                              middle_time_useconds,
-                                              finish_time_seconds,
-                                              finish_time_useconds,
-                                              &time_o);
+            svt_av1_get_time(&finish_time_seconds, &finish_time_useconds);
+            time_o =
+                svt_av1_compute_overall_elapsed_time_ms(middle_time_seconds,
+                                                        middle_time_useconds,
+                                                        finish_time_seconds,
+                                                        finish_time_useconds);
 
-            printf("residual_kernel8bit(%3dx%3d): %6.2f\n",
+            printf("svt_residual_kernel8bit(%3dx%3d): %6.2f\n",
                    area_width_,
                    area_height_,
                    time_c / time_o);
         }
     }
 
-    void run_16bit_test() {
+    void run_16bit_test_sse2() {
         prepare_16bit_data();
 
-        residual_kernel16bit_sse2_intrin(input16bit_,
-                                         input_stride_,
-                                         pred16bit_,
-                                         pred_stride_,
-                                         residual1_,
-                                         residual_stride_,
-                                         area_width_,
-                                         area_height_);
-        residual_kernel16bit_c(input16bit_,
-                             input_stride_,
-                             pred16bit_,
-                             pred_stride_,
-                             residual2_,
-                             residual_stride_,
-                             area_width_,
-                             area_height_);
+        svt_residual_kernel16bit_sse2_intrin(input16bit_,
+                                             input_stride_,
+                                             pred16bit_,
+                                             pred_stride_,
+                                             residual1_,
+                                             residual_stride_,
+                                             area_width_,
+                                             area_height_);
+        svt_residual_kernel16bit_c(input16bit_,
+                                   input_stride_,
+                                   pred16bit_,
+                                   pred_stride_,
+                                   residual2_,
+                                   residual_stride_,
+                                   area_width_,
+                                   area_height_);
+
+        check_residuals(area_width_, area_height_);
+
+
+    }
+
+    void run_16bit_test_avx2() {
+        prepare_16bit_data();
+
+        svt_residual_kernel16bit_avx2(input16bit_,
+                                      input_stride_,
+                                      pred16bit_,
+                                      pred_stride_,
+                                      residual1_,
+                                      residual_stride_,
+                                      area_width_,
+                                      area_height_);
+        svt_residual_kernel16bit_c(input16bit_,
+                                   input_stride_,
+                                   pred16bit_,
+                                   pred_stride_,
+                                   residual2_,
+                                   residual_stride_,
+                                   area_width_,
+                                   area_height_);
 
         check_residuals(area_width_, area_height_);
     }
@@ -308,7 +338,8 @@ TEST_P(ResidualKernelTest, DISABLED_SpeedTest) {
 };
 
 TEST_P(ResidualKernelTest, 16bitMatchTest) {
-    run_16bit_test();
+    run_16bit_test_sse2();
+    run_16bit_test_avx2();
 };
 
 INSTANTIATE_TEST_CASE_P(ResidualUtil, ResidualKernelTest,
@@ -373,12 +404,12 @@ class ResidualSumTest : public ::testing::Test,
         test_pattern_ = TEST_GET_PARAM(1);
         size_ = TEST_GET_PARAM(0);
         residual_stride_ = MAX_SB_SIZE;
-        residual_ = (int16_t *)eb_aom_memalign(16, 2 * MAX_SB_SQUARE);
+        residual_ = (int16_t *)svt_aom_memalign(16, 2 * MAX_SB_SQUARE);
     }
 
     ~ResidualSumTest() {
         if (residual_)
-            eb_aom_free(residual_);
+            svt_aom_free(residual_);
     }
 
   protected:

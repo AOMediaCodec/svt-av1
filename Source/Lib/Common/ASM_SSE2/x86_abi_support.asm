@@ -4,9 +4,9 @@
 ; This source code is subject to the terms of the BSD 2 Clause License and
 ; the Alliance for Open Media Patent License 1.0. If the BSD 2 Clause License
 ; was not distributed with this source code in the LICENSE file, you can
-; obtain it at www.aomedia.org/license/software. If the Alliance for Open
+; obtain it at https://www.aomedia.org/license/software-license. If the Alliance for Open
 ; Media Patent License 1.0 was not distributed with this source code in the
-; PATENTS file, you can obtain it at www.aomedia.org/license/patent.
+; PATENTS file, you can obtain it at https://www.aomedia.org/license/patent-license.
 ;
 
 ;
@@ -19,6 +19,7 @@ ARCH_ARM equ 0
 ARCH_MIPS equ 0
 ARCH_PPC equ 0
 ARCH_X86 equ 0
+%undef ARCH_X86_64
 ARCH_X86_64 equ 1
 CONFIG_ACCOUNTING equ 0
 CONFIG_ANALYZER equ 0

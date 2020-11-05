@@ -4,9 +4,9 @@
  * This source code is subject to the terms of the BSD 2 Clause License and
  * the Alliance for Open Media Patent License 1.0. If the BSD 2 Clause License
  * was not distributed with this source code in the LICENSE file, you can
- * obtain it at www.aomedia.org/license/software. If the Alliance for Open
+ * obtain it at https://www.aomedia.org/license/software-license. If the Alliance for Open
  * Media Patent License 1.0 was not distributed with this source code in the
- * PATENTS file, you can obtain it at www.aomedia.org/license/patent.
+ * PATENTS file, you can obtain it at https://www.aomedia.org/license/patent-license.
  */
 
 #ifndef AOM_DSP_X86_CONVOLVE_AVX2_H_
@@ -68,17 +68,17 @@ void jnt_convolve_2d_ver_4tap_avx2(const int16_t *const im_block, const int32_t 
                                    const int32_t dst8_stride);
 
 static INLINE EbBool is_convolve_2tap(const int16_t *const filter) {
-    return (EbBool)((InterpKernel *)filter == bilinear_filters);
+    return (const void *)filter == (const void *)bilinear_filters;
 }
 
 static INLINE EbBool is_convolve_4tap(const int16_t *const filter) {
-    return (EbBool)(((InterpKernel *)filter == sub_pel_filters_4) ||
-                    ((InterpKernel *)filter == sub_pel_filters_4smooth));
+    return (const void *)filter == (const void *)sub_pel_filters_4 ||
+        (const void *)filter == (const void *)sub_pel_filters_4smooth;
 }
 
 static INLINE EbBool is_convolve_6tap(const int16_t *const filter) {
-    return (EbBool)(((InterpKernel *)filter == sub_pel_filters_8) ||
-                    ((InterpKernel *)filter == sub_pel_filters_8smooth));
+    return (const void *)filter == (const void *)sub_pel_filters_8 ||
+        (const void *)filter == (const void *)sub_pel_filters_8smooth;
 }
 
 static INLINE int32_t get_convolve_tap(const int16_t *const filter) {

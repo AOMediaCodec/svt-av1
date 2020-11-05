@@ -1,7 +1,13 @@
 // clang-format off
 /*
 * Copyright(c) 2019 Netflix, Inc.
-* SPDX - License - Identifier: BSD - 2 - Clause - Patent
+*
+* This source code is subject to the terms of the BSD 2 Clause License and
+* the Alliance for Open Media Patent License 1.0. If the BSD 2 Clause License
+* was not distributed with this source code in the LICENSE file, you can
+* obtain it at https://www.aomedia.org/license/software-license. If the Alliance for Open
+* Media Patent License 1.0 was not distributed with this source code in the
+* PATENTS file, you can obtain it at https://www.aomedia.org/license/patent-license.
 */
 
 // SUMMARY
@@ -32,7 +38,7 @@
 
 /*TODO: Remove and harmonize with encoder. Globals prevent harmonization now! */
 /*****************************************
- * eb_recon_picture_buffer_desc_ctor
+ * svt_recon_picture_buffer_desc_ctor
  *  Initializes the Buffer Descriptor's
  *  values that are fixed for the life of
  *  the descriptor.

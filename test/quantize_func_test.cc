@@ -1,17 +1,13 @@
 /*
+ * Copyright(c) 2019 Netflix, Inc.
  * Copyright (c) 2017, Alliance for Open Media. All rights reserved
  *
  * This source code is subject to the terms of the BSD 2 Clause License and
  * the Alliance for Open Media Patent License 1.0. If the BSD 2 Clause License
  * was not distributed with this source code in the LICENSE file, you can
- * obtain it at www.aomedia.org/license/software. If the Alliance for Open
+ * obtain it at https://www.aomedia.org/license/software-license. If the Alliance for Open
  * Media Patent License 1.0 was not distributed with this source code in the
- * PATENTS file, you can obtain it at www.aomedia.org/license/patent.
- */
-
-/*
- * Copyright(c) 2019 Netflix, Inc.
- * SPDX - License - Identifier: BSD - 2 - Clause - Patent
+ * PATENTS file, you can obtain it at https://www.aomedia.org/license/patent-license.
  */
 
 #include "gtest/gtest.h"
@@ -36,7 +32,7 @@
 namespace {
 using svt_av1_test_tool::SVTRandom;
 
-extern "C" void eb_av1_build_quantizer(
+extern "C" void svt_av1_build_quantizer(
     AomBitDepth bit_depth, int32_t y_dc_delta_q, int32_t u_dc_delta_q,
     int32_t u_ac_delta_q, int32_t v_dc_delta_q, int32_t v_ac_delta_q,
     Quants *const quants, Dequants *const deq);
@@ -84,22 +80,22 @@ class QuantizeTest : public ::testing::TestWithParam<ParamType> {
 
     virtual void SetUp() {
         qtab_ =
-            reinterpret_cast<QuanTable *>(eb_aom_memalign(32, sizeof(*qtab_)));
+            reinterpret_cast<QuanTable *>(svt_aom_memalign(32, sizeof(*qtab_)));
         const int n_coeffs = coeff_num();
         coeff_ = reinterpret_cast<TranLow *>(
-            eb_aom_memalign(32, 6 * n_coeffs * sizeof(TranLow)));
+            svt_aom_memalign(32, 6 * n_coeffs * sizeof(TranLow)));
         InitQuantizer();
     }
 
     virtual void TearDown() {
-        eb_aom_free(qtab_);
+        svt_aom_free(qtab_);
         qtab_ = NULL;
-        eb_aom_free(coeff_);
+        svt_aom_free(coeff_);
         coeff_ = NULL;
     }
 
     void InitQuantizer() {
-        eb_av1_build_quantizer(
+        svt_av1_build_quantizer(
             bd_, 0, 0, 0, 0, 0, &qtab_->quant, &qtab_->dequant);
     }
 
@@ -342,7 +338,7 @@ TEST_P(QuantizeLbdTest, DISABLED_Speed) {
     for (int cnt = 0; cnt <= rows; cnt++) {
         FillCoeffRandomRows(cnt * cols);
 
-        eb_start_time(&start_time_seconds, &start_time_useconds);
+        svt_av1_get_time(&start_time_seconds, &start_time_useconds);
         for (int n = 0; n < kNumTests; ++n) {
             quant_ref_(coeff_ptr,
                        n_coeffs,
@@ -358,7 +354,7 @@ TEST_P(QuantizeLbdTest, DISABLED_Speed) {
                        sc->iscan);
         }
 
-        eb_start_time(&middle_time_seconds, &middle_time_useconds);
+        svt_av1_get_time(&middle_time_seconds, &middle_time_useconds);
 
         for (int n = 0; n < kNumTests; ++n) {
             quant_(coeff_ptr,
@@ -374,17 +370,15 @@ TEST_P(QuantizeLbdTest, DISABLED_Speed) {
                    sc->scan,
                    sc->iscan);
         }
-        eb_start_time(&finish_time_seconds, &finish_time_useconds);
-        eb_compute_overall_elapsed_time_ms(start_time_seconds,
-                                      start_time_useconds,
-                                      middle_time_seconds,
-                                      middle_time_useconds,
-                                      &time_c);
-        eb_compute_overall_elapsed_time_ms(middle_time_seconds,
-                                      middle_time_useconds,
-                                      finish_time_seconds,
-                                      finish_time_useconds,
-                                      &time_o);
+        svt_av1_get_time(&finish_time_seconds, &finish_time_useconds);
+        time_c = svt_av1_compute_overall_elapsed_time_ms(start_time_seconds,
+                                                         start_time_useconds,
+                                                         middle_time_seconds,
+                                                         middle_time_useconds);
+        time_o = svt_av1_compute_overall_elapsed_time_ms(middle_time_seconds,
+                                                         middle_time_useconds,
+                                                         finish_time_seconds,
+                                                         finish_time_useconds);
 
         printf("c_time = %f \t simd_time = %f \t Gain = %f \n",
                time_c,
@@ -550,7 +544,7 @@ TEST_P(QuantizeHbdTest, DISABLED_Speed) {
     for (int cnt = 0; cnt <= rows; cnt++) {
         FillCoeffRandomRows(cnt * cols);
 
-        eb_start_time(&start_time_seconds, &start_time_useconds);
+        svt_av1_get_time(&start_time_seconds, &start_time_useconds);
         for (int n = 0; n < kNumTests; ++n) {
             quant_ref_(coeff_ptr,
                        n_coeffs,
@@ -567,7 +561,7 @@ TEST_P(QuantizeHbdTest, DISABLED_Speed) {
                        av1_get_tx_scale(tx_size_));
         }
 
-        eb_start_time(&middle_time_seconds, &middle_time_useconds);
+        svt_av1_get_time(&middle_time_seconds, &middle_time_useconds);
 
         for (int n = 0; n < kNumTests; ++n) {
             quant_(coeff_ptr,
@@ -584,17 +578,15 @@ TEST_P(QuantizeHbdTest, DISABLED_Speed) {
                    sc->iscan,
                    av1_get_tx_scale(tx_size_));
         }
-        eb_start_time(&finish_time_seconds, &finish_time_useconds);
-        eb_compute_overall_elapsed_time_ms(start_time_seconds,
-                                      start_time_useconds,
-                                      middle_time_seconds,
-                                      middle_time_useconds,
-                                      &time_c);
-        eb_compute_overall_elapsed_time_ms(middle_time_seconds,
-                                      middle_time_useconds,
-                                      finish_time_seconds,
-                                      finish_time_useconds,
-                                      &time_o);
+        svt_av1_get_time(&finish_time_seconds, &finish_time_useconds);
+        time_c = svt_av1_compute_overall_elapsed_time_ms(start_time_seconds,
+                                                         start_time_useconds,
+                                                         middle_time_seconds,
+                                                         middle_time_useconds);
+        time_o = svt_av1_compute_overall_elapsed_time_ms(middle_time_seconds,
+                                                         middle_time_useconds,
+                                                         finish_time_seconds,
+                                                         finish_time_useconds);
 
         printf("c_time = %f \t simd_time = %f \t Gain = %f \n",
                time_c,
@@ -607,55 +599,55 @@ using std::make_tuple;
 
 #if HAS_AVX2
 const QuantizeParam kQParamArrayAvx2[] = {
-    make_tuple(&eb_av1_quantize_fp_c, &eb_av1_quantize_fp_avx2,
+    make_tuple(&svt_av1_quantize_fp_c, &svt_av1_quantize_fp_avx2,
                static_cast<TxSize>(TX_16X16), TYPE_FP, AOM_BITS_8),
-    make_tuple(&eb_av1_quantize_fp_c, &eb_av1_quantize_fp_avx2,
+    make_tuple(&svt_av1_quantize_fp_c, &svt_av1_quantize_fp_avx2,
                static_cast<TxSize>(TX_4X16), TYPE_FP, AOM_BITS_8),
-    make_tuple(&eb_av1_quantize_fp_c, &eb_av1_quantize_fp_avx2,
+    make_tuple(&svt_av1_quantize_fp_c, &svt_av1_quantize_fp_avx2,
                static_cast<TxSize>(TX_16X4), TYPE_FP, AOM_BITS_8),
-    make_tuple(&eb_av1_quantize_fp_c, &eb_av1_quantize_fp_avx2,
+    make_tuple(&svt_av1_quantize_fp_c, &svt_av1_quantize_fp_avx2,
                static_cast<TxSize>(TX_32X8), TYPE_FP, AOM_BITS_8),
-    make_tuple(&eb_av1_quantize_fp_c, &eb_av1_quantize_fp_avx2,
+    make_tuple(&svt_av1_quantize_fp_c, &svt_av1_quantize_fp_avx2,
                static_cast<TxSize>(TX_8X32), TYPE_FP, AOM_BITS_8),
-    make_tuple(&eb_av1_quantize_fp_32x32_c, &eb_av1_quantize_fp_32x32_avx2,
+    make_tuple(&svt_av1_quantize_fp_32x32_c, &svt_av1_quantize_fp_32x32_avx2,
                static_cast<TxSize>(TX_32X32), TYPE_FP, AOM_BITS_8),
-    make_tuple(&eb_av1_quantize_fp_32x32_c, &eb_av1_quantize_fp_32x32_avx2,
+    make_tuple(&svt_av1_quantize_fp_32x32_c, &svt_av1_quantize_fp_32x32_avx2,
                static_cast<TxSize>(TX_16X64), TYPE_FP, AOM_BITS_8),
-    make_tuple(&eb_av1_quantize_fp_32x32_c, &eb_av1_quantize_fp_32x32_avx2,
+    make_tuple(&svt_av1_quantize_fp_32x32_c, &svt_av1_quantize_fp_32x32_avx2,
                static_cast<TxSize>(TX_64X16), TYPE_FP, AOM_BITS_8),
-    make_tuple(&eb_av1_quantize_fp_64x64_c, &eb_av1_quantize_fp_64x64_avx2,
+    make_tuple(&svt_av1_quantize_fp_64x64_c, &svt_av1_quantize_fp_64x64_avx2,
                static_cast<TxSize>(TX_64X64), TYPE_FP, AOM_BITS_8)};
 
 const QuantizeHbdParam kQHbdParamArrayAvx2[] = {
-    make_tuple(&eb_av1_highbd_quantize_fp_c, &eb_av1_highbd_quantize_fp_avx2,
+    make_tuple(&svt_av1_highbd_quantize_fp_c, &svt_av1_highbd_quantize_fp_avx2,
                static_cast<TxSize>(TX_16X16), TYPE_FP, AOM_BITS_8),
-    make_tuple(&eb_av1_highbd_quantize_fp_c, &eb_av1_highbd_quantize_fp_avx2,
+    make_tuple(&svt_av1_highbd_quantize_fp_c, &svt_av1_highbd_quantize_fp_avx2,
                static_cast<TxSize>(TX_4X16), TYPE_FP, AOM_BITS_8),
-    make_tuple(&eb_av1_highbd_quantize_fp_c, &eb_av1_highbd_quantize_fp_avx2,
+    make_tuple(&svt_av1_highbd_quantize_fp_c, &svt_av1_highbd_quantize_fp_avx2,
                static_cast<TxSize>(TX_16X4), TYPE_FP, AOM_BITS_8),
-    make_tuple(&eb_av1_highbd_quantize_fp_c, &eb_av1_highbd_quantize_fp_avx2,
+    make_tuple(&svt_av1_highbd_quantize_fp_c, &svt_av1_highbd_quantize_fp_avx2,
                static_cast<TxSize>(TX_32X8), TYPE_FP, AOM_BITS_8),
-    make_tuple(&eb_av1_highbd_quantize_fp_c, &eb_av1_highbd_quantize_fp_avx2,
+    make_tuple(&svt_av1_highbd_quantize_fp_c, &svt_av1_highbd_quantize_fp_avx2,
                static_cast<TxSize>(TX_8X32), TYPE_FP, AOM_BITS_8),
-    make_tuple(&eb_av1_highbd_quantize_fp_c, &eb_av1_highbd_quantize_fp_avx2,
+    make_tuple(&svt_av1_highbd_quantize_fp_c, &svt_av1_highbd_quantize_fp_avx2,
                static_cast<TxSize>(TX_16X16), TYPE_FP, AOM_BITS_10),
-    make_tuple(&eb_av1_highbd_quantize_fp_c, &eb_av1_highbd_quantize_fp_avx2,
+    make_tuple(&svt_av1_highbd_quantize_fp_c, &svt_av1_highbd_quantize_fp_avx2,
                static_cast<TxSize>(TX_4X16), TYPE_FP, AOM_BITS_10),
-    make_tuple(&eb_av1_highbd_quantize_fp_c, &eb_av1_highbd_quantize_fp_avx2,
+    make_tuple(&svt_av1_highbd_quantize_fp_c, &svt_av1_highbd_quantize_fp_avx2,
                static_cast<TxSize>(TX_16X4), TYPE_FP, AOM_BITS_10),
-    make_tuple(&eb_av1_highbd_quantize_fp_c, &eb_av1_highbd_quantize_fp_avx2,
+    make_tuple(&svt_av1_highbd_quantize_fp_c, &svt_av1_highbd_quantize_fp_avx2,
                static_cast<TxSize>(TX_32X8), TYPE_FP, AOM_BITS_10),
-    make_tuple(&eb_av1_highbd_quantize_fp_c, &eb_av1_highbd_quantize_fp_avx2,
+    make_tuple(&svt_av1_highbd_quantize_fp_c, &svt_av1_highbd_quantize_fp_avx2,
                static_cast<TxSize>(TX_8X32), TYPE_FP, AOM_BITS_10),
-    make_tuple(&eb_av1_highbd_quantize_fp_c, &eb_av1_highbd_quantize_fp_avx2,
+    make_tuple(&svt_av1_highbd_quantize_fp_c, &svt_av1_highbd_quantize_fp_avx2,
                static_cast<TxSize>(TX_16X16), TYPE_FP, AOM_BITS_12),
-    make_tuple(&eb_av1_highbd_quantize_fp_c, &eb_av1_highbd_quantize_fp_avx2,
+    make_tuple(&svt_av1_highbd_quantize_fp_c, &svt_av1_highbd_quantize_fp_avx2,
                static_cast<TxSize>(TX_4X16), TYPE_FP, AOM_BITS_12),
-    make_tuple(&eb_av1_highbd_quantize_fp_c, &eb_av1_highbd_quantize_fp_avx2,
+    make_tuple(&svt_av1_highbd_quantize_fp_c, &svt_av1_highbd_quantize_fp_avx2,
                static_cast<TxSize>(TX_16X4), TYPE_FP, AOM_BITS_12),
-    make_tuple(&eb_av1_highbd_quantize_fp_c, &eb_av1_highbd_quantize_fp_avx2,
+    make_tuple(&svt_av1_highbd_quantize_fp_c, &svt_av1_highbd_quantize_fp_avx2,
                static_cast<TxSize>(TX_32X8), TYPE_FP, AOM_BITS_12),
-    make_tuple(&eb_av1_highbd_quantize_fp_c, &eb_av1_highbd_quantize_fp_avx2,
+    make_tuple(&svt_av1_highbd_quantize_fp_c, &svt_av1_highbd_quantize_fp_avx2,
                static_cast<TxSize>(TX_8X32), TYPE_FP, AOM_BITS_12)};
 
 INSTANTIATE_TEST_CASE_P(AVX2, QuantizeLbdTest,

@@ -4,9 +4,9 @@
  * This source code is subject to the terms of the BSD 2 Clause License and
  * the Alliance for Open Media Patent License 1.0. If the BSD 2 Clause License
  * was not distributed with this source code in the LICENSE file, you can
- * obtain it at www.aomedia.org/license/software. If the Alliance for Open
+ * obtain it at https://www.aomedia.org/license/software-license. If the Alliance for Open
  * Media Patent License 1.0 was not distributed with this source code in the
- * PATENTS file, you can obtain it at www.aomedia.org/license/patent.
+ * PATENTS file, you can obtain it at https://www.aomedia.org/license/patent-license.
  */
 
 #include <assert.h>
@@ -64,12 +64,12 @@ static INLINE void RENAME(calc_centroids)(const int *data, int *centroids, const
 
     for (i = 0; i < k; ++i) {
         if (count[i] == 0) {
-            if (eb_memcpy != NULL)
-                eb_memcpy(centroids + i * AV1_K_MEANS_DIM,
+            if (svt_memcpy != NULL)
+                svt_memcpy(centroids + i * AV1_K_MEANS_DIM,
                        data + (lcg_rand16(&rand_state) % n) * AV1_K_MEANS_DIM,
                        sizeof(centroids[0]) * AV1_K_MEANS_DIM);
             else
-                eb_memcpy_c(centroids + i * AV1_K_MEANS_DIM,
+                svt_memcpy_c(centroids + i * AV1_K_MEANS_DIM,
                     data + (lcg_rand16(&rand_state) % n) * AV1_K_MEANS_DIM,
                     sizeof(centroids[0]) * AV1_K_MEANS_DIM);
 
@@ -103,15 +103,15 @@ void RENAME(av1_k_means)(const int *data, int *centroids, uint8_t *indices, int 
 
     for (int i = 0; i < max_itr; ++i) {
         const int64_t pre_dist = this_dist;
-        if (eb_memcpy != NULL)
+        if (svt_memcpy != NULL)
         {
-            eb_memcpy(pre_centroids, centroids, sizeof(pre_centroids[0]) * k * AV1_K_MEANS_DIM);
-            eb_memcpy(pre_indices, indices, sizeof(pre_indices[0]) * n);
+            svt_memcpy(pre_centroids, centroids, sizeof(pre_centroids[0]) * k * AV1_K_MEANS_DIM);
+            svt_memcpy(pre_indices, indices, sizeof(pre_indices[0]) * n);
         }
         else
         {
-            eb_memcpy_c(pre_centroids, centroids, sizeof(pre_centroids[0]) * k * AV1_K_MEANS_DIM);
-            eb_memcpy_c(pre_indices, indices, sizeof(pre_indices[0]) * n);
+            svt_memcpy_c(pre_centroids, centroids, sizeof(pre_centroids[0]) * k * AV1_K_MEANS_DIM);
+            svt_memcpy_c(pre_indices, indices, sizeof(pre_indices[0]) * n);
         }
 
         RENAME(calc_centroids)(data, centroids, indices, n, k);
@@ -119,15 +119,15 @@ void RENAME(av1_k_means)(const int *data, int *centroids, uint8_t *indices, int 
         this_dist = RENAME(calc_total_dist)(data, centroids, indices, n, k);
 
         if (this_dist > pre_dist) {
-            if (eb_memcpy != NULL)
+            if (svt_memcpy != NULL)
             {
-                eb_memcpy(centroids, pre_centroids, sizeof(pre_centroids[0]) * k * AV1_K_MEANS_DIM);
-                eb_memcpy(indices, pre_indices, sizeof(pre_indices[0]) * n);
+                svt_memcpy(centroids, pre_centroids, sizeof(pre_centroids[0]) * k * AV1_K_MEANS_DIM);
+                svt_memcpy(indices, pre_indices, sizeof(pre_indices[0]) * n);
             }
             else
             {
-                eb_memcpy_c(centroids, pre_centroids, sizeof(pre_centroids[0]) * k * AV1_K_MEANS_DIM);
-                eb_memcpy_c(indices, pre_indices, sizeof(pre_indices[0]) * n);
+                svt_memcpy_c(centroids, pre_centroids, sizeof(pre_centroids[0]) * k * AV1_K_MEANS_DIM);
+                svt_memcpy_c(indices, pre_indices, sizeof(pre_indices[0]) * n);
 
             }
             break;

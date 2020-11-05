@@ -1,13 +1,20 @@
 #
 # Copyright(c) 2019 Intel Corporation
-# SPDX - License - Identifier: BSD - 2 - Clause - Patent
 #
+# This source code is subject to the terms of the BSD 2 Clause License and
+# the Alliance for Open Media Patent License 1.0. If the BSD 2 Clause License
+# was not distributed with this source code in the LICENSE file, you can
+# obtain it at https://www.aomedia.org/license/software-license. If the Alliance for Open
+# Media Patent License 1.0 was not distributed with this source code in the
+# PATENTS file, you can obtain it at https://www.aomedia.org/license/patent-license.
+#
+
 # Encoder Library directory CMakeLists.txt
 
 # Shared Encoder Version
 set(ENC_VERSION_MAJOR 0)
 set(ENC_VERSION_MINOR 8)
-set(ENC_VERSION_PATCH 4)
+set(ENC_VERSION_PATCH 5)
 set(ENC_VERSION ${ENC_VERSION_MAJOR}.${ENC_VERSION_MINOR}.${ENC_VERSION_PATCH})
 
 if(UNIX)
@@ -42,7 +49,7 @@ link_directories(${PROJECT_SOURCE_DIR}/Source/Lib/Common/Codec/
 add_subdirectory(C_DEFAULT)
 add_subdirectory(Codec)
 add_subdirectory(Globals)
-if(X86)
+if(NOT COMPILE_C_ONLY AND X86)
     # Include Encoder Subdirectories
     include_directories(${PROJECT_SOURCE_DIR}/Source/Lib/Common/ASM_SSE2/
         ${PROJECT_SOURCE_DIR}/Source/Lib/Common/ASM_SSSE3/
@@ -89,7 +96,7 @@ if(common_lib_source)
 endif()
 
 # Encoder Lib Source Files
-if(X86)
+if(NOT COMPILE_C_ONLY AND X86)
     add_library(SvtAv1Enc
         ${all_files}
         $<TARGET_OBJECTS:COMMON_CODEC>

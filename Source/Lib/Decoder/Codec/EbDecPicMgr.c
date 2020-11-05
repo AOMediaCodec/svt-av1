@@ -1,17 +1,13 @@
 /*
-* Copyright(c) 2019 Netflix, Inc.
-* SPDX - License - Identifier: BSD - 2 - Clause - Patent
-*/
-
-/*
+ * Copyright(c) 2019 Netflix, Inc.
  * Copyright (c) 2016, Alliance for Open Media. All rights reserved
  *
  * This source code is subject to the terms of the BSD 2 Clause License and
  * the Alliance for Open Media Patent License 1.0. If the BSD 2 Clause License
  * was not distributed with this source code in the LICENSE file, you can
- * obtain it at www.aomedia.org/license/software. If the Alliance for Open
+ * obtain it at https://www.aomedia.org/license/software-license. If the Alliance for Open
  * Media Patent License 1.0 was not distributed with this source code in the
- * PATENTS file, you can obtain it at www.aomedia.org/license/patent.
+ * PATENTS file, you can obtain it at https://www.aomedia.org/license/patent-license.
  */
 
 // SUMMARY
@@ -185,8 +181,6 @@ EbDecPicBuf *dec_pic_mgr_get_cur_pic(EbDecHandle *dec_handle_ptr) {
 static INLINE void dec_ref_count_and_rel(EbDecPicBuf *ps_pic_buf) {
     if (ps_pic_buf != NULL) {
         ps_pic_buf->ref_count--;
-        assert(ps_pic_buf->ref_count == 0);
-
         if (ps_pic_buf->ref_count == 0) ps_pic_buf->is_free = 1;
     }
 }
@@ -332,7 +326,6 @@ void svt_set_frame_refs(EbDecHandle *dec_handle_ptr, int32_t lst_map_idx, int32_
     int32_t gld_frame_sort_idx = -1;
 
     assert(dec_handle_ptr->seq_header.order_hint_info.enable_order_hint);
-    assert(dec_handle_ptr->seq_header.order_hint_info.order_hint_bits == 0);
 
     const int32_t cur_order_hint = (int32_t)dec_handle_ptr->frame_header.order_hint;
     const int32_t cur_frame_sort_idx =

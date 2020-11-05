@@ -4,9 +4,9 @@
  * This source code is subject to the terms of the BSD 2 Clause License and
  * the Alliance for Open Media Patent License 1.0. If the BSD 2 Clause License
  * was not distributed with this source code in the LICENSE file, you can
- * obtain it at www.aomedia.org/license/software. If the Alliance for Open
+ * obtain it at https://www.aomedia.org/license/software-license. If the Alliance for Open
  * Media Patent License 1.0 was not distributed with this source code in the
- * PATENTS file, you can obtain it at www.aomedia.org/license/patent.
+ * PATENTS file, you can obtain it at https://www.aomedia.org/license/patent-license.
  */
 
 #include "EbDefinitions.h"
@@ -104,7 +104,7 @@ static void highbd_10_variance_avx2(const uint16_t *src, int src_stride,
 }
 
 #define VAR_FN(w, h, block_size, shift)                                    \
-  uint32_t eb_aom_highbd_10_variance##w##x##h##_avx2(                      \
+  uint32_t svt_aom_highbd_10_variance##w##x##h##_avx2(                     \
       const uint8_t *src8, int src_stride, const uint8_t *ref8,            \
       int ref_stride, uint32_t *sse) {                                     \
     int sum;                                                               \

@@ -1,6 +1,12 @@
 /*
 * Copyright(c) 2019 Intel Corporation
-* SPDX - License - Identifier: BSD - 2 - Clause - Patent
+*
+* This source code is subject to the terms of the BSD 2 Clause License and
+* the Alliance for Open Media Patent License 1.0. If the BSD 2 Clause License
+* was not distributed with this source code in the LICENSE file, you can
+* obtain it at https://www.aomedia.org/license/software-license. If the Alliance for Open
+* Media Patent License 1.0 was not distributed with this source code in the
+* PATENTS file, you can obtain it at https://www.aomedia.org/license/patent-license.
 */
 
 #ifndef EbBlockStructures_h
@@ -32,7 +38,6 @@ typedef struct mv32 {
     int32_t col;
 } MV32;
 
-#if TPL_LA
 #define GET_MV_RAWPEL(x) (((x) + 3 + ((x) >= 0)) >> 3)
 #define GET_MV_SUBPEL(x) ((x)*8)
 
@@ -41,6 +46,15 @@ typedef struct fullpel_mv {
   int16_t row;
   int16_t col;
 } FULLPEL_MV;
+static const MV kZeroMv = { 0, 0 };
+static const FULLPEL_MV kZeroFullMv = { 0, 0 };
+static INLINE int is_zero_mv(const MV *mv) {
+    return *((const uint32_t *)mv) == 0;
+}
+
+static INLINE int is_equal_mv(const MV *a, const MV *b) {
+    return *((const uint32_t *)a) == *((const uint32_t *)b);
+}
 
 static AOM_INLINE FULLPEL_MV get_fullmv_from_mv(const MV *subpel_mv) {
   const FULLPEL_MV full_mv = { (int16_t)GET_MV_RAWPEL(subpel_mv->row),
@@ -58,7 +72,6 @@ typedef struct OisMbResults {
     int64_t intra_cost;
     int32_t intra_mode;
 } OisMbResults;
-#endif
 typedef struct CandidateMv {
     IntMv   this_mv;
     IntMv   comp_mv;
@@ -204,8 +217,8 @@ typedef struct MbModeInfo {
 } MbModeInfo;
 
 
-void eb_av1_tile_set_col(TileInfo *tile, const TilesInfo *tiles_info, int32_t mi_cols, int col);
-void eb_av1_tile_set_row(TileInfo *tile, TilesInfo *tiles_info, int32_t mi_rows, int row);
+void svt_av1_tile_set_col(TileInfo *tile, const TilesInfo *tiles_info, int32_t mi_cols, int col);
+void svt_av1_tile_set_row(TileInfo *tile, TilesInfo *tiles_info, int32_t mi_rows, int row);
 
 static INLINE int32_t tile_log2(int32_t blk_size, int32_t target) {
     int32_t k;

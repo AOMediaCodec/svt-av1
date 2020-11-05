@@ -1,7 +1,14 @@
 /*
 * Copyright(c) 2019 Intel Corporation
-* SPDX - License - Identifier: BSD - 2 - Clause - Patent
+*
+* This source code is subject to the terms of the BSD 2 Clause License and
+* the Alliance for Open Media Patent License 1.0. If the BSD 2 Clause License
+* was not distributed with this source code in the LICENSE file, you can
+* obtain it at https://www.aomedia.org/license/software-license. If the Alliance for Open
+* Media Patent License 1.0 was not distributed with this source code in the
+* PATENTS file, you can obtain it at https://www.aomedia.org/license/patent-license.
 */
+
 
 #ifndef EbSvtAv1Enc_h
 #define EbSvtAv1Enc_h
@@ -14,12 +21,12 @@ extern "C" {
 #include "EbSvtAv1.h"
 #include <stdlib.h>
 #include <stdio.h>
+
 //***HME***
 #define EB_HME_SEARCH_AREA_COLUMN_MAX_COUNT 2
 #define EB_HME_SEARCH_AREA_ROW_MAX_COUNT 2
 #define MAX_HIERARCHICAL_LEVEL 6
 #define REF_LIST_MAX_DEPTH 4
-
 #define MAX_ENC_PRESET 8
 
 #define DEFAULT -1
@@ -55,6 +62,27 @@ typedef enum {
     SUPERRES_MODES
 } SUPERRES_MODE;
 
+typedef enum {
+    SVT_AV1_STREAM_INFO_START = 1,
+
+    // The output is SvtAv1FixedBuf*
+    // Two use this, you need:
+    // 1. set the EbSvtAv1EncConfiguration.rc_firstpass_stats_out to EB_TRUE
+    // 2. call this when you got EB_BUFFERFLAG_EOS
+    SVT_AV1_STREAM_INFO_FIRST_PASS_STATS_OUT = SVT_AV1_STREAM_INFO_START,
+
+    SVT_AV1_STREAM_INFO_END,
+} SVT_AV1_STREAM_INFO_ID;
+
+/*!\brief Generic fixed size buffer structure
+ *
+ * This structure is able to hold a reference to any fixed size buffer.
+ */
+typedef struct SvtAv1FixedBuf {
+    void *buf;       /**< Pointer to the data. Does NOT own the data! */
+    uint64_t sz;       /**< Length of the buffer, in chars */
+} SvtAv1FixedBuf; /**< alias for struct aom_fixed_buf */
+
 // Will contain the EbEncApi which will live in the EncHandle class
 // Only modifiable during config-time.
 typedef struct EbSvtAv1EncConfiguration {
@@ -65,20 +93,8 @@ typedef struct EbSvtAv1EncConfiguration {
      * density mode.
      *
      * Default is defined as MAX_ENC_PRESET. */
-#if 0//REMOVE_MR_MACRO
     int8_t enc_mode;
-#else
-    uint8_t enc_mode;
-#endif
-    /* For two pass encoding, the enc_mod of the second pass is passed in the first pass.
-    * First pass has the option to run with second pass ME settings.
-    *
-    * Default is defined as MAX_ENC_PRESET. */
-#if 0//REMOVE_MR_MACRO
-    int8_t snd_pass_enc_mode;
-#else
-    uint8_t snd_pass_enc_mode;
-#endif
+
     // GOP Structure
 
     /* The intra period defines the interval of frames after which you insert an
@@ -211,10 +227,18 @@ typedef struct EbSvtAv1EncConfiguration {
     *
     * Default is 0.*/
     EbBool use_qp_file;
-    /* Input stats file */
-    FILE *input_stat_file;
-    /* output stats file */
-    FILE *output_stat_file;
+    /* input buffer for the second pass */
+    SvtAv1FixedBuf rc_twopass_stats_in;
+    /* generate first pass stats output.
+    * when you set this to EB_TRUE, and you got the EB_BUFFERFLAG_EOS,
+    * you can get the encoder stats using:
+    *
+    * SvtAv1FixedBuf first_pass_stat;
+    * EbErrorType ret = svt_av1_enc_get_stream_info(component_handle,
+    *     SVT_AV1_STREAM_INFO_FIRST_PASS_STATS_OUT, &first_pass_stat);
+    *
+    * Default is 0.*/
+    EbBool rc_firstpass_stats_out;
     /* Enable picture QP scaling between hierarchical levels
     *
     * Default is null.*/
@@ -248,10 +272,10 @@ typedef struct EbSvtAv1EncConfiguration {
     * Default is 1. */
     EbBool enable_global_motion;
 
-    /* CDEF mode
+    /* CDEF Level
     *
     * Default is -1. */
-    int cdef_mode;
+    int cdef_level;
 
     /* Restoration filtering
     *  enable/disable
@@ -262,11 +286,6 @@ typedef struct EbSvtAv1EncConfiguration {
     int enable_restoration_filtering;
     int sg_filter_mode;
     int wn_filter_mode;
-
-    /* edge based skip angle intra
-    *
-    * Default is -1. */
-    int edge_skp_angle_intra;
 
     /* enable angle intra
     *
@@ -282,24 +301,16 @@ typedef struct EbSvtAv1EncConfiguration {
     *
     * Default is -1. */
     int enable_paeth;
-#if 1//ON_OFF_FEATURE_MRP
+
     /* mrp level
     *
     * Default is -1. */
     int mrp_level;
-#endif
 
     /* enable smooth
     *
     * Default is -1. */
     int enable_smooth;
-
-#if 0//!REMOVE_COMBINE_CLASS12
-    /* combine class 12
-    *
-    * Default is -1. */
-    int combine_class_12;
-#endif
     /* motion field motion vector
     *
     *  Default is -1. */
@@ -308,16 +319,12 @@ typedef struct EbSvtAv1EncConfiguration {
     *
     * Default is -1. */
     int enable_redundant_blk;
+
     /* spatial sse in full loop
     *
-    * Default is -1. */
-    int spatial_sse_fl;
-#if 0//!REMOVE_ME_SUBPEL_CODE
-    /* subpel
-    *
-    * Default is -1. */
-    int enable_subpel;
-#endif
+    * -1: Default, 0: OFF in PD_PASS_2, 1: Fully ON in PD_PASS_2. */
+    int spatial_sse_full_loop_level;
+
     /* over boundry block
     *
     * Default is -1. */
@@ -326,16 +333,7 @@ typedef struct EbSvtAv1EncConfiguration {
     *
     * Default is -1. */
     int new_nearest_comb_inject;
-#if 0//!SHUT_ME_CAND_SORTING
-    /* prune unipred at me
-    *
-    * Default is -1. */
-    int prune_unipred_me;
-#endif
-    /* prune ref frame for rec partitions
-    *
-    * Default is -1. */
-    int prune_ref_rec_part;
+
     /* nsq table
     *
     * Default is -1. */
@@ -376,7 +374,6 @@ typedef struct EbSvtAv1EncConfiguration {
      * Default is -1 (auto) */
     int disable_cfl_flag;
 
-#if 1 // OBMC_CLI
     /* obmc_level specifies the level of the OBMC feature that would be
      * considered when the level is specified in the command line instruction (CLI).
      * The meaning of the feature level in the CLI is different from that for
@@ -392,18 +389,12 @@ typedef struct EbSvtAv1EncConfiguration {
      *
      * Default is -1 (auto). */
     int8_t obmc_level;
-#else
-    /* OBMC
-    *
-    * Default is 1. */
-    EbBool enable_obmc;
-#endif
+
     /* RDOQ
     *
-    * Default is -1. */
-    int enable_rdoq;
+    * -1: Default, 0: OFF in PD_PASS_2, 1: Fully ON in PD_PASS_2. */
+    int rdoq_level;
 
-#if 1 // FILTER_INTRA_CLI
     /* Filter intra prediction
     *
     * The table below specifies the meaning of filter_intra_level when specified in the CLI.
@@ -412,12 +403,6 @@ typedef struct EbSvtAv1EncConfiguration {
     *         0          | OFF everywhere in encoder
     *         1          | Fully ON in PD_PASS_2, Default settings in PD_PASS_0 */
     int8_t filter_intra_level;
-#else
-    /* Filter intra prediction
-    *
-    * Default is 1. */
-    EbBool enable_filter_intra;
-#endif
 
     /* Intra Edge Filter
     *
@@ -467,16 +452,13 @@ typedef struct EbSvtAv1EncConfiguration {
      * 2 = Auto: 8bit & 10bit mode decision
      *
     * Default is 1. */
-#if 1 //CHANGE_HBD_MODE
     int8_t enable_hbd_mode_decision;
-#else
-    uint8_t enable_hbd_mode_decision;
 
-#endif
     /* Palette Mode
     *
-    * Default is -1. */
-    int32_t enable_palette;
+    * -1: Default, 0: OFF, 1: Fully ON, 2 ... 6: Faster levels
+    * Levels 0 - 6 apply only to PD_PASS_2 */
+    int32_t palette_level;
 
     // Rate Control
 
@@ -498,21 +480,12 @@ typedef struct EbSvtAv1EncConfiguration {
      * Default depends on rate control mode.*/
     uint32_t look_ahead_distance;
 
-#if 1 //TPL_LA
     /* Enable TPL in look ahead, only works when look_ahead_distance>0
      * 0 = disable TPL in look ahead
      * 1 = enable TPL in look ahead
      * Default is 0  */
     uint8_t enable_tpl_la;
-    /* Number of frames of sequence to be encoded. If number of frames is greater
-     * than the number of frames in file, the encoder will loop to the beginning
-     * and continue the encode.
-     *
-     * 0 = encodes the full clip.
-     *
-     * Default is 0. */
-    uint64_t frames_to_be_encoded;
-#endif
+
     /* Target bitrate in bits/second, only apllicable when rate control mode is
      * set to 2 or 3.
      *
@@ -532,6 +505,27 @@ typedef struct EbSvtAv1EncConfiguration {
      *
      * Default is 0. */
     uint32_t min_qp_allowed;
+
+    /* TWO PASS DATARATE CONTROL OPTIONS.
+     * Indicates the bias (expressed on a scale of 0 to 100) for determining
+     * target size for the current frame. The value 0 indicates the optimal CBR
+     * mode value should be used, and 100 indicates the optimal VBR mode value
+     * should be used. */
+    uint32_t vbr_bias_pct;
+    /* Indicates the minimum bitrate to be used for a single GOP as a percentage
+     * of the target bitrate. */
+    uint32_t vbr_min_section_pct;
+    /* Indicates the maximum bitrate to be used for a single GOP as a percentage
+     * of the target bitrate. */
+    uint32_t vbr_max_section_pct;
+    /* under_shoot_pct indicates the tolerance of the VBR algorithm to undershoot
+     * and is used as a trigger threshold for more agressive adaptation of Q. Its
+     * value can range from 0-100. */
+    uint32_t under_shoot_pct;
+    /* over_shoot_pct indicates the tolerance of the VBR algorithm to overshoot
+     * and is used as a trigger threshold for more agressive adaptation of Q. Its
+     * value can range from 0-1000. */
+    uint32_t over_shoot_pct;
 
     /* Flag to signal the content being a screen sharing content type
     *
@@ -686,7 +680,8 @@ typedef struct EbSvtAv1EncConfiguration {
 
     /* Variables to control the use of ALT-REF (temporally filtered frames)
     */
-    EbBool  enable_altrefs;
+    // -1: Default; 0: OFF; 1: ON; 2 and 3: Faster levels
+    int8_t  tf_level;
     uint8_t altref_strength;
     uint8_t altref_nframes;
     EbBool  enable_overlays;
@@ -696,13 +691,6 @@ typedef struct EbSvtAv1EncConfiguration {
     uint8_t superres_denom;
     uint8_t superres_kf_denom;
     uint8_t superres_qthres;
-
-    uint32_t sq_weight;
-
-    uint64_t md_stage_1_cand_prune_th;
-    uint64_t md_stage_1_class_prune_th;
-    uint64_t md_stage_2_3_cand_prune_th;
-    uint64_t md_stage_2_3_class_prune_th;
 
   /* Prediction Structure user defined
    */
@@ -799,6 +787,16 @@ EB_API void svt_av1_enc_release_out_buffer(EbBufferHeaderType **p_buffer);
      * @ *p_buffer           Output buffer. */
 EB_API EbErrorType svt_av1_get_recon(EbComponentType *   svt_enc_component,
                                     EbBufferHeaderType *p_buffer);
+
+/* OPTIONAL: get stream information
+     *
+     * Parameter:
+     * @ *svt_enc_component  Encoder handler.
+     * @ *stream_info_id SVT_AV1_STREAM_INFO_ID.
+     * @ *info         output, the type depends on id */
+EB_API EbErrorType svt_av1_enc_get_stream_info(EbComponentType *    svt_enc_component,
+                                    uint32_t stream_info_id, void* info);
+
 
 /* STEP 6: Deinitialize encoder library.
      *

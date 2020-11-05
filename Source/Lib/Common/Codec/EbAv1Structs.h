@@ -1,7 +1,13 @@
 /*
-* Copyright(c) 2019 Netflix, Inc.
-* SPDX - License - Identifier: BSD - 2 - Clause - Patent
-*/
+ * Copyright(c) 2019 Netflix, Inc.
+ *
+ * This source code is subject to the terms of the BSD 2 Clause License and
+ * the Alliance for Open Media Patent License 1.0. If the BSD 2 Clause License
+ * was not distributed with this source code in the LICENSE file, you can
+ * obtain it at https://www.aomedia.org/license/software-license. If the Alliance for Open
+ * Media Patent License 1.0 was not distributed with this source code in the
+ * PATENTS file, you can obtain it at https://www.aomedia.org/license/patent-license.
+ */
 
 #ifndef EbAV1Structs_h
 #define EbAV1Structs_h
@@ -166,11 +172,7 @@ typedef struct SeqHeader {
     /*!< 1: Specifies that the use_filter_intra syntax element may be present.
      *   0: Specifies that the use_filter_intra syntax element will not be
      *       present*/
-#if FILTER_INTRA_CLI
     uint8_t filter_intra_level;
-#else
-    uint8_t enable_filter_intra;
-#endif
 
     /*!< Specifies whether the intra edge filtering process should be enabled */
     uint8_t enable_intra_edge_filter;
@@ -224,7 +226,7 @@ typedef struct SeqHeader {
 
     /*!< 1: Specifies that cdef filtering may be enabled.
          0: specifies that cdef filtering is disabled */
-    uint8_t enable_cdef;
+    uint8_t cdef_level;
 
     /*!< 1: Specifies that loop restoration filtering may be enabled.
          0: Specifies that loop restoration filtering is disabled*/
@@ -385,6 +387,18 @@ typedef struct SkipModeInfo {
     int ref_frame_idx_1;
 
 } SkipModeInfo;
+
+typedef struct {
+  /*FRAME_TYPE*/FrameType frame_type;
+  //REFERENCE_MODE reference_mode;
+
+  unsigned int order_hint;
+  unsigned int display_order_hint;
+  unsigned int frame_number;
+  SkipModeInfo skip_mode_info;
+  int refresh_frame_flags;  // Which ref frames are overwritten by this frame
+  int frame_refs_short_signaling;
+} CurrentFrame;
 
 //typedef struct GlobalMotionParams {
 //

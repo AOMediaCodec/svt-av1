@@ -1,6 +1,12 @@
 /*
 * Copyright(c) 2019 Intel Corporation
-* SPDX - License - Identifier: BSD - 2 - Clause - Patent
+*
+* This source code is subject to the terms of the BSD 2 Clause License and
+* the Alliance for Open Media Patent License 1.0. If the BSD 2 Clause License
+* was not distributed with this source code in the LICENSE file, you can
+* obtain it at https://www.aomedia.org/license/software-license. If the Alliance for Open
+* Media Patent License 1.0 was not distributed with this source code in the
+* PATENTS file, you can obtain it at https://www.aomedia.org/license/patent-license.
 */
 
 #ifndef EbPictureBuffer_h
@@ -291,11 +297,11 @@ typedef struct EbPictureBufferDescInitData {
 /**************************************
      * Extern Function Declarations
      **************************************/
-extern EbErrorType eb_picture_buffer_desc_ctor(EbPictureBufferDesc *object_ptr,
-                                               const EbPtr          object_init_data_ptr);
+extern EbErrorType svt_picture_buffer_desc_ctor(EbPictureBufferDesc *object_ptr,
+                                                const EbPtr          object_init_data_ptr);
 
-extern EbErrorType eb_recon_picture_buffer_desc_ctor(EbPictureBufferDesc *object_ptr,
-                                                     EbPtr                object_init_data_ptr);
+extern EbErrorType svt_recon_picture_buffer_desc_ctor(EbPictureBufferDesc *object_ptr,
+                                                      EbPtr                object_init_data_ptr);
 
 #ifdef __cplusplus
 }

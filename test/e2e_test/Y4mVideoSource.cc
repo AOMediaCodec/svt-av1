@@ -1,7 +1,13 @@
 /*
- * Copyright(c) 2019 Netflix, Inc.
- * SPDX - License - Identifier: BSD - 2 - Clause - Patent
- */
+* Copyright(c) 2019 Netflix, Inc.
+*
+* This source code is subject to the terms of the BSD 2 Clause License and
+* the Alliance for Open Media Patent License 1.0. If the BSD 2 Clause License
+* was not distributed with this source code in the LICENSE file, you can
+* obtain it at https://www.aomedia.org/license/software-license. If the Alliance for Open
+* Media Patent License 1.0 was not distributed with this source code in the
+* PATENTS file, you can obtain it at https://www.aomedia.org/license/patent-license.
+*/
 
 /******************************************************************************
  * @file Y4mVideoSource.h
@@ -56,10 +62,10 @@ EbErrorType Y4MVideoSource::parse_file_info() {
         return EB_ErrorBadParameter;
     read_y4m_header(&cfg);
 
-    width_ = cfg.source_width;
-    height_ = cfg.source_height;
-    bit_depth_ = cfg.encoder_bit_depth;
-    svt_compressed_2bit_plane_ = cfg.compressed_ten_bit_format;
+    width_ = cfg.config.source_width;
+    height_ = cfg.config.source_height;
+    bit_depth_ = cfg.config.encoder_bit_depth;
+    svt_compressed_2bit_plane_ = cfg.config.compressed_ten_bit_format;
 
     // y4m video source use the color format type from test vector param for
     // "read_y4m_header" does not output color format info

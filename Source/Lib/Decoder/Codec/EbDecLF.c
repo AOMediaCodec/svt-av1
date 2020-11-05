@@ -1,17 +1,13 @@
 /*
 * Copyright(c) 2019 Netflix, Inc.
-* SPDX - License - Identifier: BSD - 2 - Clause - Patent
-*/
-
-/*
 * Copyright (c) 2016, Alliance for Open Media. All rights reserved
 *
 * This source code is subject to the terms of the BSD 2 Clause License and
 * the Alliance for Open Media Patent License 1.0. If the BSD 2 Clause License
 * was not distributed with this source code in the LICENSE file, you can
-* obtain it at www.aomedia.org/license/software. If the Alliance for Open
+* obtain it at https://www.aomedia.org/license/software-license. If the Alliance for Open
 * Media Patent License 1.0 was not distributed with this source code in the
-* PATENTS file, you can obtain it at www.aomedia.org/license/patent.
+* PATENTS file, you can obtain it at https://www.aomedia.org/license/patent-license.
 */
 
 /*SUMMARY
@@ -40,27 +36,27 @@ SvtLbdFilterTapFn lbd_horz_filter_tap[FILTER_LEN];
 SvtHbdFilterTapFn hbd_horz_filter_tap[FILTER_LEN];
 
 void set_lbd_lf_filter_tap_functions(void) {
-    lbd_horz_filter_tap[0] = aom_lpf_horizontal_4;
-    lbd_horz_filter_tap[1] = aom_lpf_horizontal_6;
-    lbd_horz_filter_tap[2] = aom_lpf_horizontal_8;
-    lbd_horz_filter_tap[3] = aom_lpf_horizontal_14;
+    lbd_horz_filter_tap[0] = svt_aom_lpf_horizontal_4;
+    lbd_horz_filter_tap[1] = svt_aom_lpf_horizontal_6;
+    lbd_horz_filter_tap[2] = svt_aom_lpf_horizontal_8;
+    lbd_horz_filter_tap[3] = svt_aom_lpf_horizontal_14;
 
-    lbd_vert_filter_tap[0] = aom_lpf_vertical_4;
-    lbd_vert_filter_tap[1] = aom_lpf_vertical_6;
-    lbd_vert_filter_tap[2] = aom_lpf_vertical_8;
-    lbd_vert_filter_tap[3] = aom_lpf_vertical_14;
+    lbd_vert_filter_tap[0] = svt_aom_lpf_vertical_4;
+    lbd_vert_filter_tap[1] = svt_aom_lpf_vertical_6;
+    lbd_vert_filter_tap[2] = svt_aom_lpf_vertical_8;
+    lbd_vert_filter_tap[3] = svt_aom_lpf_vertical_14;
 }
 
 void set_hbd_lf_filter_tap_functions(void) {
-    hbd_horz_filter_tap[0] = aom_highbd_lpf_horizontal_4;
-    hbd_horz_filter_tap[1] = aom_highbd_lpf_horizontal_6;
-    hbd_horz_filter_tap[2] = aom_highbd_lpf_horizontal_8;
-    hbd_horz_filter_tap[3] = aom_highbd_lpf_horizontal_14;
+    hbd_horz_filter_tap[0] = svt_aom_highbd_lpf_horizontal_4;
+    hbd_horz_filter_tap[1] = svt_aom_highbd_lpf_horizontal_6;
+    hbd_horz_filter_tap[2] = svt_aom_highbd_lpf_horizontal_8;
+    hbd_horz_filter_tap[3] = svt_aom_highbd_lpf_horizontal_14;
 
-    hbd_vert_filter_tap[0] = aom_highbd_lpf_vertical_4;
-    hbd_vert_filter_tap[1] = aom_highbd_lpf_vertical_6;
-    hbd_vert_filter_tap[2] = aom_highbd_lpf_vertical_8;
-    hbd_vert_filter_tap[3] = aom_highbd_lpf_vertical_14;
+    hbd_vert_filter_tap[0] = svt_aom_highbd_lpf_vertical_4;
+    hbd_vert_filter_tap[1] = svt_aom_highbd_lpf_vertical_6;
+    hbd_vert_filter_tap[2] = svt_aom_highbd_lpf_vertical_8;
+    hbd_vert_filter_tap[3] = svt_aom_highbd_lpf_vertical_14;
 }
 
 /*Population of neighbour block lf params for each 4x4 block*/
@@ -835,7 +831,7 @@ void dec_av1_loop_filter_frame(EbDecHandle *dec_handle_ptr,
     for (int lvl = 0; lvl <= MAX_LOOP_FILTER; lvl++)
         memset(lf_info->lfthr[lvl].hev_thr, (lvl >> 4), SIMD_WIDTH);
 
-    eb_av1_loop_filter_frame_init(frm_hdr, lf_info, plane_start, plane_end);
+    svt_av1_loop_filter_frame_init(frm_hdr, lf_info, plane_start, plane_end);
 
     set_lbd_lf_filter_tap_functions();
     set_hbd_lf_filter_tap_functions();

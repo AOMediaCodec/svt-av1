@@ -1,6 +1,12 @@
 /*
 * Copyright(c) 2019 Intel Corporation
-* SPDX - License - Identifier: BSD - 2 - Clause - Patent
+*
+* This source code is subject to the terms of the BSD 2 Clause License and
+* the Alliance for Open Media Patent License 1.0. If the BSD 2 Clause License
+* was not distributed with this source code in the LICENSE file, you can
+* obtain it at https://www.aomedia.org/license/software-license. If the Alliance for Open
+* Media Patent License 1.0 was not distributed with this source code in the
+* PATENTS file, you can obtain it at https://www.aomedia.org/license/patent-license.
 */
 
 #include <stdint.h>
@@ -47,7 +53,7 @@ uint32_t variance_highbd_c(const uint16_t *a, int a_stride, const uint16_t *b, i
 }
 
 #define VAR(W, H)                                                                        \
-    uint32_t eb_aom_variance##W##x##H##_c(                                               \
+    uint32_t svt_aom_variance##W##x##H##_c(                                              \
         const uint8_t *a, int a_stride, const uint8_t *b, int b_stride, uint32_t *sse) { \
         int sum;                                                                         \
         variance_c(a, a_stride, b, b_stride, W, H, sse, &sum);                           \

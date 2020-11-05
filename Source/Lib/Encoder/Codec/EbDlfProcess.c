@@ -1,17 +1,13 @@
 /*
 * Copyright(c) 2019 Intel Corporation
-* SPDX - License - Identifier: BSD - 2 - Clause - Patent
-*/
-
-/*
 * Copyright (c) 2016, Alliance for Open Media. All rights reserved
 *
 * This source code is subject to the terms of the BSD 2 Clause License and
 * the Alliance for Open Media Patent License 1.0. If the BSD 2 Clause License
 * was not distributed with this source code in the LICENSE file, you can
-* obtain it at www.aomedia.org/license/software. If the Alliance for Open
+* obtain it at https://www.aomedia.org/license/software-license. If the Alliance for Open
 * Media Patent License 1.0 was not distributed with this source code in the
-* PATENTS file, you can obtain it at www.aomedia.org/license/patent.
+* PATENTS file, you can obtain it at https://www.aomedia.org/license/patent-license.
 */
 
 #include <stdlib.h>
@@ -25,8 +21,8 @@
 #include "EbPictureControlSet.h"
 #include "aom_dsp_rtcd.h"
 
-void eb_av1_loop_restoration_save_boundary_lines(const Yv12BufferConfig *frame, Av1Common *cm,
-                                                 int32_t after_cdef);
+void svt_av1_loop_restoration_save_boundary_lines(const Yv12BufferConfig *frame, Av1Common *cm,
+                                                  int32_t after_cdef);
 
 static void dlf_context_dctor(EbPtr p) {
     EbThreadContext *thread_context_ptr = (EbThreadContext *)p;
@@ -51,9 +47,9 @@ EbErrorType dlf_context_ctor(EbThreadContext *thread_context_ptr, const EbEncHan
 
     // Input/Output System Resource Manager FIFOs
     context_ptr->dlf_input_fifo_ptr =
-        eb_system_resource_get_consumer_fifo(enc_handle_ptr->enc_dec_results_resource_ptr, index);
+        svt_system_resource_get_consumer_fifo(enc_handle_ptr->enc_dec_results_resource_ptr, index);
     context_ptr->dlf_output_fifo_ptr =
-        eb_system_resource_get_producer_fifo(enc_handle_ptr->dlf_results_resource_ptr, index);
+        svt_system_resource_get_producer_fifo(enc_handle_ptr->dlf_results_resource_ptr, index);
 
     context_ptr->temp_lf_recon_picture16bit_ptr = (EbPictureBufferDesc *)NULL;
     context_ptr->temp_lf_recon_picture_ptr      = (EbPictureBufferDesc *)NULL;
@@ -73,14 +69,14 @@ EbErrorType dlf_context_ctor(EbThreadContext *thread_context_ptr, const EbEncHan
     if (scs_ptr->static_config.is_16bit_pipeline || is_16bit) {
         temp_lf_recon_desc_init_data.bit_depth = EB_16BIT;
         EB_NEW(context_ptr->temp_lf_recon_picture16bit_ptr,
-               eb_recon_picture_buffer_desc_ctor,
+               svt_recon_picture_buffer_desc_ctor,
                (EbPtr)&temp_lf_recon_desc_init_data);
         if(!is_16bit)
             context_ptr->temp_lf_recon_picture16bit_ptr->bit_depth = EB_8BIT;
     } else {
         temp_lf_recon_desc_init_data.bit_depth = EB_8BIT;
         EB_NEW(context_ptr->temp_lf_recon_picture_ptr,
-               eb_recon_picture_buffer_desc_ctor,
+               svt_recon_picture_buffer_desc_ctor,
                (EbPtr)&temp_lf_recon_desc_init_data);
     }
 
@@ -137,7 +133,7 @@ void *dlf_kernel(void *input_ptr) {
                         + input_buffer_8bit->origin_y * input_buffer_8bit->stride_y;
             input_stride_8bit = input_buffer_8bit->stride_y;
 
-            convert_8bit_to_16bit(input_8bit,
+            svt_convert_8bit_to_16bit(input_8bit,
                 input_stride_8bit,
                 input_16bit,
                 input_stride_16bit,
@@ -154,7 +150,7 @@ void *dlf_kernel(void *input_ptr) {
                         + input_buffer_8bit->origin_y / 2 * input_buffer_8bit->stride_cb;
             input_stride_8bit = input_buffer_8bit->stride_cb;
 
-            convert_8bit_to_16bit(input_8bit,
+            svt_convert_8bit_to_16bit(input_8bit,
                 input_stride_8bit,
                 input_16bit,
                 input_stride_16bit,
@@ -171,7 +167,7 @@ void *dlf_kernel(void *input_ptr) {
                         + input_buffer_8bit->origin_y / 2 * input_buffer_8bit->stride_cr;
             input_stride_8bit = input_buffer_8bit->stride_cr;
 
-            convert_8bit_to_16bit(input_8bit,
+            svt_convert_8bit_to_16bit(input_8bit,
                 input_stride_8bit,
                 input_16bit,
                 input_stride_16bit,
@@ -202,17 +198,17 @@ void *dlf_kernel(void *input_ptr) {
                     ? pcs_ptr->recon_picture16bit_ptr
                     : pcs_ptr->recon_picture_ptr;
 
-            eb_av1_loop_filter_init(pcs_ptr);
+            svt_av1_loop_filter_init(pcs_ptr);
 
             if (pcs_ptr->parent_pcs_ptr->loop_filter_mode == 2) {
-                eb_av1_pick_filter_level(
+                svt_av1_pick_filter_level(
                     context_ptr,
                     (EbPictureBufferDesc *)pcs_ptr->parent_pcs_ptr->enhanced_picture_ptr,
                     pcs_ptr,
                     LPF_PICK_FROM_Q);
             }
 
-            eb_av1_pick_filter_level(
+            svt_av1_pick_filter_level(
                 context_ptr,
                 (EbPictureBufferDesc *)pcs_ptr->parent_pcs_ptr->enhanced_picture_ptr,
                 pcs_ptr,
@@ -225,7 +221,7 @@ void *dlf_kernel(void *input_ptr) {
             pcs_ptr->parent_pcs_ptr->lf.filter_level_u  = 0;
             pcs_ptr->parent_pcs_ptr->lf.filter_level_v  = 0;
 #endif
-            eb_av1_loop_filter_frame(recon_buffer, pcs_ptr, 0, 3);
+            svt_av1_loop_filter_frame(recon_buffer, pcs_ptr, 0, 3);
         }
 
         //pre-cdef prep
@@ -260,8 +256,8 @@ void *dlf_kernel(void *input_ptr) {
             }
             link_eb_to_aom_buffer_desc(recon_picture_ptr, cm->frame_to_show, scs_ptr->max_input_pad_right, scs_ptr->max_input_pad_bottom, is_16bit || scs_ptr->static_config.is_16bit_pipeline);
             if (scs_ptr->seq_header.enable_restoration)
-                eb_av1_loop_restoration_save_boundary_lines(cm->frame_to_show, cm, 0);
-            if (scs_ptr->seq_header.enable_cdef && pcs_ptr->parent_pcs_ptr->cdef_filter_mode) {
+                svt_av1_loop_restoration_save_boundary_lines(cm->frame_to_show, cm, 0);
+            if (scs_ptr->seq_header.cdef_level && pcs_ptr->parent_pcs_ptr->cdef_level) {
                 if (scs_ptr->static_config.is_16bit_pipeline || is_16bit) {
                     pcs_ptr->src[0] = (uint16_t *)recon_picture_ptr->buffer_y +
                                       (recon_picture_ptr->origin_x +
@@ -338,16 +334,16 @@ void *dlf_kernel(void *input_ptr) {
         for (segment_index = 0; segment_index < pcs_ptr->cdef_segments_total_count;
              ++segment_index) {
             // Get Empty DLF Results to Cdef
-            eb_get_empty_object(context_ptr->dlf_output_fifo_ptr, &dlf_results_wrapper_ptr);
+            svt_get_empty_object(context_ptr->dlf_output_fifo_ptr, &dlf_results_wrapper_ptr);
             dlf_results_ptr = (struct DlfResults *)dlf_results_wrapper_ptr->object_ptr;
             dlf_results_ptr->pcs_wrapper_ptr = enc_dec_results_ptr->pcs_wrapper_ptr;
             dlf_results_ptr->segment_index   = segment_index;
             // Post DLF Results
-            eb_post_full_object(dlf_results_wrapper_ptr);
+            svt_post_full_object(dlf_results_wrapper_ptr);
         }
 
         // Release EncDec Results
-        eb_release_object(enc_dec_results_wrapper_ptr);
+        svt_release_object(enc_dec_results_wrapper_ptr);
     }
 
     return NULL;

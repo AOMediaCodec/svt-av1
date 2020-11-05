@@ -1,7 +1,13 @@
 /*
- * Copyright(c) 2019 Intel Corporation
- * SPDX - License - Identifier: BSD - 2 - Clause - Patent
- */
+* Copyright(c) 2019 Intel Corporation
+*
+* This source code is subject to the terms of the BSD 2 Clause License and
+* the Alliance for Open Media Patent License 1.0. If the BSD 2 Clause License
+* was not distributed with this source code in the LICENSE file, you can
+* obtain it at https://www.aomedia.org/license/software-license. If the Alliance for Open
+* Media Patent License 1.0 was not distributed with this source code in the
+* PATENTS file, you can obtain it at https://www.aomedia.org/license/patent-license.
+*/
 
 #include "EbDefinitions.h"
 
@@ -638,7 +644,6 @@ static INLINE void h_pred_32(uint16_t **const dst, const ptrdiff_t stride, const
 static INLINE void h_pred_32x8(uint16_t **dst, const ptrdiff_t stride, const uint16_t *const left) {
     // dst and it's stride must be 32-byte aligned.
     assert(!((intptr_t)*dst % 32));
-    assert(!(stride % 32));
 
     const __m128i left_u16 = _mm_loadu_si128((const __m128i *)left);
 
@@ -739,8 +744,8 @@ static INLINE void h_pred_64(uint16_t **const dst, const ptrdiff_t stride, const
     // Broadcast the 16-bit left pixel to 256-bit register.
     const __m512i row = _mm512_broadcastw_epi16(left);
 
-    zz_store_512(*dst + 0x00, row);
-    zz_store_512(*dst + 0x20, row);
+    zz_storeu_512(*dst + 0x00, row);
+    zz_storeu_512(*dst + 0x20, row);
 
     *dst += stride;
 }
@@ -749,7 +754,6 @@ static INLINE void h_pred_64(uint16_t **const dst, const ptrdiff_t stride, const
 static INLINE void h_pred_64x8(uint16_t **dst, const ptrdiff_t stride, const uint16_t *const left) {
     // dst and it's stride must be 32-byte aligned.
     assert(!((intptr_t)*dst % 32));
-    assert(!(stride % 32));
 
     __m128i left_u16 = _mm_loadu_si128((const __m128i *)left);
 

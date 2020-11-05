@@ -1,6 +1,12 @@
 #
 # Copyright(c) 2019 Netflix, Inc.
-# SPDX - License - Identifier: BSD - 2 - Clause - Patent
+#
+# This source code is subject to the terms of the BSD 2 Clause License and
+# the Alliance for Open Media Patent License 1.0. If the BSD 2 Clause License
+# was not distributed with this source code in the LICENSE file, you can
+# obtain it at https://www.aomedia.org/license/software-license. If the Alliance for Open
+# Media Patent License 1.0 was not distributed with this source code in the
+# PATENTS file, you can obtain it at https://www.aomedia.org/license/patent-license.
 #
 
 # APP Directory CMakeLists.txt
@@ -8,7 +14,7 @@
 # Include Subdirectories
 include_directories(${PROJECT_SOURCE_DIR}/test/
     ${PROJECT_SOURCE_DIR}/test/ref
-    ${PROJECT_SOURCE_DIR}/Bin/${CMAKE_BUILD_TYPE}/
+    ${CMAKE_OUTPUT_DIRECTORY}/
     ${PROJECT_SOURCE_DIR}/third_party/googletest/include third_party/googletest/src
     ${PROJECT_SOURCE_DIR}/Source/API
     ${PROJECT_SOURCE_DIR}/Source/Lib/Common/Codec
@@ -105,7 +111,7 @@ add_dependencies(SvtAv1UnitTests SvtAv1Enc SvtAv1Dec)
 
 install(TARGETS SvtAv1UnitTests RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
 
-add_test(SvtAv1UnitTests ${PROJECT_SOURCE_DIR}/Bin/${CMAKE_BUILD_TYPE}/SvtAv1UnitTests)
+add_test(SvtAv1UnitTests ${CMAKE_OUTPUT_DIRECTORY}/SvtAv1UnitTests)
 
 add_subdirectory(api_test)
 add_subdirectory(e2e_test)

@@ -1,6 +1,12 @@
 /*
 * Copyright(c) 2019 Intel Corporation
-* SPDX - License - Identifier: BSD - 2 - Clause - Patent
+*
+* This source code is subject to the terms of the BSD 2 Clause License and
+* the Alliance for Open Media Patent License 1.0. If the BSD 2 Clause License
+* was not distributed with this source code in the LICENSE file, you can
+* obtain it at https://www.aomedia.org/license/software-license. If the Alliance for Open
+* Media Patent License 1.0 was not distributed with this source code in the
+* PATENTS file, you can obtain it at https://www.aomedia.org/license/patent-license.
 */
 
 #ifndef EbEncDecProcess_h
@@ -49,23 +55,8 @@ typedef struct EncDecContext {
     // temporary buffers for decision making of LF (LPF_PICK_FROM_FULL_IMAGE).
     // Since recon switches between reconPtr and referencePtr, the temporary buffers sizes used the referencePtr's which has padding,...
     EbPictureBufferDesc *inverse_quant_buffer;
-#if !QP2QINDEX
-    // Lambda
-    uint16_t qp;
-    uint8_t  chroma_qp;
-    uint32_t fast_lambda;
-    uint32_t full_lambda;
-    uint32_t full_chroma_lambda_sao;
-#else
-#if TPL_LA_LAMBDA_SCALING
     uint32_t pic_fast_lambda[2];
     uint32_t pic_full_lambda[2];
-#else
-    uint32_t pic_fast_lambda;
-    uint32_t pic_full_lambda;
-    uint32_t pic_full_chroma_lambda_sao;
-#endif
-#endif
 
     //  Context Variables---------------------------------
     BlkStruct *blk_ptr;
@@ -82,9 +73,6 @@ typedef struct EncDecContext {
     uint64_t      tot_intra_coded_area;
     uint8_t       intra_coded_area_sb
         [MAX_NUMBER_OF_TREEBLOCKS_PER_PICTURE]; //percentage of intra coded area 0-100%
-#if !QP2QINDEX
-    uint16_t qp_index;
-#endif
     uint64_t three_quad_energy;
 
     // Needed for DC prediction
@@ -95,10 +83,6 @@ typedef struct EncDecContext {
 
     uint8_t is_inter;
     uint8_t reduced_tx_set_used;
-#if !REMOVE_UNUSED_CODE_PH2
-    EbBool
-            evaluate_cfl_ep; // 0: CFL is evaluated @ mode decision, 1: CFL is evaluated @ encode pass
-#endif
     uint8_t md_skip_blk;
 
     uint16_t tile_group_index;
@@ -113,7 +97,7 @@ extern EbErrorType enc_dec_context_ctor(EbThreadContext *  thread_context_ptr,
                                         const EbEncHandle *enc_handle_ptr, int index,
                                         int tasks_index, int demux_index);
 
-extern void *enc_dec_kernel(void *input_ptr);
+extern void *mode_decision_kernel(void *input_ptr);
 
 #ifdef __cplusplus
 }

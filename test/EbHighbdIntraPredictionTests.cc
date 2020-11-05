@@ -1,7 +1,14 @@
 /*
- * Copyright(c) 2019 Intel Corporation
- * SPDX - License - Identifier: BSD - 2 - Clause - Patent
- */
+* Copyright(c) 2019 Intel Corporation
+*
+* This source code is subject to the terms of the BSD 2 Clause License and
+* the Alliance for Open Media Patent License 1.0. If the BSD 2 Clause License
+* was not distributed with this source code in the LICENSE file, you can
+* obtain it at https://www.aomedia.org/license/software-license. If the Alliance for Open
+* Media Patent License 1.0 was not distributed with this source code in the
+* PATENTS file, you can obtain it at https://www.aomedia.org/license/patent-license.
+*/
+
 
 #include "gtest/gtest.h"
 #include "EbDefinitions.h"
@@ -19,7 +26,7 @@ int bitdepth[] = { 8, 10, 12 };
 static void init_data(uint16_t **input, uint16_t **above, uint16_t **left, ptrdiff_t input_stride) {
     TEST_ALLIGN_MALLOC(uint16_t*, *input, sizeof(uint16_t) * MAX_SB_SIZE * input_stride);
     memset(*input, 0, MAX_SB_SIZE * input_stride);
-    eb_buf_random_u16(*input, (uint32_t)(MAX_SB_SIZE * input_stride));
+    svt_buf_random_u16(*input, (uint32_t)(MAX_SB_SIZE * input_stride));
     *above = *input + ((rand() % (MAX_SB_SIZE * input_stride / 2)) >> 4 << 4); //align to 16
     *left = *input + ((rand() % (MAX_SB_SIZE * input_stride / 4)) >> 4 << 4); //align to 16
 }
@@ -29,7 +36,7 @@ static void uninit_data(uint16_t *input) {
 }
 
 static void init_coeff(uint16_t **coeff, uint16_t **coeff_opt, ptrdiff_t *stride) {
-    *stride = eb_create_random_aligned_stride(MAX_SB_SIZE, 64);
+    *stride = svt_create_random_aligned_stride(MAX_SB_SIZE, 64);
     TEST_ALLIGN_MALLOC(uint16_t*, *coeff, sizeof(uint16_t) * MAX_SB_SIZE * *stride);
     TEST_ALLIGN_MALLOC(uint16_t*, *coeff_opt, sizeof(uint16_t) * MAX_SB_SIZE * *stride);
     memset(*coeff, 0, MAX_SB_SIZE * *stride);
@@ -67,7 +74,7 @@ TEST(HighbdIntraPredictionTest, aom_dc_top_predictor_kernels)
                 case 0://32x8
                     for (int j = 0; j < 10; j++) {
                         init_coeff(&dc_coeff, &dc_coeff_opt, &stride);
-                        ASSERT(eb_buf_compare_u16(dc_coeff, dc_coeff_opt, MAX_SB_SIZE * stride) == 1);
+                        ASSERT(svt_buf_compare_u16(dc_coeff, dc_coeff_opt, MAX_SB_SIZE * stride) == 1);
                         init_data(&input, &above, &left, stride);
                         aom_highbd_dc_top_funcptr_array_base[loop](dc_coeff, stride, above, left, bitdepth[x]);
                         aom_highbd_dc_top_funcptr_array_opt[loop](dc_coeff_opt, stride, above, left, bitdepth[x]);
@@ -79,7 +86,7 @@ TEST(HighbdIntraPredictionTest, aom_dc_top_predictor_kernels)
                 case 1://32x16
                     for (int j = 0; j < 10; j++) {
                         init_coeff(&dc_coeff, &dc_coeff_opt, &stride);
-                        ASSERT(eb_buf_compare_u16(dc_coeff, dc_coeff_opt, MAX_SB_SIZE * stride) == 1);
+                        ASSERT(svt_buf_compare_u16(dc_coeff, dc_coeff_opt, MAX_SB_SIZE * stride) == 1);
                         init_data(&input, &above, &left, stride);
                         aom_highbd_dc_top_funcptr_array_base[loop](dc_coeff, stride, above, left, bitdepth[x]);
                         aom_highbd_dc_top_funcptr_array_opt[loop](dc_coeff_opt, stride, above, left, bitdepth[x]);
@@ -91,7 +98,7 @@ TEST(HighbdIntraPredictionTest, aom_dc_top_predictor_kernels)
                 case 2://32x32
                     for (int j = 0; j < 10; j++) {
                         init_coeff(&dc_coeff, &dc_coeff_opt, &stride);
-                        ASSERT(eb_buf_compare_u16(dc_coeff, dc_coeff_opt, MAX_SB_SIZE * stride) == 1);
+                        ASSERT(svt_buf_compare_u16(dc_coeff, dc_coeff_opt, MAX_SB_SIZE * stride) == 1);
                         init_data(&input, &above, &left, stride);
                         aom_highbd_dc_top_funcptr_array_base[loop](dc_coeff, stride, above, left, bitdepth[x]);
                         aom_highbd_dc_top_funcptr_array_opt[loop](dc_coeff_opt, stride, above, left, bitdepth[x]);
@@ -103,7 +110,7 @@ TEST(HighbdIntraPredictionTest, aom_dc_top_predictor_kernels)
                 case 3://32x64
                     for (int j = 0; j < 10; j++) {
                         init_coeff(&dc_coeff, &dc_coeff_opt, &stride);
-                        ASSERT(eb_buf_compare_u16(dc_coeff, dc_coeff_opt, MAX_SB_SIZE * stride) == 1);
+                        ASSERT(svt_buf_compare_u16(dc_coeff, dc_coeff_opt, MAX_SB_SIZE * stride) == 1);
                         init_data(&input, &above, &left, stride);
                         aom_highbd_dc_top_funcptr_array_base[loop](dc_coeff, stride, above, left, bitdepth[x]);
                         aom_highbd_dc_top_funcptr_array_opt[loop](dc_coeff_opt, stride, above, left, bitdepth[x]);
@@ -115,7 +122,7 @@ TEST(HighbdIntraPredictionTest, aom_dc_top_predictor_kernels)
                 case 4://64x16
                     for (int j = 0; j < 10; j++) {
                         init_coeff(&dc_coeff, &dc_coeff_opt, &stride);
-                        ASSERT(eb_buf_compare_u16(dc_coeff, dc_coeff_opt, MAX_SB_SIZE * stride) == 1);
+                        ASSERT(svt_buf_compare_u16(dc_coeff, dc_coeff_opt, MAX_SB_SIZE * stride) == 1);
                         init_data(&input, &above, &left, stride);
                         aom_highbd_dc_top_funcptr_array_base[loop](dc_coeff, stride, above, left, bitdepth[x]);
                         aom_highbd_dc_top_funcptr_array_opt[loop](dc_coeff_opt, stride, above, left, bitdepth[x]);
@@ -127,7 +134,7 @@ TEST(HighbdIntraPredictionTest, aom_dc_top_predictor_kernels)
                 case 5://64x32
                     for (int j = 0; j < 10; j++) {
                         init_coeff(&dc_coeff, &dc_coeff_opt, &stride);
-                        ASSERT(eb_buf_compare_u16(dc_coeff, dc_coeff_opt, MAX_SB_SIZE * stride) == 1);
+                        ASSERT(svt_buf_compare_u16(dc_coeff, dc_coeff_opt, MAX_SB_SIZE * stride) == 1);
                         init_data(&input, &above, &left, stride);
                         aom_highbd_dc_top_funcptr_array_base[loop](dc_coeff, stride, above, left, bitdepth[x]);
                         aom_highbd_dc_top_funcptr_array_opt[loop](dc_coeff_opt, stride, above, left, bitdepth[x]);
@@ -139,7 +146,7 @@ TEST(HighbdIntraPredictionTest, aom_dc_top_predictor_kernels)
                 case 6://64x64
                     for (int j = 0; j < 10; j++) {
                         init_coeff(&dc_coeff, &dc_coeff_opt, &stride);
-                        ASSERT(eb_buf_compare_u16(dc_coeff, dc_coeff_opt, MAX_SB_SIZE * stride) == 1);
+                        ASSERT(svt_buf_compare_u16(dc_coeff, dc_coeff_opt, MAX_SB_SIZE * stride) == 1);
                         init_data(&input, &above, &left, stride);
                         aom_highbd_dc_top_funcptr_array_base[loop](dc_coeff, stride, above, left, bitdepth[x]);
                         aom_highbd_dc_top_funcptr_array_opt[loop](dc_coeff_opt, stride, above, left, bitdepth[x]);
@@ -172,7 +179,7 @@ TEST(HighbdIntraPredictionTest, aom_dc_left_predictor_kernels)
                 case 0://32x8
                     for (int j = 0; j < 1; j++) {
                         init_coeff(&dc_coeff, &dc_coeff_opt, &stride);
-                        ASSERT(eb_buf_compare_u16(dc_coeff, dc_coeff_opt, MAX_SB_SIZE * stride) == 1);
+                        ASSERT(svt_buf_compare_u16(dc_coeff, dc_coeff_opt, MAX_SB_SIZE * stride) == 1);
                         init_data(&input, &above, &left, stride);
                         aom_highbd_dc_left_funcptr_array_base[loop](dc_coeff, stride, above, left, bitdepth[x]);
                         aom_highbd_dc_left_funcptr_array_opt[loop](dc_coeff_opt, stride, above, left, bitdepth[x]);
@@ -184,7 +191,7 @@ TEST(HighbdIntraPredictionTest, aom_dc_left_predictor_kernels)
                 case 1://32x16
                     for (int j = 0; j < 2; j++) {
                         init_coeff(&dc_coeff, &dc_coeff_opt, &stride);
-                        ASSERT(eb_buf_compare_u16(dc_coeff, dc_coeff_opt, MAX_SB_SIZE * stride) == 1);
+                        ASSERT(svt_buf_compare_u16(dc_coeff, dc_coeff_opt, MAX_SB_SIZE * stride) == 1);
                         init_data(&input, &above, &left, stride);
                         aom_highbd_dc_left_funcptr_array_base[loop](dc_coeff, stride, above, left, bitdepth[x]);
                         aom_highbd_dc_left_funcptr_array_opt[loop](dc_coeff_opt, stride, above, left, bitdepth[x]);
@@ -196,7 +203,7 @@ TEST(HighbdIntraPredictionTest, aom_dc_left_predictor_kernels)
                 case 2://32x32
                     for (int j = 0; j < 2; j++) {
                         init_coeff(&dc_coeff, &dc_coeff_opt, &stride);
-                        ASSERT(eb_buf_compare_u16(dc_coeff, dc_coeff_opt, MAX_SB_SIZE * stride) == 1);
+                        ASSERT(svt_buf_compare_u16(dc_coeff, dc_coeff_opt, MAX_SB_SIZE * stride) == 1);
                         init_data(&input, &above, &left, stride);
                         aom_highbd_dc_left_funcptr_array_base[loop](dc_coeff, stride, above, left, bitdepth[x]);
                         aom_highbd_dc_left_funcptr_array_opt[loop](dc_coeff_opt, stride, above, left, bitdepth[x]);
@@ -208,7 +215,7 @@ TEST(HighbdIntraPredictionTest, aom_dc_left_predictor_kernels)
                 case 3://32x64
                     for (int j = 0; j < 2; j++) {
                         init_coeff(&dc_coeff, &dc_coeff_opt, &stride);
-                        ASSERT(eb_buf_compare_u16(dc_coeff, dc_coeff_opt, MAX_SB_SIZE * stride) == 1);
+                        ASSERT(svt_buf_compare_u16(dc_coeff, dc_coeff_opt, MAX_SB_SIZE * stride) == 1);
                         init_data(&input, &above, &left, stride);
                         aom_highbd_dc_left_funcptr_array_base[loop](dc_coeff, stride, above, left, bitdepth[x]);
                         aom_highbd_dc_left_funcptr_array_opt[loop](dc_coeff_opt, stride, above, left, bitdepth[x]);
@@ -220,7 +227,7 @@ TEST(HighbdIntraPredictionTest, aom_dc_left_predictor_kernels)
                 case 4://64x16
                     for (int j = 0; j < 2; j++) {
                         init_coeff(&dc_coeff, &dc_coeff_opt, &stride);
-                        ASSERT(eb_buf_compare_u16(dc_coeff, dc_coeff_opt, MAX_SB_SIZE * stride) == 1);
+                        ASSERT(svt_buf_compare_u16(dc_coeff, dc_coeff_opt, MAX_SB_SIZE * stride) == 1);
                         init_data(&input, &above, &left, stride);
                         aom_highbd_dc_left_funcptr_array_base[loop](dc_coeff, stride, above, left, bitdepth[x]);
                         aom_highbd_dc_left_funcptr_array_opt[loop](dc_coeff_opt, stride, above, left, bitdepth[x]);
@@ -232,7 +239,7 @@ TEST(HighbdIntraPredictionTest, aom_dc_left_predictor_kernels)
                 case 5://64x32
                     for (int j = 0; j < 2; j++) {
                         init_coeff(&dc_coeff, &dc_coeff_opt, &stride);
-                        ASSERT(eb_buf_compare_u16(dc_coeff, dc_coeff_opt, MAX_SB_SIZE * stride) == 1);
+                        ASSERT(svt_buf_compare_u16(dc_coeff, dc_coeff_opt, MAX_SB_SIZE * stride) == 1);
                         init_data(&input, &above, &left, stride);
                         aom_highbd_dc_left_funcptr_array_base[loop](dc_coeff, stride, above, left, bitdepth[x]);
                         aom_highbd_dc_left_funcptr_array_opt[loop](dc_coeff_opt, stride, above, left, bitdepth[x]);
@@ -244,7 +251,7 @@ TEST(HighbdIntraPredictionTest, aom_dc_left_predictor_kernels)
                 case 6://64x64
                     for (int j = 0; j < 2; j++) {
                         init_coeff(&dc_coeff, &dc_coeff_opt, &stride);
-                        ASSERT(eb_buf_compare_u16(dc_coeff, dc_coeff_opt, MAX_SB_SIZE * stride) == 1);
+                        ASSERT(svt_buf_compare_u16(dc_coeff, dc_coeff_opt, MAX_SB_SIZE * stride) == 1);
                         init_data(&input, &above, &left, stride);
                         aom_highbd_dc_left_funcptr_array_base[loop](dc_coeff, stride, above, left, bitdepth[x]);
                         aom_highbd_dc_left_funcptr_array_opt[loop](dc_coeff_opt, stride, above, left, bitdepth[x]);
@@ -277,7 +284,7 @@ TEST(HighbdIntraPredictionTest, aom_dc_predictor_kernels)
                 case 0://32x8
                     for (int j = 0; j < 1; j++) {
                         init_coeff(&dc_coeff, &dc_coeff_opt, &stride);
-                        ASSERT(eb_buf_compare_u16(dc_coeff, dc_coeff_opt, MAX_SB_SIZE * stride) == 1);
+                        ASSERT(svt_buf_compare_u16(dc_coeff, dc_coeff_opt, MAX_SB_SIZE * stride) == 1);
                         init_data(&input, &above, &left, stride);
                         aom_highbd_dc_pred_funcptr_array_base[loop](dc_coeff, stride, above, left, bitdepth[x]);
                         aom_highbd_dc_pred_funcptr_array_opt[loop](dc_coeff_opt, stride, above, left, bitdepth[x]);
@@ -289,7 +296,7 @@ TEST(HighbdIntraPredictionTest, aom_dc_predictor_kernels)
                 case 1://32x16
                     for (int j = 0; j < 2; j++) {
                         init_coeff(&dc_coeff, &dc_coeff_opt, &stride);
-                        ASSERT(eb_buf_compare_u16(dc_coeff, dc_coeff_opt, MAX_SB_SIZE * stride) == 1);
+                        ASSERT(svt_buf_compare_u16(dc_coeff, dc_coeff_opt, MAX_SB_SIZE * stride) == 1);
                         init_data(&input, &above, &left, stride);
                         aom_highbd_dc_pred_funcptr_array_base[loop](dc_coeff, stride, above, left, bitdepth[x]);
                         aom_highbd_dc_pred_funcptr_array_opt[loop](dc_coeff_opt, stride, above, left, bitdepth[x]);
@@ -301,7 +308,7 @@ TEST(HighbdIntraPredictionTest, aom_dc_predictor_kernels)
                 case 2://32x32
                     for (int j = 0; j < 2; j++) {
                         init_coeff(&dc_coeff, &dc_coeff_opt, &stride);
-                        ASSERT(eb_buf_compare_u16(dc_coeff, dc_coeff_opt, MAX_SB_SIZE * stride) == 1);
+                        ASSERT(svt_buf_compare_u16(dc_coeff, dc_coeff_opt, MAX_SB_SIZE * stride) == 1);
                         init_data(&input, &above, &left, stride);
                         aom_highbd_dc_pred_funcptr_array_base[loop](dc_coeff, stride, above, left, bitdepth[x]);
                         aom_highbd_dc_pred_funcptr_array_opt[loop](dc_coeff_opt, stride, above, left, bitdepth[x]);
@@ -313,7 +320,7 @@ TEST(HighbdIntraPredictionTest, aom_dc_predictor_kernels)
                 case 3://32x64
                     for (int j = 0; j < 2; j++) {
                         init_coeff(&dc_coeff, &dc_coeff_opt, &stride);
-                        ASSERT(eb_buf_compare_u16(dc_coeff, dc_coeff_opt, MAX_SB_SIZE * stride) == 1);
+                        ASSERT(svt_buf_compare_u16(dc_coeff, dc_coeff_opt, MAX_SB_SIZE * stride) == 1);
                         init_data(&input, &above, &left, stride);
                         aom_highbd_dc_pred_funcptr_array_base[loop](dc_coeff, stride, above, left, bitdepth[x]);
                         aom_highbd_dc_pred_funcptr_array_opt[loop](dc_coeff_opt, stride, above, left, bitdepth[x]);
@@ -325,7 +332,7 @@ TEST(HighbdIntraPredictionTest, aom_dc_predictor_kernels)
                 case 4://64x16
                     for (int j = 0; j < 2; j++) {
                         init_coeff(&dc_coeff, &dc_coeff_opt, &stride);
-                        ASSERT(eb_buf_compare_u16(dc_coeff, dc_coeff_opt, MAX_SB_SIZE * stride) == 1);
+                        ASSERT(svt_buf_compare_u16(dc_coeff, dc_coeff_opt, MAX_SB_SIZE * stride) == 1);
                         init_data(&input, &above, &left, stride);
                         aom_highbd_dc_pred_funcptr_array_base[loop](dc_coeff, stride, above, left, bitdepth[x]);
                         aom_highbd_dc_pred_funcptr_array_opt[loop](dc_coeff_opt, stride, above, left, bitdepth[x]);
@@ -337,7 +344,7 @@ TEST(HighbdIntraPredictionTest, aom_dc_predictor_kernels)
                 case 5://64x32
                     for (int j = 0; j < 2; j++) {
                         init_coeff(&dc_coeff, &dc_coeff_opt, &stride);
-                        ASSERT(eb_buf_compare_u16(dc_coeff, dc_coeff_opt, MAX_SB_SIZE * stride) == 1);
+                        ASSERT(svt_buf_compare_u16(dc_coeff, dc_coeff_opt, MAX_SB_SIZE * stride) == 1);
                         init_data(&input, &above, &left, stride);
                         aom_highbd_dc_pred_funcptr_array_base[loop](dc_coeff, stride, above, left, bitdepth[x]);
                         aom_highbd_dc_pred_funcptr_array_opt[loop](dc_coeff_opt, stride, above, left, bitdepth[x]);
@@ -349,7 +356,7 @@ TEST(HighbdIntraPredictionTest, aom_dc_predictor_kernels)
                 case 6://64x64
                     for (int j = 0; j < 2; j++) {
                         init_coeff(&dc_coeff, &dc_coeff_opt, &stride);
-                        ASSERT(eb_buf_compare_u16(dc_coeff, dc_coeff_opt, MAX_SB_SIZE * stride) == 1);
+                        ASSERT(svt_buf_compare_u16(dc_coeff, dc_coeff_opt, MAX_SB_SIZE * stride) == 1);
                         init_data(&input, &above, &left, stride);
                         aom_highbd_dc_pred_funcptr_array_base[loop](dc_coeff, stride, above, left, bitdepth[x]);
                         aom_highbd_dc_pred_funcptr_array_opt[loop](dc_coeff_opt, stride, above, left, bitdepth[x]);
@@ -382,7 +389,7 @@ TEST(HighbdIntraPredictionTest, aom_h_predictor_kernels)
                 case 0://32x8
                     for (uint16_t j = 0; j < 1; j++) {
                         init_coeff(&dc_coeff, &dc_coeff_opt, &stride);
-                        ASSERT(eb_buf_compare_u16(dc_coeff, dc_coeff_opt, MAX_SB_SIZE * stride) == 1);
+                        ASSERT(svt_buf_compare_u16(dc_coeff, dc_coeff_opt, MAX_SB_SIZE * stride) == 1);
                         init_data(&input, &above, &left, stride);
                         aom_highbd_h_pred_funcptr_array_base[loop](dc_coeff, stride, above, left, bitdepth[x]);
                         aom_highbd_h_pred_funcptr_array_opt[loop](dc_coeff_opt, stride, above, left, bitdepth[x]);
@@ -394,7 +401,7 @@ TEST(HighbdIntraPredictionTest, aom_h_predictor_kernels)
                 case 1://32x16
                     for (uint16_t j = 0; j < 2; j++) {
                         init_coeff(&dc_coeff, &dc_coeff_opt, &stride);
-                        ASSERT(eb_buf_compare_u16(dc_coeff, dc_coeff_opt, MAX_SB_SIZE * stride) == 1);
+                        ASSERT(svt_buf_compare_u16(dc_coeff, dc_coeff_opt, MAX_SB_SIZE * stride) == 1);
                         init_data(&input, &above, &left, stride);
                         aom_highbd_h_pred_funcptr_array_base[loop](dc_coeff, stride, above, left, bitdepth[x]);
                         aom_highbd_h_pred_funcptr_array_opt[loop](dc_coeff_opt, stride, above, left, bitdepth[x]);
@@ -406,7 +413,7 @@ TEST(HighbdIntraPredictionTest, aom_h_predictor_kernels)
                 case 2://32x32
                     for (uint16_t j = 0; j < 2; j++) {
                         init_coeff(&dc_coeff, &dc_coeff_opt, &stride);
-                        ASSERT(eb_buf_compare_u16(dc_coeff, dc_coeff_opt, MAX_SB_SIZE * stride) == 1);
+                        ASSERT(svt_buf_compare_u16(dc_coeff, dc_coeff_opt, MAX_SB_SIZE * stride) == 1);
                         init_data(&input, &above, &left, stride);
                         aom_highbd_h_pred_funcptr_array_base[loop](dc_coeff, stride, above, left, bitdepth[x]);
                         aom_highbd_h_pred_funcptr_array_opt[loop](dc_coeff_opt, stride, above, left, bitdepth[x]);
@@ -418,7 +425,7 @@ TEST(HighbdIntraPredictionTest, aom_h_predictor_kernels)
                 case 3://32x64
                     for (uint16_t j = 0; j < 2; j++) {
                         init_coeff(&dc_coeff, &dc_coeff_opt, &stride);
-                        ASSERT(eb_buf_compare_u16(dc_coeff, dc_coeff_opt, MAX_SB_SIZE * stride) == 1);
+                        ASSERT(svt_buf_compare_u16(dc_coeff, dc_coeff_opt, MAX_SB_SIZE * stride) == 1);
                         init_data(&input, &above, &left, stride);
                         aom_highbd_h_pred_funcptr_array_base[loop](dc_coeff, stride, above, left, bitdepth[x]);
                         aom_highbd_h_pred_funcptr_array_opt[loop](dc_coeff_opt, stride, above, left, bitdepth[x]);
@@ -430,7 +437,7 @@ TEST(HighbdIntraPredictionTest, aom_h_predictor_kernels)
                 case 4://64x16
                     for (uint16_t j = 0; j < 2; j++) {
                         init_coeff(&dc_coeff, &dc_coeff_opt, &stride);
-                        ASSERT(eb_buf_compare_u16(dc_coeff, dc_coeff_opt, MAX_SB_SIZE * stride) == 1);
+                        ASSERT(svt_buf_compare_u16(dc_coeff, dc_coeff_opt, MAX_SB_SIZE * stride) == 1);
                         init_data(&input, &above, &left, stride);
                         aom_highbd_h_pred_funcptr_array_base[loop](dc_coeff, stride, above, left, bitdepth[x]);
                         aom_highbd_h_pred_funcptr_array_opt[loop](dc_coeff_opt, stride, above, left, bitdepth[x]);
@@ -442,7 +449,7 @@ TEST(HighbdIntraPredictionTest, aom_h_predictor_kernels)
                 case 5://64x32
                     for (uint16_t j = 0; j < 2; j++) {
                         init_coeff(&dc_coeff, &dc_coeff_opt, &stride);
-                        ASSERT(eb_buf_compare_u16(dc_coeff, dc_coeff_opt, MAX_SB_SIZE * stride) == 1);
+                        ASSERT(svt_buf_compare_u16(dc_coeff, dc_coeff_opt, MAX_SB_SIZE * stride) == 1);
                         init_data(&input, &above, &left, stride);
                         aom_highbd_h_pred_funcptr_array_base[loop](dc_coeff, stride, above, left, bitdepth[x]);
                         aom_highbd_h_pred_funcptr_array_opt[loop](dc_coeff_opt, stride, above, left, bitdepth[x]);
@@ -454,7 +461,7 @@ TEST(HighbdIntraPredictionTest, aom_h_predictor_kernels)
                 case 6://64x64
                     for (uint16_t j = 0; j < 2; j++) {
                         init_coeff(&dc_coeff, &dc_coeff_opt, &stride);
-                        ASSERT(eb_buf_compare_u16(dc_coeff, dc_coeff_opt, MAX_SB_SIZE * stride) == 1);
+                        ASSERT(svt_buf_compare_u16(dc_coeff, dc_coeff_opt, MAX_SB_SIZE * stride) == 1);
                         init_data(&input, &above, &left, stride);
                         aom_highbd_h_pred_funcptr_array_base[loop](dc_coeff, stride, above, left, bitdepth[x]);
                         aom_highbd_h_pred_funcptr_array_opt[loop](dc_coeff_opt, stride, above, left, bitdepth[x]);
@@ -487,7 +494,7 @@ TEST(HighbdIntraPredictionTest, aom_v_predictor_kernels)
                 case 0://32x8
                     for (uint16_t j = 0; j < 1; j++) {
                         init_coeff(&dc_coeff, &dc_coeff_opt, &stride);
-                        ASSERT(eb_buf_compare_u16(dc_coeff, dc_coeff_opt, MAX_SB_SIZE * stride) == 1);
+                        ASSERT(svt_buf_compare_u16(dc_coeff, dc_coeff_opt, MAX_SB_SIZE * stride) == 1);
                         init_data(&input, &above, &left, stride);
                         aom_highbd_v_pred_funcptr_array_base[loop](dc_coeff, stride, above, left, bitdepth[x]);
                         aom_highbd_v_pred_funcptr_array_opt[loop](dc_coeff_opt, stride, above, left, bitdepth[x]);
@@ -499,7 +506,7 @@ TEST(HighbdIntraPredictionTest, aom_v_predictor_kernels)
                 case 1://32x16
                     for (uint16_t j = 0; j < 2; j++) {
                         init_coeff(&dc_coeff, &dc_coeff_opt, &stride);
-                        ASSERT(eb_buf_compare_u16(dc_coeff, dc_coeff_opt, MAX_SB_SIZE * stride) == 1);
+                        ASSERT(svt_buf_compare_u16(dc_coeff, dc_coeff_opt, MAX_SB_SIZE * stride) == 1);
                         init_data(&input, &above, &left, stride);
                         aom_highbd_v_pred_funcptr_array_base[loop](dc_coeff, stride, above, left, bitdepth[x]);
                         aom_highbd_v_pred_funcptr_array_opt[loop](dc_coeff_opt, stride, above, left, bitdepth[x]);
@@ -511,7 +518,7 @@ TEST(HighbdIntraPredictionTest, aom_v_predictor_kernels)
                 case 2://32x32
                     for (uint16_t j = 0; j < 2; j++) {
                         init_coeff(&dc_coeff, &dc_coeff_opt, &stride);
-                        ASSERT(eb_buf_compare_u16(dc_coeff, dc_coeff_opt, MAX_SB_SIZE * stride) == 1);
+                        ASSERT(svt_buf_compare_u16(dc_coeff, dc_coeff_opt, MAX_SB_SIZE * stride) == 1);
                         init_data(&input, &above, &left, stride);
                         aom_highbd_v_pred_funcptr_array_base[loop](dc_coeff, stride, above, left, bitdepth[x]);
                         aom_highbd_v_pred_funcptr_array_opt[loop](dc_coeff_opt, stride, above, left, bitdepth[x]);
@@ -523,7 +530,7 @@ TEST(HighbdIntraPredictionTest, aom_v_predictor_kernels)
                 case 3://32x64
                     for (uint16_t j = 0; j < 2; j++) {
                         init_coeff(&dc_coeff, &dc_coeff_opt, &stride);
-                        ASSERT(eb_buf_compare_u16(dc_coeff, dc_coeff_opt, MAX_SB_SIZE * stride) == 1);
+                        ASSERT(svt_buf_compare_u16(dc_coeff, dc_coeff_opt, MAX_SB_SIZE * stride) == 1);
                         init_data(&input, &above, &left, stride);
                         aom_highbd_v_pred_funcptr_array_base[loop](dc_coeff, stride, above, left, bitdepth[x]);
                         aom_highbd_v_pred_funcptr_array_opt[loop](dc_coeff_opt, stride, above, left, bitdepth[x]);
@@ -535,7 +542,7 @@ TEST(HighbdIntraPredictionTest, aom_v_predictor_kernels)
                 case 4://64x16
                     for (uint16_t j = 0; j < 2; j++) {
                         init_coeff(&dc_coeff, &dc_coeff_opt, &stride);
-                        ASSERT(eb_buf_compare_u16(dc_coeff, dc_coeff_opt, MAX_SB_SIZE * stride) == 1);
+                        ASSERT(svt_buf_compare_u16(dc_coeff, dc_coeff_opt, MAX_SB_SIZE * stride) == 1);
                         init_data(&input, &above, &left, stride);
                         aom_highbd_v_pred_funcptr_array_base[loop](dc_coeff, stride, above, left, bitdepth[x]);
                         aom_highbd_v_pred_funcptr_array_opt[loop](dc_coeff_opt, stride, above, left, bitdepth[x]);
@@ -547,7 +554,7 @@ TEST(HighbdIntraPredictionTest, aom_v_predictor_kernels)
                 case 5://64x32
                     for (uint16_t j = 0; j < 2; j++) {
                         init_coeff(&dc_coeff, &dc_coeff_opt, &stride);
-                        ASSERT(eb_buf_compare_u16(dc_coeff, dc_coeff_opt, MAX_SB_SIZE * stride) == 1);
+                        ASSERT(svt_buf_compare_u16(dc_coeff, dc_coeff_opt, MAX_SB_SIZE * stride) == 1);
                         init_data(&input, &above, &left, stride);
                         aom_highbd_v_pred_funcptr_array_base[loop](dc_coeff, stride, above, left, bitdepth[x]);
                         aom_highbd_v_pred_funcptr_array_opt[loop](dc_coeff_opt, stride, above, left, bitdepth[x]);
@@ -559,7 +566,7 @@ TEST(HighbdIntraPredictionTest, aom_v_predictor_kernels)
                 case 6://64x64
                     for (uint16_t j = 0; j < 2; j++) {
                         init_coeff(&dc_coeff, &dc_coeff_opt, &stride);
-                        ASSERT(eb_buf_compare_u16(dc_coeff, dc_coeff_opt, MAX_SB_SIZE * stride) == 1);
+                        ASSERT(svt_buf_compare_u16(dc_coeff, dc_coeff_opt, MAX_SB_SIZE * stride) == 1);
                         init_data(&input, &above, &left, stride);
                         aom_highbd_v_pred_funcptr_array_base[loop](dc_coeff, stride, above, left, bitdepth[x]);
                         aom_highbd_v_pred_funcptr_array_opt[loop](dc_coeff_opt, stride, above, left, bitdepth[x]);
@@ -592,7 +599,7 @@ TEST(HighbdIntraPredictionTest, aom_highbd_smooth_predictor_kernels)
                 case 0://32x8
                     for (int j = 0; j < 2; j++) {
                         init_coeff(&dc_coeff, &dc_coeff_opt, &stride);
-                        ASSERT(eb_buf_compare_u16(dc_coeff, dc_coeff_opt, MAX_SB_SIZE * stride) == 1);
+                        ASSERT(svt_buf_compare_u16(dc_coeff, dc_coeff_opt, MAX_SB_SIZE * stride) == 1);
                         init_data(&input, &above, &left, stride);
                         aom_smooth_predictor_funcptr_array_base[loop](dc_coeff, stride, above, left, bitdepth[x]);
                         aom_smooth_predictor_funcptr_array_opt[loop](dc_coeff_opt, stride, above, left, bitdepth[x]);
@@ -604,7 +611,7 @@ TEST(HighbdIntraPredictionTest, aom_highbd_smooth_predictor_kernels)
                 case 1://32x16
                     for (int j = 0; j < 2; j++) {
                         init_coeff(&dc_coeff, &dc_coeff_opt, &stride);
-                        ASSERT(eb_buf_compare_u16(dc_coeff, dc_coeff_opt, MAX_SB_SIZE * stride) == 1);
+                        ASSERT(svt_buf_compare_u16(dc_coeff, dc_coeff_opt, MAX_SB_SIZE * stride) == 1);
                         init_data(&input, &above, &left, stride);
                         aom_smooth_predictor_funcptr_array_base[loop](dc_coeff, stride, above, left, bitdepth[x]);
                         aom_smooth_predictor_funcptr_array_opt[loop](dc_coeff_opt, stride, above, left, bitdepth[x]);
@@ -616,7 +623,7 @@ TEST(HighbdIntraPredictionTest, aom_highbd_smooth_predictor_kernels)
                 case 2://32x32
                     for (int j = 0; j < 2; j++) {
                         init_coeff(&dc_coeff, &dc_coeff_opt, &stride);
-                        ASSERT(eb_buf_compare_u16(dc_coeff, dc_coeff_opt, MAX_SB_SIZE * stride) == 1);
+                        ASSERT(svt_buf_compare_u16(dc_coeff, dc_coeff_opt, MAX_SB_SIZE * stride) == 1);
                         init_data(&input, &above, &left, stride);
                         aom_smooth_predictor_funcptr_array_base[loop](dc_coeff, stride, above, left, bitdepth[x]);
                         aom_smooth_predictor_funcptr_array_opt[loop](dc_coeff_opt, stride, above, left, bitdepth[x]);
@@ -628,7 +635,7 @@ TEST(HighbdIntraPredictionTest, aom_highbd_smooth_predictor_kernels)
                 case 3://32x64
                     for (int j = 0; j < 2; j++) {
                         init_coeff(&dc_coeff, &dc_coeff_opt, &stride);
-                        ASSERT(eb_buf_compare_u16(dc_coeff, dc_coeff_opt, MAX_SB_SIZE * stride) == 1);
+                        ASSERT(svt_buf_compare_u16(dc_coeff, dc_coeff_opt, MAX_SB_SIZE * stride) == 1);
                         init_data(&input, &above, &left, stride);
                         aom_smooth_predictor_funcptr_array_base[loop](dc_coeff, stride, above, left, bitdepth[x]);
                         aom_smooth_predictor_funcptr_array_opt[loop](dc_coeff_opt, stride, above, left, bitdepth[x]);
@@ -640,7 +647,7 @@ TEST(HighbdIntraPredictionTest, aom_highbd_smooth_predictor_kernels)
                 case 4://64x16
                     for (int j = 0; j < 2; j++) {
                         init_coeff(&dc_coeff, &dc_coeff_opt, &stride);
-                        ASSERT(eb_buf_compare_u16(dc_coeff, dc_coeff_opt, MAX_SB_SIZE * stride) == 1);
+                        ASSERT(svt_buf_compare_u16(dc_coeff, dc_coeff_opt, MAX_SB_SIZE * stride) == 1);
                         init_data(&input, &above, &left, stride);
                         aom_smooth_predictor_funcptr_array_base[loop](dc_coeff, stride, above, left, bitdepth[x]);
                         aom_smooth_predictor_funcptr_array_opt[loop](dc_coeff_opt, stride, above, left, bitdepth[x]);
@@ -652,7 +659,7 @@ TEST(HighbdIntraPredictionTest, aom_highbd_smooth_predictor_kernels)
                 case 5://64x32
                     for (int j = 0; j < 2; j++) {
                         init_coeff(&dc_coeff, &dc_coeff_opt, &stride);
-                        ASSERT(eb_buf_compare_u16(dc_coeff, dc_coeff_opt, MAX_SB_SIZE * stride) == 1);
+                        ASSERT(svt_buf_compare_u16(dc_coeff, dc_coeff_opt, MAX_SB_SIZE * stride) == 1);
                         init_data(&input, &above, &left, stride);
                         aom_smooth_predictor_funcptr_array_base[loop](dc_coeff, stride, above, left, bitdepth[x]);
                         aom_smooth_predictor_funcptr_array_opt[loop](dc_coeff_opt, stride, above, left, bitdepth[x]);
@@ -664,7 +671,7 @@ TEST(HighbdIntraPredictionTest, aom_highbd_smooth_predictor_kernels)
                 case 6://64x64
                     for (int j = 0; j < 2; j++) {
                         init_coeff(&dc_coeff, &dc_coeff_opt, &stride);
-                        ASSERT(eb_buf_compare_u16(dc_coeff, dc_coeff_opt, MAX_SB_SIZE * stride) == 1);
+                        ASSERT(svt_buf_compare_u16(dc_coeff, dc_coeff_opt, MAX_SB_SIZE * stride) == 1);
                         init_data(&input, &above, &left, stride);
                         aom_smooth_predictor_funcptr_array_base[loop](dc_coeff, stride, above, left, bitdepth[x]);
                         aom_smooth_predictor_funcptr_array_opt[loop](dc_coeff_opt, stride, above, left, bitdepth[x]);
@@ -699,7 +706,7 @@ TEST(HighbdIntraPredictionTest, aom_highbd_smooth_v_predictor_kernels)
                 case 0://32x8
                     for (int j = 0; j < 2; j++) {
                         init_coeff(&dc_coeff, &dc_coeff_opt, &stride);
-                        ASSERT(eb_buf_compare_u16(dc_coeff, dc_coeff_opt, MAX_SB_SIZE * stride) == 1);
+                        ASSERT(svt_buf_compare_u16(dc_coeff, dc_coeff_opt, MAX_SB_SIZE * stride) == 1);
                         init_data(&input, &above, &left, stride);
                         aom_highbd_smooth_v_predictor_funcptr_array_base[loop](dc_coeff, stride, above, left, bitdepth[x]);
                         aom_highbd_smooth_v_predictor_funcptr_array_opt[loop](dc_coeff_opt, stride, above, left, bitdepth[x]);
@@ -711,7 +718,7 @@ TEST(HighbdIntraPredictionTest, aom_highbd_smooth_v_predictor_kernels)
                 case 1://32x16
                     for (int j = 0; j < 2; j++) {
                         init_coeff(&dc_coeff, &dc_coeff_opt, &stride);
-                        ASSERT(eb_buf_compare_u16(dc_coeff, dc_coeff_opt, MAX_SB_SIZE * stride) == 1);
+                        ASSERT(svt_buf_compare_u16(dc_coeff, dc_coeff_opt, MAX_SB_SIZE * stride) == 1);
                         init_data(&input, &above, &left, stride);
                         aom_highbd_smooth_v_predictor_funcptr_array_base[loop](dc_coeff, stride, above, left, bitdepth[x]);
                         aom_highbd_smooth_v_predictor_funcptr_array_opt[loop](dc_coeff_opt, stride, above, left, bitdepth[x]);
@@ -723,7 +730,7 @@ TEST(HighbdIntraPredictionTest, aom_highbd_smooth_v_predictor_kernels)
                 case 2://32x32
                     for (int j = 0; j < 2; j++) {
                         init_coeff(&dc_coeff, &dc_coeff_opt, &stride);
-                        ASSERT(eb_buf_compare_u16(dc_coeff, dc_coeff_opt, MAX_SB_SIZE * stride) == 1);
+                        ASSERT(svt_buf_compare_u16(dc_coeff, dc_coeff_opt, MAX_SB_SIZE * stride) == 1);
                         init_data(&input, &above, &left, stride);
                         aom_highbd_smooth_v_predictor_funcptr_array_base[loop](dc_coeff, stride, above, left, bitdepth[x]);
                         aom_highbd_smooth_v_predictor_funcptr_array_opt[loop](dc_coeff_opt, stride, above, left, bitdepth[x]);
@@ -735,7 +742,7 @@ TEST(HighbdIntraPredictionTest, aom_highbd_smooth_v_predictor_kernels)
                 case 3://32x64
                     for (int j = 0; j < 2; j++) {
                         init_coeff(&dc_coeff, &dc_coeff_opt, &stride);
-                        ASSERT(eb_buf_compare_u16(dc_coeff, dc_coeff_opt, MAX_SB_SIZE * stride) == 1);
+                        ASSERT(svt_buf_compare_u16(dc_coeff, dc_coeff_opt, MAX_SB_SIZE * stride) == 1);
                         init_data(&input, &above, &left, stride);
                         aom_highbd_smooth_v_predictor_funcptr_array_base[loop](dc_coeff, stride, above, left, bitdepth[x]);
                         aom_highbd_smooth_v_predictor_funcptr_array_opt[loop](dc_coeff_opt, stride, above, left, bitdepth[x]);
@@ -747,7 +754,7 @@ TEST(HighbdIntraPredictionTest, aom_highbd_smooth_v_predictor_kernels)
                 case 4://64x16
                     for (int j = 0; j < 2; j++) {
                         init_coeff(&dc_coeff, &dc_coeff_opt, &stride);
-                        ASSERT(eb_buf_compare_u16(dc_coeff, dc_coeff_opt, MAX_SB_SIZE * stride) == 1);
+                        ASSERT(svt_buf_compare_u16(dc_coeff, dc_coeff_opt, MAX_SB_SIZE * stride) == 1);
                         init_data(&input, &above, &left, stride);
                         aom_highbd_smooth_v_predictor_funcptr_array_base[loop](dc_coeff, stride, above, left, bitdepth[x]);
                         aom_highbd_smooth_v_predictor_funcptr_array_opt[loop](dc_coeff_opt, stride, above, left, bitdepth[x]);
@@ -759,7 +766,7 @@ TEST(HighbdIntraPredictionTest, aom_highbd_smooth_v_predictor_kernels)
                 case 5://64x32
                     for (int j = 0; j < 2; j++) {
                         init_coeff(&dc_coeff, &dc_coeff_opt, &stride);
-                        ASSERT(eb_buf_compare_u16(dc_coeff, dc_coeff_opt, MAX_SB_SIZE * stride) == 1);
+                        ASSERT(svt_buf_compare_u16(dc_coeff, dc_coeff_opt, MAX_SB_SIZE * stride) == 1);
                         init_data(&input, &above, &left, stride);
                         aom_highbd_smooth_v_predictor_funcptr_array_base[loop](dc_coeff, stride, above, left, bitdepth[x]);
                         aom_highbd_smooth_v_predictor_funcptr_array_opt[loop](dc_coeff_opt, stride, above, left, bitdepth[x]);
@@ -771,7 +778,7 @@ TEST(HighbdIntraPredictionTest, aom_highbd_smooth_v_predictor_kernels)
                 case 6://64x64
                     for (int j = 0; j < 2; j++) {
                         init_coeff(&dc_coeff, &dc_coeff_opt, &stride);
-                        ASSERT(eb_buf_compare_u16(dc_coeff, dc_coeff_opt, MAX_SB_SIZE * stride) == 1);
+                        ASSERT(svt_buf_compare_u16(dc_coeff, dc_coeff_opt, MAX_SB_SIZE * stride) == 1);
                         init_data(&input, &above, &left, stride);
                         aom_highbd_smooth_v_predictor_funcptr_array_base[loop](dc_coeff, stride, above, left, bitdepth[x]);
                         aom_highbd_smooth_v_predictor_funcptr_array_opt[loop](dc_coeff_opt, stride, above, left, bitdepth[x]);
@@ -805,7 +812,7 @@ TEST(HighbdIntraPredictionTest, aom_highbd_smooth_h_predictor_kernels)
                 case 0://32x8
                     for (int j = 0; j < 2; j++) {
                         init_coeff(&dc_coeff, &dc_coeff_opt, &stride);
-                        ASSERT(eb_buf_compare_u16(dc_coeff, dc_coeff_opt, MAX_SB_SIZE * stride) == 1);
+                        ASSERT(svt_buf_compare_u16(dc_coeff, dc_coeff_opt, MAX_SB_SIZE * stride) == 1);
                         init_data(&input, &above, &left, stride);
                         aom_highbd_smooth_h_predictor_funcptr_array_base[loop](dc_coeff, stride, above, left, bitdepth[x]);
                         aom_highbd_smooth_h_predictor_funcptr_array_opt[loop](dc_coeff_opt, stride, above, left, bitdepth[x]);
@@ -817,7 +824,7 @@ TEST(HighbdIntraPredictionTest, aom_highbd_smooth_h_predictor_kernels)
                 case 1://32x16
                     for (int j = 0; j < 2; j++) {
                         init_coeff(&dc_coeff, &dc_coeff_opt, &stride);
-                        ASSERT(eb_buf_compare_u16(dc_coeff, dc_coeff_opt, MAX_SB_SIZE * stride) == 1);
+                        ASSERT(svt_buf_compare_u16(dc_coeff, dc_coeff_opt, MAX_SB_SIZE * stride) == 1);
                         init_data(&input, &above, &left, stride);
                         aom_highbd_smooth_h_predictor_funcptr_array_base[loop](dc_coeff, stride, above, left, bitdepth[x]);
                         aom_highbd_smooth_h_predictor_funcptr_array_opt[loop](dc_coeff_opt, stride, above, left, bitdepth[x]);
@@ -829,7 +836,7 @@ TEST(HighbdIntraPredictionTest, aom_highbd_smooth_h_predictor_kernels)
                 case 2://32x32
                     for (int j = 0; j < 2; j++) {
                         init_coeff(&dc_coeff, &dc_coeff_opt, &stride);
-                        ASSERT(eb_buf_compare_u16(dc_coeff, dc_coeff_opt, MAX_SB_SIZE * stride) == 1);
+                        ASSERT(svt_buf_compare_u16(dc_coeff, dc_coeff_opt, MAX_SB_SIZE * stride) == 1);
                         init_data(&input, &above, &left, stride);
                         aom_highbd_smooth_h_predictor_funcptr_array_base[loop](dc_coeff, stride, above, left, bitdepth[x]);
                         aom_highbd_smooth_h_predictor_funcptr_array_opt[loop](dc_coeff_opt, stride, above, left, bitdepth[x]);
@@ -841,7 +848,7 @@ TEST(HighbdIntraPredictionTest, aom_highbd_smooth_h_predictor_kernels)
                 case 3://32x64
                     for (int j = 0; j < 2; j++) {
                         init_coeff(&dc_coeff, &dc_coeff_opt, &stride);
-                        ASSERT(eb_buf_compare_u16(dc_coeff, dc_coeff_opt, MAX_SB_SIZE * stride) == 1);
+                        ASSERT(svt_buf_compare_u16(dc_coeff, dc_coeff_opt, MAX_SB_SIZE * stride) == 1);
                         init_data(&input, &above, &left, stride);
                         aom_highbd_smooth_h_predictor_funcptr_array_base[loop](dc_coeff, stride, above, left, bitdepth[x]);
                         aom_highbd_smooth_h_predictor_funcptr_array_opt[loop](dc_coeff_opt, stride, above, left, bitdepth[x]);
@@ -853,7 +860,7 @@ TEST(HighbdIntraPredictionTest, aom_highbd_smooth_h_predictor_kernels)
                 case 4://64x16
                     for (int j = 0; j < 2; j++) {
                         init_coeff(&dc_coeff, &dc_coeff_opt, &stride);
-                        ASSERT(eb_buf_compare_u16(dc_coeff, dc_coeff_opt, MAX_SB_SIZE * stride) == 1);
+                        ASSERT(svt_buf_compare_u16(dc_coeff, dc_coeff_opt, MAX_SB_SIZE * stride) == 1);
                         init_data(&input, &above, &left, stride);
                         aom_highbd_smooth_h_predictor_funcptr_array_base[loop](dc_coeff, stride, above, left, bitdepth[x]);
                         aom_highbd_smooth_h_predictor_funcptr_array_opt[loop](dc_coeff_opt, stride, above, left, bitdepth[x]);
@@ -865,7 +872,7 @@ TEST(HighbdIntraPredictionTest, aom_highbd_smooth_h_predictor_kernels)
                 case 5://64x32
                     for (int j = 0; j < 2; j++) {
                         init_coeff(&dc_coeff, &dc_coeff_opt, &stride);
-                        ASSERT(eb_buf_compare_u16(dc_coeff, dc_coeff_opt, MAX_SB_SIZE * stride) == 1);
+                        ASSERT(svt_buf_compare_u16(dc_coeff, dc_coeff_opt, MAX_SB_SIZE * stride) == 1);
                         init_data(&input, &above, &left, stride);
                         aom_highbd_smooth_h_predictor_funcptr_array_base[loop](dc_coeff, stride, above, left, bitdepth[x]);
                         aom_highbd_smooth_h_predictor_funcptr_array_opt[loop](dc_coeff_opt, stride, above, left, bitdepth[x]);
@@ -877,7 +884,7 @@ TEST(HighbdIntraPredictionTest, aom_highbd_smooth_h_predictor_kernels)
                 case 6://64x64
                     for (int j = 0; j < 2; j++) {
                         init_coeff(&dc_coeff, &dc_coeff_opt, &stride);
-                        ASSERT(eb_buf_compare_u16(dc_coeff, dc_coeff_opt, MAX_SB_SIZE * stride) == 1);
+                        ASSERT(svt_buf_compare_u16(dc_coeff, dc_coeff_opt, MAX_SB_SIZE * stride) == 1);
                         init_data(&input, &above, &left, stride);
                         aom_highbd_smooth_h_predictor_funcptr_array_base[loop](dc_coeff, stride, above, left, bitdepth[x]);
                         aom_highbd_smooth_h_predictor_funcptr_array_opt[loop](dc_coeff_opt, stride, above, left, bitdepth[x]);
@@ -928,7 +935,7 @@ class GetGRadientHistTest
                 src_[j] = rnd_.random();
             }
 
-            av1_get_gradient_hist_c(src_, width, height, width, out_ref_);
+            svt_av1_get_gradient_hist_c(src_, width, height, width, out_ref_);
 
             test_impl(src_, width, height, width, out_tst_);
 
@@ -947,4 +954,4 @@ TEST_P(GetGRadientHistTest, MatchTest) {
 INSTANTIATE_TEST_CASE_P(
     GET_GRADIENT_HIST, GetGRadientHistTest,
     ::testing::Combine(::testing::Range(BLOCK_4X4, BlockSizeS_ALL),
-                       ::testing::Values(av1_get_gradient_hist_avx2)));
+                       ::testing::Values(svt_av1_get_gradient_hist_avx2)));

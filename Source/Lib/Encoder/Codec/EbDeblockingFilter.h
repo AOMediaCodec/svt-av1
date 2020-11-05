@@ -1,17 +1,13 @@
 /*
 * Copyright(c) 2019 Intel Corporation
-* SPDX - License - Identifier: BSD - 2 - Clause - Patent
-*/
-
-/*
 * Copyright (c) 2016, Alliance for Open Media. All rights reserved
 *
 * This source code is subject to the terms of the BSD 2 Clause License and
 * the Alliance for Open Media Patent License 1.0. If the BSD 2 Clause License
 * was not distributed with this source code in the LICENSE file, you can
-* obtain it at www.aomedia.org/license/software. If the Alliance for Open
+* obtain it at https://www.aomedia.org/license/software-license. If the Alliance for Open
 * Media Patent License 1.0 was not distributed with this source code in the
-* PATENTS file, you can obtain it at www.aomedia.org/license/patent.
+* PATENTS file, you can obtain it at https://www.aomedia.org/license/patent-license.
 */
 
 //#include "EbDeblockingFilter_SSE2.h"
@@ -44,33 +40,33 @@ struct AV1Common;
 struct macroblockd;
 struct AV1LfSyncData;
 
-void eb_av1_loop_filter_init(PictureControlSet *pcs_ptr);
+void svt_av1_loop_filter_init(PictureControlSet *pcs_ptr);
 
 void loop_filter_sb(EbPictureBufferDesc *frame_buffer, //reconpicture,
                     //Yv12BufferConfig *frame_buffer,
                     PictureControlSet *pcs_ptr, MacroBlockD *xd, int32_t mi_row, int32_t mi_col,
                     int32_t plane_start, int32_t plane_end, uint8_t last_col);
 
-void eb_av1_loop_filter_frame(
+void svt_av1_loop_filter_frame(
         EbPictureBufferDesc *frame_buffer,//reconpicture,
         //Yv12BufferConfig *frame_buffer,
         PictureControlSet *pcs_ptr,
         /*MacroBlockD *xd,*/ int32_t plane_start, int32_t plane_end/*,
         int32_t partial_frame*/);
 
-void eb_av1_pick_filter_level(DlfContext *         context_ptr,
-                              EbPictureBufferDesc *srcBuffer, // source input
-                              PictureControlSet *pcs_ptr, LpfPickMethod method);
+void svt_av1_pick_filter_level(DlfContext *         context_ptr,
+                               EbPictureBufferDesc *srcBuffer, // source input
+                               PictureControlSet *pcs_ptr, LpfPickMethod method);
 
-void eb_av1_filter_block_plane_vert(const PictureControlSet *const pcs_ptr,
-                                    const MacroBlockD *const xd, const int32_t plane,
-                                    const MacroblockdPlane *const plane_ptr, const uint32_t mi_row,
-                                    const uint32_t mi_col);
+void svt_av1_filter_block_plane_vert(const PictureControlSet *const pcs_ptr,
+                                     const MacroBlockD *const xd, const int32_t plane,
+                                     const MacroblockdPlane *const plane_ptr, const uint32_t mi_row,
+                                     const uint32_t mi_col);
 
-void eb_av1_filter_block_plane_horz(const PictureControlSet *const pcs_ptr,
-                                    const MacroBlockD *const xd, const int32_t plane,
-                                    const MacroblockdPlane *const plane_ptr, const uint32_t mi_row,
-                                    const uint32_t mi_col);
+void svt_av1_filter_block_plane_horz(const PictureControlSet *const pcs_ptr,
+                                     const MacroBlockD *const xd, const int32_t plane,
+                                     const MacroblockdPlane *const plane_ptr, const uint32_t mi_row,
+                                     const uint32_t mi_col);
 
 typedef struct LoopFilterWorkerData {
     EbPictureBufferDesc *   frame_buffer; //reconpicture,

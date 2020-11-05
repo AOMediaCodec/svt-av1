@@ -1,6 +1,12 @@
 /*
 * Copyright(c) 2019 Intel Corporation
-* SPDX - License - Identifier: BSD - 2 - Clause - Patent
+*
+* This source code is subject to the terms of the BSD 2 Clause License and
+* the Alliance for Open Media Patent License 1.0. If the BSD 2 Clause License
+* was not distributed with this source code in the LICENSE file, you can
+* obtain it at https://www.aomedia.org/license/software-license. If the Alliance for Open
+* Media Patent License 1.0 was not distributed with this source code in the
+* PATENTS file, you can obtain it at https://www.aomedia.org/license/patent-license.
 */
 
 #include "EbPictureOperators_SSE2.h"
@@ -8,12 +14,12 @@
 #include "EbDefinitions.h"
 
 /******************************************************************************************************
-                                       residual_kernel16bit_sse2_intrin
+                                       svt_residual_kernel16bit_sse2_intrin
 ******************************************************************************************************/
-void residual_kernel16bit_sse2_intrin(uint16_t *input, uint32_t input_stride, uint16_t *pred,
-                                      uint32_t pred_stride, int16_t *residual,
-                                      uint32_t residual_stride, uint32_t area_width,
-                                      uint32_t area_height) {
+void svt_residual_kernel16bit_sse2_intrin(uint16_t *input, uint32_t input_stride, uint16_t *pred,
+                                          uint32_t pred_stride, int16_t *residual,
+                                          uint32_t residual_stride, uint32_t area_width,
+                                          uint32_t area_height) {
     uint32_t x, y;
     __m128i  residual0, residual1;
 
@@ -213,12 +219,12 @@ void residual_kernel16bit_sse2_intrin(uint16_t *input, uint32_t input_stride, ui
 * faster memcopy for <= 64B blocks, great w/ inlining and size known at compile time (or w/ PGO)
 * THIS NEEDS TO STAY IN A HEADER FOR BEST PERFORMANCE
 ********************************************************************************************/
-#ifdef ARCH_X86
+#ifdef ARCH_X86_64
 #include <immintrin.h>
 #if defined(__GNUC__) && !defined(__clang__) && !defined(__ICC__)
 __attribute__((optimize("unroll-loops")))
 #endif
-static void eb_memcpy_small(void *dst_ptr, const void *src_ptr, size_t size) {
+static void svt_memcpy_small(void *dst_ptr, const void *src_ptr, size_t size) {
     const unsigned char *src = src_ptr;
     unsigned char *      dst = dst_ptr;
     size_t               i   = 0;
@@ -239,7 +245,7 @@ static void eb_memcpy_small(void *dst_ptr, const void *src_ptr, size_t size) {
     for (; i < size; ++i) dst[i] = src[i];
 }
 #define EB_MIN(a, b) (((a) < (b)) ? (a) : (b))
-static void eb_memcpy_sse(void* dst_ptr, void const* src_ptr, size_t size) {
+static void svt_memcpy_sse(void* dst_ptr, void const* src_ptr, size_t size) {
     const unsigned char *src       = src_ptr;
     unsigned char *      dst       = dst_ptr;
     size_t               i         = 0;
@@ -247,7 +253,7 @@ static void eb_memcpy_sse(void* dst_ptr, void const* src_ptr, size_t size) {
 
     // align dest to a $line
     if (align_cnt != 64) {
-        eb_memcpy_small(dst, src, align_cnt);
+        svt_memcpy_small(dst, src, align_cnt);
         dst += align_cnt;
         src += align_cnt;
         size -= align_cnt;
@@ -269,12 +275,12 @@ static void eb_memcpy_sse(void* dst_ptr, void const* src_ptr, size_t size) {
     }
 
     // copy the remainder
-    if (i < size) eb_memcpy_small(dst + i, src + i, size - i);
+    if (i < size) svt_memcpy_small(dst + i, src + i, size - i);
 }
-extern void eb_memcpy_intrin_sse(void* dst_ptr, void const* src_ptr, size_t size) {
+extern void svt_memcpy_intrin_sse(void* dst_ptr, void const* src_ptr, size_t size) {
     if (size > 64)
-        eb_memcpy_sse(dst_ptr, src_ptr, size);
+        svt_memcpy_sse(dst_ptr, src_ptr, size);
     else
-        eb_memcpy_small(dst_ptr, src_ptr, size);
+        svt_memcpy_small(dst_ptr, src_ptr, size);
 }
 #endif

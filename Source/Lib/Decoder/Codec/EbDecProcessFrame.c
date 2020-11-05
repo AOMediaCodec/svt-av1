@@ -1,6 +1,12 @@
 /*
 * Copyright(c) 2019 Netflix, Inc.
-* SPDX - License - Identifier: BSD - 2 - Clause - Patent
+*
+* This source code is subject to the terms of the BSD 2 Clause License and
+* the Alliance for Open Media Patent License 1.0. If the BSD 2 Clause License
+* was not distributed with this source code in the LICENSE file, you can
+* obtain it at https://www.aomedia.org/license/software-license. If the Alliance for Open
+* Media Patent License 1.0 was not distributed with this source code in the
+* PATENTS file, you can obtain it at https://www.aomedia.org/license/patent-license.
 */
 
 // SUMMARY
@@ -133,7 +139,7 @@ EbErrorType decode_tile(DecModCtxt *dec_mod_ctxt, TilesInfo *tile_info,
             dec_mod_ctxt->seq_header->sb_size_log2;
 
         //lock mutex
-        eb_block_on_mutex(parse_recon_tile_info_array->tile_sbrow_mutex);
+        svt_block_on_mutex(parse_recon_tile_info_array->tile_sbrow_mutex);
 
         //pick up a row and increment the sb row counter
         if (parse_recon_tile_info_array->sb_row_to_process !=
@@ -143,7 +149,7 @@ EbErrorType decode_tile(DecModCtxt *dec_mod_ctxt, TilesInfo *tile_info,
         }
 
         //unlock mutex
-        eb_release_mutex(parse_recon_tile_info_array->tile_sbrow_mutex);
+        svt_release_mutex(parse_recon_tile_info_array->tile_sbrow_mutex);
 
         //wait for parse
         if (-1 != sb_row_in_tile) {

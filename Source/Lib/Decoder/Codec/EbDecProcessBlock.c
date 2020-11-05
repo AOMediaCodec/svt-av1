@@ -1,6 +1,12 @@
 /*
 * Copyright(c) 2019 Netflix, Inc.
-* SPDX - License - Identifier: BSD - 2 - Clause - Patent
+*
+* This source code is subject to the terms of the BSD 2 Clause License and
+* the Alliance for Open Media Patent License 1.0. If the BSD 2 Clause License
+* was not distributed with this source code in the LICENSE file, you can
+* obtain it at https://www.aomedia.org/license/software-license. If the Alliance for Open
+* Media Patent License 1.0 was not distributed with this source code in the
+* PATENTS file, you can obtain it at https://www.aomedia.org/license/patent-license.
 */
 
 // SUMMARY
@@ -222,15 +228,15 @@ void decode_block(DecModCtxt *dec_mod_ctxt, BlockModeInfo *mode_info, int32_t mi
 
             part_info.num_samples = nsamples;
 
-            apply_wm = !eb_find_projection(nsamples,
-                                           pts,
-                                           pts_inref,
-                                           bsize,
-                                           mv.row,
-                                           mv.col,
-                                           &part_info.local_warp_params,
-                                           mi_row,
-                                           mi_col);
+            apply_wm = !svt_find_projection(nsamples,
+                                            pts,
+                                            pts_inref,
+                                            bsize,
+                                            mv.row,
+                                            mv.col,
+                                            &part_info.local_warp_params,
+                                            mi_row,
+                                            mi_col);
 
             /* local warp mode should find valid projection */
             assert(apply_wm);

@@ -1,7 +1,13 @@
 /*
- * Copyright(c) 2019 Netflix, Inc.
- * SPDX - License - Identifier: BSD - 2 - Clause - Patent
- */
+* Copyright(c) 2019 Netflix, Inc.
+*
+* This source code is subject to the terms of the BSD 2 Clause License and
+* the Alliance for Open Media Patent License 1.0. If the BSD 2 Clause License
+* was not distributed with this source code in the LICENSE file, you can
+* obtain it at https://www.aomedia.org/license/software-license. If the Alliance for Open
+* Media Patent License 1.0 was not distributed with this source code in the
+* PATENTS file, you can obtain it at https://www.aomedia.org/license/patent-license.
+*/
 
 /******************************************************************************
  * @file pixel_proj_err_test.cc
@@ -10,7 +16,7 @@
  *
  * - av1_lowbd_pixel_proj_error_avx2
  * - av1_highbd_pixel_proj_error_avx2
- * - get_proj_subspace_avx2
+ * - svt_get_proj_subspace_avx2
  *
  * @author Cidana-Edmond, Cidana-Wenyao
  *
@@ -81,25 +87,25 @@ class PixelProjErrorTest
     }
 
     virtual void SetUp() {
-        src_ = (Sample *)(eb_aom_malloc(MAX_DATA_BLOCK * MAX_DATA_BLOCK *
+        src_ = (Sample *)(svt_aom_malloc(MAX_DATA_BLOCK * MAX_DATA_BLOCK *
                                         sizeof(*src_)));
         ASSERT_NE(src_, nullptr);
-        dgd_ = (Sample *)(eb_aom_malloc(MAX_DATA_BLOCK * MAX_DATA_BLOCK *
+        dgd_ = (Sample *)(svt_aom_malloc(MAX_DATA_BLOCK * MAX_DATA_BLOCK *
                                         sizeof(*dgd_)));
         ASSERT_NE(dgd_, nullptr);
-        flt0_ = (int32_t *)(eb_aom_malloc(MAX_DATA_BLOCK * MAX_DATA_BLOCK *
+        flt0_ = (int32_t *)(svt_aom_malloc(MAX_DATA_BLOCK * MAX_DATA_BLOCK *
                                           sizeof(*flt0_)));
         ASSERT_NE(flt0_, nullptr);
-        flt1_ = (int32_t *)(eb_aom_malloc(MAX_DATA_BLOCK * MAX_DATA_BLOCK *
+        flt1_ = (int32_t *)(svt_aom_malloc(MAX_DATA_BLOCK * MAX_DATA_BLOCK *
                                           sizeof(*flt1_)));
         ASSERT_NE(flt1_, nullptr);
     }
 
     virtual void TearDown() {
-        eb_aom_free(src_);
-        eb_aom_free(dgd_);
-        eb_aom_free(flt0_);
-        eb_aom_free(flt1_);
+        svt_aom_free(src_);
+        svt_aom_free(dgd_);
+        svt_aom_free(flt0_);
+        svt_aom_free(flt1_);
     }
 
     virtual void prepare_random_data() = 0;
@@ -199,7 +205,7 @@ class PixelProjErrorTest
 
         const uint64_t num_loop = 1000000;
 
-        eb_start_time(&start_time_seconds, &start_time_useconds);
+        svt_av1_get_time(&start_time_seconds, &start_time_useconds);
 
         for (uint64_t i = 0; i < num_loop; i++) {
             err_ref = ref_func_(src,
@@ -216,7 +222,7 @@ class PixelProjErrorTest
                                 &params);
         }
 
-        eb_start_time(&middle_time_seconds, &middle_time_useconds);
+        svt_av1_get_time(&middle_time_seconds, &middle_time_useconds);
 
         for (uint64_t i = 0; i < num_loop; i++) {
             err_test = tst_func_(src,
@@ -233,31 +239,29 @@ class PixelProjErrorTest
                                  &params);
         }
 
-        eb_start_time(&finish_time_seconds, &finish_time_useconds);
+        svt_av1_get_time(&finish_time_seconds, &finish_time_useconds);
 
         ASSERT_EQ(err_ref, err_test);
 
-        eb_compute_overall_elapsed_time_ms(start_time_seconds,
-                                      start_time_useconds,
-                                      middle_time_seconds,
-                                      middle_time_useconds,
-                                      &time_c);
-        eb_compute_overall_elapsed_time_ms(middle_time_seconds,
-                                      middle_time_useconds,
-                                      finish_time_seconds,
-                                      finish_time_useconds,
-                                      &time_o);
+        time_c = svt_av1_compute_overall_elapsed_time_ms(start_time_seconds,
+                                                         start_time_useconds,
+                                                         middle_time_seconds,
+                                                         middle_time_useconds);
+        time_o = svt_av1_compute_overall_elapsed_time_ms(middle_time_seconds,
+                                                         middle_time_useconds,
+                                                         finish_time_seconds,
+                                                         finish_time_useconds);
 
         printf("Average Nanoseconds per Function Call\n");
         printf(
-            "    eb_av1_lowbd_pixel_proj_error_c(size: %d, r0: %d, r1: %d)   : "
+            "   svt_av1_lowbd_pixel_proj_error_c(size: %d, r0: %d, r1: %d)   : "
             "%6.2f\n",
             size,
             r0,
             r1,
             1000000 * time_c / num_loop);
         printf(
-            "    eb_av1_lowbd_pixel_proj_error_optsize: %d, r0: %d, r1: %d) : "
+            "   svt_av1_lowbd_pixel_proj_error_optsize: %d, r0: %d, r1: %d) : "
             "%6.2f   (Comparison: "
             "%5.2fx)\n",
             size,
@@ -325,11 +329,11 @@ TEST_P(PixelProjErrorLbdTest, DISABLED_SpeedTest) {
 }
 
 static const PixelProjErrorTestParam lbd_test_vector[] = {
-    make_tuple(eb_av1_lowbd_pixel_proj_error_avx2,
-               eb_av1_lowbd_pixel_proj_error_c),
+    make_tuple(svt_av1_lowbd_pixel_proj_error_avx2,
+               svt_av1_lowbd_pixel_proj_error_c),
 #ifndef NON_AVX512_SUPPORT
-    make_tuple(eb_av1_lowbd_pixel_proj_error_avx512,
-               eb_av1_lowbd_pixel_proj_error_c)
+    make_tuple(svt_av1_lowbd_pixel_proj_error_avx512,
+               svt_av1_lowbd_pixel_proj_error_c)
 #endif
 };
 
@@ -374,12 +378,12 @@ TEST_P(PixelProjErrorHbdTest, MatchTestWithExtremeValue) {
 }
 
 static const PixelProjErrorTestParam hbd_test_vector[] = {make_tuple(
-    eb_av1_highbd_pixel_proj_error_avx2, eb_av1_highbd_pixel_proj_error_c)};
+    svt_av1_highbd_pixel_proj_error_avx2, svt_av1_highbd_pixel_proj_error_c)};
 
 INSTANTIATE_TEST_CASE_P(RST, PixelProjErrorHbdTest,
                         ::testing::ValuesIn(hbd_test_vector));
 
-// test get_proj_subspace
+// test svt_get_proj_subspace
 TEST(SelfGuidedToolsTest, GetProjSubspaceMatchTest) {
     const int32_t pu_width = RESTORATION_PROC_UNIT_SIZE;
     const int32_t pu_height = RESTORATION_PROC_UNIT_SIZE;
@@ -387,11 +391,11 @@ TEST(SelfGuidedToolsTest, GetProjSubspaceMatchTest) {
     const int NUM_ITERS = 2000;
     int i, j, k;
 
-    uint8_t *input_ = (uint8_t *)eb_aom_memalign(
+    uint8_t *input_ = (uint8_t *)svt_aom_memalign(
         32, stride * (height + 32) * sizeof(uint8_t));
-    uint8_t *output_ = (uint8_t *)eb_aom_memalign(
+    uint8_t *output_ = (uint8_t *)svt_aom_memalign(
         32, out_stride * (height + 32) * sizeof(uint8_t));
-    int32_t *tmpbuf = (int32_t *)eb_aom_memalign(32, RESTORATION_TMPBUF_SIZE);
+    int32_t *tmpbuf = (int32_t *)svt_aom_memalign(32, RESTORATION_TMPBUF_SIZE);
     uint8_t *input = input_ + stride * 16 + 16;
     uint8_t *output = output_ + out_stride * 16 + 16;
     int32_t *flt0 = tmpbuf;
@@ -423,16 +427,16 @@ TEST(SelfGuidedToolsTest, GetProjSubspaceMatchTest) {
                     int32_t *flt1_p = flt1 + k * flt_stride + j;
                     assert(w * h <= RESTORATION_UNITPELS_MAX);
 
-                    eb_av1_selfguided_restoration_avx2(output_p,
-                                                       w,
-                                                       h,
-                                                       out_stride,
-                                                       flt0_p,
-                                                       flt1_p,
-                                                       flt_stride,
-                                                       ep,
-                                                       8,
-                                                       0);
+                    svt_av1_selfguided_restoration_avx2(output_p,
+                                                        w,
+                                                        h,
+                                                        out_stride,
+                                                        flt0_p,
+                                                        flt1_p,
+                                                        flt_stride,
+                                                        ep,
+                                                        8,
+                                                        0);
                 }
             }
 
@@ -440,32 +444,32 @@ TEST(SelfGuidedToolsTest, GetProjSubspaceMatchTest) {
             int32_t xqd_c[2] = {0};
             int32_t xqd_asm[2] = {0};
             const SgrParamsType *const params = &eb_sgr_params[ep];
-            get_proj_subspace_c(input,
-                                width,
-                                height,
-                                stride,
-                                output,
-                                out_stride,
-                                0,
-                                flt0,
-                                flt_stride,
-                                flt1,
-                                flt_stride,
-                                xqd_c,
-                                params);
-            get_proj_subspace_avx2(input,
-                                   width,
-                                   height,
-                                   stride,
-                                   output,
-                                   out_stride,
-                                   0,
-                                   flt0,
-                                   flt_stride,
-                                   flt1,
-                                   flt_stride,
-                                   xqd_asm,
-                                   params);
+            svt_get_proj_subspace_c(input,
+                                    width,
+                                    height,
+                                    stride,
+                                    output,
+                                    out_stride,
+                                    0,
+                                    flt0,
+                                    flt_stride,
+                                    flt1,
+                                    flt_stride,
+                                    xqd_c,
+                                    params);
+            svt_get_proj_subspace_avx2(input,
+                                       width,
+                                       height,
+                                       stride,
+                                       output,
+                                       out_stride,
+                                       0,
+                                       flt0,
+                                       flt_stride,
+                                       flt1,
+                                       flt_stride,
+                                       xqd_asm,
+                                       params);
             ASSERT_EQ(xqd_c[0], xqd_asm[0])
                 << "xqd_asm[0] does not match with xqd_asm[0] with iter "
                 << iter << " ep " << ep;
@@ -475,8 +479,8 @@ TEST(SelfGuidedToolsTest, GetProjSubspaceMatchTest) {
         }
     }
 
-    eb_aom_free(input_);
-    eb_aom_free(output_);
-    eb_aom_free(tmpbuf);
+    svt_aom_free(input_);
+    svt_aom_free(output_);
+    svt_aom_free(tmpbuf);
 }
 }  // namespace

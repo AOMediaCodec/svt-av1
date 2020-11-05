@@ -1,6 +1,12 @@
 /*
 * Copyright(c) 2019 Netflix, Inc.
-* SPDX - License - Identifier: BSD - 2 - Clause - Patent
+*
+* This source code is subject to the terms of the BSD 2 Clause License and
+* the Alliance for Open Media Patent License 1.0. If the BSD 2 Clause License
+* was not distributed with this source code in the LICENSE file, you can
+* obtain it at https://www.aomedia.org/license/software-license. If the Alliance for Open
+* Media Patent License 1.0 was not distributed with this source code in the
+* PATENTS file, you can obtain it at https://www.aomedia.org/license/patent-license.
 */
 
 // SUMMARY
@@ -155,7 +161,7 @@ EbErrorType start_parse_tile(EbDecHandle *dec_handle_ptr, ParseCtxt *parse_ctxt,
     if (!frame_header->disable_frame_end_update_cdf &&
         (tile_num == tiles_info->context_update_tile_id)) {
         dec_handle_ptr->cur_pic_buf[0]->final_frm_ctx = parse_ctxt->cur_tile_ctx;
-        eb_av1_reset_cdf_symbol_counters(&dec_handle_ptr->cur_pic_buf[0]->final_frm_ctx);
+        svt_av1_reset_cdf_symbol_counters(&dec_handle_ptr->cur_pic_buf[0]->final_frm_ctx);
     }
     return status;
 }

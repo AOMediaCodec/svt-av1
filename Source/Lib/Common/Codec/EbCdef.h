@@ -4,9 +4,9 @@
  * This source code is subject to the terms of the BSD 2 Clause License and
  * the Alliance for Open Media Patent License 1.0. If the BSD 2 Clause License
  * was not distributed with this source code in the LICENSE file, you can
- * obtain it at www.aomedia.org/license/software. If the Alliance for Open
+ * obtain it at https://www.aomedia.org/license/software-license. If the Alliance for Open
  * Media Patent License 1.0 was not distributed with this source code in the
- * PATENTS file, you can obtain it at www.aomedia.org/license/patent.
+ * PATENTS file, you can obtain it at https://www.aomedia.org/license/patent-license.
  */
 #ifndef EbCdef_h
 #define EbCdef_h
@@ -58,11 +58,11 @@ void copy_sb8_16(uint16_t *dst, int32_t dstride, const uint8_t *src, int32_t src
 void copy_rect(uint16_t *dst, int32_t dstride, const uint16_t *src, int32_t sstride, int32_t v,
                int32_t h);
 
-void eb_cdef_filter_fb(uint8_t *dst8, uint16_t *dst16, int32_t dstride, uint16_t *in, int32_t xdec,
-                       int32_t ydec, int32_t dir[CDEF_NBLOCKS][CDEF_NBLOCKS], int32_t *dirinit,
-                       int32_t var[CDEF_NBLOCKS][CDEF_NBLOCKS], int32_t pli, CdefList *dlist,
-                       int32_t cdef_count, int32_t level, int32_t sec_strength, int32_t pri_damping,
-                       int32_t sec_damping, int32_t coeff_shift);
+void svt_cdef_filter_fb(uint8_t *dst8, uint16_t *dst16, int32_t dstride, uint16_t *in, int32_t xdec,
+                        int32_t ydec, int32_t dir[CDEF_NBLOCKS][CDEF_NBLOCKS], int32_t *dirinit,
+                        int32_t var[CDEF_NBLOCKS][CDEF_NBLOCKS], int32_t pli, CdefList *dlist,
+                        int32_t cdef_count, int32_t level, int32_t sec_strength, int32_t pri_damping,
+                        int32_t sec_damping, int32_t coeff_shift);
 
 
 #ifdef __cplusplus

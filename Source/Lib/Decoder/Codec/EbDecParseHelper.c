@@ -1,17 +1,13 @@
 /*
 * Copyright(c) 2019 Netflix, Inc.
-* SPDX - License - Identifier: BSD - 2 - Clause - Patent
-*/
-
-/*
 * Copyright (c) 2016, Alliance for Open Media. All rights reserved
 *
 * This source code is subject to the terms of the BSD 2 Clause License and
 * the Alliance for Open Media Patent License 1.0. If the BSD 2 Clause License
 * was not distributed with this source code in the LICENSE file, you can
-* obtain it at www.aomedia.org/license/software. If the Alliance for Open
+* obtain it at https://www.aomedia.org/license/software-license. If the Alliance for Open
 * Media Patent License 1.0 was not distributed with this source code in the
-* PATENTS file, you can obtain it at www.aomedia.org/license/patent.
+* PATENTS file, you can obtain it at https://www.aomedia.org/license/patent-license.
 */
 
 #include "EbDefinitions.h"
@@ -164,13 +160,6 @@ static INLINE int block_center_x(int mi_col, BlockSize bs) {
 static INLINE int block_center_y(int mi_row, BlockSize bs) {
     const int bh = block_size_high[bs];
     return mi_row * MI_SIZE + bh / 2 - 1;
-}
-
-static INLINE int convert_to_trans_prec(int allow_hp, int coor) {
-    if (allow_hp)
-        return ROUND_POWER_OF_TWO_SIGNED(coor, WARPEDMODEL_PREC_BITS - 3);
-    else
-        return ROUND_POWER_OF_TWO_SIGNED(coor, WARPEDMODEL_PREC_BITS - 2) * 2;
 }
 
 IntMv gm_get_motion_vector(const GlobalMotionParams *gm, int allow_hp, BlockSize bsize, int mi_col,

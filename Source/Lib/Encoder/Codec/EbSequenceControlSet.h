@@ -1,17 +1,13 @@
 /*
 * Copyright(c) 2019 Intel Corporation
-* SPDX - License - Identifier: BSD - 2 - Clause - Patent
-*/
-
-/*
 * Copyright (c) 2016, Alliance for Open Media. All rights reserved
 *
 * This source code is subject to the terms of the BSD 2 Clause License and
 * the Alliance for Open Media Patent License 1.0. If the BSD 2 Clause License
 * was not distributed with this source code in the LICENSE file, you can
-* obtain it at www.aomedia.org/license/software. If the Alliance for Open
+* obtain it at https://www.aomedia.org/license/software-license. If the Alliance for Open
 * Media Patent License 1.0 was not distributed with this source code in the
-* PATENTS file, you can obtain it at www.aomedia.org/license/patent.
+* PATENTS file, you can obtain it at https://www.aomedia.org/license/patent-license.
 */
 
 #ifndef EbSequenceControlSet_h
@@ -21,6 +17,7 @@
 #include "EbAv1Structs.h"
 #include "EbEncodeContext.h"
 #include "EbObject.h"
+#include "firstpass.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -73,20 +70,11 @@ typedef struct SequenceControlSet {
          for algorithms such as SceneChange or TemporalFiltering */
     uint32_t scd_delay;
     /*!< Enable the use of altrefs in the stream */
-    EbBool    enable_altrefs;
+    int8_t   tf_level;
     /*!<  */
     EbBlockMeanPrec          block_mean_calc_prec;
-#if !REMOVE_MRP_MODE
-    /*!< MRP (The signal changes per preset; 0: MRP mode 0, 1: MRP mode 1) Default is 0. */
-    uint8_t mrp_mode;
-#endif
     /*!< CDF (The signal changes per preset; 0: CDF update, 1: no CDF update) Default is 0.*/
     uint8_t cdf_mode;
-#if !NSQ_REMOVAL_CODE_CLEAN_UP
-    /*!< Non-square present flag to use for memory allocation
-        (The signal changes per preset; 0: NSQ absent, 1: NSQ present) Default is 1. */
-    uint8_t nsq_present;
-#endif
     /*!< Down-sampling method @ ME and alt-ref temporal filtering
         (The signal changes per preset; 0: filtering, 1: decimation) Default is 0. */
     uint8_t down_sampling_method_me_search;
@@ -104,10 +92,6 @@ typedef struct SequenceControlSet {
     /*!< Enable compound prediction to be used in the stream, decisions will be taken at a picture level subsequently
     (The signal changes per preset; 0: compound disabled, 1: compound enabled) Default is 1. */
     uint8_t compound_mode;
-
-    /*!< Temporary input / output statistics files for 2-pass encoding */
-    EbBool use_input_stat_file;
-    EbBool use_output_stat_file;
 
     /*!< Sequence resolution parameters */
     uint32_t          chroma_format_idc;
@@ -169,9 +153,7 @@ typedef struct SequenceControlSet {
 
     /*!< Picture, reference, recon and input output buffer count */
     uint32_t picture_control_set_pool_init_count;
-#if DECOUPLE_ME_RES
     uint32_t me_pool_init_count;
-#endif
     uint32_t picture_control_set_pool_init_count_child;
     uint32_t pa_reference_picture_buffer_init_count;
     uint32_t reference_picture_buffer_init_count;
@@ -207,7 +189,9 @@ typedef struct SequenceControlSet {
     uint32_t cdef_process_init_count;
     uint32_t rest_process_init_count;
     uint32_t total_process_init_count;
-
+    int32_t  lap_enabled;
+    TWO_PASS twopass;
+    double   double_frame_rate;
 } SequenceControlSet;
 
 typedef struct EbSequenceControlSetInitData {
@@ -225,15 +209,15 @@ typedef struct EbSequenceControlSetInstance {
 /**************************************
      * Extern Function Declarations
      **************************************/
-extern EbErrorType eb_sequence_control_set_creator(EbPtr *object_dbl_ptr,
-                                                   EbPtr  object_init_data_ptr);
+extern EbErrorType svt_sequence_control_set_creator(EbPtr *object_dbl_ptr,
+                                                    EbPtr  object_init_data_ptr);
 
-extern EbErrorType eb_sequence_control_set_ctor(SequenceControlSet *object,
-                                                EbPtr               object_init_data_ptr);
+extern EbErrorType svt_sequence_control_set_ctor(SequenceControlSet *object,
+                                                 EbPtr               object_init_data_ptr);
 
 extern EbErrorType copy_sequence_control_set(SequenceControlSet *dst, SequenceControlSet *src);
 
-extern EbErrorType eb_sequence_control_set_instance_ctor(EbSequenceControlSetInstance *object_ptr);
+extern EbErrorType svt_sequence_control_set_instance_ctor(EbSequenceControlSetInstance *object_ptr);
 
 extern EbErrorType sb_params_init(SequenceControlSet *scs_ptr);
 
@@ -241,6 +225,16 @@ extern EbErrorType derive_input_resolution(EbInputResolution *input_resolution,
                                            uint32_t           input_size);
 
 EbErrorType sb_geom_init(SequenceControlSet *scs_ptr);
+
+inline static EbBool use_input_stat(const SequenceControlSet* scs_ptr)
+{
+    return !!scs_ptr->static_config.rc_twopass_stats_in.sz;
+}
+
+inline static EbBool use_output_stat(const SequenceControlSet* scs_ptr)
+{
+    return scs_ptr->static_config.rc_firstpass_stats_out;
+}
 
 #ifdef __cplusplus
 }
