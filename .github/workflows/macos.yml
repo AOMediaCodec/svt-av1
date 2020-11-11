@@ -23,6 +23,7 @@ jobs:
       matrix:
         include:
           - generator: Xcode
+            DEVELOPER_DIR: /Applications/Xcode_12.2.app/Contents/Developer
           - generator: Unix Makefiles
     steps:
       - uses: actions/checkout@v2
