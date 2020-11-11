@@ -23,7 +23,6 @@ jobs:
       matrix:
         include:
           - generator: Xcode
-            DEVELOPER_DIR: /Applications/Xcode_12.2.app/Contents/Developer
           - generator: Unix Makefiles
     steps:
       - uses: actions/checkout@v2
@@ -44,6 +43,7 @@ jobs:
           printf '%s\n' \
             "PATH=/usr/local/opt/ccache/libexec:$PATH" \
             "CCACHE_DIR=$HOME/.ccache" >> $GITHUB_ENV
+          sudo xcode-select -s /Applications/Xcode_12.2.app/Contents/Developer
           clang -v
       - name: Run CMake
         run: cmake -S "$GITHUB_WORKSPACE" -B Build -G"${{ matrix.generator }}" -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=OFF
