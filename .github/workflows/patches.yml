@@ -59,6 +59,7 @@ jobs:
             brew update || brew update-reset
             brew upgrade yasm nasm ccache pkg-config ninja || brew install -q yasm nasm ccache pkg-config ninja
           } || brew update-reset
+          sudo xcode-select -s /Applications/Xcode_12.2.app/Contents/Developer
       - name: Check dependencies
         run: |
           [ -d ~/.ccache ] && sudo chown -R "$USER": ~/.ccache
