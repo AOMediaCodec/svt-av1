@@ -157,9 +157,11 @@ add_library(CpuFeature::cpu_features ALIAS cpu_features)
 # program : list_cpu_features
 #
 
-add_executable(list_cpu_features ${PROJECT_SOURCE_DIR}/src/utils/list_cpu_features.c)
-target_link_libraries(list_cpu_features PRIVATE cpu_features)
-add_executable(CpuFeature::list_cpu_features ALIAS list_cpu_features)
+if(BUILD_CPU_FEATURES_EXE)
+  add_executable(list_cpu_features ${PROJECT_SOURCE_DIR}/src/utils/list_cpu_features.c)
+  target_link_libraries(list_cpu_features PRIVATE cpu_features)
+  add_executable(CpuFeature::list_cpu_features ALIAS list_cpu_features)
+endif()
 
 #
 # ndk_compat
@@ -174,7 +176,7 @@ endif()
 #
 
 include(CTest)
-if(BUILD_TESTING)
+if(BUILD_CPU_FEATURES_TESTING)
   # Automatically incorporate googletest into the CMake Project if target not
   # found.
   enable_language(CXX)
@@ -226,34 +228,36 @@ endif()
 # Install cpu_features and list_cpu_features
 #
 
-include(GNUInstallDirs)
-install(TARGETS cpu_features list_cpu_features
-  EXPORT CpuFeaturesTargets
-  PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/cpu_features
-  ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-  LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-  RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-)
-install(EXPORT CpuFeaturesTargets
-  NAMESPACE CpuFeatures::
-  DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/CpuFeatures
-  COMPONENT Devel
-)
-include(CMakePackageConfigHelpers)
-configure_package_config_file(cmake/CpuFeaturesConfig.cmake.in
-  "${PROJECT_BINARY_DIR}/CpuFeaturesConfig.cmake"
-  INSTALL_DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/CpuFeatures"
-  NO_SET_AND_CHECK_MACRO
-  NO_CHECK_REQUIRED_COMPONENTS_MACRO
-)
-write_basic_package_version_file(
-  "${PROJECT_BINARY_DIR}/CpuFeaturesConfigVersion.cmake"
-  COMPATIBILITY SameMajorVersion
-)
-install(
-  FILES
+if(INSTALL_CPU_FEATURES)
+  include(GNUInstallDirs)
+  install(TARGETS cpu_features list_cpu_features
+    EXPORT CpuFeaturesTargets
+    PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/cpu_features
+    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+  )
+  install(EXPORT CpuFeaturesTargets
+    NAMESPACE CpuFeatures::
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/CpuFeatures
+    COMPONENT Devel
+  )
+  include(CMakePackageConfigHelpers)
+  configure_package_config_file(cmake/CpuFeaturesConfig.cmake.in
     "${PROJECT_BINARY_DIR}/CpuFeaturesConfig.cmake"
+    INSTALL_DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/CpuFeatures"
+    NO_SET_AND_CHECK_MACRO
+    NO_CHECK_REQUIRED_COMPONENTS_MACRO
+  )
+  write_basic_package_version_file(
     "${PROJECT_BINARY_DIR}/CpuFeaturesConfigVersion.cmake"
-  DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/CpuFeatures"
-  COMPONENT Devel
-)
+    COMPATIBILITY SameMajorVersion
+  )
+  install(
+    FILES
+      "${PROJECT_BINARY_DIR}/CpuFeaturesConfig.cmake"
+      "${PROJECT_BINARY_DIR}/CpuFeaturesConfigVersion.cmake"
+    DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/CpuFeatures"
+    COMPONENT Devel
+  )
+endif()
