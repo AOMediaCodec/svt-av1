@@ -98,7 +98,7 @@ endif()
 set_target_properties(SvtAv1Dec PROPERTIES VERSION ${DEC_VERSION})
 set_target_properties(SvtAv1Dec PROPERTIES SOVERSION ${DEC_VERSION_MAJOR})
 add_dependencies(SvtAv1Dec EbVersionHeaderGen)
-target_link_libraries(SvtAv1Dec ${PLATFORM_LIBS})
+target_link_libraries(SvtAv1Dec ${PLATFORM_LIBS} cpu_features)
 install(TARGETS SvtAv1Dec DESTINATION "${CMAKE_INSTALL_LIBDIR}")
 
 configure_file(pkg-config.pc.in ${CMAKE_BINARY_DIR}/SvtAv1Dec.pc @ONLY)

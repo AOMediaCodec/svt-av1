@@ -129,7 +129,7 @@ endif()
 
 set_target_properties(SvtAv1Enc PROPERTIES VERSION ${ENC_VERSION})
 set_target_properties(SvtAv1Enc PROPERTIES SOVERSION ${ENC_VERSION_MAJOR})
-target_link_libraries(SvtAv1Enc ${PLATFORM_LIBS})
+target_link_libraries(SvtAv1Enc ${PLATFORM_LIBS} cpu_features)
 install(TARGETS SvtAv1Enc DESTINATION "${CMAKE_INSTALL_LIBDIR}")
 
 configure_file(pkg-config.pc.in ${CMAKE_BINARY_DIR}/SvtAv1Enc.pc @ONLY)
