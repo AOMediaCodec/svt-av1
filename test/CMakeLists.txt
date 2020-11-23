@@ -73,7 +73,6 @@ file(GLOB all_files
 set(lib_list
     $<TARGET_OBJECTS:COMMON_CODEC>
     $<TARGET_OBJECTS:FASTFEAT>
-    $<TARGET_OBJECTS:cpu_features>
     $<TARGET_OBJECTS:COMMON_C_DEFAULT>
     $<TARGET_OBJECTS:COMMON_ASM_SSE2>
     $<TARGET_OBJECTS:COMMON_ASM_SSSE3>
@@ -87,6 +86,7 @@ set(lib_list
     $<TARGET_OBJECTS:ENCODER_ASM_AVX2>
     $<TARGET_OBJECTS:ENCODER_ASM_AVX512>
     $<TARGET_OBJECTS:ENCODER_GLOBALS>
+    cpu_features
     gtest_all)
 if(UNIX)
   # App Source Files
