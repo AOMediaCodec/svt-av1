@@ -16,6 +16,9 @@
 #include "EbPackUnPack_C.h"
 #include "EbAvcStyleMcp.h"
 
+// for get_cpu_flags
+#include "cpuinfo_x86.h"
+
 /*
  * DSP deprecated flags
  */
@@ -165,20 +168,26 @@ static int32_t can_use_intel_avx512() {
 CPU_FLAGS get_cpu_flags() {
     CPU_FLAGS flags = 0;
 
-    /* To detail tests CPU features, requires more accurate implementation.
-        Documentation help:
-        https://docs.microsoft.com/en-us/cpp/intrinsics/cpuid-cpuidex?redirectedfrom=MSDN&view=vs-2019
-    */
+    // read cpu feature information from the cpu_features library
+	// cpu_features correctly checks for OS support here, no extra work needed
+    const X86Features feat = GetX86Info().features;
 
-    if (check_4thgen_intel_core_features()) {
-        flags |= CPU_FLAGS_MMX | CPU_FLAGS_SSE | CPU_FLAGS_SSE2 | CPU_FLAGS_SSE3 | CPU_FLAGS_SSSE3 |
-                 CPU_FLAGS_SSE4_1 | CPU_FLAGS_SSE4_2 | CPU_FLAGS_AVX | CPU_FLAGS_AVX2;
-    }
+    // set flags as appropriate
+    flags |= feat.mmx ? CPU_FLAGS_MMX : 0;
+    flags |= feat.sse ? CPU_FLAGS_SSE : 0;
+    flags |= feat.sse2 ? CPU_FLAGS_SSE2 : 0;
+    flags |= feat.sse3 ? CPU_FLAGS_SSE3 : 0;
+    flags |= feat.ssse3 ? CPU_FLAGS_SSSE3 : 0;
+    flags |= feat.sse4_1 ? CPU_FLAGS_SSE4_1 : 0;
+    flags |= feat.sse4_2 ? CPU_FLAGS_SSE4_2 : 0;
+    flags |= feat.avx ? CPU_FLAGS_AVX : 0;
+    flags |= feat.avx2 ? CPU_FLAGS_AVX2 : 0;
 
-    if (can_use_intel_avx512()) {
-        flags |= CPU_FLAGS_AVX512F | CPU_FLAGS_AVX512DQ | CPU_FLAGS_AVX512CD | CPU_FLAGS_AVX512BW |
-                 CPU_FLAGS_AVX512VL;
-    }
+    flags |= feat.avx512f ? CPU_FLAGS_AVX512F : 0;
+    flags |= feat.avx512dq ? CPU_FLAGS_AVX512DQ : 0;
+    flags |= feat.avx512cd ? CPU_FLAGS_AVX512CD : 0;
+    flags |= feat.avx512bw ? CPU_FLAGS_AVX512BW : 0;
+    flags |= feat.avx512vl ? CPU_FLAGS_AVX512VL : 0;
 
     return flags;
 }
