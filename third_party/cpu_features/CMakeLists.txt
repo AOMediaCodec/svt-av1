@@ -134,24 +134,32 @@ endif()
 set (CPU_FEATURES_HDRS)
 set (CPU_FEATURES_SRCS)
 add_cpu_features_headers_and_sources(CPU_FEATURES_HDRS CPU_FEATURES_SRCS)
-list(APPEND CPU_FEATURES_SRCS $<TARGET_OBJECTS:utils>)
+
 if(NOT PROCESSOR_IS_X86 AND UNIX)
   list(APPEND CPU_FEATURES_SRCS $<TARGET_OBJECTS:unix_based_hardware_detection>)
 endif()
-add_library(cpu_features STATIC ${CPU_FEATURES_HDRS} ${CPU_FEATURES_SRCS})
-set_target_properties(cpu_features PROPERTIES PUBLIC_HEADER "${CPU_FEATURES_HDRS}")
-setup_include_and_definitions(cpu_features)
-target_link_libraries(cpu_features PUBLIC ${CMAKE_DL_LIBS})
-set_property(TARGET cpu_features PROPERTY POSITION_INDEPENDENT_CODE ${BUILD_PIC})
-target_include_directories(cpu_features
+
+add_library(internal_cpu_features OBJECT ${CPU_FEATURES_HDRS} ${CPU_FEATURES_SRCS})
+set_target_properties(internal_cpu_features PROPERTIES PUBLIC_HEADER "${CPU_FEATURES_HDRS}")
+setup_include_and_definitions(internal_cpu_features)
+set_property(TARGET internal_cpu_features PROPERTY POSITION_INDEPENDENT_CODE ${BUILD_PIC})
+target_include_directories(internal_cpu_features
   PUBLIC $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/cpu_features>
 )
 if(PROCESSOR_IS_X86)
   if(APPLE)
-    target_compile_definitions(cpu_features PRIVATE HAVE_SYSCTLBYNAME)
+    target_compile_definitions(internal_cpu_features PRIVATE HAVE_SYSCTLBYNAME)
   endif()
 endif()
-add_library(CpuFeature::cpu_features ALIAS cpu_features)
+
+add_library(cpu_features INTERFACE)
+
+if(NOT PROCESSOR_IS_X86 AND UNIX)
+  target_sources(cpu_features INTERFACE $<TARGET_OBJECTS:utils> $<TARGET_OBJECTS:internal_cpu_features>
+      $<TARGET_OBJECTS:unix_based_hardware_detection>)
+else()
+  target_sources(cpu_features INTERFACE $<TARGET_OBJECTS:utils> $<TARGET_OBJECTS:internal_cpu_features>)
+endif()
 
 #
 # program : list_cpu_features
