@@ -74,7 +74,7 @@ CPU_FLAGS get_cpu_flags() {
     CPU_FLAGS flags = 0;
 
     // read cpu feature information from the cpu_features library
-	// cpu_features correctly checks for OS support here, no extra work needed
+    // cpu_features correctly checks for OS support here, no extra work needed
     const X86Features feat = GetX86Info().features;
 
     // set flags as appropriate
