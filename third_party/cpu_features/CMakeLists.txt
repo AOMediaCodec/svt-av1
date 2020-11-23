@@ -27,7 +27,7 @@ option(BUILD_TESTING "Enable test (depends on googletest)." OFF)
 # Prefer static linking from source whenever possible.
 option(BUILD_SHARED_LIBS "Build library as shared." OFF)
 # PIC
-option(BUILD_PIC "Build with Position Independant Code." OFF) # Default is off at least for GCC
+option(BUILD_PIC "Build with Position Independant Code." ON)
 
 # Force PIC on unix when building shared libs
 # see: https://en.wikipedia.org/wiki/Position-independent_code
