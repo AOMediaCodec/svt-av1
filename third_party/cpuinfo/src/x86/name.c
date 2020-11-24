@@ -697,6 +697,10 @@ uint32_t cpuinfo_x86_format_package_name(
 		vendor_string = vendor_string_map[(uint32_t) vendor];
 	}
 	if (vendor_string == NULL) {
+// checked: this is in fact a safe use of strncpy
+#ifdef _MSC_VER
+#pragma warning(suppress : 4996)
+#endif
 		strncpy(package_name, normalized_brand_string, CPUINFO_PACKAGE_NAME_MAX);
 		package_name[CPUINFO_PACKAGE_NAME_MAX - 1] = '\0';
 		return 0;
