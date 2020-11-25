@@ -6,7 +6,9 @@
 #ifdef __GNUC__
 	#pragma GCC diagnostic push
 	#pragma GCC diagnostic ignored "-Wunused-parameter"
-	#pragma GCC diagnostic ignored "-Wimplicit-fallthrough"
+	#if __GNUC__ >= 5
+		#pragma GCC diagnostic ignored "-Wimplicit-fallthrough"
+	#endif
 #endif
 
 void cpuinfo_x86_decode_cache_descriptor(

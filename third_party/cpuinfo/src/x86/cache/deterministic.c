@@ -5,7 +5,7 @@
 #include <cpuinfo/utils.h>
 #include <cpuinfo/log.h>
 
-#ifdef __GNUC__
+#if __GNUC__ >= 5
 	#pragma GCC diagnostic push
 	#pragma GCC diagnostic ignored "-Wimplicit-fallthrough"
 #endif
@@ -260,6 +260,6 @@ bool cpuinfo_x86_decode_cache_properties(
 	return true;
 }
 
-#ifdef __GNUC__
+#if __GNUC__ > 5
 	#pragma GCC diagnostic pop
 #endif

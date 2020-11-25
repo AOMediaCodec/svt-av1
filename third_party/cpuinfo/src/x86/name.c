@@ -8,7 +8,7 @@
 #include <cpuinfo/common.h>
 #include <x86/api.h>
 
-#ifdef __GNUC__
+#if __GNUC__ >= 5
 	#pragma GCC diagnostic push
 	#pragma GCC diagnostic ignored "-Wimplicit-fallthrough"
 #endif
@@ -717,6 +717,6 @@ uint32_t cpuinfo_x86_format_package_name(
 	}
 }
 
-#ifdef __GNUC__
+#if __GNUC__ >= 5
 	#pragma GCC diagnostic pop
 #endif
