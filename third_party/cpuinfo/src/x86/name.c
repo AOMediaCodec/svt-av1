@@ -603,7 +603,14 @@ uint32_t cpuinfo_x86_normalize_brand_string(
 			}
 		}
 		if (is_token) {
+#ifdef __GNUC__
+	#pragma GCC diagnostic push
+	#pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
+#endif
 			transform_token(token_start, name_end, &parser_state);
+#ifdef __GNUC__
+	#pragma GCC diagnostic pop
+#endif
 		}
 	}
 
