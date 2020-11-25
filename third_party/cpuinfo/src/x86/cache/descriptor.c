@@ -3,6 +3,11 @@
 #include <cpuinfo.h>
 #include <x86/api.h>
 
+#ifdef __GNUC__
+	#pragma GCC diagnostic push
+	#pragma GCC diagnostic ignored "-Wunused-parameter"
+	#pragma GCC diagnostic ignored "-Wimplicit-fallthrough"
+#endif
 
 void cpuinfo_x86_decode_cache_descriptor(
 	uint8_t descriptor, enum cpuinfo_vendor vendor,
@@ -1724,3 +1729,7 @@ void cpuinfo_x86_decode_cache_descriptor(
 			break;
 	}
 }
+
+#ifdef __GNUC__
+	#pragma GCC diagnostic pop
+#endif

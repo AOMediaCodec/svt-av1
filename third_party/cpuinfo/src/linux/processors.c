@@ -15,6 +15,10 @@
 #include <linux/api.h>
 #include <cpuinfo/log.h>
 
+#ifdef __GNUC__
+	#pragma GCC diagnostic push
+	#pragma GCC diagnostic ignored "-Wunused-parameter"
+#endif
 
 #define STRINGIFY(token) #token
 
@@ -404,3 +408,6 @@ bool cpuinfo_linux_detect_thread_siblings(
 	}
 }
 
+#ifdef __GNUC__
+	#pragma GCC diagnostic pop
+#endif

@@ -8,6 +8,10 @@
 #include <cpuinfo/common.h>
 #include <x86/api.h>
 
+#ifdef __GNUC__
+	#pragma GCC diagnostic push
+	#pragma GCC diagnostic ignored "-Wimplicit-fallthrough"
+#endif
 
 /* The state of the parser to be preserved between parsing different tokens. */
 struct parser_state {
@@ -712,3 +716,7 @@ uint32_t cpuinfo_x86_format_package_name(
 		return (uint32_t) strlen(vendor_string) + 1;
 	}
 }
+
+#ifdef __GNUC__
+	#pragma GCC diagnostic pop
+#endif

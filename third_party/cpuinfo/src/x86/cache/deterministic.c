@@ -5,6 +5,10 @@
 #include <cpuinfo/utils.h>
 #include <cpuinfo/log.h>
 
+#ifdef __GNUC__
+	#pragma GCC diagnostic push
+	#pragma GCC diagnostic ignored "-Wimplicit-fallthrough"
+#endif
 
 enum cache_type {
 	cache_type_none = 0,
@@ -255,3 +259,7 @@ bool cpuinfo_x86_decode_cache_properties(
 	}
 	return true;
 }
+
+#ifdef __GNUC__
+	#pragma GCC diagnostic pop
+#endif

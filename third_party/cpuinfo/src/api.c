@@ -15,6 +15,11 @@
 	#endif
 #endif
 
+#ifdef __GNUC__
+	#pragma GCC diagnostic push
+	#pragma GCC diagnostic ignored "-Wunused-parameter"
+#endif
+
 bool cpuinfo_is_initialized = false;
 
 struct cpuinfo_processor* cpuinfo_processors = NULL;
@@ -408,3 +413,7 @@ uint32_t CPUINFO_ABI cpuinfo_get_current_uarch_index_with_default(uint32_t defau
 		return 0;
 	#endif
 }
+
+#ifdef __GNUC__
+	#pragma GCC diagnostic pop
+#endif

@@ -5,6 +5,10 @@
 #include <x86/cpuid.h>
 #include <cpuinfo.h>
 
+#ifdef __GNUC__
+	#pragma GCC diagnostic push
+	#pragma GCC diagnostic ignored "-Wunused-parameter"
+#endif
 
 #if CPUINFO_ARCH_X86
 	#ifdef _MSC_VER
@@ -722,3 +726,7 @@ struct cpuinfo_x86_isa cpuinfo_x86_detect_isa(
 
 	return isa;
 }
+
+#ifdef __GNUC__
+	#pragma GCC diagnostic pop
+#endif

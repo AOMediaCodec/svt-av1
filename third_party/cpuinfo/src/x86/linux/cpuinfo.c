@@ -8,6 +8,11 @@
 #include <x86/linux/api.h>
 #include <cpuinfo/log.h>
 
+#ifdef __GNUC__
+	#pragma GCC diagnostic push
+	#pragma GCC diagnostic ignored "-Wunused-parameter"
+#endif
+
 /*
  * Size, in chars, of the on-stack buffer used for parsing lines of /proc/cpuinfo.
  * This is also the limit on the length of a single line.
@@ -205,3 +210,7 @@ bool cpuinfo_x86_linux_parse_proc_cpuinfo(
 	return cpuinfo_linux_parse_multiline_file("/proc/cpuinfo", BUFFER_SIZE,
 		(cpuinfo_line_callback) parse_line, &state);
 }
+
+#ifdef __GNUC__
+	#pragma GCC diagnostic pop
+#endif

@@ -21,6 +21,11 @@
 
 #include <clog.h>
 
+#ifdef __GNUC__
+	// it's safe here to ignore the return code of write() to standard error
+	#pragma GCC diagnostic push
+	#pragma GCC diagnostic ignored "-Wunused-result"
+#endif
 
 /* Messages up to this size are formatted entirely on-stack, and don't allocate heap memory */
 #define CLOG_STACK_BUFFER_SIZE 1024
@@ -421,3 +426,7 @@ cleanup:
 		va_end(args_copy);
 	#endif
 }
+
+#ifdef __GNUC__
+	#pragma GCC diagnostic pop
+#endif
