@@ -702,13 +702,14 @@ uint32_t cpuinfo_x86_format_package_name(
 	}
 	if (vendor_string == NULL) {
 // checked: this is in fact a safe use of strncpy
-#ifdef _CRT_SECURE_NO_WARNINGS
+#ifdef _MSC_VER
+#pragma warning(suppress : 4996)
 		strncpy(package_name, normalized_brand_string, CPUINFO_PACKAGE_NAME_MAX);
 #else
-#define _CRT_SECURE_NO_WARNINGS
 		strncpy(package_name, normalized_brand_string, CPUINFO_PACKAGE_NAME_MAX);
-#undef _CRT_SECURE_NO_WARNINGS
 #endif
+		
+
 		package_name[CPUINFO_PACKAGE_NAME_MAX - 1] = '\0';
 		return 0;
 	} else {
