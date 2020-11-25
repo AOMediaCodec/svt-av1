@@ -706,9 +706,10 @@ uint32_t cpuinfo_x86_format_package_name(
 		strncpy(package_name, normalized_brand_string, CPUINFO_PACKAGE_NAME_MAX);
 #else
 #define _CRT_SECURE_NO_WARNINGS
-		package_name[CPUINFO_PACKAGE_NAME_MAX - 1] = '\0';
+		strncpy(package_name, normalized_brand_string, CPUINFO_PACKAGE_NAME_MAX);
 #undef _CRT_SECURE_NO_WARNINGS
 #endif
+		package_name[CPUINFO_PACKAGE_NAME_MAX - 1] = '\0';
 		return 0;
 	} else {
 		snprintf(package_name, CPUINFO_PACKAGE_NAME_MAX,
