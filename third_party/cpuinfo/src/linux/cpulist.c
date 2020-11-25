@@ -131,7 +131,7 @@ inline static bool parse_entry(const char* entry_start, const char* entry_end, c
 
 bool cpuinfo_linux_parse_cpulist(const char* filename, cpuinfo_cpulist_callback callback, void* context) {
 	bool status = true;
-	int file = -1;
+	int file;
 	char buffer[BUFFER_SIZE];
 	#if CPUINFO_LOG_DEBUG_PARSERS
 		cpuinfo_log_debug("parsing cpu list from file %s", filename);

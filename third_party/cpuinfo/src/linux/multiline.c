@@ -19,9 +19,9 @@
 
 bool cpuinfo_linux_parse_multiline_file(const char* filename, size_t buffer_size, cpuinfo_line_callback callback, void* context)
 {
-	int file = -1;
+	int file;
 	bool status = false;
-	char* buffer = (char*) alloca(buffer_size);
+	char buffer[buffer_size];
 
 #if CPUINFO_MOCK
 	file = cpuinfo_mock_open(filename, O_RDONLY);
