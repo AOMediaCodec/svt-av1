@@ -1768,7 +1768,6 @@ static void init_wedge_signs() {
 #endif // !USE_PRECOMPUTED_WEDGE_SIGN
 
 static const uint8_t *get_wedge_mask_inplace(int wedge_index, int neg, BlockSize sb_type) {
-    const uint8_t *      master;
     const int            bh = block_size_high[sb_type];
     const int            bw = block_size_wide[sb_type];
 
@@ -1779,9 +1778,8 @@ static const uint8_t *get_wedge_mask_inplace(int wedge_index, int neg, BlockSize
 
     woff   = (a->x_offset * bw) >> 3;
     hoff   = (a->y_offset * bh) >> 3;
-    master = wedge_mask_obl[neg ^ wsignflip][a->direction] +
-             MASK_PRIMARY_STRIDE * (MASK_PRIMARY_SIZE / 2 - hoff) + MASK_PRIMARY_SIZE / 2 - woff;
-    return master;
+    return wedge_mask_obl[neg ^ wsignflip][a->direction] +
+        MASK_PRIMARY_STRIDE * (MASK_PRIMARY_SIZE / 2 - hoff) + MASK_PRIMARY_SIZE / 2 - woff;
 }
 
 static void init_wedge_masks() {
