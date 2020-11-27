@@ -6,8 +6,6 @@
 #include <cpuinfo/log.h>
 
 #ifdef __linux__
-	#include <linux/api.h>
-
 	#include <unistd.h>
 	#include <sys/syscall.h>
 	#if !defined(__NR_getcpu)

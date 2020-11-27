@@ -101,8 +101,7 @@ IF(CPUINFO_SUPPORTED_PLATFORM)
       src/x86/cache/deterministic.c)
     IF(CMAKE_SYSTEM_NAME STREQUAL "Linux" OR CMAKE_SYSTEM_NAME STREQUAL "Android")
       LIST(APPEND CPUINFO_SRCS
-        src/x86/linux/init.c
-        src/x86/linux/cpuinfo.c)
+        src/x86/linux/init.c)
     ELSEIF(CMAKE_SYSTEM_NAME STREQUAL "Darwin" OR CMAKE_SYSTEM_NAME STREQUAL "iOS")
       LIST(APPEND CPUINFO_SRCS src/x86/mach/x86_mach_init.c)
     ELSEIF(CMAKE_SYSTEM_NAME MATCHES "^(Windows|CYGWIN|MSYS)$")
@@ -110,13 +109,7 @@ IF(CPUINFO_SUPPORTED_PLATFORM)
     ENDIF()
   ENDIF()
 
-  IF(CMAKE_SYSTEM_NAME STREQUAL "Linux" OR CMAKE_SYSTEM_NAME STREQUAL "Android")
-    LIST(APPEND CPUINFO_SRCS
-      src/linux/smallfile.c
-      src/linux/multiline.c
-      src/linux/cpulist.c
-      src/linux/processors.c)
-  ELSEIF(CMAKE_SYSTEM_NAME STREQUAL "Darwin" OR CMAKE_SYSTEM_NAME STREQUAL "iOS")
+  IF(CMAKE_SYSTEM_NAME STREQUAL "Darwin" OR CMAKE_SYSTEM_NAME STREQUAL "iOS")
     LIST(APPEND CPUINFO_SRCS src/mach/mach_topology.c)
   ENDIF()
 
