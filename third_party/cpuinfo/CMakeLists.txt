@@ -74,12 +74,6 @@ ELSEIF(NOT CMAKE_SYSTEM_NAME MATCHES "^(Windows|CYGWIN|MSYS|Darwin|Linux|Android
   ENDIF()
 ENDIF()
 
-# ---[ Download deps
-SET(CONFU_DEPENDENCIES_SOURCE_DIR ${CMAKE_SOURCE_DIR}/deps
-  CACHE PATH "Confu-style dependencies source directory")
-SET(CONFU_DEPENDENCIES_BINARY_DIR ${CMAKE_BINARY_DIR}/deps
-  CACHE PATH "Confu-style dependencies binary directory")
-
 # ---[ cpuinfo library
 SET(CPUINFO_SRCS
   src/init.c

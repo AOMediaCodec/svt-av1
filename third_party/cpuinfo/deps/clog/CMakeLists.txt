@@ -32,12 +32,6 @@ MACRO(CLOG_TARGET_RUNTIME_LIBRARY target)
   ENDIF()
 ENDMACRO()
 
-# ---[ Download deps
-SET(CONFU_DEPENDENCIES_SOURCE_DIR ${CMAKE_SOURCE_DIR}/deps
-  CACHE PATH "Confu-style dependencies source directory")
-SET(CONFU_DEPENDENCIES_BINARY_DIR ${CMAKE_BINARY_DIR}/deps
-  CACHE PATH "Confu-style dependencies binary directory")
-
 # ---[ clog library
 ADD_LIBRARY(clog OBJECT src/clog.c)
 SET_TARGET_PROPERTIES(clog PROPERTIES
