@@ -87,7 +87,6 @@ IF(CPUINFO_SUPPORTED_PLATFORM)
       src/x86/info.c
       src/x86/vendor.c
       src/x86/uarch.c
-      src/x86/name.c
       src/x86/topology.c
       src/x86/isa.c
       src/x86/cache/x86_cache_init.c
