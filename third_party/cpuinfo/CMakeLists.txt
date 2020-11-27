@@ -83,10 +83,7 @@ IF(CPUINFO_SUPPORTED_PLATFORM)
   IF(NOT CMAKE_SYSTEM_NAME STREQUAL "Emscripten" AND (CMAKE_SYSTEM_PROCESSOR MATCHES "^(i[3-6]86|AMD64|x86(_64)?)$" OR IOS_ARCH MATCHES "^(i386|x86_64)$"))
     LIST(APPEND CPUINFO_SRCS
       src/x86/x86_init.c
-      src/x86/info.c
       src/x86/vendor.c
-      src/x86/uarch.c
-      src/x86/topology.c
       src/x86/isa.c)
     IF(CMAKE_SYSTEM_NAME STREQUAL "Linux" OR CMAKE_SYSTEM_NAME STREQUAL "Android")
       LIST(APPEND CPUINFO_SRCS

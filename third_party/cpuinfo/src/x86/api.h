@@ -84,18 +84,8 @@ struct cpuinfo_x86_processor {
 CPUINFO_INTERNAL void cpuinfo_x86_init_processor(struct cpuinfo_x86_processor* processor);
 
 CPUINFO_INTERNAL enum cpuinfo_vendor cpuinfo_x86_decode_vendor(uint32_t ebx, uint32_t ecx, uint32_t edx);
-CPUINFO_INTERNAL struct cpuinfo_x86_model_info cpuinfo_x86_decode_model_info(uint32_t eax);
-CPUINFO_INTERNAL enum cpuinfo_uarch cpuinfo_x86_decode_uarch(
-	enum cpuinfo_vendor vendor,
-	const struct cpuinfo_x86_model_info* model_info);
 
 CPUINFO_INTERNAL struct cpuinfo_x86_isa cpuinfo_x86_detect_isa(
 	const struct cpuid_regs basic_info, const struct cpuid_regs extended_info,
 	uint32_t max_base_index, uint32_t max_extended_index,
-	enum cpuinfo_vendor vendor, enum cpuinfo_uarch uarch);
-
-CPUINFO_INTERNAL void cpuinfo_x86_detect_topology(
-	uint32_t max_base_index,
-	uint32_t max_extended_index,
-	struct cpuid_regs leaf1,
-	struct cpuinfo_x86_topology* topology);
+	enum cpuinfo_vendor vendor);

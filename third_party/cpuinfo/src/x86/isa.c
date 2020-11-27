@@ -42,7 +42,7 @@
 struct cpuinfo_x86_isa cpuinfo_x86_detect_isa(
 	const struct cpuid_regs basic_info, const struct cpuid_regs extended_info,
 	uint32_t max_base_index, uint32_t max_extended_index,
-	enum cpuinfo_vendor vendor, enum cpuinfo_uarch uarch)
+	enum cpuinfo_vendor vendor)
 {
 	struct cpuinfo_x86_isa isa = { 0 };
 
@@ -227,9 +227,9 @@ struct cpuinfo_x86_isa cpuinfo_x86_detect_isa(
 #if CPUINFO_ARCH_X86
 	/*
 	 * 3dnow! Geode instructions:
-	 * - No CPUID bit, detect as Geode microarchitecture + 3dnow!+ support
+	 * - Removed support
 	 */
-	isa.three_d_now_geode = isa.three_d_now_plus && (uarch == cpuinfo_uarch_geode);
+	isa.three_d_now_geode = false;
 #endif
 
 	/*
