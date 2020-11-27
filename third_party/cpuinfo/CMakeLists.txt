@@ -108,38 +108,6 @@ IF(CPUINFO_SUPPORTED_PLATFORM)
     ELSEIF(CMAKE_SYSTEM_NAME MATCHES "^(Windows|CYGWIN|MSYS)$")
       LIST(APPEND CPUINFO_SRCS src/x86/windows/init.c)
     ENDIF()
-  ELSEIF(CMAKE_SYSTEM_PROCESSOR MATCHES "^(armv[5-8].*|aarch64|arm64)$" OR IOS_ARCH MATCHES "^(armv7.*|arm64.*)$")
-    LIST(APPEND CPUINFO_SRCS
-      src/arm/uarch.c
-      src/arm/cache.c)
-    IF(CMAKE_SYSTEM_NAME STREQUAL "Linux" OR CMAKE_SYSTEM_NAME STREQUAL "Android")
-      LIST(APPEND CPUINFO_SRCS
-        src/arm/linux/init.c
-        src/arm/linux/cpuinfo.c
-        src/arm/linux/clusters.c
-        src/arm/linux/chipset.c
-        src/arm/linux/midr.c
-        src/arm/linux/hwcap.c)
-      IF(CMAKE_SYSTEM_PROCESSOR MATCHES "^armv[5-8]")
-        LIST(APPEND CPUINFO_SRCS src/arm/linux/aarch32-isa.c)
-        IF(CMAKE_SYSTEM_NAME STREQUAL "Android" AND ANDROID_ABI STREQUAL "armeabi")
-          SET_SOURCE_FILES_PROPERTIES(src/arm/linux/aarch32-isa.c PROPERTIES COMPILE_FLAGS -marm)
-        ENDIF()
-      ELSEIF(CMAKE_SYSTEM_PROCESSOR MATCHES "^(aarch64|arm64)$")
-        LIST(APPEND CPUINFO_SRCS src/arm/linux/aarch64-isa.c)
-      ENDIF()
-    ELSEIF(IOS OR (CMAKE_SYSTEM_NAME STREQUAL "Darwin" AND CMAKE_SYSTEM_PROCESSOR STREQUAL "arm64"))
-      LIST(APPEND CPUINFO_SRCS src/arm/mach/init.c)
-    ENDIF()
-    IF(CMAKE_SYSTEM_NAME STREQUAL "Android")
-      LIST(APPEND CPUINFO_SRCS
-        src/arm/android/properties.c)
-    ENDIF()
-  ENDIF()
-
-  IF(CMAKE_SYSTEM_NAME STREQUAL "Emscripten")
-    LIST(APPEND CPUINFO_SRCS
-      src/emscripten/init.c)
   ENDIF()
 
   IF(CMAKE_SYSTEM_NAME STREQUAL "Linux" OR CMAKE_SYSTEM_NAME STREQUAL "Android")
