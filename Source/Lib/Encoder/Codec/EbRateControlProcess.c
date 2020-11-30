@@ -1953,15 +1953,16 @@ void high_level_rc_input_picture_vbr(PictureParentControlSet *pcs_ptr, SequenceC
                     queue_entry_index_temp++;
                 }
 
-                if (min_la_bit_distance >=
-                    (uint64_t)ABS((int64_t)high_level_rate_control_ptr
-                                      ->pred_bits_ref_qp_per_sw[ref_qp_index] -
-                                  (int64_t)bit_constraint_per_sw)) {
-                    min_la_bit_distance = (uint64_t)ABS(
-                        (int64_t)
-                            high_level_rate_control_ptr->pred_bits_ref_qp_per_sw[ref_qp_index] -
-                        (int64_t)bit_constraint_per_sw);
-                    selected_ref_qp = ref_qp_index;
+                const uint64_t la_bit_distance_temp = (uint64_t)ABS(
+                    (int64_t)high_level_rate_control_ptr->pred_bits_ref_qp_per_sw[ref_qp_index] -
+                    (int64_t)bit_constraint_per_sw);
+                if (min_la_bit_distance >= la_bit_distance_temp) {
+                    if (min_la_bit_distance == la_bit_distance_temp &&
+                        ref_qp_index < selected_ref_qp) {
+                        best_qp_found = EB_TRUE;
+                    }
+                    min_la_bit_distance = la_bit_distance_temp;
+                    selected_ref_qp     = ref_qp_index;
                 } else
                     best_qp_found = EB_TRUE;
                 const int32_t qp_step = ref_qp_table_index == previous_selected_ref_qp
@@ -1970,7 +1971,7 @@ void high_level_rc_input_picture_vbr(PictureParentControlSet *pcs_ptr, SequenceC
                         ? +1
                         : -1
                     : 1;
-                ref_qp_table_index    = (uint32_t)(ref_qp_table_index + qp_step);
+                ref_qp_table_index = (uint32_t)(ref_qp_table_index + qp_step);
             }
         }
 
