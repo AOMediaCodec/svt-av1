@@ -61,9 +61,10 @@
 #define BASE_LAYER_SWITCH_MODE_TOKEN "-base-layer-switch-mode" // no Eval
 #define QP_TOKEN "-q"
 #define USE_QP_FILE_TOKEN "-use-q-file"
-#if ENABLE_FIXED_QINDEX_OFFSETS
+#if FTR_ENABLE_FIXED_QINDEX_OFFSETS
 #define USE_FIXED_QINDEX_OFFSETS_TOKEN "-use-fixed-qindex-offsets"
 #define QINDEX_OFFSETS_TOKEN "-qindex-offsets"
+#define KEY_FRAME_QINDEX_OFFSET_TOKEN "-key-frame-qindex-offset"
 #define KEY_FRAME_CHROMA_QINDEX_OFFSET_TOKEN "-key-frame-chroma-qindex-offset"
 #define CHROMA_QINDEX_OFFSETS_TOKEN "-chroma-qindex-offsets"
 #endif
@@ -427,9 +428,13 @@ static void set_cfg_qp(const char *value, EbConfig *cfg) {
 static void set_cfg_use_qp_file(const char *value, EbConfig *cfg) {
     cfg->config.use_qp_file = (EbBool)strtol(value, NULL, 0);
 };
-#if ENABLE_FIXED_QINDEX_OFFSETS
+#if FTR_ENABLE_FIXED_QINDEX_OFFSETS
 static void set_cfg_use_fixed_qindex_offsets(const char *value, EbConfig *cfg) {
     cfg->config.use_fixed_qindex_offsets = (EbBool)strtol(value, NULL, 0);
+}
+
+static void set_cfg_key_frame_qindex_offset(const char *value, EbConfig *cfg) {
+    cfg->config.key_frame_qindex_offset = (int32_t)strtol(value, NULL, 0);
 }
 
 static void set_cfg_key_frame_chroma_qindex_offset(const char *value, EbConfig *cfg) {
@@ -907,12 +912,15 @@ ConfigEntry config_entry_rc[] = {
      USE_QP_FILE_TOKEN,
      "Overwrite QP assignment using qp values in QP file",
      set_cfg_use_qp_file},
-#if ENABLE_FIXED_QINDEX_OFFSETS
+#if FTR_ENABLE_FIXED_QINDEX_OFFSETS
     {SINGLE_INPUT, USE_FIXED_QINDEX_OFFSETS_TOKEN,
      "Use fixed QIndex offset",
      set_cfg_use_fixed_qindex_offsets},
+     {SINGLE_INPUT, KEY_FRAME_QINDEX_OFFSET_TOKEN,
+     "Key Frame QIndex Offset",
+     set_cfg_key_frame_qindex_offset},
      {SINGLE_INPUT, KEY_FRAME_CHROMA_QINDEX_OFFSET_TOKEN,
-     "Key Frame Chroma Qindex Offset",
+     "Key Frame Chroma QIndex Offset",
      set_cfg_key_frame_chroma_qindex_offset},
      {SINGLE_INPUT, QINDEX_OFFSETS_TOKEN,
      "QIndexOffsets",
@@ -1291,11 +1299,12 @@ ConfigEntry config_entry[] = {
      set_scene_change_detection},
     {SINGLE_INPUT, QP_TOKEN, "QP", set_cfg_qp},
     {SINGLE_INPUT, USE_QP_FILE_TOKEN, "UseQpFile", set_cfg_use_qp_file},
-#if ENABLE_FIXED_QINDEX_OFFSETS
+#if FTR_ENABLE_FIXED_QINDEX_OFFSETS
     {SINGLE_INPUT, USE_FIXED_QINDEX_OFFSETS_TOKEN, "UseFixedQIndexOffsets", set_cfg_use_fixed_qindex_offsets},
-    {SINGLE_INPUT, KEY_FRAME_CHROMA_QINDEX_OFFSET_TOKEN, "KeyFrameChromaQPOffset", set_cfg_key_frame_chroma_qindex_offset},
-    {SINGLE_INPUT, QINDEX_OFFSETS_TOKEN, "QPOffsets", set_cfg_qindex_offsets},
-    {SINGLE_INPUT, CHROMA_QINDEX_OFFSETS_TOKEN, "ChromaQPOffsets", set_cfg_chroma_qindex_offsets},
+    {SINGLE_INPUT, KEY_FRAME_QINDEX_OFFSET_TOKEN, "KeyFrameQIndexOffset", set_cfg_key_frame_qindex_offset},
+    {SINGLE_INPUT, KEY_FRAME_CHROMA_QINDEX_OFFSET_TOKEN, "KeyFrameChromaQIndexOffset", set_cfg_key_frame_chroma_qindex_offset},
+    {SINGLE_INPUT, QINDEX_OFFSETS_TOKEN, "QIndexOffsets", set_cfg_qindex_offsets},
+    {SINGLE_INPUT, CHROMA_QINDEX_OFFSETS_TOKEN, "ChromaQIndexOffsets", set_cfg_chroma_qindex_offsets},
 #endif
     {SINGLE_INPUT, STAT_REPORT_TOKEN, "StatReport", set_stat_report},
     {SINGLE_INPUT, RATE_CONTROL_ENABLE_TOKEN, "RateControlMode", set_rate_control_mode},

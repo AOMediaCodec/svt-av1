@@ -172,7 +172,7 @@ void svt_av1_set_quantizer(PictureParentControlSet *pcs_ptr, int32_t q) {
     pcs_ptr->max_qmlevel                       = 9;
 
     frm_hdr->quantization_params.base_q_idx = AOMMAX(frm_hdr->delta_q_params.delta_q_present, q);
-#if ENABLE_FIXED_QINDEX_OFFSETS
+#if FTR_ENABLE_FIXED_QINDEX_OFFSETS
     if (!pcs_ptr->scs_ptr->static_config.use_fixed_qindex_offsets)
 #endif
     {

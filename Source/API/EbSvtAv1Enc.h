@@ -226,13 +226,14 @@ typedef struct EbSvtAv1EncConfiguration {
     *
     * Default is 0.*/
     EbBool use_qp_file;
-#if ENABLE_FIXED_QINDEX_OFFSETS
+#if FTR_ENABLE_FIXED_QINDEX_OFFSETS
     /* use fixed qp offset for every picture based on temporal layer index
     *
     * Default is 0.*/
     EbBool use_fixed_qindex_offsets;
     int32_t qindex_offsets[EB_MAX_TEMPORAL_LAYERS];
     int32_t key_frame_chroma_qindex_offset;
+    int32_t key_frame_qindex_offset;
     int32_t chroma_qindex_offsets[EB_MAX_TEMPORAL_LAYERS];
 #endif
     /* input buffer for the second pass */

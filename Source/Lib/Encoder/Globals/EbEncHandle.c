@@ -2205,9 +2205,10 @@ void copy_api_from_app(
     scs_ptr->intra_refresh_type = scs_ptr->static_config.intra_refresh_type;
     scs_ptr->max_temporal_layers = scs_ptr->static_config.hierarchical_levels;
     scs_ptr->static_config.use_qp_file = ((EbSvtAv1EncConfiguration*)config_struct)->use_qp_file;
-#if ENABLE_FIXED_QINDEX_OFFSETS
+#if FTR_ENABLE_FIXED_QINDEX_OFFSETS
     scs_ptr->static_config.use_fixed_qindex_offsets = ((EbSvtAv1EncConfiguration*)config_struct)->use_fixed_qindex_offsets;
     scs_ptr->static_config.key_frame_chroma_qindex_offset = ((EbSvtAv1EncConfiguration*)config_struct)->key_frame_chroma_qindex_offset;
+    scs_ptr->static_config.key_frame_qindex_offset = ((EbSvtAv1EncConfiguration*)config_struct)->key_frame_qindex_offset;
     if (scs_ptr->static_config.use_fixed_qindex_offsets == 1) {
         scs_ptr->static_config.enable_qp_scaling_flag = 0;
         scs_ptr->static_config.use_qp_file = 0;
@@ -3076,10 +3077,11 @@ EbErrorType svt_svt_enc_init_parameter(
 
     config_ptr->qp = 50;
     config_ptr->use_qp_file = EB_FALSE;
-#if ENABLE_FIXED_QINDEX_OFFSETS
+#if FTR_ENABLE_FIXED_QINDEX_OFFSETS
     config_ptr->use_fixed_qindex_offsets = EB_FALSE;
     memset(config_ptr->qindex_offsets, 0, sizeof(config_ptr->qindex_offsets));
     config_ptr->key_frame_chroma_qindex_offset = 0;
+    config_ptr->key_frame_qindex_offset = 0;
     memset(config_ptr->chroma_qindex_offsets, 0, sizeof(config_ptr->chroma_qindex_offsets));
 #endif
     config_ptr->scene_change_detection = 0;
