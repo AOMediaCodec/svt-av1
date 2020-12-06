@@ -194,13 +194,13 @@ an example command line is:
 
 for this command line, corresponding qindex are:
 
-| ** Frame Type ** | ** Luma qindex ** | ** Chroma qindex ** |
+| **Frame Type** | **Luma qindex** | **Chroma qindex** |
 | --- | --- | --- |
-| ** Key Frame ** | 148 (42x4 - 20) | 142 (148 - 6) |
-| ** Layer0 Frame ** | 156 (42x4 - 12) | 150 (156 - 6) |
-| ** Layer1 Frame ** | 160 (42x4 - 8) | 160 (160 + 0) |
-| ** Layer2 Frame ** | 164 (42x4 - 4) | 176 (164 + 12) |
-| ** Layer3 Frame ** | 168 (42x4 + 0) | 192 (168 + 24) |
+| **Key Frame** | 148 (42x4 - 20) | 142 (148 - 6) |
+| **Layer0 Frame** | 156 (42x4 - 12) | 150 (156 - 6) |
+| **Layer1 Frame** | 160 (42x4 - 8) | 160 (160 + 0) |
+| **Layer2 Frame** | 164 (42x4 - 4) | 176 (164 + 12) |
+| **Layer3 Frame** | 168 (42x4 + 0) | 192 (168 + 24) |
 
 #### Twopass Options
 | **Configuration file parameter** | **Command line** | **Range** | **Default** | **Description** |
