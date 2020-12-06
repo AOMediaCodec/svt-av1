@@ -195,6 +195,7 @@ an example command line is:
 for this command line, corresponding qindex are:
 
 | ** Frame Type ** | ** Luma qindex ** | ** Chroma qindex ** |
+| --- | --- | --- |
 | ** Key Frame ** | 148 (42x4 - 20) | 142 (148 - 6) |
 | ** Layer0 Frame ** | 156 (42x4 - 12) | 150 (156 - 6) |
 | ** Layer1 Frame ** | 160 (42x4 - 8) | 160 (160 + 0) |
