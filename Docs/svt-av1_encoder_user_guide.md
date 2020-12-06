@@ -181,7 +181,7 @@ The encoder parameters present in the `Sample.cfg` file are listed in this table
 
 use-fixed-qindex-offsets and associtated arguments (hierarchical-levels, qindex-offsets, chroma-qindex-offsets, key-frame-qindex-offset, key-frame-chroma-qindex-offset) are used together to specify the qindex offsets based on frame type and temporal layer when rc mode = 0.
 
-qp value specified by -q argument is assigned to the pictures at the highest temporal layer. it is first converted to qindex, then corresponding qindex offsets are added on top of it based on frame types (Key/Inter) and temporal layer id. 
+qp value specified by -q argument is assigned to the pictures at the highest temporal layer. it is first converted to qindex, then corresponding qindex offsets are added on top of it based on frame types (Key/Inter) and temporal layer id.
 
 qindex offset can be negative. the final qindex value will be clamped in the valid min/max qindex range.
 
