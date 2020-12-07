@@ -1905,7 +1905,7 @@ void high_level_rc_input_picture_vbr(PictureParentControlSet *pcs_ptr, SequenceC
                 EbBool end_of_sequence_flag = EB_FALSE;
 
                 while (!end_of_sequence_flag &&
-                       queue_entry_index_temp <= queue_entry_index_head_temp +
+                       queue_entry_index_temp < queue_entry_index_head_temp +
                                scs_ptr->static_config.look_ahead_distance) {
                     uint32_t queue_entry_index_temp2 =
                         (queue_entry_index_temp >
@@ -2007,7 +2007,7 @@ void high_level_rc_input_picture_vbr(PictureParentControlSet *pcs_ptr, SequenceC
             while (
                 !end_of_sequence_flag &&
                 //queue_entry_index_temp <= encode_context_ptr->hl_rate_control_historgram_queue_head_index+scs_ptr->static_config.look_ahead_distance){
-                queue_entry_index_temp <=
+                queue_entry_index_temp <
                     queue_entry_index_head_temp + scs_ptr->static_config.look_ahead_distance) {
                 uint32_t queue_entry_index_temp2 =
                     (queue_entry_index_temp > HIGH_LEVEL_RATE_CONTROL_HISTOGRAM_QUEUE_MAX_DEPTH - 1)
@@ -3431,7 +3431,7 @@ void high_level_rc_input_picture_cvbr(PictureParentControlSet *pcs_ptr, Sequence
                     EbBool end_of_sequence_flag = EB_FALSE;
 
                     while (!end_of_sequence_flag &&
-                           queue_entry_index_temp <= queue_entry_index_head_temp +
+                           queue_entry_index_temp < queue_entry_index_head_temp +
                                    scs_ptr->static_config.look_ahead_distance) {
                         uint32_t queue_entry_index_temp2 =
                             (queue_entry_index_temp >
@@ -3546,7 +3546,7 @@ void high_level_rc_input_picture_cvbr(PictureParentControlSet *pcs_ptr, Sequence
             while (
                 !end_of_sequence_flag &&
                 //queue_entry_index_temp <= encode_context_ptr->hl_rate_control_historgram_queue_head_index+scs_ptr->static_config.look_ahead_distance){
-                queue_entry_index_temp <=
+                queue_entry_index_temp <
                     queue_entry_index_head_temp + scs_ptr->static_config.look_ahead_distance) {
                 uint32_t queue_entry_index_temp2 =
                     (queue_entry_index_temp > HIGH_LEVEL_RATE_CONTROL_HISTOGRAM_QUEUE_MAX_DEPTH - 1)
@@ -3916,7 +3916,7 @@ void frame_level_rc_input_picture_cvbr(PictureControlSet *pcs_ptr, SequenceContr
             while (
                 !end_of_sequence_flag &&
                 //queue_entry_index_temp <= queue_entry_index_head_temp + scs_ptr->static_config.look_ahead_distance) {
-                queue_entry_index_temp <= queue_entry_index_head_temp +
+                queue_entry_index_temp < queue_entry_index_head_temp +
                         encode_context_ptr
                             ->hl_rate_control_historgram_queue[queue_entry_index_head_temp]
                             ->frames_in_sw -
