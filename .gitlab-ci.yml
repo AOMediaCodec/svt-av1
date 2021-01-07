@@ -678,9 +678,9 @@ Win64 (Release, MSVC, Tests):
 Win64 Unit Tests:
   extends: .windows-ci-common
   stage: test
-  parallel: 50
+  parallel: 10
   variables:
-    GTEST_TOTAL_SHARDS: 50
+    GTEST_TOTAL_SHARDS: 10
     GTEST_OUTPUT: "xml:report.xml"
   artifacts:
     when: always
