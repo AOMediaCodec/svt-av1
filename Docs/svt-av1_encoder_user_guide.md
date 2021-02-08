@@ -104,7 +104,7 @@ It should be noted that not all the encoder parameters present in the `Sample.cf
 
 Here are some sample encode command lines
 
-#### 1 pass fixed QP at maximum speed from 24fps yuv 1920x1080 input
+#### 1 pass CRF at maximum speed from 24fps yuv 1920x1080 input
 `SvtAv1EncApp -i input.yuv -w 1920 -h 1080 --fps 24 --rc 0 -q 30 --preset 8 -b output.ivf`
 
 #### 1 pass VBR 10000 Kbps at medium speed from 24fps yuv 1920x1080 input
@@ -328,4 +328,3 @@ Example: 72 core machine:
 18 jobs x --lp 4 --unpin 1
 
 (`-ss`) and (`-unpin 1`) is not a valid combination.(`-unpin`) is overwritten to 0 when (`-ss`) is used.
-
