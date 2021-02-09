@@ -911,7 +911,7 @@ ConfigEntry config_entry_rc[] = {
     // Rate Control
     {SINGLE_INPUT,
      RATE_CONTROL_ENABLE_TOKEN,
-     "Rate control mode(0 = CQP , 1 = VBR , 2 = CVBR)",
+     "Rate control mode(0 = CQP if --enable-tpl-la is set to 0, else CRF , 1 = VBR , 2 = CVBR)",
      set_rate_control_mode},
     {SINGLE_INPUT, TARGET_BIT_RATE_TOKEN, "Target Bitrate (kbps)", set_target_bit_rate},
     {SINGLE_INPUT,
@@ -1006,7 +1006,7 @@ ConfigEntry config_entry_specific[] = {
     {SINGLE_INPUT, TILE_COL_TOKEN, "Number of tile columns to use, log2[0-4]", set_tile_col},
     {SINGLE_INPUT, QP_TOKEN, "Constant/Constrained Quality level", set_cfg_qp},
     {SINGLE_INPUT, QP_LONG_TOKEN, "Constant/Constrained Quality level", set_cfg_qp},
-    {SINGLE_INPUT, CRF_LONG_TOKEN, "Constant Rate Factor", set_cfg_crf},
+    {SINGLE_INPUT, CRF_LONG_TOKEN, "Constant Rate Factor, equal to --rc 0 --enable-tpl-la 1 --qp x", set_cfg_crf},
 
     {SINGLE_INPUT,
      LOOKAHEAD_NEW_TOKEN,

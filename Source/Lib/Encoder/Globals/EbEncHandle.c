@@ -2561,7 +2561,7 @@ static EbErrorType verify_settings(
     }
 
     if (config->qp > MAX_QP_VALUE) {
-        SVT_LOG("Error instance %u: QP must be [0 - %d]\n", channel_number + 1, MAX_QP_VALUE);
+        SVT_LOG("Error instance %u: %s must be [0 - %d]\n", channel_number + 1, config->enable_tpl_la ? "CRF" : "QP", MAX_QP_VALUE);
         return_error = EB_ErrorBadParameter;
     }
     if (config->hierarchical_levels > 5) {

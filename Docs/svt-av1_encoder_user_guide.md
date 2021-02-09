@@ -92,7 +92,11 @@ The intra period defines the interval of frames after which you insert an Intra 
 
 `--rc integer` **[Optional]**
 
-This token sets the bitrate control encoding mode [1: Variable Bitrate, 0: Constant QP]. When `--rc` is set to 1, it is best to match the `--lookahead` (lookahead distance described in the next section) parameter to the `--keyint`. When `--rc` is set to 0, a qp value is expected with the use of the `-q` command line option otherwise a default value is assigned (25).
+This token sets the bitrate control encoding mode [1: Variable Bitrate, 0: Constant QP OR Constant Rate Factor]. When `--rc` is set to 1, it is best to match the `--lookahead` (lookahead distance described in the next section) parameter to the `--keyint`.
+
+When `--rc` is set to 0 and `--enable-tpl-la` is set to 0, a qp value is expected with the use of the `-q` or `--qp` command line option.\
+If `--rc` is set to 0 and `--enable-tpl-la` is set to 1, a crf value is expected with the use of the `--crf` command line option.\
+If a qp/crf values is not specified, a default value is assigned (50).
 
 For example, the following command encodes 100 frames of the YUV video sequence into the bin bit stream file. The picture is 1920 luma pixels wide and 1080 pixels high using the `Sample.cfg` configuration. The QP equals 30 and the md5 checksum is not included in the bit stream.
 
@@ -164,9 +168,10 @@ The encoder parameters present in the `Sample.cfg` file are listed in this table
 | **Configuration file parameter** | **Command line** | **Range** | **Default** | **Description** |
 | --- | --- | --- | --- | --- |
 | **RateControlMode** | --rc | [0 - 2] | 0 | 0 = CQP , 1 = VBR , 2 = CVBR |
-| **QP** | -q | [0 - 63] | 50 | Quantization parameter used when RateControl is set to 0 |
+| **QP** | -q | [0 - 63] | 50 | Quantization parameter used when RateControl is set to 0 and EnableTPLModel is set to 0 |
+| **CRF** | --crf | [0 - 63] | 50 | Rate control parameter used when RateControl is set to 0 and EnableTPLModel is set to 1 |
 | **TargetBitRate** | --tbr | [1 - 4294967] | 7000 | Target bitrate in kilobits per second when RateControlMode is set to 1, or 2 |
-| **UseQpFile** | --use-q-file | [0-1] | 0 | When set to 1, overwrite the picture qp assignment using qp values in QpFile |
+| **UseQpFile** | --use-q-file | [0-1] | 0 | When set to 1, overwrite the picture qp assignment using qp values in QpFile, can be used for initial crf values as well if EnableTPLModel is set to 1, the encoder may still change crf per block |
 | **QpFile** | --qpfile | any string | Null | Path to qp file |
 | **MaxQpAllowed** | --max-qp | [0 - 63] | Null | Maximum (worst) quantizer[0-63] |
 | **MinQpAllowed** | --min-qp | [0 - 63] | Null | Minimum (best) quantizer[0-63] |
